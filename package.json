@@ -6,17 +6,28 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "api:generate": "curl -s http://localhost:5289/openapi/v1.json -o openapi.json && sed -i 's/application\\/x-www-form-urlencoded/multipart\\/form-data/g' openapi.json && orval"
   },
   "private": true,
   "packageManager": "npm@11.7.0",
   "dependencies": {
+    "@angular/animations": "^21.2.0",
+    "@angular/cdk": "~21.2.0",
     "@angular/common": "^21.2.0",
     "@angular/compiler": "^21.2.0",
     "@angular/core": "^21.2.0",
     "@angular/forms": "^21.2.0",
+    "@angular/material": "~21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
+    "@ng-icons/core": "^33.1.0",
+    "@ng-icons/material-file-icons": "^33.1.0",
+    "@ng-icons/simple-icons": "^33.1.0",
+    "deepslate": "^0.10.1",
+    "gl-matrix": "^3.4.3",
+    "marked": "^17.0.3",
+    "ngx-image-cropper": "^9.1.6",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -24,6 +35,9 @@
     "@angular/build": "^21.2.0",
     "@angular/cli": "^21.2.0",
     "@angular/compiler-cli": "^21.2.0",
+    "@angular/localize": "^21.2.0",
+    "@angular/material": "^21.2.0",
+    "orval": "^8.5.1",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2"
   }

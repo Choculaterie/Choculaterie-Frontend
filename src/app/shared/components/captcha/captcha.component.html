@@ -1,0 +1,48 @@
+<div class="captcha-field" [class.captcha-field-active]="phase() !== 'checkbox'">
+    <span class="captcha-label">Security check</span>
+    <div class="captcha-inner">
+        @if (phase() === 'checkbox') {
+            <div class="captcha-checkbox" (click)="onCheckboxClick()">
+                <div class="captcha-checkbox-box">
+                    <mat-icon>check_box_outline_blank</mat-icon>
+                </div>
+                <span class="captcha-checkbox-label">I'm not a robot</span>
+            </div>
+        } @else if (phase() === 'loading') {
+            <div class="captcha-checkbox">
+                <mat-spinner diameter="22" />
+                <span class="captcha-checkbox-label">Loading puzzle…</span>
+            </div>
+        } @else if (phase() === 'error') {
+            <div class="captcha-error">
+                <span>{{ errorMsg() }}</span>
+                <button mat-stroked-button (click)="onCheckboxClick()">
+                    <mat-icon>refresh</mat-icon> Retry
+                </button>
+            </div>
+        } @else if (phase() === 'challenge') {
+            <p class="captcha-instructions">{{ instructions() }}</p>
+            <canvas #canvas
+                [width]="canvasWidth" [height]="canvasHeight"
+                (mousedown)="onPointerDown($event)"
+                (mousemove)="onPointerMove($event)"
+                (mouseup)="onPointerUp($event)"
+                (mouseleave)="onPointerUp($event)"
+                (touchstart)="onTouchStart($event)"
+                (touchmove)="onTouchMove($event)"
+                (touchend)="onTouchEnd($event)"
+                class="captcha-canvas">
+            </canvas>
+            <div class="captcha-actions">
+                <button mat-stroked-button type="button" (click)="resetChallenge()">
+                    <mat-icon>refresh</mat-icon> New puzzle
+                </button>
+            </div>
+        } @else if (phase() === 'solved') {
+            <div class="captcha-checkbox captcha-solved">
+                <mat-icon class="solved-icon">check_circle</mat-icon>
+                <span class="captcha-checkbox-label">Verified</span>
+            </div>
+        }
+    </div>
+</div>

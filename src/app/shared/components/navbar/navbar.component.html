@@ -1,0 +1,51 @@
+<mat-toolbar class="navbar">
+    <a routerLink="/" class="brand">
+        <img src="server_logo.png" alt="Choculaterie" class="brand-logo" />
+        <span class="brand-text">Choculaterie</span>
+    </a>
+
+    <a mat-button routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">Home</a>
+    <a mat-button routerLink="/schematics" routerLinkActive="active-link">Schematics</a>
+    <a mat-button routerLink="/mods" routerLinkActive="active-link">Mods</a>
+
+    <span class="spacer"></span>
+
+    @if (session.isAuthenticated()) {
+    <button [matMenuTriggerFor]="profileMenu" class="profile-btn">
+        <span class="username">{{ session.user()?.username }}</span>
+        @if (session.profile()?.filePath || session.user()?.filePath) {
+        <img [src]="(session.profile()?.filePath ?? session.user()!.filePath!) | userImg" class="avatar" alt="avatar" />
+        } @else {
+        <mat-icon>account_circle</mat-icon>
+        }
+        <mat-icon class="dropdown-arrow">arrow_drop_down</mat-icon>
+    </button>
+
+    <mat-menu #profileMenu="matMenu" xPosition="before" class="profile-menu">
+        <button mat-menu-item [routerLink]="['/users', session.user()?.username]">
+            <mat-icon>manage_accounts</mat-icon>
+            My Profile
+        </button>
+        @if (session.isAdminOrMod()) {
+        <button mat-menu-item routerLink="/admin">
+            <mat-icon>admin_panel_settings</mat-icon>
+            Admin Panel
+        </button>
+        }
+        <mat-divider />
+        <button mat-menu-item (click)="logout()" class="logout-item">
+            <mat-icon>logout</mat-icon>
+            Logout
+        </button>
+    </mat-menu>
+    } @else {
+    <a mat-button routerLink="/auth/register" routerLinkActive="active-link">
+        <mat-icon>person_add</mat-icon>
+        Register
+    </a>
+    <a mat-stroked-button routerLink="/auth/login" routerLinkActive="active-link">
+        <mat-icon>login</mat-icon>
+        Login
+    </a>
+    }
+</mat-toolbar>

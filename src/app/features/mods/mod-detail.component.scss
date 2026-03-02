@@ -1,0 +1,116 @@
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.page-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font: var(--mat-sys-headline-medium);
+    margin: 0;
+}
+
+.page-title-img {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.form-card {
+    margin-bottom: 1.5rem;
+}
+
+.form-card mat-card-header {
+    margin-bottom: 1rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-span {
+    grid-column: 1 / -1;
+}
+
+.form-desc {
+    grid-column: 1 / -1;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.file-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+}
+
+.mod-table {
+    width: 100%;
+}
+
+.release-Stable {
+    --mdc-chip-label-text-color: green;
+}
+
+.release-Beta {
+    --mdc-chip-label-text-color: orange;
+}
+
+.release-Alpha {
+    --mdc-chip-label-text-color: red;
+}
+
+.release-Experimental {
+    --mdc-chip-label-text-color: purple;
+}
+
+.release-Broken {
+    --mdc-chip-label-text-color: darkred;
+}
+
+mat-chip {
+    text-transform: capitalize;
+}
+
+.image-preview {
+    position: relative;
+    display: inline-block;
+    margin-top: 0.75rem;
+
+    img {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid var(--mat-sys-outline-variant);
+    }
+
+    button {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: var(--mat-sys-surface);
+    }
+}

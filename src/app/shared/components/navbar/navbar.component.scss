@@ -1,0 +1,99 @@
+:host {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.navbar {
+    padding: 0 1rem;
+    gap: 0.5rem;
+}
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    margin-right: 0.5rem;
+    color: inherit;
+    cursor: pointer;
+}
+
+.brand-logo {
+    height: 28px;
+    width: auto;
+    display: block;
+}
+
+.brand-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    line-height: 28px;
+}
+
+.active-link {
+    color: var(--mat-sys-primary) !important;
+    font-weight: 600;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.profile-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.4rem 0.5rem;
+    border-radius: 20px;
+    color: inherit;
+    font: inherit;
+    transition: background 0.15s;
+
+    &:hover {
+        background: var(--mat-sys-surface-variant);
+    }
+}
+
+.avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.dropdown-arrow {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.username {
+    font-size: 0.9rem;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.menu-header {
+    opacity: 1 !important;
+}
+
+.menu-role {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.logout-item {
+    color: var(--mat-menu-item-label-text-color, inherit);
+}

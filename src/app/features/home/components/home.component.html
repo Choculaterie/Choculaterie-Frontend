@@ -1,0 +1,43 @@
+<div class="home-page">
+    <!-- Hero -->
+    <section class="hero">
+        <img src="server_logo.png" alt="Choculaterie" class="hero-logo" />
+        <h1>Choculaterie</h1>
+        <p class="hero-sub">Discover, share, and download Minecraft schematics</p>
+        <div class="hero-actions">
+            <a mat-flat-button routerLink="/schematics">Browse Schematics</a>
+            <a mat-stroked-button routerLink="/auth/register">Join Now</a>
+        </div>
+    </section>
+
+    <!-- Announcements -->
+    @if (announcements().length) {
+    <section class="announcements">
+        @for (a of announcements(); track a.id) {
+        <div class="announcement" [class]="'announcement-' + a.type">
+            <mat-icon>{{ a.type === 'warning' ? 'warning' : a.type === 'error' ? 'error' : 'campaign' }}</mat-icon>
+            <span>{{ a.message }}</span>
+        </div>
+        }
+    </section>
+    }
+
+    <!-- Latest Schematics -->
+    <section class="section">
+        <div class="section-header">
+            <h2><mat-icon>new_releases</mat-icon> Latest Schematics</h2>
+            <a mat-button routerLink="/schematics">View all</a>
+        </div>
+        @if (loadingSchematics()) {
+            <app-loading-spinner [diameter]="36" />
+        } @else {
+            <div class="schematic-grid">
+                @for (s of latestSchematics(); track s.id) {
+                    <app-schematic-card [schematic]="s" />
+                } @empty {
+                    <p class="muted">No schematics yet.</p>
+                }
+            </div>
+        }
+    </section>
+</div>

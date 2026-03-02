@@ -1,1 +1,240 @@
-/* Global styles */
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+  @include mat.theme((color: (primary: mat.$magenta-palette,
+        tertiary: mat.$violet-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    ));
+}
+
+body {
+  color-scheme: light dark;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  height: 100%;
+}
+
+/* ── Material Symbols Outlined (M3 icons) ────────────────────── */
+.material-icons {
+  font-family: 'Material Symbols Outlined' !important;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+
+  &.filled {
+    font-variation-settings: 'FILL' 1;
+  }
+}
+
+/* ── Utility layout ─────────────────────────────────────────── */
+.page-container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.page-container--narrow {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.card-page {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 3rem 1rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background-color: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.info-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background-color: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+/* ── Button icon + text alignment ────────────────────────────── */
+button[mat-flat-button],
+button[mat-stroked-button],
+a[mat-flat-button],
+a[mat-stroked-button] {
+  .mdc-button__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+}
+
+/* ── Toast snack-bar (Gmail-style, M3) ──────────────────────────────── */
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-shape: 12px;
+  margin: 0 0 1rem 1rem !important;
+
+  .mdc-snackbar__surface {
+    box-shadow: var(--mat-sys-level3) !important;
+    min-width: 280px;
+    max-width: 480px;
+  }
+
+  .mat-mdc-snack-bar-label {
+    font: var(--mat-sys-body-medium);
+  }
+
+  .mat-mdc-button {
+    font: var(--mat-sys-label-large);
+    letter-spacing: 0.01em;
+    font-weight: 600;
+    color: #000 !important;
+    --mdc-text-button-label-text-color: #000 !important;
+  }
+}
+
+.mat-mdc-snack-bar-container.toast-success {
+  --mdc-snackbar-container-color: var(--mat-sys-primary-container);
+  --mdc-snackbar-supporting-text-color: var(--mat-sys-on-primary-container);
+  --mat-snack-bar-button-color: #000;
+}
+
+.mat-mdc-snack-bar-container.toast-error {
+  --mdc-snackbar-container-color: var(--mat-sys-error-container);
+  --mdc-snackbar-supporting-text-color: var(--mat-sys-on-error-container);
+  --mat-snack-bar-button-color: #000;
+}
+
+.mat-mdc-snack-bar-container.toast-info {
+  --mdc-snackbar-container-color: var(--mat-sys-secondary-container);
+  --mdc-snackbar-supporting-text-color: var(--mat-sys-on-secondary-container);
+  --mat-snack-bar-button-color: #000;
+}
+
+/* ── Markdown rendered content ──────────────────────────────── */
+
+
+
+/* Fix async validator spinner alignment in mat-form-field suffix */
+.mat-mdc-form-field .mat-mdc-form-field-icon-suffix {
+  padding-right: 0.75rem;
+}
+
+.mat-mdc-form-field .mat-mdc-form-field-icon-suffix mat-spinner,
+.mat-mdc-form-field .mat-mdc-form-field-icon-suffix .mat-mdc-progress-spinner {
+  margin-right: 0.25rem;
+}
+
+.markdown-content {
+  p {
+    margin: 0.5em 0;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 0.75em 0 0.25em;
+    font-weight: 600;
+  }
+
+  a {
+    color: var(--mat-sys-primary);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  ul,
+  ol {
+    margin: 0.5em 0;
+    padding-left: 1.5em;
+  }
+
+  code {
+    background: var(--mat-sys-surface-variant);
+    padding: 0.1em 0.3em;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-family: 'Roboto Mono', monospace;
+  }
+
+  pre {
+    background: var(--mat-sys-surface-variant);
+    padding: 1em;
+    border-radius: 8px;
+    overflow-x: auto;
+
+    code {
+      background: none;
+      padding: 0;
+    }
+  }
+
+  blockquote {
+    border-left: 3px solid var(--mat-sys-primary);
+    margin: 0.5em 0;
+    padding-left: 1em;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  img {
+    max-width: 100%;
+    border-radius: 8px;
+  }
+}
+
+// Litematic 3D viewer dialog — remove default padding for full-bleed canvas
+.litematic-viewer-dialog .mat-mdc-dialog-container .mdc-dialog__surface {
+  padding: 0;
+  overflow: hidden;
+}

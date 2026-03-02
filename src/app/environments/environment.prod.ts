@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://api.choculaterie.com/api',
+    apiBasePath: 'https://backend.choculaterie.com',
 };

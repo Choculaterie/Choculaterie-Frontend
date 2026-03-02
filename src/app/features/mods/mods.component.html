@@ -1,0 +1,113 @@
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title"><mat-icon>extension</mat-icon> Mods</h1>
+        <div class="header-actions">
+            <a mat-stroked-button href="https://modrinth.com/user/Choculat" target="_blank" rel="noopener">
+                <mat-icon>open_in_new</mat-icon> Alternative Download (Modrinth)
+            </a>
+            @if (isAdmin()) {
+            <button mat-flat-button (click)="toggleCreate()">
+                <mat-icon>add</mat-icon> {{ showCreateForm() ? 'Cancel' : 'New Mod' }}
+            </button>
+            }
+        </div>
+    </div>
+
+    <!-- Create mod form (admin only) -->
+    @if (showCreateForm() && isAdmin()) {
+    <mat-card appearance="outlined" class="form-card" #formCard>
+        <mat-card-header><mat-card-title>Create New Mod</mat-card-title></mat-card-header>
+        <mat-card-content>
+            <div class="form-grid">
+                <mat-form-field appearance="outline" class="full-width form-span">
+                    <mat-label i18n>Title</mat-label>
+                    <input matInput [(ngModel)]="formTitle" placeholder="My Awesome Mod" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width form-span">
+                    <mat-label i18n>Description</mat-label>
+                    <textarea matInput [(ngModel)]="formDesc" rows="2"></textarea>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Release Type</mat-label>
+                    <mat-select [(ngModel)]="formRelease">
+                        <mat-option value="Stable">Stable</mat-option>
+                        <mat-option value="Beta">Beta</mat-option>
+                        <mat-option value="Alpha">Alpha</mat-option>
+                        <mat-option value="Experimental">Experimental</mat-option>
+                        <mat-option value="Broken">Broken</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Game Versions</mat-label>
+                    <mat-select [(ngModel)]="formVersions" multiple>
+                        @for (v of allowedVersions(); track v.id) {
+                        <mat-option [value]="v.name">{{ v.name }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Platform</mat-label>
+                    <mat-select [(ngModel)]="formPlatform">
+                        <mat-option value="Fabric">Fabric</mat-option>
+                        <mat-option value="Forge">Forge</mat-option>
+                        <mat-option value="NeoForge">NeoForge</mat-option>
+                        <mat-option value="Bukkit">Bukkit</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div class="form-actions">
+                <button mat-stroked-button (click)="cancelCreate()">Cancel</button>
+                <button mat-flat-button (click)="createMod()"
+                    [disabled]="!formTitle.trim() || !formVersions.length || formLoading()">
+                    Create
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+    }
+
+    @if (loading()) {
+    <app-loading-spinner i18n-message message="Loading mods..." />
+    } @else if (modSummaries().length === 0) {
+    <app-empty-state icon="extension_off" i18n-title title="No mods available" i18n-subtitle
+        subtitle="Check back later for mod releases" />
+    } @else {
+    <div class="mod-grid">
+        @for (mod of modSummaries(); track mod.name) {
+        <a class="card-link" [routerLink]="['/mods', mod.name]">
+            <mat-card class="mod-card" appearance="outlined">
+                <mat-card-content>
+                    <div class="mod-card-header">
+                        @if (mod.imagePath) {
+                        <img [src]="mod.imagePath" [alt]="mod.name" class="mod-icon" />
+                        } @else {
+                        <div class="mod-icon-placeholder"><mat-icon>extension</mat-icon></div>
+                        }
+                        <div class="mod-card-info">
+                            <span class="mod-name">{{ mod.name }}</span>
+                            @if (mod.description) {
+                            <span class="mod-desc">{{ mod.description }}</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="mod-card-meta">
+                        <mat-chip>{{ mod.versionCount }} version{{ mod.versionCount > 1 ? 's' : '' }}</mat-chip>
+                        <span class="meta-stat"><mat-icon>download</mat-icon> {{ mod.totalDownloads | numFmt }}</span>
+                        <span class="meta-stat"><ng-icon name="matfMinecraftColored" size="16" /> {{ mod.versionRange
+                            }}</span>
+                        <span class="meta-stat">
+                            @if (mod.platform === 'Fabric') {
+                            <ng-icon name="matfMinecraftFabricColored" size="16" />
+                            } @else {
+                            <mat-icon>memory</mat-icon>
+                            }
+                            {{ mod.platform }}
+                        </span>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </a>
+        }
+    </div>
+    }
+</div>

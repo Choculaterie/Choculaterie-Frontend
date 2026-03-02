@@ -1,0 +1,37 @@
+<a class="card-link" [routerLink]="['/schematics', schematic().id]">
+<mat-card class="schematic-card" appearance="outlined">
+    @if (schematic().filePath) {
+        <img mat-card-image [src]="schematic().filePath | schematicImg" [alt]="schematic().name" class="card-img" />
+    } @else {
+        <div class="card-img-placeholder">
+            <mat-icon>architecture</mat-icon>
+        </div>
+    }
+    <mat-card-content>
+        <span class="card-title">{{ schematic().name }}</span>
+        <p class="card-author">by <app-user-link [username]="schematic().username" /></p>
+        @if (schematic().description) {
+            <p class="card-desc">{{ schematic().description }}</p>
+        }
+        <div class="card-meta">
+            <span i18n-matTooltip matTooltip="Likes"><mat-icon>favorite</mat-icon> {{ schematic().likesCount | numFmt }}</span>
+            <span i18n-matTooltip matTooltip="Downloads"><mat-icon>download</mat-icon> {{ schematic().downloadCount | numFmt }}</span>
+            <span i18n-matTooltip matTooltip="Views"><mat-icon>visibility</mat-icon> {{ schematic().viewCount | numFmt }}</span>
+        </div>
+        @if (schematic().tags.length) {
+            <mat-chip-set class="card-tags">
+                @for (tag of visibleTags(); track tag) {
+                    <mat-chip (click)="onTagClick($event, tag)">{{ tag }}</mat-chip>
+                }
+                @if (hasOverflowTags()) {
+                    <mat-chip class="more-chip">…</mat-chip>
+                }
+            </mat-chip-set>
+        }
+        <div class="card-footer">
+            <span class="card-type" (click)="onTypeClick($event)">{{ schematic().schematicType }}</span>
+            <span class="card-date">{{ schematic().publishDate | date:'mediumDate' }}</span>
+        </div>
+    </mat-card-content>
+</mat-card>
+</a>

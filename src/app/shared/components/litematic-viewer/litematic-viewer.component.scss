@@ -1,0 +1,107 @@
+.viewer-dialog {
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    width: 100%;
+    overflow: hidden;
+}
+
+.viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    flex-shrink: 0;
+
+    h2 {
+        margin: 0;
+        font-size: 1.1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+.viewer-body {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+    background: #1a1a2e;
+    border-radius: 8px;
+    margin: 0 1rem;
+    overflow: hidden;
+}
+
+.render-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    outline: none;
+
+    &.hidden {
+        visibility: hidden;
+    }
+}
+
+.loading-overlay,
+.error-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+
+    mat-progress-bar {
+        width: 60%;
+        max-width: 320px;
+    }
+
+    z-index: 1;
+
+    p {
+        margin: 0;
+        font-size: 0.9rem;
+    }
+}
+
+.error-overlay mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #ef5350;
+}
+
+.viewer-controls {
+    display: flex;
+    gap: 1.5rem;
+    padding: 0.5rem 1rem;
+    flex-shrink: 0;
+
+    .slider-group {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        label {
+            font-size: 0.8rem;
+            white-space: nowrap;
+            min-width: 70px;
+        }
+
+        mat-slider {
+            flex: 1;
+        }
+    }
+}
+
+.viewer-hint {
+    text-align: center;
+    font-size: 0.75rem;
+    padding: 0.25rem 1rem 0.75rem;
+    opacity: 0.5;
+    flex-shrink: 0;
+}

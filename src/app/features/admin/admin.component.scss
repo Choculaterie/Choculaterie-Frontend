@@ -1,0 +1,275 @@
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    font: var(--mat-sys-headline-medium);
+    margin-bottom: 1rem;
+}
+
+.tab-content {
+    padding: 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.search-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.search-field {
+    flex: 1;
+}
+
+.compact-select {
+    width: 120px;
+
+    .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+    }
+
+    .mat-mdc-text-field-wrapper {
+        padding: 0 !important;
+    }
+
+    .mat-mdc-form-field-infix {
+        padding-top: 0.375rem !important;
+        padding-bottom: 0.375rem !important;
+        min-height: unset;
+    }
+}
+
+.badge-select {
+    width: 160px;
+}
+
+.inline-select {
+    width: 120px;
+    padding: 0.375rem 0.5rem;
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    vertical-align: middle;
+}
+
+.compact-input {
+    width: 100px;
+}
+
+.inline-form {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.flex-grow {
+    flex: 1;
+    min-width: 200px;
+}
+
+.form-card {
+    mat-card-content {
+        padding: 1rem;
+    }
+}
+
+.muted {
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.disk-progress-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--mat-sys-on-surface-variant);
+    margin-top: 0.375rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.disk-footer-left,
+.disk-footer-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+    }
+}
+
+a {
+    color: var(--mat-sys-primary);
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+// User detail panel
+.detail-card {
+    margin-bottom: 1rem;
+}
+
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.detail-user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.detail-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.detail-avatar-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.detail-username {
+    font: var(--mat-sys-title-large);
+}
+
+.badge-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-left: 0.25rem;
+}
+
+.detail-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 1rem;
+
+    h3 {
+        margin: 0.5rem 0 0;
+        font: var(--mat-sys-title-medium);
+    }
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 0.5rem 2rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.detail-label {
+    font-size: 0.75rem;
+    color: var(--mat-sys-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.detail-value {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.detail-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.key-active {
+    color: var(--mat-sys-primary);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.compact-table {
+    font-size: 0.875rem;
+}
+
+.user-detail-link {
+    cursor: pointer;
+}
+
+.copy-btn {
+    --mdc-icon-button-state-layer-size: 28px;
+    --mdc-icon-button-icon-size: 16px;
+    width: 28px !important;
+    height: 28px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    flex-shrink: 0;
+
+    .mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+    }
+}
+
+.disk-progress {
+    margin-bottom: 1rem;
+}
+
+.disk-progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--mat-sys-on-surface-variant);
+    margin-bottom: 0.25rem;
+}
+
+.usage-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 120px;
+
+    mat-progress-bar {
+        flex: 1;
+    }
+
+    span {
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+}
+
+.live-msg-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem;
+}

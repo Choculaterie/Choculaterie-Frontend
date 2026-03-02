@@ -1,0 +1,145 @@
+<div class="page-container">
+    <div class="page-header">
+        <div class="header-left">
+            <button mat-icon-button routerLink="/mods" i18n-matTooltip matTooltip="Back to mods">
+                <mat-icon>arrow_back</mat-icon>
+            </button>
+            <h1 class="page-title">
+                @if (modImage(); as img) {
+                    <img [src]="img | modFile" [alt]="modName" class="page-title-img" />
+                } @else {
+                    <mat-icon>extension</mat-icon>
+                }
+                {{ modName }}
+            </h1>
+        </div>
+        @if (isAdmin()) {
+        <button mat-flat-button (click)="toggleForm()">
+            <mat-icon>add</mat-icon> {{ showForm() ? 'Cancel' : 'Add Version' }}
+        </button>
+        }
+    </div>
+
+    <!-- Create / Edit form -->
+    @if (showForm() && isAdmin()) {
+    <mat-card appearance="outlined" class="form-card" #formCard>
+        <mat-card-header>
+            <mat-card-title>{{ editingMod() ? 'Edit Version' : 'New Version' }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="form-grid">
+                <mat-form-field appearance="outline" class="form-span">
+                    <mat-label i18n>Title</mat-label>
+                    <input matInput [(ngModel)]="formTitle" [placeholder]="modName" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="form-span">
+                    <mat-label i18n>Description</mat-label>
+                    <textarea matInput [(ngModel)]="formDesc" rows="2"></textarea>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Release Type</mat-label>
+                    <mat-select [(ngModel)]="formRelease">
+                        <mat-option value="Stable">Stable</mat-option>
+                        <mat-option value="Beta">Beta</mat-option>
+                        <mat-option value="Alpha">Alpha</mat-option>
+                        <mat-option value="Experimental">Experimental</mat-option>
+                        <mat-option value="Broken">Broken</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Game Versions</mat-label>
+                    <mat-select [(ngModel)]="formVersions" multiple>
+                        @for (v of allowedVersions(); track v.id) {
+                        <mat-option [value]="v.name">{{ v.name }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Platform</mat-label>
+                    <mat-select [(ngModel)]="formPlatform">
+                        <mat-option value="Fabric">Fabric</mat-option>
+                        <mat-option value="Forge">Forge</mat-option>
+                        <mat-option value="NeoForge">NeoForge</mat-option>
+                        <mat-option value="Bukkit">Bukkit</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div class="file-row">
+                <button mat-stroked-button type="button" (click)="fileInput.click()">
+                    <mat-icon>upload_file</mat-icon> {{ formFile ? formFile.name : 'Select Mod File' }}
+                </button>
+                <input #fileInput type="file" hidden (change)="onFileSelected($event)" />
+                <button mat-stroked-button type="button" (click)="imageInput.click()">
+                    <mat-icon>image</mat-icon> {{ formImage ? formImage.name : 'Select Image' }}
+                </button>
+                <input #imageInput type="file" accept="image/*" hidden (change)="onImageSelected($event)" />
+            </div>
+            @if (imagePreview()) {
+            <div class="image-preview">
+                <img [src]="imagePreview()" alt="Image preview" />
+                <button mat-icon-button type="button" (click)="formImage = null; imagePreview.set(null)" matTooltip="Remove image">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </div>
+            }
+            <div class="form-actions">
+                <button mat-stroked-button (click)="resetForm()">Cancel</button>
+                <button mat-flat-button (click)="editingMod() ? updateMod() : createMod()" [disabled]="formLoading() || !formVersions.length">
+                    {{ editingMod() ? 'Update' : 'Create' }}
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+    }
+
+    @if (loading()) {
+    <app-loading-spinner i18n-message message="Loading versions..." />
+    } @else if (versions().length === 0) {
+    <app-empty-state icon="extension_off" i18n-title title="No versions" i18n-subtitle
+        subtitle="This mod has no versions yet." />
+    } @else {
+    <table mat-table [dataSource]="versions()" class="mod-table">
+        <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef>Description</th>
+            <td mat-cell *matCellDef="let mod">{{ mod.description }}</td>
+        </ng-container>
+        <ng-container matColumnDef="releaseType">
+            <th mat-header-cell *matHeaderCellDef>Release</th>
+            <td mat-cell *matCellDef="let mod">
+                <mat-chip [class]="'release-' + mod.releaseType">{{ mod.releaseType }}</mat-chip>
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="gameVersion">
+            <th mat-header-cell *matHeaderCellDef>Game Version</th>
+            <td mat-cell *matCellDef="let mod">{{ mod.gameVersion }}</td>
+        </ng-container>
+        <ng-container matColumnDef="platform">
+            <th mat-header-cell *matHeaderCellDef>Platform</th>
+            <td mat-cell *matCellDef="let mod">{{ mod.platform }}</td>
+        </ng-container>
+        <ng-container matColumnDef="downloads">
+            <th mat-header-cell *matHeaderCellDef>Downloads</th>
+            <td mat-cell *matCellDef="let mod">{{ mod.downloadCount | numFmt }}</td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let mod">
+                <button mat-icon-button (click)="downloadMod(mod)" i18n-matTooltip matTooltip="Download">
+                    <mat-icon>download</mat-icon>
+                </button>
+                @if (isAdmin()) {
+                <button mat-icon-button (click)="editMod(mod)" i18n-matTooltip matTooltip="Edit">
+                    <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button (click)="deleteMod(mod)" i18n-matTooltip matTooltip="Delete">
+                    <mat-icon>delete</mat-icon>
+                </button>
+                }
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+    }
+</div>

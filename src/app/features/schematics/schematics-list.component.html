@@ -1,0 +1,222 @@
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title"><mat-icon>architecture</mat-icon> Schematics</h1>
+        @if (session.isAuthenticated()) {
+        <button mat-flat-button (click)="showCreate.set(!showCreate())">
+            <mat-icon>{{ showCreate() ? 'remove' : 'add' }}</mat-icon> {{ showCreate() ? 'Cancel' : 'Upload Schematic'
+            }}
+        </button>
+        }
+    </div>
+
+    <!-- Create form -->
+    @if (showCreate()) {
+    <mat-card appearance="outlined" class="form-card">
+        <mat-card-header><mat-card-title>Upload New Schematic</mat-card-title></mat-card-header>
+        <mat-card-content>
+            <form [formGroup]="createForm" (ngSubmit)="submitCreate()">
+                <div class="form-grid">
+                    <mat-form-field appearance="outline">
+                        <mat-label i18n>Name</mat-label>
+                        <input matInput formControlName="name" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label i18n>Type</mat-label>
+                        <mat-select formControlName="schematicType">
+                            <mat-option value="Redstone">Redstone</mat-option>
+                            <mat-option value="Build">Build</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="span-2">
+                        <mat-label i18n>Description</mat-label>
+                        <textarea matInput formControlName="description" rows="3"></textarea>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label i18n>Tags</mat-label>
+                        <mat-select formControlName="tags" multiple>
+                            @for (t of allowedTags(); track t.id) {
+                            <mat-option [value]="t.name">{{ t.name }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label i18n>Versions</mat-label>
+                        <mat-select formControlName="versions" multiple>
+                            @for (v of allowedVersions(); track v.id) {
+                            <mat-option [value]="v.name">{{ v.name }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label i18n>Visibility</mat-label>
+                        <mat-select formControlName="visibility">
+                            <mat-option value="Public">Public</mat-option>
+                            <mat-option value="Unlisted">Unlisted</mat-option>
+                            <mat-option value="Private">Private</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label i18n>External Download Link</mat-label>
+                        <input matInput formControlName="downloadLinkMediaFire" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label i18n>External Video Link</mat-label>
+                        <input matInput formControlName="youtubeLink" />
+                    </mat-form-field>
+                </div>
+
+                <!-- File uploads -->
+                <div class="file-row">
+                    <button mat-stroked-button type="button" (click)="pictureInput.click()">
+                        <mat-icon>image</mat-icon> Add Pictures
+                    </button>
+                    <input #pictureInput type="file" accept="image/*" multiple hidden
+                        (change)="onPicturesSelected($event)" />
+                    <button mat-stroked-button type="button" (click)="litematicInput.click()">
+                        <mat-icon>insert_drive_file</mat-icon> Add Litematic Files
+                    </button>
+                    <input #litematicInput type="file" accept=".litematic" multiple hidden
+                        (change)="onLitematicsSelected($event)" />
+                </div>
+
+                <!-- Picture previews -->
+                @if (pictureFiles.length) {
+                <div class="file-previews">
+                    <h4>Pictures</h4>
+                    <div class="preview-grid" cdkDropList cdkDropListOrientation="horizontal"
+                        (cdkDropListDropped)="dropPicture($event)">
+                        @for (f of pictureFiles; track f.name; let i = $index) {
+                        <div class="preview-item" [class.cover]="i === 0" cdkDrag>
+                            <img [src]="picturePreviews()[i]" [alt]="f.name" />
+                            <div class="preview-actions">
+                                <button mat-icon-button type="button" (click)="removePicture(i)" i18n-matTooltip
+                                    matTooltip="Remove">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                                <span class="spacer"></span>
+                                <mat-icon class="drag-handle" cdkDragHandle>drag_indicator</mat-icon>
+                            </div>
+                            @if (i === 0) {
+                            <span class="cover-badge">Cover</span>
+                            }
+                        </div>
+                        }
+                    </div>
+                </div>
+                }
+
+                <!-- Litematic previews -->
+                @if (litematicFiles.length) {
+                <div class="file-previews">
+                    <h4>Litematic Files</h4>
+                    <div class="file-list-preview" cdkDropList (cdkDropListDropped)="dropLitematic($event)">
+                        @for (f of litematicFiles; track f.name; let i = $index) {
+                        <div class="file-item" cdkDrag>
+                            <mat-icon>insert_drive_file</mat-icon>
+                            <span>{{ f.name }}</span>
+                            <span class="file-size">{{ (f.size / 1024).toFixed(1) }} KB</span>
+                            <button mat-icon-button type="button" (click)="removeLitematic(i)" i18n-matTooltip
+                                matTooltip="Remove">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                            <mat-icon class="drag-handle" cdkDragHandle>drag_indicator</mat-icon>
+                        </div>
+                        }
+                    </div>
+                </div>
+                }
+
+                <div class="form-actions">
+                    <button mat-stroked-button type="button" (click)="showCreate.set(false)">Cancel</button>
+                    <button mat-flat-button type="submit" [disabled]="createForm.invalid || creating()">
+                        @if (creating()) { <mat-spinner diameter="18" /> } @else { Upload }
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+    }
+
+    <!-- Filters -->
+    <div class="filters">
+        <mat-form-field appearance="outline" class="filter-search">
+            <mat-label i18n>Search</mat-label>
+            <input matInput [(ngModel)]="search" (keyup.enter)="loadPage(1)" (ngModelChange)="onSearchInput($event)"
+                [matAutocomplete]="searchAuto" placeholder="Search schematics..." />
+            <mat-icon matPrefix>search</mat-icon>
+            <mat-autocomplete #searchAuto="matAutocomplete" [displayWith]="displaySuggestion"
+                (optionSelected)="onSuggestionSelected($event)">
+                @for (s of searchSuggestions(); track s.label + s.type) {
+                <mat-option [value]="s">
+                    <mat-icon class="suggestion-icon">{{ s.type === 'user' ? 'person' : 'architecture' }}</mat-icon>
+                    {{ s.label }}
+                </mat-option>
+                }
+            </mat-autocomplete>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-sm">
+            <mat-label i18n>Tag</mat-label>
+            <mat-select [(ngModel)]="tag" (selectionChange)="loadPage(1)">
+                <mat-option value="">All</mat-option>
+                @for (t of allowedTags(); track t.id) {
+                <mat-option [value]="t.name">{{ t.name }}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-sm">
+            <mat-label i18n>Version</mat-label>
+            <mat-select [(ngModel)]="version" (selectionChange)="loadPage(1)">
+                <mat-option value="">All</mat-option>
+                @for (v of allowedVersions(); track v.id) {
+                <mat-option [value]="v.name">{{ v.name }}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-sm">
+            <mat-label i18n>Type</mat-label>
+            <mat-select [(ngModel)]="type" (selectionChange)="loadPage(1)">
+                <mat-option value="">All</mat-option>
+                <mat-option value="Redstone">Redstone</mat-option>
+                <mat-option value="Build">Build</mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-sm">
+            <mat-label i18n>Sort</mat-label>
+            <mat-select [(ngModel)]="sort" (selectionChange)="loadPage(1)">
+                <mat-option value="date">Date</mat-option>
+                <mat-option value="likes">Likes</mat-option>
+                <mat-option value="downloads">Downloads</mat-option>
+                <mat-option value="views">Views</mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <button mat-icon-button (click)="toggleDirection()" i18n-matTooltip matTooltip="Sort direction">
+            <mat-icon>{{ direction === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+        </button>
+
+        <button mat-stroked-button (click)="clearFilters()">
+            <mat-icon>clear</mat-icon> Clear
+        </button>
+    </div>
+
+    <!-- Results -->
+    @if (loading()) {
+    <app-loading-spinner i18n-message message="Loading schematics..." />
+    } @else if (schematics().length === 0) {
+    <app-empty-state icon="search_off" i18n-title title="No schematics found" i18n-subtitle
+        subtitle="Try adjusting your search or filters" />
+    } @else {
+    <div class="schematic-grid">
+        @for (s of schematics(); track s.id) {
+        <app-schematic-card [schematic]="s" />
+        }
+    </div>
+
+    <mat-paginator [length]="totalCount()" [pageSize]="pageSize()" [pageIndex]="currentPage() - 1"
+        [pageSizeOptions]="[12, 21, 48]" (page)="onPageChange($event)" showFirstLastButtons />
+    }
+</div>

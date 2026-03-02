@@ -1,0 +1,642 @@
+<div class="page-container">
+    @if (loading() && !displayProfile()) {
+    <app-loading-spinner i18n-message message="Loading profile..." />
+    } @else if (error()) {
+    <div class="error-banner"><mat-icon>error_outline</mat-icon> {{ error() }}</div>
+    } @else if (displayProfile(); as p) {
+
+    <!-- Banner Header -->
+    <div class="profile-header" [class.has-cover]="p.coverImagePath"
+        [style.background-image]="p.coverImagePath ? 'url(' + (p.coverImagePath | userImg) + ')' : ''">
+        @if (isOwnProfile()) {
+        <div class="cover-actions">
+            <button class="cover-edit-btn" i18n-matTooltip
+                [matTooltip]="p.coverImagePath ? 'Change cover (3:1 ratio recommended)' : 'Add cover image (3:1 ratio recommended)'"
+                (click)="coverInput.click()" [disabled]="coverUploading()">
+                <mat-icon>{{ p.coverImagePath ? 'edit' : 'add_photo_alternate' }}</mat-icon>
+            </button>
+            @if (p.coverImagePath) {
+            <button class="cover-delete-btn" i18n-matTooltip matTooltip="Remove cover" (click)="deleteCoverImage()"
+                [disabled]="coverUploading()">
+                <mat-icon>close</mat-icon>
+            </button>
+            }
+        </div>
+        <input #coverInput type="file" accept="image/jpeg,image/png,image/webp" hidden
+            (change)="onCoverSelected($event)" />
+        }
+        <div class="profile-header-overlay"></div>
+        <div class="profile-header-content">
+            <div class="profile-avatar" [class.editable]="isOwnProfile()">
+                @if (isOwnProfile() && picUploading()) {
+                <div class="avatar-loading"><mat-spinner diameter="48" /></div>
+                } @else if (p.filePath) {
+                <img [src]="p.filePath | userImg" [alt]="p.username" />
+                } @else {
+                <mat-icon>account_circle</mat-icon>
+                }
+                @if (isOwnProfile()) {
+                <button class="avatar-edit-btn" i18n-matTooltip matTooltip="Change picture" (click)="picInput.click()"
+                    [disabled]="picUploading()">
+                    <mat-icon>edit</mat-icon>
+                </button>
+                <input #picInput type="file" accept="image/jpeg,image/png,image/webp" hidden
+                    (change)="onPictureSelected($event)" />
+                }
+            </div>
+
+            <div class="profile-info">
+                <div class="name-row">
+                    <h1>{{ p.username }}</h1>
+                    @if (p.badge != null) {
+                    <mat-icon class="badge-icon" [style.color]="badgeColor(p.badge)"
+                        [matTooltip]="badgeLabel(p.badge)">{{ badgeIcon(p.badge) }}</mat-icon>
+                    }
+                </div>
+                @if (p.biographie) {
+                <div class="bio markdown-content" [innerHTML]="p.biographie | markdown"></div>
+                }
+            </div>
+            @if (p.socialLinks?.length) {
+            <div class="social-links">
+                @for (link of p.socialLinks; track link.id) {
+                <a [href]="link.url" target="_blank" rel="noopener" [matTooltip]="link.platform" class="social-link">
+                    @if (isBrandIcon(link.platform)) {
+                    <ng-icon [name]="socialIcon(link.platform)" size="20" />
+                    } @else {
+                    <mat-icon>language</mat-icon>
+                    }
+                </a>
+                }
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Meta Grid -->
+    <div class="meta-grid">
+        <div class="meta-item"><mat-icon>calendar_today</mat-icon> <strong i18n>Joined:</strong> {{ p.registrationDate |
+            date:'mediumDate' }}</div>
+        @if (p.minecraftUsername || p.isMinecraftLinked) {
+        <div class="meta-item"><ng-icon name="matfMinecraftColored" size="18" /> <strong>Minecraft:</strong> {{
+            p.minecraftUsername }}
+        </div>
+        }
+        @if (p.discordUsername || p.isDiscordLinked) {
+        <div class="meta-item"><ng-icon name="simpleDiscord" size="18" /> <strong>Discord:</strong> {{ p.discordUsername
+            }}</div>
+        }
+        @if (isOwnProfile()) {
+        <div class="meta-item"><mat-icon>shield</mat-icon> {{ roleLabel(session.user()?.role) }}</div>
+        @if (ownProfile()?.hasSecurityKeys) {
+        <div class="meta-item"><mat-icon>key</mat-icon> <span i18n>Security keys active</span></div>
+        }
+        }
+        <div class="meta-actions">
+            @if (!isOwnProfile() && enrichedProfile()) {
+            <button mat-flat-button (click)="toggleLike()">
+                <mat-icon [class.filled]="enrichedProfile()!.isLiked">favorite</mat-icon>
+                <span>{{ enrichedProfile()!.isLiked ? 'Liked' : 'Like' }}</span>
+            </button>
+            <button mat-stroked-button (click)="reportUser()">
+                <mat-icon>flag</mat-icon> <span i18n>Report</span>
+            </button>
+            @if (isAdmin()) {
+            <a mat-stroked-button routerLink="/admin" [queryParams]="{ tab: 0, userId: enrichedProfile()!.id }"
+                class="admin-manage-btn">
+                <mat-icon>admin_panel_settings</mat-icon> <span i18n>Manage User</span>
+            </a>
+            }
+            }
+        </div>
+    </div>
+
+    <!-- Content Tabs -->
+    <mat-tab-group dynamicHeight [selectedIndex]="selectedTab()" (selectedTabChange)="onTabChange($event.index)">
+
+        <mat-tab label="Schematics">
+            <div class="tab-content">
+                @if (loadingContent()) {
+                <app-loading-spinner [diameter]="36" />
+                } @else if (schematics().length === 0) {
+                <app-empty-state icon="architecture" i18n-title
+                    [title]="isOwnProfile() ? 'No schematics yet' : 'No schematics'" i18n-subtitle
+                    [subtitle]="isOwnProfile() ? 'Upload your first schematic to see it here.' : 'This user hasn\'t published any schematics yet'" />
+                } @else {
+                <div class="schematic-grid">
+                    @for (s of schematics(); track s.id) {
+                    <app-schematic-card [schematic]="s" />
+                    }
+                </div>
+                }
+            </div>
+        </mat-tab>
+
+        <mat-tab label="Liked Schematics">
+            <div class="tab-content">
+                @if (likedSchematics().length === 0) {
+                <app-empty-state icon="favorite_border" i18n-title title="No liked schematics" i18n-subtitle
+                    [subtitle]="isOwnProfile() ? 'Like schematics to save them here.' : ''" />
+                } @else {
+                <div class="schematic-grid">
+                    @for (s of likedSchematics(); track s.id) {
+                    <app-schematic-card [schematic]="s" />
+                    }
+                </div>
+                }
+            </div>
+        </mat-tab>
+
+        <mat-tab label="Liked Users">
+            <div class="tab-content">
+                @if (likedUsers().length === 0) {
+                <app-empty-state icon="person_off" i18n-title title="No liked users" i18n-subtitle
+                    [subtitle]="isOwnProfile() ? 'Like other users to see them here.' : ''" />
+                } @else {
+                <div class="user-grid">
+                    @for (u of likedUsers(); track u.id) {
+                    <app-user-card [user]="u" />
+                    }
+                </div>
+                }
+            </div>
+        </mat-tab>
+
+        @if (isOwnProfile()) {
+
+        <!-- Account -->
+        <mat-tab label="Account">
+            <div class="tab-content">
+                @let op = ownProfile()!;
+
+                <h3 class="section-heading"><mat-icon>person</mat-icon> Profile</h3>
+                <form [formGroup]="profileForm" (ngSubmit)="submitProfile()">
+                    <mat-form-field class="full-width" appearance="outline">
+                        <mat-label i18n>Username</mat-label>
+                        <input matInput formControlName="username" maxlength="20" />
+                        <mat-icon matPrefix>badge</mat-icon>
+                        @if (usernameChecking()) { <mat-spinner matSuffix diameter="18" /> }
+                        <mat-error>
+                            @if (profileForm.get('username')?.hasError('required')) { Username is required }
+                            @else if (profileForm.get('username')?.hasError('minlength')) { Minimum 3 characters }
+                            @else if (profileForm.get('username')?.hasError('pattern')) { Only letters, numbers,
+                            hyphens, underscores }
+                            @else if (profileForm.get('username')?.hasError('usernameTaken')) { Username is already
+                            taken }
+                        </mat-error>
+                    </mat-form-field>
+                    <mat-form-field class="full-width profile-bio-field" appearance="outline">
+                        <mat-label i18n>Bio</mat-label>
+                        <textarea matInput formControlName="bio" rows="3" maxlength="500"></textarea>
+                        <mat-icon matPrefix>info</mat-icon>
+                        <mat-hint>{{ profileForm.get('bio')?.value?.length || 0 }} / 500</mat-hint>
+                    </mat-form-field>
+                    <div class="form-actions">
+                        <button mat-flat-button type="submit"
+                            [disabled]="profileForm.invalid || profileForm.pending || profileSaving()">
+                            @if (profileSaving()) { <mat-spinner diameter="18" /> } @else { Save profile }
+                        </button>
+                    </div>
+                </form>
+
+                <mat-divider class="section-divider" />
+
+                <h3 class="section-heading"><mat-icon>share</mat-icon> Social Links</h3>
+                <div class="social-links-list" cdkDropList (cdkDropListDropped)="dropSocialLink($event)">
+                    @for (link of editSocialLinks(); track $index) {
+                    <div class="social-link-row" cdkDrag>
+                        <mat-form-field appearance="outline" class="social-platform-field">
+                            <mat-label i18n>Platform</mat-label>
+                            <mat-select [value]="link.platform"
+                                (selectionChange)="updateSocialLink($index, 'platform', $event.value)">
+                                <mat-select-trigger>
+                                    <span class="select-trigger">
+                                        <ng-icon [name]="socialIcon(link.platform)" size="18" />
+                                        {{ link.platform === 'youtube' ? 'YouTube' : link.platform === 'twitch' ?
+                                        'Twitch' : link.platform === 'discord' ? 'Discord' : link.platform === 'matrix'
+                                        ? 'Matrix' : link.platform === 'github' ? 'GitHub' : 'Website' }}
+                                    </span>
+                                </mat-select-trigger>
+                                <mat-option value="youtube">
+                                    <span class="option-row"><ng-icon name="simpleYoutube" size="18" /> YouTube</span>
+                                </mat-option>
+                                <mat-option value="twitch">
+                                    <span class="option-row"><ng-icon name="simpleTwitch" size="18" /> Twitch</span>
+                                </mat-option>
+                                <mat-option value="discord">
+                                    <span class="option-row"><ng-icon name="simpleDiscord" size="18" /> Discord</span>
+                                </mat-option>
+                                <mat-option value="matrix">
+                                    <span class="option-row"><ng-icon name="simpleMatrix" size="18" /> Matrix</span>
+                                </mat-option>
+                                <mat-option value="github">
+                                    <span class="option-row"><ng-icon name="simpleGithub" size="18" /> GitHub</span>
+                                </mat-option>
+                                <mat-option value="website">
+                                    <span class="option-row"><ng-icon name="simpleFirefoxbrowser" size="18" />
+                                        Website</span>
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="social-url-field">
+                            <mat-label i18n>URL</mat-label>
+                            <input matInput [value]="link.url" required
+                                (input)="updateSocialLink($index, 'url', $any($event.target).value)"
+                                placeholder="https://..." />
+                            @if (!link.url.trim()) {
+                            <mat-error i18n>URL is required</mat-error>
+                            }
+                        </mat-form-field>
+                        <button mat-icon-button (click)="removeSocialLink($index)" i18n-matTooltip matTooltip="Remove">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                        <mat-icon class="drag-handle" cdkDragHandle>drag_indicator</mat-icon>
+                    </div>
+                    }
+                </div>
+                @if (editSocialLinks().length < 10) { <button mat-stroked-button (click)="addSocialLink()">
+                    <mat-icon>add</mat-icon> <span>Add link</span></button>
+                    }
+                    <div class="form-actions">
+                        <button mat-flat-button (click)="saveSocialLinks()"
+                            [disabled]="socialSaving() || hasEmptyUrls()">
+                            @if (socialSaving()) { <mat-spinner diameter="18" /> } @else { Save links }
+                        </button>
+                    </div>
+
+                    <mat-divider class="section-divider" />
+
+                    <h3 class="section-heading"><mat-icon>email</mat-icon> Email</h3>
+                    @if (editStep() === 'form') {
+                    <form [formGroup]="emailForm" (ngSubmit)="submitEmail()">
+                        <mat-form-field class="full-width" appearance="outline">
+                            <mat-label i18n>Email</mat-label>
+                            <input matInput type="email" formControlName="email" />
+                            <mat-icon matPrefix>email</mat-icon>
+                            @if (emailChecking()) { <mat-spinner matSuffix diameter="18" /> }
+                            <mat-hint>Changing email requires a verification code</mat-hint>
+                            <mat-error>
+                                @if (emailForm.get('email')?.hasError('required')) { Email is required }
+                                @else if (emailForm.get('email')?.hasError('email')) { Enter a valid email }
+                                @else if (emailForm.get('email')?.hasError('emailTaken')) { Email is already in use }
+                            </mat-error>
+                        </mat-form-field>
+                        <div class="form-actions">
+                            <button mat-flat-button type="submit"
+                                [disabled]="emailForm.invalid || emailForm.pending || editLoading()">
+                                @if (editLoading()) { <mat-spinner diameter="18" /> } @else { Update email }
+                            </button>
+                        </div>
+                    </form>
+                    }
+                    @if (editStep() === 'confirm') {
+                    <div class="info-banner">
+                        <mat-icon>mark_email_unread</mat-icon>
+                        A verification code was sent to <strong>{{ pendingEmail() }}</strong>. Enter it below to
+                        confirm.
+                    </div>
+                    <form [formGroup]="confirmForm" (ngSubmit)="submitConfirm()">
+                        <mat-form-field class="full-width" appearance="outline">
+                            <mat-label i18n>Verification code</mat-label>
+                            <input matInput formControlName="code" autocomplete="one-time-code" maxlength="10" />
+                            <mat-icon matPrefix>pin</mat-icon>
+                            <mat-error>@if (confirmForm.get('code')?.hasError('required')) { Code is required
+                                }</mat-error>
+                        </mat-form-field>
+                        <div class="form-actions">
+                            <button mat-stroked-button type="button" (click)="cancelConfirm()">Cancel</button>
+                            <button mat-flat-button type="submit" [disabled]="confirmForm.invalid || editLoading()">
+                                @if (editLoading()) { <mat-spinner diameter="18" /> } @else { Confirm }
+                            </button>
+                        </div>
+                    </form>
+                    }
+
+                    <mat-divider class="section-divider" />
+
+                    <h3 class="section-heading"><mat-icon>lock</mat-icon> Password</h3>
+                    @if (resetStep() === 'request') {
+                    <p>Request a password reset code to change your password.</p>
+                    <div class="form-actions">
+                        <button mat-flat-button (click)="requestPasswordReset()" [disabled]="resetLoading()">
+                            @if (resetLoading()) { <mat-spinner diameter="18" /> } @else { Send reset code }
+                        </button>
+                    </div>
+                    }
+                    @if (resetStep() === 'confirm') {
+                    <div class="info-banner"><mat-icon>mark_email_unread</mat-icon> A reset code was sent to <strong>{{
+                            op.email }}</strong>.</div>
+                    <form [formGroup]="resetForm" (ngSubmit)="confirmPasswordReset()">
+                        <mat-form-field class="full-width" appearance="outline">
+                            <mat-label i18n>Reset code</mat-label>
+                            <input matInput formControlName="code" autocomplete="one-time-code" maxlength="10" />
+                            <mat-icon matPrefix>pin</mat-icon>
+                        </mat-form-field>
+                        <mat-form-field class="full-width" appearance="outline">
+                            <mat-label i18n>New password</mat-label>
+                            <input matInput [type]="hideResetPassword() ? 'password' : 'text'"
+                                formControlName="newPassword" autocomplete="new-password" />
+                            <mat-icon matPrefix>lock</mat-icon>
+                            <button mat-icon-button matSuffix type="button"
+                                (click)="hideResetPassword.set(!hideResetPassword())">
+                                <mat-icon>{{ hideResetPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                            </button>
+                            <mat-error>@if (resetForm.get('newPassword')?.hasError('required')) { Password is required
+                                }</mat-error>
+                        </mat-form-field>
+
+                        @if (resetForm.get('newPassword')?.value) {
+                        <ul class="password-rules">
+                            <li [class.met]="resetForm.get('newPassword')!.value!.length >= 6">
+                                <mat-icon>{{ resetForm.get('newPassword')!.value!.length >= 6 ? 'check_circle' :
+                                    'radio_button_unchecked' }}</mat-icon>
+                                Min 6 characters
+                            </li>
+                            <li [class.met]="pwHasUppercase()">
+                                <mat-icon>{{ pwHasUppercase() ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                                At least one uppercase letter
+                            </li>
+                            <li [class.met]="pwHasLowercase()">
+                                <mat-icon>{{ pwHasLowercase() ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                                At least one lowercase letter
+                            </li>
+                            <li [class.met]="pwHasDigit()">
+                                <mat-icon>{{ pwHasDigit() ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                                At least one digit
+                            </li>
+                            <li [class.met]="pwHasSpecial()">
+                                <mat-icon>{{ pwHasSpecial() ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                                At least one special character
+                            </li>
+                        </ul>
+                        }
+
+                        <mat-form-field class="full-width" appearance="outline">
+                            <mat-label i18n>Confirm password</mat-label>
+                            <input matInput [type]="hideResetPassword() ? 'password' : 'text'"
+                                formControlName="confirmPassword" autocomplete="new-password" />
+                            <mat-icon matPrefix>lock_outline</mat-icon>
+                            <mat-error>
+                                @if (resetForm.get('confirmPassword')?.hasError('required')) { Please confirm your
+                                password }
+                                @else if (resetForm.hasError('mismatch')) { Passwords do not match }
+                            </mat-error>
+                        </mat-form-field>
+
+                        <div class="form-actions">
+                            <button mat-flat-button type="submit" [disabled]="resetForm.invalid || resetLoading()">
+                                @if (resetLoading()) { <mat-spinner diameter="18" /> } @else { Change password }
+                            </button>
+                        </div>
+                    </form>
+                    }
+
+                    <mat-divider class="section-divider" />
+
+                    <h3 class="section-heading"><ng-icon name="matfMinecraftColored" size="20" /> Minecraft</h3>
+                    @if (op.isMinecraftLinked) {
+                    <div class="link-status linked">
+                        <mat-icon>check_circle</mat-icon>
+                        <span>Linked to <strong>{{ op.minecraftUsername }}</strong></span>
+                        <span class="spacer"></span>
+                        <button mat-stroked-button color="warn" (click)="unlinkMc()" [disabled]="mcLoading()">
+                            @if (mcLoading()) { <mat-spinner diameter="18" /> } @else { Unlink }
+                        </button>
+                    </div>
+                    } @else {
+                    <div class="link-status"><mat-icon>link_off</mat-icon> <span>Not linked</span></div>
+                    @if (mcLinkData(); as mc) {
+                    <div class="link-code-box">
+                        <div class="link-instructions">
+                            <p>{{ mc.instructions ?? 'Enter this code in the Minecraft server:' }}</p>
+                        </div>
+                        <div class="code-row">
+                            <code class="code-value">/link {{ mc.code }}</code>
+                            <button mat-icon-button (click)="copyLinkCode(mc.code)" i18n-matTooltip
+                                matTooltip="Copy command">
+                                <mat-icon>content_copy</mat-icon>
+                            </button>
+                        </div>
+                        @if (mc.serverAddress) {
+                        <div class="link-detail">
+                            <mat-icon>dns</mat-icon>
+                            <span>Server: <strong>{{ mc.serverAddress }}</strong></span>
+                            <button mat-icon-button (click)="copyText(mc.serverAddress)" i18n-matTooltip
+                                matTooltip="Copy address">
+                                <mat-icon>content_copy</mat-icon>
+                            </button>
+                        </div>
+                        }
+                        <div class="link-detail"><mat-icon>timer</mat-icon>
+                            @if (mcTimerSeconds() > 0) { <span>Expires in {{ formatTimer(mcTimerSeconds()) }}</span> }
+                            @else { <span>Code expired</span> }
+                        </div>
+                        <div class="form-actions">
+                            <button mat-stroked-button (click)="checkMcStatus()" [disabled]="mcLoading()">@if
+                                (mcLoading()) { <mat-spinner diameter="18" /> } @else { Check status }</button>
+                            <button mat-stroked-button (click)="generateMcCode()"
+                                [disabled]="mcLoading() || mcTimerSeconds() > 0">
+                                Regenerate code @if (mcTimerSeconds() > 0) { ({{ formatTimer(mcTimerSeconds()) }}) }
+                            </button>
+                        </div>
+                    </div>
+                    } @else {
+                    <div class="form-actions">
+                        <button mat-flat-button (click)="generateMcCode()" [disabled]="mcLoading()">
+                            @if (mcLoading()) { <mat-spinner diameter="18" /> } @else { Generate linking code }
+                        </button>
+                    </div>
+                    }
+                    }
+
+                    <mat-divider class="section-divider" />
+
+                    <h3 class="section-heading"><ng-icon name="simpleDiscord" size="20" /> Discord</h3>
+                    @if (op.isDiscordLinked) {
+                    <div class="link-status linked">
+                        <mat-icon>check_circle</mat-icon>
+                        <span>Linked to <strong>{{ op.discordUsername }}</strong></span>
+                        <span class="spacer"></span>
+                        <button mat-stroked-button color="warn" (click)="unlinkDc()" [disabled]="dcLoading()">
+                            @if (dcLoading()) { <mat-spinner diameter="18" /> } @else { Unlink }
+                        </button>
+                    </div>
+                    } @else {
+                    <div class="link-status"><mat-icon>link_off</mat-icon> <span>Not linked</span></div>
+                    @if (dcLinkData(); as dc) {
+                    <div class="link-code-box">
+                        <div class="link-instructions">
+                            <p>{{ dc.instructions ?? 'Use this code with the Discord bot:' }}</p>
+                        </div>
+                        <div class="code-row">
+                            <code class="code-value">/link {{ dc.code }}</code>
+                            <button mat-icon-button (click)="copyLinkCode(dc.code)" i18n-matTooltip
+                                matTooltip="Copy command">
+                                <mat-icon>content_copy</mat-icon>
+                            </button>
+                        </div>
+                        @if (dc.discordUrl) {
+                        <div class="link-detail">
+                            <mat-icon>open_in_new</mat-icon>
+                            <a [href]="dc.discordUrl" target="_blank" rel="noopener">{{ dc.discordUrl }}</a>
+                            <button mat-icon-button (click)="copyText(dc.discordUrl)" i18n-matTooltip
+                                matTooltip="Copy URL">
+                                <mat-icon>content_copy</mat-icon>
+                            </button>
+                        </div>
+                        }
+                        <div class="link-detail"><mat-icon>timer</mat-icon>
+                            @if (dcTimerSeconds() > 0) { <span>Expires in {{ formatTimer(dcTimerSeconds()) }}</span> }
+                            @else { <span>Code expired</span> }
+                        </div>
+                        <div class="form-actions">
+                            <button mat-stroked-button (click)="checkDcStatus()" [disabled]="dcLoading()">@if
+                                (dcLoading()) { <mat-spinner diameter="18" /> } @else { Check status }</button>
+                            <button mat-stroked-button (click)="generateDcCode()"
+                                [disabled]="dcLoading() || dcTimerSeconds() > 0">
+                                Regenerate code @if (dcTimerSeconds() > 0) { ({{ formatTimer(dcTimerSeconds()) }}) }
+                            </button>
+                        </div>
+                    </div>
+                    } @else {
+                    <div class="form-actions">
+                        <button mat-flat-button (click)="generateDcCode()" [disabled]="dcLoading()">
+                            @if (dcLoading()) { <mat-spinner diameter="18" /> } @else { Generate linking code }
+                        </button>
+                    </div>
+                    }
+                    }
+
+            </div>
+        </mat-tab>
+
+        <!-- Security Keys -->
+        <mat-tab label="Security Keys">
+            <div class="tab-content">
+                @if (loadingKeys()) {
+                <app-loading-spinner i18n-message message="Loading security keys…" />
+                } @else if (securityKeys().length === 0) {
+                <app-empty-state icon="key_off" i18n-title title="No security keys" i18n-subtitle
+                    subtitle="Add a security key for extra account protection." />
+                } @else {
+                <table mat-table [dataSource]="securityKeys()" class="full-width">
+                    <ng-container matColumnDef="keyName">
+                        <th mat-header-cell *matHeaderCellDef>Name</th>
+                        <td mat-cell *matCellDef="let key">{{ key.keyName }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="dateAdded">
+                        <th mat-header-cell *matHeaderCellDef>Added</th>
+                        <td mat-cell *matCellDef="let key">{{ key.dateAdded | date:'mediumDate' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="lastUsed">
+                        <th mat-header-cell *matHeaderCellDef>Last used</th>
+                        <td mat-cell *matCellDef="let key">{{ key.lastUsed ? (key.lastUsed | date:'medium') : 'Never' }}
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="useCount">
+                        <th mat-header-cell *matHeaderCellDef>Uses</th>
+                        <td mat-cell *matCellDef="let key">{{ key.useCount }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let key"><button mat-icon-button color="warn" (click)="deleteKey(key)"
+                                i18n-matTooltip matTooltip="Delete key"><mat-icon>delete</mat-icon></button></td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="secKeyColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: secKeyColumns;"></tr>
+                </table>
+                }
+
+                <mat-divider class="section-divider" />
+                <div class="key-actions">
+                    <mat-form-field appearance="outline" class="key-name-field">
+                        <mat-label i18n>Key name</mat-label>
+                        <input matInput [(ngModel)]="newKeyName" placeholder="e.g. YubiKey 5" />
+                        <mat-icon matPrefix>key</mat-icon>
+                    </mat-form-field>
+                    <button mat-flat-button (click)="registerSecurityKey()"
+                        [disabled]="!newKeyName || registeringKey()">
+                        @if (registeringKey()) { <mat-spinner diameter="18" /> } @else {
+                        <ng-container><mat-icon>add</mat-icon> <span i18n>Register Key</span></ng-container> }
+                    </button>
+                </div>
+            </div>
+        </mat-tab>
+
+        <!-- Save Manager -->
+        <mat-tab label="Save Manager">
+            <div class="tab-content">
+                @if (saveQuota(); as q) {
+                <mat-card appearance="outlined" class="quota-card">
+                    <mat-card-content>
+                        <div class="quota-stats">
+                            <div class="quota-item"><span class="quota-label">Used</span><span class="quota-value">{{
+                                    q.usedSpaceBytes | fileSize }}</span></div>
+                            <div class="quota-item"><span class="quota-label">Total</span><span class="quota-value">{{
+                                    q.totalSpaceBytes | fileSize }}</span></div>
+                            <div class="quota-item"><span class="quota-label">Remaining</span><span
+                                    class="quota-value">{{ q.remainingSpaceBytes | fileSize }}</span></div>
+                            <div class="quota-item"><span class="quota-label">Saves</span><span class="quota-value">{{
+                                    q.saveCount }}</span></div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+                }
+
+                @if (loadingSaves()) {
+                <app-loading-spinner i18n-message message="Loading saves…" />
+                } @else if (saves().length === 0) {
+                <app-empty-state icon="save" i18n-title title="No saves" i18n-subtitle
+                    subtitle="Your Minecraft world saves will appear here." />
+                } @else {
+                <table mat-table [dataSource]="saves()" class="full-width">
+                    <ng-container matColumnDef="worldName">
+                        <th mat-header-cell *matHeaderCellDef>World</th>
+                        <td mat-cell *matCellDef="let s">{{ s.worldName }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="fileSizeBytes">
+                        <th mat-header-cell *matHeaderCellDef>Size</th>
+                        <td mat-cell *matCellDef="let s">{{ s.fileSizeBytes | fileSize }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="createdAt">
+                        <th mat-header-cell *matHeaderCellDef>Created</th>
+                        <td mat-cell *matCellDef="let s">{{ s.createdAt | date:'medium' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="updatedAt">
+                        <th mat-header-cell *matHeaderCellDef>Updated</th>
+                        <td mat-cell *matCellDef="let s">{{ s.updatedAt | date:'medium' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let s">
+                            <button mat-icon-button (click)="downloadSave(s)" i18n-matTooltip
+                                matTooltip="Download"><mat-icon>download</mat-icon></button>
+                            <button mat-icon-button color="warn" (click)="deleteSave(s)" i18n-matTooltip
+                                matTooltip="Delete"><mat-icon>delete</mat-icon></button>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="saveColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: saveColumns;"></tr>
+                </table>
+                }
+
+                <mat-divider class="section-divider" />
+                <div class="form-actions">
+                    @if (saveVerified()) {
+                    <button mat-stroked-button (click)="regenerateKey()" i18n-matTooltip
+                        matTooltip="Regenerate save key">
+                        <mat-icon>refresh</mat-icon> <span>Regenerate save key</span>
+                    </button>
+                    } @else {
+                    <button mat-stroked-button (click)="unlockSaveKey()" [disabled]="verifyingSave()">
+                        @if (verifyingSave()) { <mat-spinner diameter="18" /> } @else {
+                        <ng-container><mat-icon>lock</mat-icon> <span i18n>Unlock save key</span></ng-container> }
+                    </button>
+                    }
+                </div>
+            </div>
+        </mat-tab>
+        }
+    </mat-tab-group>
+    }
+</div>

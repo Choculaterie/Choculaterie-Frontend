@@ -1,0 +1,51 @@
+<div class="page-container">
+    <h1 class="page-title"><mat-icon>group</mat-icon> Users</h1>
+
+    <div class="filters">
+        <mat-form-field appearance="outline" class="filter-search">
+            <mat-label i18n>Search users</mat-label>
+            <input matInput [(ngModel)]="search" (keyup.enter)="loadPage(1)"
+                   (ngModelChange)="onSearchInput($event)"
+                   [matAutocomplete]="userAuto" />
+            <mat-icon matPrefix>search</mat-icon>
+            <mat-autocomplete #userAuto="matAutocomplete" (optionSelected)="search = $event.option.value; loadPage(1)">
+                @for (s of userSuggestions(); track s) {
+                    <mat-option [value]="s">{{ s }}</mat-option>
+                }
+            </mat-autocomplete>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-sm">
+            <mat-label i18n>Sort</mat-label>
+            <mat-select [(ngModel)]="sort" (selectionChange)="loadPage(1)">
+                <mat-option value="username">Username</mat-option>
+                <mat-option value="score">Score</mat-option>
+                <mat-option value="date">Join Date</mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <button mat-icon-button (click)="toggleDirection()">
+            <mat-icon>{{ direction === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+        </button>
+    </div>
+
+    @if (loading()) {
+        <app-loading-spinner i18n-message message="Loading users..." />
+    } @else if (users().length === 0) {
+        <app-empty-state icon="person_off" i18n-title title="No users found" i18n-subtitle subtitle="Try a different search" />
+    } @else {
+        <div class="user-grid">
+            @for (u of users(); track u.id) {
+                <app-user-card [user]="u" />
+            }
+        </div>
+
+        <mat-paginator
+            [length]="totalCount()"
+            [pageSize]="pageSize()"
+            [pageIndex]="currentPage() - 1"
+            [pageSizeOptions]="[20, 40]"
+            (page)="onPageChange($event)"
+            showFirstLastButtons />
+    }
+</div>

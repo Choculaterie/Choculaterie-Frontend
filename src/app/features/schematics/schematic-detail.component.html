@@ -1,0 +1,366 @@
+<div class="page-container">
+    @if (loading()) {
+    <app-loading-spinner i18n-message message="Loading schematic..." />
+    } @else if (error()) {
+    <div class="error-banner"><mat-icon>error_outline</mat-icon> {{ error() }}</div>
+    } @else if (schematic()) {
+    @let s = schematic()!;
+
+    <!-- Image gallery -->
+    @if (s.pictures.length || getYouTubeId(s.youtubeLink)) {
+    @let videoIdx = s.pictures.length;
+    @let hasVideo = !!getYouTubeId(s.youtubeLink);
+    @let totalItems = s.pictures.length + (hasVideo ? 1 : 0);
+    <div class="gallery">
+        <div class="gallery-main">
+            @if (selectedImage()
+            < s.pictures.length) { <img [src]="s.pictures[selectedImage()].filePath | schematicImg" [alt]="s.name" />
+            } @else if (hasVideo) {
+            <iframe class="video-embed" [src]="getYouTubeEmbedUrl(s.youtubeLink)" frameborder="0" allowfullscreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+            </iframe>
+            }
+        </div>
+        @if (totalItems > 1) {
+        <div class="gallery-thumbs">
+            @for (pic of s.pictures; track pic.id; let i = $index) {
+            <img [src]="pic.filePath | schematicImg" [alt]="'Image ' + (i + 1)" [class.active]="i === selectedImage()"
+                (click)="selectedImage.set(i)" />
+            }
+            @if (hasVideo) {
+            <div class="video-thumb" [class.active]="selectedImage() === videoIdx"
+                (click)="selectedImage.set(videoIdx)">
+                <img [src]="getYouTubeThumb(s.youtubeLink)" alt="Video" />
+                <mat-icon class="play-overlay">play_circle</mat-icon>
+            </div>
+            }
+        </div>
+        }
+    </div>
+    }
+
+    <!-- Header -->
+    <div class="detail-header">
+        <div>
+            <h1>{{ s.name }}</h1>
+            <p class="author">by <app-user-link [username]="s.username" /> &middot; {{ s.publishDate | date:'mediumDate'
+                }}</p>
+        </div>
+        <div class="header-actions">
+            <button mat-flat-button (click)="toggleLike()">
+                <mat-icon [class.filled]="s.isLiked">favorite</mat-icon>
+                {{ s.likesCount | numFmt }}
+            </button>
+            @if (hasLitematicFiles()) {
+            <button mat-stroked-button (click)="viewIn3DAction()">
+                <mat-icon>view_in_ar</mat-icon> View in 3D
+            </button>
+            }
+            <button mat-stroked-button (click)="download()">
+                <mat-icon>download</mat-icon> Download ({{ s.downloadCount | numFmt }})
+            </button>
+            <button mat-icon-button [matMenuTriggerFor]="moreMenu">
+                <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #moreMenu="matMenu">
+                <button mat-menu-item (click)="fork()">
+                    <mat-icon>fork_right</mat-icon> Fork
+                </button>
+                <button mat-menu-item (click)="shareSchematic()">
+                    <mat-icon>share</mat-icon> Share
+                </button>
+                @if (!isOwner()) {
+                <button mat-menu-item (click)="report()">
+                    <mat-icon>flag</mat-icon> Report
+                </button>
+                }
+                @if (isOwner()) {
+                <button mat-menu-item (click)="startEdit()">
+                    <mat-icon>edit</mat-icon> Edit
+                </button>
+                <button mat-menu-item (click)="deleteSchematic()" class="warn-item">
+                    <mat-icon>delete</mat-icon> Delete
+                </button>
+                }
+            </mat-menu>
+        </div>
+    </div>
+
+    <mat-divider />
+
+    <!-- Info cards -->
+    <div class="detail-grid">
+        <!-- Description -->
+        <mat-card appearance="outlined">
+            <mat-card-header><mat-card-title>Description</mat-card-title></mat-card-header>
+            <mat-card-content>
+                <div class="description markdown-content"
+                    [innerHTML]="(s.description || 'No description provided.') | markdown"></div>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Details -->
+        <mat-card appearance="outlined">
+            <mat-card-header><mat-card-title>Details</mat-card-title></mat-card-header>
+            <mat-card-content>
+                <ul class="detail-list">
+                    <li><mat-icon>category</mat-icon> <strong>Type:</strong> {{ s.schematicType }}</li>
+                    <li><mat-icon>visibility</mat-icon> <strong>Visibility:</strong> {{ s.visibility }}</li>
+                    <li><mat-icon>remove_red_eye</mat-icon> <strong>Views:</strong> {{ s.viewCount | numFmt }}</li>
+                    @if (s.authorName) {
+                    <li><mat-icon>person</mat-icon> <strong>Author:</strong> {{ s.authorName }}</li>
+                    }
+                    @if (s.forked) {
+                    <li><mat-icon>fork_right</mat-icon> <strong>Forked from:</strong>
+                        <a [routerLink]="['/schematics', s.forked]">{{ s.forked }}</a>
+                    </li>
+                    }
+                    @if (s.downloadLinkMediaFire) {
+                    <li><mat-icon>link</mat-icon> <strong>External download:</strong>
+                        <a [href]="s.downloadLinkMediaFire" target="_blank" rel="noopener">Download link</a>
+                    </li>
+                    }
+                    @if (s.youtubeLink) {
+                    <li><mat-icon>smart_display</mat-icon> <strong>External video:</strong>
+                        <a [href]="s.youtubeLink" target="_blank" rel="noopener">Watch video</a>
+                    </li>
+                    }
+                </ul>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- Tags -->
+    @if (editing()) {
+    <mat-card appearance="outlined" class="edit-card">
+        <mat-card-header><mat-card-title>Edit Schematic</mat-card-title></mat-card-header>
+        <mat-card-content>
+            <form [formGroup]="editForm" (ngSubmit)="submitEdit()">
+                <div class="edit-grid">
+                    <mat-form-field appearance="outline">
+                        <mat-label i18n>Name</mat-label>
+                        <input matInput formControlName="name" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label i18n>Type</mat-label>
+                        <mat-select formControlName="schematicType">
+                            <mat-option value="Build">Build</mat-option>
+                            <mat-option value="Redstone">Redstone</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="span-2">
+                        <mat-label i18n>Description</mat-label>
+                        <textarea matInput formControlName="description" rows="3"></textarea>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label i18n>Tags</mat-label>
+                        <mat-select formControlName="tags" multiple>
+                            @for (t of allowedTags(); track t.id) {
+                            <mat-option [value]="t.name">{{ t.name }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label i18n>Versions</mat-label>
+                        <mat-select formControlName="versions" multiple>
+                            @for (v of allowedVersions(); track v.id) {
+                            <mat-option [value]="v.name">{{ v.name }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label i18n>Visibility</mat-label>
+                        <mat-select formControlName="visibility">
+                            <mat-option value="Public">Public</mat-option>
+                            <mat-option value="Unlisted">Unlisted</mat-option>
+                            <mat-option value="Private">Private</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label i18n>External download link</mat-label>
+                        <input matInput formControlName="downloadLinkMediaFire" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label i18n>External video link</mat-label>
+                        <input matInput formControlName="youtubeLink" />
+                    </mat-form-field>
+                </div>
+
+                <!-- Existing Pictures -->
+                <div class="file-previews">
+                    <h4>Pictures ({{ editExistingPictures().length + editNewPictures().length }} / 10)</h4>
+                    <div class="preview-grid" cdkDropList cdkDropListOrientation="horizontal"
+                        (cdkDropListDropped)="dropExistingPicture($event)">
+                        @for (pic of editExistingPictures(); track pic.id; let i = $index) {
+                        <div class="preview-item" [class.cover]="i === 0" cdkDrag>
+                            <img [src]="pic.filePath | schematicImg" alt="Existing picture" />
+                            <div class="preview-actions">
+                                <button mat-icon-button type="button" (click)="removeExistingPicture(pic.id)"
+                                    i18n-matTooltip matTooltip="Remove">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                                <span class="spacer"></span>
+                                <mat-icon class="drag-handle" cdkDragHandle>drag_indicator</mat-icon>
+                            </div>
+                            @if (i === 0) {
+                            <span class="cover-badge">Cover</span>
+                            }
+                        </div>
+                        }
+                        @for (f of editNewPictures(); track $index) {
+                        @let totalIdx = editExistingPictures().length + $index;
+                        <div class="preview-item new-file" [class.cover]="totalIdx === 0" cdkDrag>
+                            <img [src]="editNewPicturePreviews()[$index]" [alt]="f.name" />
+                            <div class="preview-actions">
+                                <button mat-icon-button type="button" (click)="removeNewPicture($index)" i18n-matTooltip
+                                    matTooltip="Remove">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                                <span class="spacer"></span>
+                                <mat-icon class="drag-handle" cdkDragHandle>drag_indicator</mat-icon>
+                            </div>
+                            @if (totalIdx === 0) {
+                            <span class="cover-badge">Cover</span>
+                            }
+                            <span class="new-badge">New</span>
+                        </div>
+                        }
+                    </div>
+                    @if (editExistingPictures().length + editNewPictures().length < 10) { <div class="file-row">
+                        <button mat-stroked-button type="button" (click)="editPictureInput.click()">
+                            <mat-icon>add_photo_alternate</mat-icon> Add Pictures
+                        </button>
+                        <input #editPictureInput type="file" accept="image/*" multiple hidden
+                            (change)="onEditPicturesSelected($event)" />
+                </div>
+                }
+</div>
+
+<!-- Existing Litematic Files -->
+<div class="file-previews">
+    <h4>Litematic Files ({{ editExistingFiles().length + editNewLitematics().length }} / 10)</h4>
+    <div class="file-list-preview" cdkDropList (cdkDropListDropped)="dropEditLitematic($event)">
+        @for (f of editExistingFiles(); track f.id) {
+        <div class="file-item" cdkDrag>
+            <mat-icon>insert_drive_file</mat-icon>
+            <span>{{ f.name }}</span>
+            <span class="spacer"></span>
+            @if (f.name.endsWith('.litematic')) {
+            <button mat-icon-button type="button" (click)="viewIn3D(f)" i18n-matTooltip matTooltip="View in 3D">
+                <mat-icon>view_in_ar</mat-icon>
+            </button>
+            }
+            <button mat-icon-button type="button" (click)="removeExistingFile(f.id)" i18n-matTooltip
+                matTooltip="Remove">
+                <mat-icon>close</mat-icon>
+            </button>
+            <mat-icon class="drag-handle" cdkDragHandle>drag_indicator</mat-icon>
+        </div>
+        }
+        @for (f of editNewLitematics(); track $index) {
+        <div class="file-item new-file" cdkDrag>
+            <mat-icon>insert_drive_file</mat-icon>
+            <span>{{ f.name }}</span>
+            <span class="file-size">{{ (f.size / 1024).toFixed(1) }} KB</span>
+            <span class="new-badge-inline">New</span>
+            <button mat-icon-button type="button" (click)="removeNewLitematic($index)" i18n-matTooltip
+                matTooltip="Remove">
+                <mat-icon>close</mat-icon>
+            </button>
+            <mat-icon class="drag-handle" cdkDragHandle>drag_indicator</mat-icon>
+        </div>
+        }
+    </div>
+    @if (editExistingFiles().length + editNewLitematics().length < 10) { <div class="file-row">
+        <button mat-stroked-button type="button" (click)="editLitematicInput.click()">
+            <mat-icon>note_add</mat-icon> Add Litematic Files
+        </button>
+        <input #editLitematicInput type="file" accept=".litematic" multiple hidden
+            (change)="onEditLitematicsSelected($event)" />
+</div>
+}
+</div>
+
+@if (editFileError()) {
+<div class="edit-file-error"><mat-icon>warning</mat-icon> {{ editFileError() }}</div>
+}
+
+<div class="edit-actions">
+    <button mat-stroked-button type="button" (click)="editing.set(false)">Cancel</button>
+    <button mat-flat-button type="submit" [disabled]="editForm.invalid || saving() || !isEditFileValid()">
+        @if (saving()) { <mat-spinner diameter="18" /> } @else { Save Changes }
+    </button>
+</div>
+</form>
+</mat-card-content>
+</mat-card>
+}
+
+@if (s.tags.length) {
+<div class="tags-section">
+    <h3>Tags</h3>
+    <mat-chip-set>
+        @for (tag of s.tags; track tag) {
+        <mat-chip [routerLink]="['/schematics']" [queryParams]="{tag: tag}">{{ tag }}</mat-chip>
+        }
+    </mat-chip-set>
+</div>
+}
+
+@if (s.versions.length) {
+<div class="tags-section">
+    <h3>Versions</h3>
+    <mat-chip-set>
+        @for (ver of s.versions; track ver) {
+        <mat-chip [routerLink]="['/schematics']" [queryParams]="{version: ver}">{{ ver }}</mat-chip>
+        }
+    </mat-chip-set>
+</div>
+}
+
+<!-- Files -->
+@if (s.files.length) {
+<div class="files-section">
+    <h3><mat-icon>folder</mat-icon> Files <span class="files-hint" i18n>Block textures are generated automatically and
+            may not be accurate.</span></h3>
+    <div class="file-list">
+        @for (f of s.files; track f.id) {
+        <mat-card appearance="outlined" class="file-card">
+            <mat-card-content>
+                <div class="file-header">
+                    <mat-icon>insert_drive_file</mat-icon>
+                    <span class="file-name">{{ f.name }}</span>
+                    <span class="spacer"></span>
+                    @if (f.name.endsWith('.litematic')) {
+                    <button mat-icon-button i18n-matTooltip matTooltip="View in 3D" (click)="viewIn3D(f)">
+                        <mat-icon>view_in_ar</mat-icon>
+                    </button>
+                    }
+                    <button mat-icon-button i18n-matTooltip matTooltip="Download file" (click)="downloadSingleFile(f)">
+                        <mat-icon>download</mat-icon>
+                    </button>
+                </div>
+                @if (f.blockList) {
+                <div class="block-list">
+                    @for (block of parseBlockList(f.blockList); track block.name) {
+                    <span class="block-chip">
+                        @if (getBlockRect(block.name); as rect) {
+                        <span class="block-tex" [style.background-image]="'url(' + atlasUrl + ')'"
+                            [style.background-position]="'-' + rect[0] + 'px -' + rect[1] + 'px'"></span>
+                        } @else {
+                        <mat-icon class="block-icon">widgets</mat-icon>
+                        }
+                        <span class="block-name">{{ block.name }}</span>
+                        <span class="block-count">&times;{{ block.count }}</span>
+                    </span>
+                    }
+                </div>
+                }
+            </mat-card-content>
+        </mat-card>
+        }
+    </div>
+</div>
+}
+}
+</div>
