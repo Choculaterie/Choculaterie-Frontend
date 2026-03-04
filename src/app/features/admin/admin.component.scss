@@ -17,12 +17,77 @@ h1 {
 
 .full-width {
     width: 100%;
+    overflow-x: auto;
+}
+
+.table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .search-row {
     display: flex;
     gap: 0.75rem;
     align-items: center;
+
+    @media (max-width: 600px) {
+        flex-wrap: wrap;
+    }
+}
+
+// Search: field + actions on same row; wraps on mobile
+.search-col {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+
+    @media (max-width: 600px) {
+        flex-wrap: wrap;
+    }
+}
+
+.search-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+
+    @media (max-width: 600px) {
+        width: 100%;
+    }
+}
+
+.msg-textarea {
+    resize: vertical;
+    min-height: 40px;
+}
+
+// Live message form
+.live-msg-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.live-msg-bottom {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.live-msg-type {
+    min-width: 120px;
+    flex: 1;
+}
+
+.live-msg-btns {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-left: auto;
 }
 
 .search-field {
@@ -74,6 +139,11 @@ h1 {
 .flex-grow {
     flex: 1;
     min-width: 200px;
+
+    @media (max-width: 600px) {
+        min-width: 0;
+        width: 100%;
+    }
 }
 
 .form-card {
@@ -177,6 +247,10 @@ a {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 0.5rem 2rem;
+
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+    }
 }
 
 .detail-item {
@@ -272,4 +346,192 @@ a {
     align-items: center;
     justify-content: space-between;
     gap: 0.25rem;
+}
+
+.msg-cell {
+    white-space: normal;
+    word-break: break-word;
+    max-width: 420px;
+    min-width: 160px;
+}
+
+// ── Tab badges / dots ─────────────────────────────────────────────────────────
+
+.tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--mat-sys-error);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-left: 6px;
+    line-height: 1;
+}
+
+.tab-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--mat-sys-error);
+    margin-left: 6px;
+    flex-shrink: 0;
+}
+
+// ── Table row states ──────────────────────────────────────────────────────────
+
+.unread-row td {
+    font-weight: 500;
+    background: color-mix(in srgb, var(--mat-sys-primary) 5%, transparent);
+}
+
+.unread-label {
+    font-weight: 700;
+}
+
+.status-unread {
+    color: var(--mat-sys-error);
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.status-read {
+    opacity: 0.5;
+    font-size: 0.82rem;
+}
+
+.unread-chip {
+    background: var(--mat-sys-primary-container) !important;
+}
+
+.highlight-row {
+    background: color-mix(in srgb, var(--mat-sys-error) 10%, transparent) !important;
+}
+
+// ── Tag suggestion inline input ───────────────────────────────────────────────
+
+.inline-input {
+    border: 1px solid var(--mat-sys-outline);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font: inherit;
+    font-size: 0.9rem;
+    background: var(--mat-sys-surface);
+    color: inherit;
+    outline: none;
+    width: 160px;
+
+    &:focus {
+        border-color: var(--mat-sys-primary);
+    }
+}
+
+.no-data {
+    padding: 1rem 0;
+    opacity: 0.6;
+    font-size: 0.9rem;
+}
+
+// ── FAQ create form ───────────────────────────────────────────────────────────
+
+.faq-create-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    mat-form-field {
+        width: 100%;
+    }
+}
+
+// ── FAQ accordion (match public FAQ page styling) ─────────────────────────────
+
+mat-accordion mat-expansion-panel {
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 8px !important;
+    overflow: hidden;
+    margin-bottom: 6px;
+    background: var(--mat-sys-surface-container-low);
+}
+
+mat-accordion mat-expansion-panel-header {
+    font-weight: 600;
+}
+
+mat-accordion .faq-answer {
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+// ── Ticket detail ─────────────────────────────────────────────────────────────
+
+.ticket-detail {
+    max-width: 720px;
+}
+
+.ticket-body {
+    white-space: pre-wrap;
+    line-height: 1.6;
+    margin: 0.5rem 0 1rem;
+}
+
+.ticket-contact {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 1rem;
+
+    mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+    }
+}
+
+.ticket-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.ticket-thumb {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--mat-sys-outline-variant);
+    cursor: pointer;
+    transition: opacity 0.15s;
+
+    &:hover {
+        opacity: 0.85;
+    }
+}
+
+// ── Propose tag row in schematic form ────────────────────────────────────────
+
+.propose-tag-row {
+    grid-column: span 1;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 0.1rem;
+}
+
+.propose-tag-btn {
+    font-size: 0.82rem;
+    opacity: 0.75;
+
+    &:hover {
+        opacity: 1;
+    }
 }

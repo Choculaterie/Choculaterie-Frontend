@@ -4,6 +4,10 @@
     height: 80vh;
     width: 100%;
     overflow: hidden;
+
+    @media (max-width: 600px) {
+        height: 100vh;
+    }
 }
 
 .viewer-header {
@@ -79,6 +83,11 @@
     gap: 1.5rem;
     padding: 0.5rem 1rem;
     flex-shrink: 0;
+
+    @media (max-width: 600px) {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
 
     .slider-group {
         flex: 1;

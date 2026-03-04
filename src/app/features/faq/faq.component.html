@@ -1,0 +1,121 @@
+<div class="faq-page">
+
+    <!-- ─── Hero ─── -->
+    <section class="faq-hero">
+        <h1 i18n>Frequently Asked Questions</h1>
+        <p i18n>Can't find what you're looking for? Reach out below.</p>
+    </section>
+
+    <!-- ─── FAQ Accordion ─── -->
+    <section class="faq-section">
+        @if (loadingFaqs()) {
+        <app-loading-spinner />
+        } @else if (faqs().length === 0) {
+        <p class="empty-msg" i18n>No questions yet — check back soon!</p>
+        } @else {
+        <mat-accordion multi>
+            @for (faq of faqs(); track faq.id) {
+            <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                    <mat-panel-title>{{ faq.question }}</mat-panel-title>
+                </mat-expansion-panel-header>
+                <p class="faq-answer">{{ faq.answer }}</p>
+            </mat-expansion-panel>
+            }
+        </mat-accordion>
+        }
+    </section>
+
+    <mat-divider class="section-divider" />
+
+    <!-- ─── Contact ─── -->
+    <section class="contact-section">
+        <h2 i18n>Still have questions?</h2>
+        <p i18n>Get in touch through any of the channels below, or fill out the form.</p>
+
+        <div class="contact-channels">
+            <div class="channel">
+                <mat-icon>chat</mat-icon>
+                <div>
+                    <strong i18n>Discord</strong>
+                    <span>&#64;Choculat</span>
+                </div>
+            </div>
+            <div class="channel">
+                <mat-icon>email</mat-icon>
+                <div>
+                    <strong i18n>Email</strong>
+                    <!-- Email assembled only on click — no mailto href in DOM -->
+                    <span class="obf-email" role="link" tabindex="0" aria-label="support@choculaterie.com"
+                        (click)="openEmail()" (keydown.enter)="openEmail()"></span>
+                </div>
+            </div>
+        </div>
+
+        <mat-divider class="channel-divider" />
+
+        @if (submitted()) {
+        <div class="success-state">
+            <mat-icon class="success-icon">check_circle</mat-icon>
+            <h3 i18n>Message sent!</h3>
+            <p i18n>We'll get back to you as soon as possible.</p>
+        </div>
+        } @else {
+        <form [formGroup]="contactForm" (ngSubmit)="submit()" class="contact-form">
+            <mat-form-field appearance="outline">
+                <mat-label i18n>Subject</mat-label>
+                <input matInput formControlName="title" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label i18n>Message</mat-label>
+                <textarea matInput formControlName="description" rows="5"></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label i18n>Your contact (optional)</mat-label>
+                <input matInput formControlName="contact" placeholder="email or Discord" />
+                <mat-hint i18n>So we can reply to you</mat-hint>
+            </mat-form-field>
+
+            <!-- Image attachments -->
+            <div class="attachments">
+                <button type="button" mat-stroked-button (click)="imgInput.click()" [disabled]="imageFiles.length >= 5">
+                    <mat-icon>attach_file</mat-icon>
+                    <span i18n>Attach images ({{ imageFiles.length }}/5)</span>
+                </button>
+                <input #imgInput type="file" accept="image/*" multiple hidden (change)="onImageChange($event)" />
+                @if (imagePreviews().length) {
+                <div class="preview-grid">
+                    @for (preview of imagePreviews(); track preview; let i = $index) {
+                    <div class="preview-item">
+                        <img [src]="preview" [alt]="imageFiles[i]?.name" />
+                        <div class="preview-actions">
+                            <button mat-icon-button type="button" (click)="removeImage(i)" i18n-matTooltip
+                                matTooltip="Remove">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+
+            @if (!session.isAuthenticated()) {
+            <div class="captcha-wrap">
+                <app-captcha (solved)="onCaptchaSolved($event)" (reset)="captchaData.set(null)" />
+            </div>
+            }
+
+            <div class="form-actions">
+                <button mat-flat-button type="submit"
+                    [disabled]="contactForm.invalid || submitting() || (!session.isAuthenticated() && !captchaData())">
+                    <mat-icon>send</mat-icon>
+                    <span i18n>Send message</span>
+                </button>
+            </div>
+        </form>
+        }
+    </section>
+</div>

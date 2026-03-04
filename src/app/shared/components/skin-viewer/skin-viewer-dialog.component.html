@@ -1,0 +1,47 @@
+<div class="skin-dialog">
+    <button mat-icon-button class="close-btn" mat-dialog-close i18n-matTooltip matTooltip="Close">
+        <mat-icon>close</mat-icon>
+    </button>
+
+    <div class="skin-layout">
+        <div class="canvas-wrap">
+            @if (loading()) {
+            <div class="overlay">
+                <mat-spinner diameter="48" />
+            </div>
+            }
+            @if (!loading() && error()) {
+            <div class="overlay error-overlay">
+                <mat-icon>error_outline</mat-icon>
+                <p>{{ error() }}</p>
+            </div>
+            }
+            <canvas #skinCanvas class="skin-canvas"></canvas>
+        </div>
+
+        <div class="skin-info">
+            @if (playerName()) {
+            <h2 class="player-name">{{ playerName() }}</h2>
+            }
+            <p class="hint" i18n>Scroll to zoom · Drag to orbit</p>
+
+            <button mat-stroked-button (click)="toggleAnimation()" class="anim-btn">
+                <mat-icon>{{ animating() ? 'pause' : 'play_arrow' }}</mat-icon>
+                {{ animating() ? 'Pause' : 'Animate' }}
+            </button>
+
+            @if (!loading() && !error()) {
+            <div class="screenshot-btns">
+                <button mat-stroked-button (click)="screenshotBody()" i18n-matTooltip matTooltip="Download 3D view">
+                    <mat-icon>photo_camera</mat-icon>
+                    <span i18n>Screenshot</span>
+                </button>
+                <button mat-stroked-button (click)="screenshotFace()" i18n-matTooltip matTooltip="Download face">
+                    <mat-icon>face</mat-icon>
+                    <span i18n>Face</span>
+                </button>
+            </div>
+            }
+        </div>
+    </div>
+</div>

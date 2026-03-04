@@ -1,3 +1,11 @@
+@for (a of announcements(); track a.id) {
+@let t = a.type.toLowerCase();
+<div class="site-banner" [class]="'site-banner--' + t">
+  <mat-icon>{{ t === 'alert' ? 'notification_important' : t === 'warning' ? 'warning_amber' : t === 'error' ? 'error' :
+    'campaign' }}</mat-icon>
+  <span>{{ a.message }}</span>
+</div>
+}
 <app-navbar />
 <main class="content">
   <router-outlet />

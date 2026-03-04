@@ -4,16 +4,52 @@
     border-radius: 12px;
     overflow: hidden;
     padding: 0;
-    background-size: cover;
-    background-position: center;
     background-color: var(--mat-sys-surface-container);
     min-height: 140px;
+    max-width: 100%;
 
     &.has-cover {
+        background-color: transparent; // cover-pic handles the visual
         aspect-ratio: 3 / 1;
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
+    }
+
+    @media (max-width: 600px) {
+        overflow: visible;
+        min-height: 0;
+
+        &.has-cover {
+            aspect-ratio: unset;
+            display: block;
+            background-color: var(--mat-sys-surface-container);
+            border-radius: 12px;
+        }
+
+        // Always keep the background on mobile (matches desktop no-cover)
+        &:not(.has-cover) {
+            background-color: var(--mat-sys-surface-container);
+            min-height: 80px;
+        }
+    }
+}
+
+// ═══ Cover image element ═══
+.cover-pic {
+    // Desktop: absolute overlay filling the profile-header behind content
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+
+    @media (max-width: 600px) {
+        // Mobile: static block that creates the cover image area
+        position: static;
+        padding-top: 33.33%; // 3:1 aspect ratio
+        width: 100%;
+        border-radius: 12px 12px 0 0;
     }
 }
 
@@ -27,6 +63,7 @@
 
 .profile-header-content {
     position: relative;
+    z-index: 1;
     display: flex;
     gap: 1.5rem;
     align-items: flex-start;
@@ -37,6 +74,8 @@
         flex-direction: column;
         align-items: center;
         text-align: center;
+        padding: 1rem;
+        gap: 0.75rem;
     }
 }
 
@@ -95,6 +134,11 @@
     border: 3px solid var(--mat-sys-primary);
     position: relative;
 
+    @media (max-width: 600px) {
+        width: 80px;
+        height: 80px;
+    }
+
     img {
         width: 100%;
         height: 100%;
@@ -126,19 +170,18 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    border: 2px solid var(--mat-sys-surface);
+    border: 2px solid var(--mat-sys-primary);
     background: var(--mat-sys-primary);
-    color: var(--mat-sys-on-primary);
+    color: #000;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     padding: 0;
-    transition: background 0.2s;
+    transition: filter 0.2s;
 
     &:hover {
-        background: var(--mat-sys-primary-container);
-        color: var(--mat-sys-on-primary-container);
+        filter: brightness(0.85);
     }
 
     &:disabled {
@@ -150,6 +193,7 @@
         font-size: 16px;
         width: 16px;
         height: 16px;
+        color: #000 !important;
     }
 }
 
@@ -170,6 +214,21 @@
         color: #fff;
         text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 0, 0, 0.5);
     }
+
+    @media (max-width: 600px) {
+        justify-content: center;
+
+        h1 {
+            color: var(--mat-sys-on-surface);
+            text-shadow: none;
+        }
+    }
+}
+
+// No cover on desktop: also use normal text color
+.profile-header:not(.has-cover) .name-row h1 {
+    color: var(--mat-sys-on-surface);
+    text-shadow: none;
 }
 
 .badge-icon {
@@ -184,6 +243,17 @@
     color: rgba(255, 255, 255, 0.9);
     margin: 0.5rem 0 0;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 0 8px rgba(0, 0, 0, 0.5);
+
+    @media (max-width: 600px) {
+        color: var(--mat-sys-on-surface-variant);
+        text-shadow: none;
+    }
+}
+
+// No cover on desktop: also use normal bio color
+.profile-header:not(.has-cover) .bio {
+    color: var(--mat-sys-on-surface-variant);
+    text-shadow: none;
 }
 
 // ═══ Social Links (bottom-right of header) ═══
@@ -193,6 +263,12 @@
     flex-wrap: wrap;
     margin-left: auto;
     align-self: flex-end;
+
+    @media (max-width: 600px) {
+        margin-left: 0;
+        justify-content: center;
+        align-self: center;
+    }
 }
 
 .social-link {
@@ -242,6 +318,35 @@
     }
 }
 
+.meta-item--mc {
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 2px 6px;
+    margin: -2px -6px;
+    transition: background 0.15s;
+    user-select: none;
+
+    .mc-name {
+        color: var(--mat-sys-primary);
+    }
+
+    .mc-hover-icon {
+        opacity: 0;
+        transition: opacity 0.15s;
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+    }
+
+    &:hover {
+        background: var(--mat-sys-surface-variant);
+
+        .mc-hover-icon {
+            opacity: 1;
+        }
+    }
+}
+
 .meta-actions {
     display: flex;
     gap: 0.5rem;
@@ -264,12 +369,16 @@
 
 // ═══ Tabs & Content ═══
 ::ng-deep {
+
+    // Allow the tab body to scroll vertically without clipping CDK drag previews.
+    // CDK drag uses a portal to <body> for previews, so overflow here is irrelevant
+    // to them — we can safely set overflow: hidden and they still work.
     .mat-mdc-tab-body-content {
-        overflow: visible !important;
+        overflow: hidden !important;
     }
 
     .mat-mdc-tab-body {
-        overflow: visible !important;
+        overflow: hidden !important;
     }
 
     .social-link-row.cdk-drag-preview {
@@ -294,6 +403,10 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    // With overflow:hidden on the tab body, width is now properly constrained.
+    // These elements will resolve 100% against the real viewport-width parent.
+    min-width: 0;
+    max-width: 100%;
 }
 
 .schematic-grid {
@@ -326,6 +439,8 @@ mat-divider {
     justify-content: flex-end;
     margin-top: 0.5rem;
     align-items: center;
+    flex-wrap: wrap;
+    max-width: calc(100vw - 1.5rem);
 
     button,
     a {
@@ -411,6 +526,10 @@ mat-divider {
     background: var(--mat-sys-surface-container);
     margin-bottom: 0.75rem;
 
+    @media (max-width: 600px) {
+        flex-wrap: wrap;
+    }
+
     mat-icon {
         color: var(--mat-sys-on-surface-variant);
     }
@@ -452,6 +571,10 @@ mat-divider {
     background: var(--mat-sys-surface);
     border: 1px solid var(--mat-sys-outline-variant);
     margin-bottom: 0.75rem;
+
+    @media (max-width: 600px) {
+        flex-wrap: wrap;
+    }
 }
 
 .code-value {
@@ -522,6 +645,10 @@ mat-divider {
     .mat-mdc-form-field {
         overflow: visible;
     }
+
+    @media (max-width: 600px) {
+        flex-wrap: wrap;
+    }
 }
 
 .drag-handle {
@@ -543,6 +670,10 @@ mat-divider {
 .social-platform-field {
     width: 160px;
     flex-shrink: 0;
+
+    @media (max-width: 600px) {
+        width: 100%;
+    }
 }
 
 .social-url-field {
@@ -574,9 +705,12 @@ mat-divider {
 // ═══ Security Key Actions ═══
 .key-actions {
     display: flex;
-    gap: 1rem;
-    align-items: center;
-    justify-content: flex-end;
+    flex-direction: column;
+    gap: 0.125rem;
+    align-items: flex-end;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 
     .key-name-field .mat-mdc-form-field-subscript-wrapper {
         display: none;
@@ -590,27 +724,46 @@ mat-divider {
 }
 
 .key-name-field {
-    flex: 1;
-    max-width: 320px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 0 !important;
+
+    .mat-mdc-form-field-infix {
+        min-width: 0 !important;
+    }
 }
 
 .quota-card {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+
     mat-card-content {
         padding: 1rem;
+
+        @media (max-width: 600px) {
+            padding: 0.75rem;
+        }
     }
 }
 
 .quota-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
     text-align: center;
+
+    @media (max-width: 600px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 .quota-item {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    min-width: 0;
 }
 
 .quota-label {
@@ -623,4 +776,55 @@ mat-divider {
 .quota-value {
     font: var(--mat-sys-title-medium);
     color: var(--mat-sys-on-surface);
+    overflow-wrap: anywhere;
+
+    @media (max-width: 600px) {
+        font: var(--mat-sys-title-small);
+    }
+}
+
+.save-key-actions {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    justify-content: flex-end;
+
+    >button {
+        min-width: 0;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+}
+
+// ═══ Fix action icon buttons in saves/keys tables (prevent dots) ═══
+::ng-deep {
+
+    .saves-table .mat-column-actions,
+    .keys-table .mat-column-actions {
+        white-space: nowrap;
+        width: 1%;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+}
+
+// ═══ Scrollable table wrapper (security keys, save manager) ═══
+.table-scroll {
+    // The table must be contained to the visible page width so overflow-x
+    // actually triggers.  We can't rely on parent width constraints because
+    // the Angular tab body has overflow-y: visible which can break width
+    // containment in some browsers.  Using 100vw minus the page padding
+    // guarantees the wrapper never exceeds the viewport.
+    max-width: calc(100vw - 1.5rem);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    @media (max-width: 600px) {
+        max-width: calc(100vw - 1.5rem);
+    }
+
+    .full-width {
+        width: auto !important;
+        min-width: max-content !important;
+    }
 }

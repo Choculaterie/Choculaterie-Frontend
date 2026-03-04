@@ -25,7 +25,9 @@ import {
 } from 'rxjs';
 
 import type {
+  AcceptTagSuggestionRequest,
   AdminLoginAsRequest,
+  AdminNotificationResponse,
   AdminSchematicListResponse,
   AdminToggleSchematicRequest,
   AdminUserDetailResponse,
@@ -38,15 +40,21 @@ import type {
   ChangeUserQuotaRequest,
   ChangeUserRoleRequest,
   ChangeUserStatusRequest,
+  ContactTicketResponse,
+  FaqCreateRequest,
+  FaqResponse,
+  FaqUpdateRequest,
   GetApiAdminSchematicsParams,
   GetApiAdminStorageParams,
+  GetApiAdminTicketsParams,
   GetApiAdminUsersParams,
   LiveMessageRequest,
   LiveMessageResponse,
   LoginResponse,
   ModMessageRequest,
   ModMessageResponse,
-  StorageStatsResponse
+  StorageStatsResponse,
+  TagSuggestionResponse
 } from './generated.schemas';
 
 
@@ -540,6 +548,36 @@ export class AdminService {
       }
     );
   }
+ deleteApiAdminSchematicsId<TData = unknown>(id: string, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ deleteApiAdminSchematicsId<TData = unknown>(id: string, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ deleteApiAdminSchematicsId<TData = unknown>(id: string, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  deleteApiAdminSchematicsId<TData = unknown>(
+    id: string, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.delete<TData>(
+      `/api/Admin/schematics/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.delete<TData>(
+      `/api/Admin/schematics/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.delete<TData>(
+      `/api/Admin/schematics/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
  getApiAdminLiveMessages<TData = LiveMessageResponse[]>( options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
  getApiAdminLiveMessages<TData = LiveMessageResponse[]>( options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
  getApiAdminLiveMessages<TData = LiveMessageResponse[]>( options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
@@ -1006,6 +1044,445 @@ export class AdminService {
 
     return this.http.delete<TData>(
       `/api/Admin/versions/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ getApiAdminTagSuggestions<TData = TagSuggestionResponse[]>( options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ getApiAdminTagSuggestions<TData = TagSuggestionResponse[]>( options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ getApiAdminTagSuggestions<TData = TagSuggestionResponse[]>( options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  getApiAdminTagSuggestions<TData = TagSuggestionResponse[]>(
+     options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/Admin/tag-suggestions`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/Admin/tag-suggestions`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/Admin/tag-suggestions`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ postApiAdminTagSuggestionsIdAccept<TData = AllowedTagResponse>(id: number,
+    acceptTagSuggestionRequest: AcceptTagSuggestionRequest, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ postApiAdminTagSuggestionsIdAccept<TData = AllowedTagResponse>(id: number,
+    acceptTagSuggestionRequest: AcceptTagSuggestionRequest, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ postApiAdminTagSuggestionsIdAccept<TData = AllowedTagResponse>(id: number,
+    acceptTagSuggestionRequest: AcceptTagSuggestionRequest, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  postApiAdminTagSuggestionsIdAccept<TData = AllowedTagResponse>(
+    id: number,
+    acceptTagSuggestionRequest: AcceptTagSuggestionRequest, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/Admin/tag-suggestions/${id}/accept`,
+      acceptTagSuggestionRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/Admin/tag-suggestions/${id}/accept`,
+      acceptTagSuggestionRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/Admin/tag-suggestions/${id}/accept`,
+      acceptTagSuggestionRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ deleteApiAdminTagSuggestionsId<TData = unknown>(id: number, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ deleteApiAdminTagSuggestionsId<TData = unknown>(id: number, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ deleteApiAdminTagSuggestionsId<TData = unknown>(id: number, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  deleteApiAdminTagSuggestionsId<TData = unknown>(
+    id: number, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.delete<TData>(
+      `/api/Admin/tag-suggestions/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.delete<TData>(
+      `/api/Admin/tag-suggestions/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.delete<TData>(
+      `/api/Admin/tag-suggestions/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ getApiAdminNotifications<TData = AdminNotificationResponse[]>( options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ getApiAdminNotifications<TData = AdminNotificationResponse[]>( options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ getApiAdminNotifications<TData = AdminNotificationResponse[]>( options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  getApiAdminNotifications<TData = AdminNotificationResponse[]>(
+     options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/Admin/notifications`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/Admin/notifications`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/Admin/notifications`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ postApiAdminNotificationsIdRead<TData = unknown>(id: number, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ postApiAdminNotificationsIdRead<TData = unknown>(id: number, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ postApiAdminNotificationsIdRead<TData = unknown>(id: number, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  postApiAdminNotificationsIdRead<TData = unknown>(
+    id: number, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/Admin/notifications/${id}/read`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/Admin/notifications/${id}/read`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/Admin/notifications/${id}/read`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ postApiAdminNotificationsIdUnread<TData = unknown>(id: number, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ postApiAdminNotificationsIdUnread<TData = unknown>(id: number, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ postApiAdminNotificationsIdUnread<TData = unknown>(id: number, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  postApiAdminNotificationsIdUnread<TData = unknown>(
+    id: number, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/Admin/notifications/${id}/unread`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/Admin/notifications/${id}/unread`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/Admin/notifications/${id}/unread`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ deleteApiAdminNotificationsId<TData = unknown>(id: number, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ deleteApiAdminNotificationsId<TData = unknown>(id: number, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ deleteApiAdminNotificationsId<TData = unknown>(id: number, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  deleteApiAdminNotificationsId<TData = unknown>(
+    id: number, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.delete<TData>(
+      `/api/Admin/notifications/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.delete<TData>(
+      `/api/Admin/notifications/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.delete<TData>(
+      `/api/Admin/notifications/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ postApiAdminFaq<TData = FaqResponse>(faqCreateRequest: FaqCreateRequest, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ postApiAdminFaq<TData = FaqResponse>(faqCreateRequest: FaqCreateRequest, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ postApiAdminFaq<TData = FaqResponse>(faqCreateRequest: FaqCreateRequest, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  postApiAdminFaq<TData = FaqResponse>(
+    faqCreateRequest: FaqCreateRequest, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/Admin/faq`,
+      faqCreateRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/Admin/faq`,
+      faqCreateRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/Admin/faq`,
+      faqCreateRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ putApiAdminFaqId<TData = FaqResponse>(id: number,
+    faqUpdateRequest: FaqUpdateRequest, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ putApiAdminFaqId<TData = FaqResponse>(id: number,
+    faqUpdateRequest: FaqUpdateRequest, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ putApiAdminFaqId<TData = FaqResponse>(id: number,
+    faqUpdateRequest: FaqUpdateRequest, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  putApiAdminFaqId<TData = FaqResponse>(
+    id: number,
+    faqUpdateRequest: FaqUpdateRequest, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.put<TData>(
+      `/api/Admin/faq/${id}`,
+      faqUpdateRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.put<TData>(
+      `/api/Admin/faq/${id}`,
+      faqUpdateRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.put<TData>(
+      `/api/Admin/faq/${id}`,
+      faqUpdateRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ deleteApiAdminFaqId<TData = unknown>(id: number, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ deleteApiAdminFaqId<TData = unknown>(id: number, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ deleteApiAdminFaqId<TData = unknown>(id: number, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  deleteApiAdminFaqId<TData = unknown>(
+    id: number, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.delete<TData>(
+      `/api/Admin/faq/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.delete<TData>(
+      `/api/Admin/faq/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.delete<TData>(
+      `/api/Admin/faq/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ getApiAdminTickets<TData = unknown>(params?: GetApiAdminTicketsParams, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ getApiAdminTickets<TData = unknown>(params?: GetApiAdminTicketsParams, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ getApiAdminTickets<TData = unknown>(params?: GetApiAdminTicketsParams, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  getApiAdminTickets<TData = unknown>(
+    params?: GetApiAdminTicketsParams, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/Admin/tickets`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/Admin/tickets`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/Admin/tickets`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+ getApiAdminTicketsId<TData = ContactTicketResponse>(id: number, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ getApiAdminTicketsId<TData = ContactTicketResponse>(id: number, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ getApiAdminTicketsId<TData = ContactTicketResponse>(id: number, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  getApiAdminTicketsId<TData = ContactTicketResponse>(
+    id: number, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/Admin/tickets/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/Admin/tickets/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/Admin/tickets/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ deleteApiAdminTicketsId<TData = unknown>(id: number, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ deleteApiAdminTicketsId<TData = unknown>(id: number, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ deleteApiAdminTicketsId<TData = unknown>(id: number, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  deleteApiAdminTicketsId<TData = unknown>(
+    id: number, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.delete<TData>(
+      `/api/Admin/tickets/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.delete<TData>(
+      `/api/Admin/tickets/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.delete<TData>(
+      `/api/Admin/tickets/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ postApiAdminTicketsIdRead<TData = unknown>(id: number, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ postApiAdminTicketsIdRead<TData = unknown>(id: number, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ postApiAdminTicketsIdRead<TData = unknown>(id: number, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  postApiAdminTicketsIdRead<TData = unknown>(
+    id: number, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/Admin/tickets/${id}/read`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/Admin/tickets/${id}/read`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/Admin/tickets/${id}/read`,undefined,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }

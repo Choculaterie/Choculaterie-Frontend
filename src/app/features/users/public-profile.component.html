@@ -6,8 +6,10 @@
     } @else if (displayProfile(); as p) {
 
     <!-- Banner Header -->
-    <div class="profile-header" [class.has-cover]="p.coverImagePath"
-        [style.background-image]="p.coverImagePath ? 'url(' + (p.coverImagePath | userImg) + ')' : ''">
+    <div class="profile-header" [class.has-cover]="p.coverImagePath">
+        @if (p.coverImagePath) {
+        <div class="cover-pic" [style.background-image]="'url(' + (p.coverImagePath | userImg) + ')'"></div>
+        }
         @if (isOwnProfile()) {
         <div class="cover-actions">
             <button class="cover-edit-btn" i18n-matTooltip
@@ -78,8 +80,13 @@
         <div class="meta-item"><mat-icon>calendar_today</mat-icon> <strong i18n>Joined:</strong> {{ p.registrationDate |
             date:'mediumDate' }}</div>
         @if (p.minecraftUsername || p.isMinecraftLinked) {
-        <div class="meta-item"><ng-icon name="matfMinecraftColored" size="18" /> <strong>Minecraft:</strong> {{
-            p.minecraftUsername }}
+        <div class="meta-item" [class.meta-item--mc]="p.minecraftUsername"
+            (click)="p.minecraftUsername && openSkinViewer(p.minecraftUsername)">
+            <ng-icon name="matfMinecraftColored" size="18" /> <strong>Minecraft:</strong>
+            @if (p.minecraftUsername) {
+            <span class="mc-name">{{ p.minecraftUsername }}</span>
+            <mat-icon class="mc-hover-icon">open_in_new</mat-icon>
+            }
         </div>
         }
         @if (p.discordUsername || p.isDiscordLinked) {
@@ -112,7 +119,8 @@
     </div>
 
     <!-- Content Tabs -->
-    <mat-tab-group dynamicHeight [selectedIndex]="selectedTab()" (selectedTabChange)="onTabChange($event.index)">
+    <mat-tab-group dynamicHeight disablePagination [selectedIndex]="selectedTab()"
+        (selectedTabChange)="onTabChange($event.index)">
 
         <mat-tab label="Schematics">
             <div class="tab-content">
@@ -519,32 +527,36 @@
                 <app-empty-state icon="key_off" i18n-title title="No security keys" i18n-subtitle
                     subtitle="Add a security key for extra account protection." />
                 } @else {
-                <table mat-table [dataSource]="securityKeys()" class="full-width">
-                    <ng-container matColumnDef="keyName">
-                        <th mat-header-cell *matHeaderCellDef>Name</th>
-                        <td mat-cell *matCellDef="let key">{{ key.keyName }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="dateAdded">
-                        <th mat-header-cell *matHeaderCellDef>Added</th>
-                        <td mat-cell *matCellDef="let key">{{ key.dateAdded | date:'mediumDate' }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="lastUsed">
-                        <th mat-header-cell *matHeaderCellDef>Last used</th>
-                        <td mat-cell *matCellDef="let key">{{ key.lastUsed ? (key.lastUsed | date:'medium') : 'Never' }}
-                        </td>
-                    </ng-container>
-                    <ng-container matColumnDef="useCount">
-                        <th mat-header-cell *matHeaderCellDef>Uses</th>
-                        <td mat-cell *matCellDef="let key">{{ key.useCount }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="actions">
-                        <th mat-header-cell *matHeaderCellDef></th>
-                        <td mat-cell *matCellDef="let key"><button mat-icon-button color="warn" (click)="deleteKey(key)"
-                                i18n-matTooltip matTooltip="Delete key"><mat-icon>delete</mat-icon></button></td>
-                    </ng-container>
-                    <tr mat-header-row *matHeaderRowDef="secKeyColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: secKeyColumns;"></tr>
-                </table>
+                <div class="table-scroll">
+                    <table mat-table [dataSource]="securityKeys()" class="full-width keys-table">
+                        <ng-container matColumnDef="keyName">
+                            <th mat-header-cell *matHeaderCellDef>Name</th>
+                            <td mat-cell *matCellDef="let key">{{ key.keyName }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="dateAdded">
+                            <th mat-header-cell *matHeaderCellDef>Added</th>
+                            <td mat-cell *matCellDef="let key">{{ key.dateAdded | date:'mediumDate' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="lastUsed">
+                            <th mat-header-cell *matHeaderCellDef>Last used</th>
+                            <td mat-cell *matCellDef="let key">{{ key.lastUsed ? (key.lastUsed | date:'medium') :
+                                'Never' }}
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="useCount">
+                            <th mat-header-cell *matHeaderCellDef>Uses</th>
+                            <td mat-cell *matCellDef="let key">{{ key.useCount }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let key"><button mat-icon-button color="warn"
+                                    (click)="deleteKey(key)" i18n-matTooltip
+                                    matTooltip="Delete key"><mat-icon>delete</mat-icon></button></td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="secKeyColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: secKeyColumns;"></tr>
+                    </table>
+                </div>
                 }
 
                 <mat-divider class="section-divider" />
@@ -589,39 +601,41 @@
                 <app-empty-state icon="save" i18n-title title="No saves" i18n-subtitle
                     subtitle="Your Minecraft world saves will appear here." />
                 } @else {
-                <table mat-table [dataSource]="saves()" class="full-width">
-                    <ng-container matColumnDef="worldName">
-                        <th mat-header-cell *matHeaderCellDef>World</th>
-                        <td mat-cell *matCellDef="let s">{{ s.worldName }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="fileSizeBytes">
-                        <th mat-header-cell *matHeaderCellDef>Size</th>
-                        <td mat-cell *matCellDef="let s">{{ s.fileSizeBytes | fileSize }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="createdAt">
-                        <th mat-header-cell *matHeaderCellDef>Created</th>
-                        <td mat-cell *matCellDef="let s">{{ s.createdAt | date:'medium' }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="updatedAt">
-                        <th mat-header-cell *matHeaderCellDef>Updated</th>
-                        <td mat-cell *matCellDef="let s">{{ s.updatedAt | date:'medium' }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="actions">
-                        <th mat-header-cell *matHeaderCellDef></th>
-                        <td mat-cell *matCellDef="let s">
-                            <button mat-icon-button (click)="downloadSave(s)" i18n-matTooltip
-                                matTooltip="Download"><mat-icon>download</mat-icon></button>
-                            <button mat-icon-button color="warn" (click)="deleteSave(s)" i18n-matTooltip
-                                matTooltip="Delete"><mat-icon>delete</mat-icon></button>
-                        </td>
-                    </ng-container>
-                    <tr mat-header-row *matHeaderRowDef="saveColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: saveColumns;"></tr>
-                </table>
+                <div class="table-scroll">
+                    <table mat-table [dataSource]="saves()" class="full-width saves-table">
+                        <ng-container matColumnDef="worldName">
+                            <th mat-header-cell *matHeaderCellDef>World</th>
+                            <td mat-cell *matCellDef="let s">{{ s.worldName }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="fileSizeBytes">
+                            <th mat-header-cell *matHeaderCellDef>Size</th>
+                            <td mat-cell *matCellDef="let s">{{ s.fileSizeBytes | fileSize }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="createdAt">
+                            <th mat-header-cell *matHeaderCellDef>Created</th>
+                            <td mat-cell *matCellDef="let s">{{ s.createdAt | date:'medium' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="updatedAt">
+                            <th mat-header-cell *matHeaderCellDef>Updated</th>
+                            <td mat-cell *matCellDef="let s">{{ s.updatedAt | date:'medium' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let s">
+                                <button mat-icon-button (click)="downloadSave(s)" i18n-matTooltip
+                                    matTooltip="Download"><mat-icon>download</mat-icon></button>
+                                <button mat-icon-button color="warn" (click)="deleteSave(s)" i18n-matTooltip
+                                    matTooltip="Delete"><mat-icon>delete</mat-icon></button>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="saveColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: saveColumns;"></tr>
+                    </table>
+                </div>
                 }
 
                 <mat-divider class="section-divider" />
-                <div class="form-actions">
+                <div class="form-actions save-key-actions">
                     @if (saveVerified()) {
                     <button mat-stroked-button (click)="regenerateKey()" i18n-matTooltip
                         matTooltip="Regenerate save key">

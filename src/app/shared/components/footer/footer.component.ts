@@ -1,21 +1,23 @@
 import { Component } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { simpleGithub, simpleDiscord } from '@ng-icons/simple-icons';
 
 @Component({
     selector: 'app-footer',
     standalone: true,
-    imports: [MatIconModule, MatDividerModule],
+    imports: [MatDividerModule, NgIconComponent],
+    viewProviders: [provideIcons({ simpleGithub, simpleDiscord })],
     template: `
         <mat-divider />
         <footer class="footer">
             <span class="disclaimer">Choculaterie is not affiliated with Mojang Studios or Microsoft.</span>
             <div class="footer-links">
                 <a href="https://github.com/Choculaterie" target="_blank" rel="noopener" aria-label="GitHub">
-                    <mat-icon>code</mat-icon> GitHub
+                    <ng-icon name="simpleGithub" size="18" /> GitHub
                 </a>
                 <a href="https://discord.gg/choculaterie" target="_blank" rel="noopener" aria-label="Discord">
-                    <mat-icon>forum</mat-icon> Discord
+                    <ng-icon name="simpleDiscord" size="18" /> Discord
                 </a>
             </div>
         </footer>
@@ -42,13 +44,12 @@ import { MatDividerModule } from '@angular/material/divider';
         .footer-links a {
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.375rem;
             color: var(--mat-sys-on-surface-variant);
             text-decoration: none;
             transition: color 0.2s;
             &:hover { color: var(--mat-sys-primary); }
-            mat-icon { font-size: 18px; width: 18px; height: 18px; }
         }
     `,
 })
-export class FooterComponent {}
+export class FooterComponent { }

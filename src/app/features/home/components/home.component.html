@@ -10,15 +10,24 @@
         </div>
     </section>
 
-    <!-- Announcements -->
-    @if (announcements().length) {
-    <section class="announcements">
-        @for (a of announcements(); track a.id) {
-        <div class="announcement" [class]="'announcement-' + a.type">
-            <mat-icon>{{ a.type === 'warning' ? 'warning' : a.type === 'error' ? 'error' : 'campaign' }}</mat-icon>
-            <span>{{ a.message }}</span>
+    <!-- Site Stats -->
+    @if (stats(); as s) {
+    <section class="stats-row">
+        <div class="stat-chip">
+            <mat-icon>construction</mat-icon>
+            <span class="stat-value">{{ s.schematicCount }}</span>
+            <span class="stat-label">Schematics</span>
         </div>
-        }
+        <div class="stat-chip">
+            <mat-icon>group</mat-icon>
+            <span class="stat-value">{{ s.userCount }}</span>
+            <span class="stat-label">Members</span>
+        </div>
+        <div class="stat-chip">
+            <mat-icon>link</mat-icon>
+            <span class="stat-value">{{ s.quickShareCount }}</span>
+            <span class="stat-label">Quick Shares</span>
+        </div>
     </section>
     }
 
@@ -29,15 +38,24 @@
             <a mat-button routerLink="/schematics">View all</a>
         </div>
         @if (loadingSchematics()) {
-            <app-loading-spinner [diameter]="36" />
+        <app-loading-spinner [diameter]="36" />
         } @else {
-            <div class="schematic-grid">
-                @for (s of latestSchematics(); track s.id) {
-                    <app-schematic-card [schematic]="s" />
-                } @empty {
-                    <p class="muted">No schematics yet.</p>
-                }
-            </div>
+        <div class="schematic-grid">
+            @for (s of latestSchematics(); track s.id) {
+            <app-schematic-card [schematic]="s" />
+            } @empty {
+            <p class="muted">No schematics yet.</p>
+            }
+        </div>
         }
+    </section>
+
+    <!-- Ko-fi Donation -->
+    <section class="donation-section">
+        <h2><mat-icon>favorite</mat-icon> Support the Server</h2>
+        <p>Enjoying Choculaterie? Help keep it running!</p>
+        <a href="https://ko-fi.com/choculat" target="_blank" rel="noopener noreferrer" class="kofi-btn">
+            <img src="https://storage.ko-fi.com/cdn/kofi4.png?v=3" alt="Support me on Ko-fi" height="40" />
+        </a>
     </section>
 </div>

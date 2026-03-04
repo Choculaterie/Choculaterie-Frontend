@@ -36,6 +36,7 @@ export interface CropperDialogResult {
             [resizeToHeight]="data.aspectRatio && data.aspectRatio > 1 ? Math.round(1200 / data.aspectRatio) : 512"
             [format]="data.format ?? 'png'"
             [style.display]="imageLoaded() ? 'block' : 'none'"
+            style="--cropper-border: 2px dashed var(--mat-sys-primary); --cropper-color: var(--mat-sys-primary); --cropper-outline-color: rgba(0,0,0,0.5);"
             (imageLoaded)="onImageLoaded()"
             (imageCropped)="onCropped($event)"
             (loadImageFailed)="onLoadFailed()"

@@ -4,12 +4,28 @@
  * Backend | v1
  * OpenAPI spec version: 1.0.0
  */
+export interface AcceptTagSuggestionRequest {
+  /** @nullable */
+  name: string | null;
+}
+
 export interface AddSecurityKeyRequest {
   keyName: string;
 }
 
 export interface AdminLoginAsRequest {
   userId: string;
+}
+
+export interface AdminNotificationResponse {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  id: number | string;
+  type: string;
+  message: string;
+  /** @nullable */
+  data: string | null;
+  isRead: boolean;
+  createdAt: string;
 }
 
 export interface AdminSchematicResponse {
@@ -40,10 +56,7 @@ export interface AdminSchematicListResponse {
 }
 
 export interface AdminToggleSchematicRequest {
-  /** @nullable */
-  status: string | null;
-  /** @nullable */
-  visibility: string | null;
+  status: string;
 }
 
 export interface SocialLinkResponse {
@@ -314,6 +327,22 @@ export interface ConfirmRegisterRequest {
   code: string;
 }
 
+export interface ContactTicketResponse {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  id: number | string;
+  title: string;
+  description: string;
+  /** @nullable */
+  contact: string | null;
+  imagePaths: string[];
+  /** @nullable */
+  userId: string | null;
+  /** @nullable */
+  username: string | null;
+  isRead: boolean;
+  createdAt: string;
+}
+
 export interface CreateShortUrlRequest {
   longUrl: string;
   /** @nullable */
@@ -323,6 +352,35 @@ export interface CreateShortUrlRequest {
 export interface EmailAvailableResponse {
   email: string;
   isAvailable: boolean;
+}
+
+export interface FaqCreateRequest {
+  question: string;
+  answer: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  order?: number | string;
+}
+
+export interface FaqResponse {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  id: number | string;
+  question: string;
+  answer: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  order: number | string;
+  createdAt: string;
+}
+
+export interface FaqUpdateRequest {
+  /** @nullable */
+  question: string | null;
+  /** @nullable */
+  answer: string | null;
+  /**
+   * @nullable
+   * @pattern ^-?(?:0|[1-9]\d*)$
+   */
+  order: number | string | null;
 }
 
 export type IFormFile = Blob;
@@ -737,6 +795,19 @@ export interface StorageStatsResponse {
   pageSize: number | string;
 }
 
+export interface TagSuggestionResponse {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  id: number | string;
+  suggestedName: string;
+  userId: string;
+  username: string;
+  createdAt: string;
+}
+
+export interface TagSuggestRequest {
+  name: string;
+}
+
 export interface UpdateProfileRequest {
   /** @nullable */
   username: string | null;
@@ -862,6 +933,27 @@ sort?: string;
 direction?: string;
 };
 
+export type GetApiAdminTicketsParams = {
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
+unreadOnly?: boolean;
+};
+
+export type PostApiContactBody = {
+  Title?: string;
+  Description?: string;
+  Contact?: string;
+  Images?: IFormFileCollection;
+  CaptchaId?: string;
+  CaptchaPositions?: string;
+};
+
 export type PostApiModsBody = {
   Title?: string;
   Description?: string;
@@ -880,6 +972,10 @@ export type PutApiModsIdBody = {
   Platform?: string;
   File?: IFormFile;
   Image?: IFormFile;
+};
+
+export type GetApiMojangProxyParams = {
+endpoint?: string;
 };
 
 export type GetApiSchematicsParams = {
@@ -949,17 +1045,6 @@ q?: string;
 
 export type GetApiSchematicsSearchAuthorsParams = {
 q?: string;
-};
-
-export type GetApiSchematicsUserUsernameContentParams = {
-/**
- * @pattern ^-?(?:0|[1-9]\d*)$
- */
-page?: number | string;
-/**
- * @pattern ^-?(?:0|[1-9]\d*)$
- */
-pageSize?: number | string;
 };
 
 export type PostApiSecurityKeysRegisterParams = {

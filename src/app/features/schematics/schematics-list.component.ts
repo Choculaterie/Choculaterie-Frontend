@@ -12,6 +12,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle, moveItemInArray } from '@angular/cdk/drag-drop';
 import { debounceTime, Subject, switchMap, of, forkJoin, map } from 'rxjs';
 import { SchematicsService } from '../../api/schematics';
@@ -23,6 +24,9 @@ import { SessionService } from '../../core/services/session.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SCHEMATICS } from '../../i18n/labels';
 import { sortVersionsDesc } from '../../shared/utils/version-sort';
+import { LitematicViewerComponent, type LitematicViewerData } from '../../shared/components/litematic-viewer/litematic-viewer.component';
+import { IsometricScreenshotDialogComponent, type IsometricScreenshotData } from '../../shared/components/litematic-viewer/isometric-screenshot-dialog.component';
+import { TagSuggestDialogComponent } from '../../shared/components/tag-suggest-dialog/tag-suggest-dialog.component';
 
 @Component({
     selector: 'app-schematics-list',
@@ -57,6 +61,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private toast = inject(ToastService);
+    private dialog = inject(MatDialog);
     session = inject(SessionService);
 
     private pendingScrollRestore: number | null = null;
@@ -231,6 +236,14 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         this.loadPage(1);
     }
 
+    onUploadClick(): void {
+        if (!this.session.isAuthenticated()) {
+            this.router.navigate(['/auth/register']);
+            return;
+        }
+        this.showCreate.set(!this.showCreate());
+    }
+
     clearFilters(): void {
         this.search = '';
         this.tag = '';
@@ -399,5 +412,46 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
                 this.toast.error(err.error?.detail ?? SCHEMATICS.uploadFailed);
             },
         });
+    }
+
+    viewIn3DLocal(file: File): void {
+        file.arrayBuffer().then(buffer => {
+            this.dialog.open(LitematicViewerComponent, {
+                data: { fileData: buffer, fileName: file.name } as LitematicViewerData,
+                width: '90vw',
+                maxWidth: '1200px',
+                panelClass: 'litematic-viewer-dialog',
+            });
+        });
+    }
+
+    generatePictureLocal(file: File): void {
+        file.arrayBuffer().then(buffer => {
+            const dialogRef = this.dialog.open(IsometricScreenshotDialogComponent, {
+                data: { fileData: buffer, fileName: file.name, mode: 'edit' } as IsometricScreenshotData,
+                width: '90vw',
+                maxWidth: '1200px',
+                panelClass: 'litematic-viewer-dialog',
+            });
+            dialogRef.afterClosed().subscribe((result: File | null) => {
+                if (result instanceof File) {
+                    this.addScreenshotToPictures(result);
+                }
+            });
+        });
+    }
+
+    private addScreenshotToPictures(file: File): void {
+        if (this.pictureFiles.length >= this.MAX_FILES) {
+            this.toast.error(`Maximum ${this.MAX_FILES} pictures allowed.`);
+            return;
+        }
+        this.pictureFiles = [...this.pictureFiles, file];
+        this.regeneratePreviews();
+        this.toast.success('Screenshot added to pictures.');
+    }
+
+    openTagSuggest(): void {
+        this.dialog.open(TagSuggestDialogComponent, { width: '420px' });
     }
 }

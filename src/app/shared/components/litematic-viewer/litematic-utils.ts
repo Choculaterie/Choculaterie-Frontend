@@ -262,7 +262,94 @@ export interface MaterialEntry {
 }
 
 /**
+ * Manual texture overrides for blocks whose model textures
+ * don't represent the block well (e.g. lever → cobblestone particle).
+ * Maps block short id → texture id in assets.textures.
+ */
+const TEXTURE_OVERRIDES: Record<string, string[]> = {
+    lever: ['item/lever', 'block/lever'],
+    redstone_wire: ['block/redstone_dust_dot', 'item/redstone'],
+    tripwire: ['block/tripwire'],
+    tripwire_hook: ['block/tripwire_hook'],
+    string: ['block/tripwire', 'item/string'],
+    comparator: ['item/comparator', 'block/comparator'],
+    repeater: ['item/repeater', 'block/repeater'],
+    brewing_stand: ['item/brewing_stand', 'block/brewing_stand'],
+    cauldron: ['item/cauldron', 'block/cauldron_side'],
+    water_cauldron: ['item/cauldron', 'block/cauldron_side'],
+    lava_cauldron: ['item/cauldron', 'block/cauldron_side'],
+    powder_snow_cauldron: ['item/cauldron', 'block/cauldron_side'],
+    flower_pot: ['item/flower_pot', 'block/flower_pot'],
+    hopper: ['item/hopper', 'block/hopper_outside'],
+    rail: ['block/rail', 'item/rail'],
+    powered_rail: ['block/powered_rail', 'item/powered_rail'],
+    detector_rail: ['block/detector_rail', 'item/detector_rail'],
+    activator_rail: ['block/activator_rail', 'item/activator_rail'],
+    chain: ['item/chain', 'block/chain'],
+    lantern: ['item/lantern', 'block/lantern'],
+    soul_lantern: ['item/soul_lantern', 'block/soul_lantern'],
+    campfire: ['item/campfire', 'block/campfire_log_lit'],
+    soul_campfire: ['item/soul_campfire', 'block/soul_campfire_log_lit'],
+    bell: ['item/bell', 'block/bell_body'],
+    conduit: ['item/conduit', 'block/conduit'],
+    end_rod: ['item/end_rod', 'block/end_rod'],
+    lightning_rod: ['item/lightning_rod', 'block/lightning_rod'],
+    candle: ['item/candle', 'block/candle_lit'],
+    dragon_egg: ['block/dragon_egg'],
+    chorus_plant: ['block/chorus_plant', 'item/chorus_plant'],
+    chorus_flower: ['block/chorus_flower', 'item/chorus_flower'],
+    // Buttons – their model textures point to the block face via particle
+    stone_button: ['block/stone'],
+    oak_button: ['block/oak_planks'],
+    spruce_button: ['block/spruce_planks'],
+    birch_button: ['block/birch_planks'],
+    jungle_button: ['block/jungle_planks'],
+    acacia_button: ['block/acacia_planks'],
+    dark_oak_button: ['block/dark_oak_planks'],
+    cherry_button: ['block/cherry_planks'],
+    bamboo_button: ['block/bamboo_planks'],
+    mangrove_button: ['block/mangrove_planks'],
+    crimson_button: ['block/crimson_planks'],
+    warped_button: ['block/warped_planks'],
+    polished_blackstone_button: ['block/polished_blackstone'],
+    // Pressure plates – same issue
+    stone_pressure_plate: ['block/stone'],
+    oak_pressure_plate: ['block/oak_planks'],
+    spruce_pressure_plate: ['block/spruce_planks'],
+    birch_pressure_plate: ['block/birch_planks'],
+    jungle_pressure_plate: ['block/jungle_planks'],
+    acacia_pressure_plate: ['block/acacia_planks'],
+    dark_oak_pressure_plate: ['block/dark_oak_planks'],
+    cherry_pressure_plate: ['block/cherry_planks'],
+    bamboo_pressure_plate: ['block/bamboo_planks'],
+    mangrove_pressure_plate: ['block/mangrove_planks'],
+    crimson_pressure_plate: ['block/crimson_planks'],
+    warped_pressure_plate: ['block/warped_planks'],
+    polished_blackstone_pressure_plate: ['block/polished_blackstone'],
+    heavy_weighted_pressure_plate: ['block/iron_block'],
+    light_weighted_pressure_plate: ['block/gold_block'],
+    // Other problematic blocks
+    scaffolding: ['block/scaffolding_top', 'item/scaffolding'],
+    ladder: ['block/ladder'],
+    iron_bars: ['block/iron_bars'],
+    glass_pane: ['block/glass'],
+    vine: ['block/vine'],
+    lily_pad: ['block/lily_pad', 'item/lily_pad'],
+    turtle_egg: ['item/turtle_egg'],
+    frogspawn: ['block/frogspawn', 'item/frogspawn'],
+    pointed_dripstone: ['item/pointed_dripstone', 'block/pointed_dripstone_tip'],
+    sweet_berry_bush: ['item/sweet_berries'],
+    cave_vines: ['item/glow_berries'],
+    cave_vines_plant: ['item/glow_berries'],
+    bubble_column: ['block/bubble_column_outer_mid'],
+};
+
+/**
  * Resolve a block id (e.g. "minecraft:spruce_slab") to pixel coordinates in the atlas.
+ *
+ * This merges ALL texture variables across the entire model parent chain first,
+ * then resolves #variable references (e.g. "#all" → "block/stone") so that
+ * blocks whose child model only defines variable indirections are resolved correctly.
  */
 export function resolveBlockTexture(
     blockId: string,
@@ -273,10 +360,25 @@ export function resolveBlockTexture(
     },
 ): [number, number, number, number] | null {
     const shortId = blockId.replace('minecraft:', '');
+
+    // ── Step 0: Check manual overrides first ──
+    const overrides = TEXTURE_OVERRIDES[shortId];
+    if (overrides) {
+        for (const texId of overrides) {
+            const rect = assets.textures[texId];
+            if (rect) return rect;
+        }
+    }
+
     const blockstate = assets.blockstates[shortId] as
         | { variants?: Record<string, unknown>; multipart?: unknown[] }
         | undefined;
-    if (!blockstate) return null;
+    if (!blockstate) {
+        // No blockstate — try direct texture lookups as last resort
+        return assets.textures[`block/${shortId}`]
+            ?? assets.textures[`item/${shortId}`]
+            ?? null;
+    }
 
     // Get the first model reference from the blockstate
     let modelRef: string | null = null;
@@ -292,7 +394,9 @@ export function resolveBlockTexture(
     }
     if (!modelRef) return null;
 
-    // Walk the model parent chain to find one concrete texture reference
+    // ── Step 1: Merge ALL texture variables across the entire parent chain ──
+    // Child values take priority over parent values (first-wins in the map).
+    const merged: Record<string, string> = {};
     let currentModel = modelRef.replace('minecraft:', '');
     const visited = new Set<string>();
     while (currentModel && !visited.has(currentModel)) {
@@ -303,27 +407,57 @@ export function resolveBlockTexture(
         if (!model) break;
 
         if (model.textures) {
-            // Try common texture keys in priority order
-            for (const key of ['all', 'top', 'front', 'side', 'texture', 'cross', 'plant', 'particle']) {
-                const val = model.textures[key];
-                if (val && !val.startsWith('#')) {
-                    const texKey = val.replace('minecraft:', '');
-                    const rect = assets.textures[texKey];
-                    if (rect) return rect;
-                }
-            }
-            // Fallback: try any texture value
-            for (const val of Object.values(model.textures)) {
-                if (val && !val.startsWith('#')) {
-                    const texKey = val.replace('minecraft:', '');
-                    const rect = assets.textures[texKey];
-                    if (rect) return rect;
-                }
+            for (const [k, v] of Object.entries(model.textures)) {
+                if (!(k in merged)) merged[k] = v; // child wins
             }
         }
-        // Follow parent
         currentModel = model.parent?.replace('minecraft:', '') ?? '';
     }
+
+    // ── Step 2: Resolve helper that follows #variable chains ──
+    const resolve = (key: string): [number, number, number, number] | null => {
+        let val = merged[key];
+        let depth = 0;
+        while (val?.startsWith('#') && depth < 10) {
+            val = merged[val.substring(1)];
+            depth++;
+        }
+        if (!val || val.startsWith('#')) return null;
+        const texKey = val.replace('minecraft:', '');
+        return assets.textures[texKey] ?? null;
+    };
+
+    // ── Step 3: Try preferred texture keys in priority order ──
+    // 'particle' is deliberately last because it often points to an unrelated
+    // texture (e.g. lever → cobblestone).
+    const PREFERRED_KEYS = [
+        'all', 'top', 'front', 'side',
+        'south', 'east', 'north', 'west', 'up',
+        'texture', 'cross', 'plant', 'end',
+        'line', 'dot', 'overlay',
+    ];
+    for (const key of PREFERRED_KEYS) {
+        const rect = resolve(key);
+        if (rect) return rect;
+    }
+
+    // ── Step 4: Fallback – try any non-particle texture in the merged map ──
+    for (const key of Object.keys(merged)) {
+        if (key === 'particle') continue;
+        const rect = resolve(key);
+        if (rect) return rect;
+    }
+
+    // ── Step 5: Try direct item/block texture lookups ──
+    const directItem = assets.textures[`item/${shortId}`];
+    if (directItem) return directItem;
+    const directBlock = assets.textures[`block/${shortId}`];
+    if (directBlock) return directBlock;
+
+    // ── Step 6: Last resort – particle ──
+    const particleRect = resolve('particle');
+    if (particleRect) return particleRect;
+
     return null;
 }
 

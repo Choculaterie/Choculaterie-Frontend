@@ -39,6 +39,7 @@ import { ReportDialogComponent, ReportDialogData, ReportDialogResult } from '../
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PasswordDialogComponent, PasswordDialogData } from '../../shared/components/password-dialog/password-dialog.component';
 import { ImageCropperDialogComponent, CropperDialogData, CropperDialogResult } from '../../shared/components/image-cropper-dialog/image-cropper-dialog.component';
+import { SkinViewerDialogComponent, type SkinViewerDialogData } from '../../shared/components/skin-viewer/skin-viewer-dialog.component';
 import { SessionService } from '../../core/services/session.service';
 import { ToastService } from '../../core/services/toast.service';
 import { UserImgPipe } from '../../shared/pipes/image-url.pipe';
@@ -117,6 +118,15 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     badgeIcon(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_ICONS[n] : 'star'; }
     badgeColor(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_COLORS[n] : '#888'; }
     roleLabel(role: unknown): string { return ROLE_LABELS[role as string] ?? String(role ?? ''); }
+
+    openSkinViewer(username: string): void {
+        this.dialog.open(SkinViewerDialogComponent, {
+            data: { username } as SkinViewerDialogData,
+            width: '90vw',
+            maxWidth: '760px',
+            panelClass: 'litematic-viewer-dialog',
+        });
+    }
 
     private static readonly BRAND_ICONS: Record<string, string> = {
         youtube: 'simpleYoutube', discord: 'simpleDiscord', twitter: 'simpleX', x: 'simpleX',
@@ -391,6 +401,12 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         if (index) params.set('tab', String(index)); else params.delete('tab');
         const qs = params.toString();
         this.location.replaceState(window.location.pathname + (qs ? '?' + qs : ''));
+
+        // Scroll the active tab label into view (disablePagination disables Angular's auto-scroll)
+        setTimeout(() => {
+            const active = document.querySelector('.mat-mdc-tab.mdc-tab--active');
+            active?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+        });
     }
 
     // ══════════════════════════════════════════
@@ -605,11 +621,25 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         if (this.profileForm.invalid) return;
         this.profileSaving.set(true);
         const val = this.profileForm.getRawValue();
+        const prev = this.ownProfile();
+        const oldUsername = prev?.username ?? null;
+        const oldBio = prev?.biographie ?? null;
         this.usersApi.putApiUsersMeProfile({ username: val.username || null, bio: val.bio || null }).subscribe({
             next: (updated) => {
                 this.profileSaving.set(false);
                 this.ownProfile.set(updated); this.session.setProfile(updated);
-                this.toast.success(PROFILE.profileUpdated);
+                this.toast.success(PROFILE.profileUpdated, {
+                    onUndo: () => {
+                        this.usersApi.putApiUsersMeProfile({ username: oldUsername, bio: oldBio }).subscribe({
+                            next: (reverted) => {
+                                this.ownProfile.set(reverted); this.session.setProfile(reverted);
+                                this.profileForm.patchValue({ username: reverted.username ?? '', bio: reverted.biographie ?? '' });
+                                this.toast.success(PROFILE.profileUpdated);
+                            },
+                            error: () => this.toast.error(PROFILE.profileUpdateFailed),
+                        });
+                    },
+                });
             },
             error: (err) => { this.profileSaving.set(false); this.toast.error(err.error?.detail ?? PROFILE.profileUpdateFailed); },
         });
@@ -679,10 +709,16 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     }
 
     deleteCoverImage(): void {
-        this.coverUploading.set(true);
-        this.usersApi.deleteApiUsersMeCoverImage().subscribe({
-            next: (updated) => { this.coverUploading.set(false); this.ownProfile.set(updated); this.session.setProfile(updated); this.toast.success(PROFILE.coverImageRemoved); },
-            error: (err) => { this.coverUploading.set(false); this.toast.error(err.error?.detail ?? PROFILE.coverImageFailed); },
+        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+            data: { title: DIALOGS.removeCover, message: DIALOGS.removeCoverMsg, confirmText: COMMON.remove, warn: true } as ConfirmDialogData,
+        });
+        dialogRef.afterClosed().subscribe((confirmed) => {
+            if (!confirmed) return;
+            this.coverUploading.set(true);
+            this.usersApi.deleteApiUsersMeCoverImage().subscribe({
+                next: (updated) => { this.coverUploading.set(false); this.ownProfile.set(updated); this.session.setProfile(updated); this.toast.success(PROFILE.coverImageRemoved); },
+                error: (err) => { this.coverUploading.set(false); this.toast.error(err.error?.detail ?? PROFILE.coverImageFailed); },
+            });
         });
     }
 
@@ -705,13 +741,27 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
 
     saveSocialLinks(): void {
         const links = this.editSocialLinks().filter(l => l.url.trim());
+        const oldLinks = (this.ownProfile()?.socialLinks ?? []).map((l: any) => ({ platform: l.platform, url: l.url }));
         this.socialSaving.set(true);
         this.usersApi.putApiUsersMeSocialLinks(links).subscribe({
             next: (updated) => {
                 this.socialSaving.set(false); this.socialLinksDirty.set(false);
                 const p = this.ownProfile();
                 if (p) { const up = { ...p, socialLinks: updated as any }; this.ownProfile.set(up); this.session.setProfile(up); }
-                this.toast.success(PROFILE.socialLinksUpdated);
+                this.toast.success(PROFILE.socialLinksUpdated, {
+                    onUndo: () => {
+                        this.usersApi.putApiUsersMeSocialLinks(oldLinks).subscribe({
+                            next: (reverted) => {
+                                const p2 = this.ownProfile();
+                                if (p2) { const up2 = { ...p2, socialLinks: reverted as any }; this.ownProfile.set(up2); this.session.setProfile(up2); }
+                                this.editSocialLinks.set((reverted as any[]).map((l: any) => ({ platform: l.platform, url: l.url })));
+                                this.socialLinksDirty.set(false);
+                                this.toast.success(PROFILE.socialLinksUpdated);
+                            },
+                            error: () => this.toast.error(PROFILE.socialLinksFailed),
+                        });
+                    },
+                });
             },
             error: (err) => { this.socialSaving.set(false); this.toast.error(err.error?.detail ?? PROFILE.socialLinksFailed); },
         });

@@ -47,6 +47,11 @@ export const routes: Routes = [
         redirectTo: 'not-found',
     },
     {
+        path: 'faq',
+        loadComponent: () =>
+            import('./features/faq/faq.component').then((m) => m.FaqComponent),
+    },
+    {
         path: 'admin',
         canActivate: [authGuard, roleGuard],
         data: { roles: ['Admin', 'Mod'] },

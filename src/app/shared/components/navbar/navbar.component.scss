@@ -67,6 +67,13 @@
     display: block;
 }
 
+.avatar-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+
 .dropdown-arrow {
     font-size: 20px;
     width: 20px;
@@ -96,4 +103,59 @@
 
 .logout-item {
     color: var(--mat-menu-item-label-text-color, inherit);
+}
+
+// ── Admin Inbox ───────────────────────────────────────────────────────────────
+
+.inbox-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.inbox-btn {
+    position: relative;
+}
+
+.inbox-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--mat-sys-error);
+    pointer-events: none;
+    border: 2px solid var(--mat-sys-surface);
+}
+
+
+
+// ── Mobile menu button: hidden on desktop, shown on mobile ──
+.mobile-menu-btn {
+    display: none;
+}
+
+@media (max-width: 600px) {
+
+    .nav-links,
+    .auth-links {
+        display: none;
+    }
+
+    .mobile-menu-btn {
+        display: inline-flex;
+    }
+
+    .brand-text {
+        display: none;
+    }
+
+    .username {
+        display: none;
+    }
+
+    .navbar {
+        padding: 0 0.5rem;
+    }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { DatePipe, Location } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -20,19 +20,25 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { Subject, debounceTime, switchMap, of, forkJoin, map, Subscription } from 'rxjs';
 import { AdminService } from '../../api/admin';
 import { UserBrowseService } from '../../api/user-browse';
 import { SchematicsService } from '../../api/schematics';
+import { FaqService } from '../../api/faq';
 import { SessionService } from '../../core/services/session.service';
 import { ToastService } from '../../core/services/toast.service';
-import type { AdminUserResponse, AdminSchematicResponse, AdminUserDetailResponse, AdminUserSchematicResponse, LiveMessageResponse, ModMessageResponse, StorageStatsResponse, UserStorageResponse, AllowedTagResponse, AllowedVersionResponse } from '../../api/generated.schemas';
+import { RealtimeService } from '../../core/services/realtime.service';
+import type { AdminUserResponse, AdminSchematicResponse, AdminUserDetailResponse, AdminUserSchematicResponse, LiveMessageResponse, ModMessageResponse, StorageStatsResponse, UserStorageResponse, AllowedTagResponse, AllowedVersionResponse, TagSuggestionResponse, AdminNotificationResponse, FaqResponse, ContactTicketResponse } from '../../api/generated.schemas';
+import type { GetApiAdminTicketsParams } from '../../api/generated.schemas';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { UserLinkComponent } from '../../shared/components/user-link/user-link.component';
-import { UserImgPipe } from '../../shared/pipes/image-url.pipe';
+import { UserImgPipe, TicketImgPipe } from '../../shared/pipes/image-url.pipe';
 import { NumberFormatPipe } from '../../shared/pipes/number-format.pipe';
+import { AdminTicketDialogComponent, AdminTicketDialogData, AdminTicketDialogResult } from './admin-ticket-dialog.component';
+import { AdminUserDialogComponent } from './admin-user-dialog.component';
 import { Role, ROLE_LABELS, Status, STATUS_LABELS, Visibility, Badge, BADGE_LABELS, BADGE_ICONS, BADGE_COLORS, resolveBadge } from '../../core/enums';
 import { ADMIN, DIALOGS, COMMON } from '../../i18n/labels';
 
@@ -61,6 +67,7 @@ import { ADMIN, DIALOGS, COMMON } from '../../i18n/labels';
         MatSortModule,
         MatDividerModule,
         MatAutocompleteModule,
+        MatExpansionModule,
         LoadingSpinnerComponent,
         EmptyStateComponent,
         UserLinkComponent,
@@ -74,9 +81,11 @@ export class AdminComponent implements OnInit, OnDestroy {
     private adminApi = inject(AdminService);
     private userBrowseApi = inject(UserBrowseService);
     private schematicsApi = inject(SchematicsService);
+    private faqService = inject(FaqService);
     private dialog = inject(MatDialog);
     private toast = inject(ToastService);
     private session = inject(SessionService);
+    readonly realtime = inject(RealtimeService);
     private location = inject(Location);
     private router = inject(Router);
     private route = inject(ActivatedRoute);
@@ -162,6 +171,61 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly editBadge = signal<string>('');
     readonly editQuota = signal<number>(1);
 
+    // Notification type helpers for tab dots
+    readonly hasSchematicDeletedNotif = computed(() =>
+        this.realtime.adminNotifications().some(n => !n.isRead && n.type === 'schematic_deleted')
+    );
+    readonly hasTagSuggestionNotif = computed(() =>
+        this.realtime.adminNotifications().some(n => !n.isRead && n.type === 'tag_suggestion')
+    );
+    readonly hasContactTicketNotif = computed(() =>
+        this.realtime.adminNotifications().some(n => !n.isRead && n.type === 'contact_ticket')
+    );
+
+    /** IDs of schematics mentioned in unread schematic_deleted notifications */
+    readonly highlightedSchematicIds = computed(() => {
+        const ids = new Set<string>();
+        this.realtime.adminNotifications()
+            .filter(n => !n.isRead && n.type === 'schematic_deleted' && n.data)
+            .forEach(n => {
+                const raw = n.data!;
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (typeof parsed === 'string') ids.add(parsed);
+                    else if (parsed?.schematicId) ids.add(String(parsed.schematicId));
+                    else if (parsed?.id) ids.add(String(parsed.id));
+                    else ids.add(raw);
+                } catch {
+                    ids.add(raw);
+                }
+            });
+        return ids;
+    });
+
+    /** Called when user clicks on a highlighted schematic row – marks only the matching notification(s) as read */
+    onSchematicRowClick(s: AdminSchematicResponse): void {
+        if (!this.highlightedSchematicIds().has(s.id)) return;
+        this.realtime.adminNotifications()
+            .filter(n => !n.isRead && n.type === 'schematic_deleted' && n.data)
+            .filter(n => {
+                const raw = n.data!;
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (typeof parsed === 'string') return parsed === s.id;
+                    if (parsed?.schematicId) return String(parsed.schematicId) === s.id;
+                    if (parsed?.id) return String(parsed.id) === s.id;
+                    return raw === s.id;
+                } catch {
+                    return raw === s.id;
+                }
+            })
+            .forEach(n => {
+                this.adminApi.postApiAdminNotificationsIdRead(n.id as number).subscribe({
+                    next: () => this.realtime.markAdminNotificationRead(n.id),
+                });
+            });
+    }
+
     // Track which tabs have been loaded
     private loadedTabs = new Set<number>();
 
@@ -214,14 +278,21 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.loadingUserDetail.set(true);
         this.adminApi.getApiAdminUsersId(userId).subscribe({
             next: (u) => {
-                this.selectedUser.set(u);
-                this.editBadge.set(u.badge ?? '');
-                this.editQuota.set(Number(u.storageQuotaGb));
                 this.loadingUserDetail.set(false);
+                const ref = this.dialog.open(AdminUserDialogComponent, {
+                    data: u,
+                    width: '90vw',
+                    maxWidth: '900px',
+                    maxHeight: '90vh',
+                });
+                ref.afterClosed().subscribe(() => {
+                    this.router.navigate([], { queryParams: { userId: null }, queryParamsHandling: 'merge', replaceUrl: true });
+                });
             },
             error: () => {
                 this.toast.error(ADMIN.failed);
                 this.loadingUserDetail.set(false);
+                this.router.navigate([], { queryParams: { userId: null }, queryParamsHandling: 'merge', replaceUrl: true });
             },
         });
     }
@@ -234,6 +305,12 @@ export class AdminComponent implements OnInit, OnDestroy {
         const qs = params.toString();
         this.location.replaceState(window.location.pathname + (qs ? '?' + qs : ''));
         this.loadTabData(idx);
+
+        // Scroll the active tab label into view (disablePagination disables Angular's auto-scroll)
+        setTimeout(() => {
+            const active = document.querySelector('.mat-mdc-tab.mdc-tab--active');
+            active?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+        });
     }
 
     private loadTabData(idx: number): void {
@@ -245,8 +322,10 @@ export class AdminComponent implements OnInit, OnDestroy {
             case 2: this.loadLiveMessages(); break;
             case 3: this.loadModMessages(); break;
             case 4: this.loadStorage(); break;
-            case 5: this.loadTags(); break;
+            case 5: this.loadTags(); this.loadTagSuggestions(); break;
             case 6: this.loadVersions(); break;
+            case 7: this.loadAdminFaqs(); break;
+            case 8: this.loadTickets(); break;
         }
     }
 
@@ -319,20 +398,26 @@ export class AdminComponent implements OnInit, OnDestroy {
     displaySchematicSuggestion = (val: any): string => val?.label ?? val ?? '';
 
     changeRole(user: AdminUserResponse, role: string): void {
+        const oldRole = user.role;
         this.adminApi.postApiAdminUsersIdRole(user.id, { role }).subscribe({
             next: () => {
                 this.users.update(list => list.map(u => u.id === user.id ? { ...u, role } : u));
-                this.toast.success(ADMIN.roleChanged(role));
+                this.toast.success(ADMIN.roleChanged(role), {
+                    onUndo: () => this.changeRole({ ...user, role } as AdminUserResponse, oldRole),
+                });
             },
             error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failedToChangeRole),
         });
     }
 
     changeStatus(user: AdminUserResponse, status: string): void {
+        const oldStatus = user.status;
         this.adminApi.postApiAdminUsersIdStatus(user.id, { status, suspensionEndDate: null }).subscribe({
             next: () => {
                 this.users.update(list => list.map(u => u.id === user.id ? { ...u, status } : u));
-                this.toast.success(ADMIN.statusChanged(status));
+                this.toast.success(ADMIN.statusChanged(status), {
+                    onUndo: () => this.changeStatus({ ...user, status } as AdminUserResponse, oldStatus),
+                });
             },
             error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failedToChangeStatus),
         });
@@ -369,18 +454,24 @@ export class AdminComponent implements OnInit, OnDestroy {
     // ── User Detail ──
     openUserDetail(user: AdminUserResponse): void {
         this.loadingUserDetail.set(true);
-        this.selectedUser.set(null);
         this.router.navigate([], { queryParams: { userId: user.id }, queryParamsHandling: 'merge', replaceUrl: true });
         this.adminApi.getApiAdminUsersId(user.id).subscribe({
             next: (u) => {
-                this.selectedUser.set(u);
-                this.editBadge.set(u.badge ?? '');
-                this.editQuota.set(Number(u.storageQuotaGb));
                 this.loadingUserDetail.set(false);
+                const ref = this.dialog.open(AdminUserDialogComponent, {
+                    data: u,
+                    width: '90vw',
+                    maxWidth: '900px',
+                    maxHeight: '90vh',
+                });
+                ref.afterClosed().subscribe(() => {
+                    this.router.navigate([], { queryParams: { userId: null }, queryParamsHandling: 'merge', replaceUrl: true });
+                });
             },
             error: () => {
                 this.toast.error(ADMIN.failed);
                 this.loadingUserDetail.set(false);
+                this.router.navigate([], { queryParams: { userId: null }, queryParamsHandling: 'merge', replaceUrl: true });
             },
         });
     }
@@ -393,10 +484,23 @@ export class AdminComponent implements OnInit, OnDestroy {
     saveBadge(): void {
         const u = this.selectedUser();
         if (!u) return;
-        this.adminApi.postApiAdminUsersIdBadge(u.id, { badge: this.editBadge() || null }).subscribe({
+        const oldBadge = u.badge;
+        const newBadge = this.editBadge() || null;
+        this.adminApi.postApiAdminUsersIdBadge(u.id, { badge: newBadge }).subscribe({
             next: () => {
-                this.selectedUser.update(prev => prev ? { ...prev, badge: this.editBadge() || null } : prev);
-                this.toast.success(ADMIN.badgeUpdated);
+                this.selectedUser.update(prev => prev ? { ...prev, badge: newBadge } : prev);
+                this.toast.success(ADMIN.badgeUpdated, {
+                    onUndo: () => {
+                        this.adminApi.postApiAdminUsersIdBadge(u.id, { badge: oldBadge }).subscribe({
+                            next: () => {
+                                this.selectedUser.update(prev => prev ? { ...prev, badge: oldBadge } : prev);
+                                this.editBadge.set(oldBadge ?? '');
+                                this.toast.success(ADMIN.badgeUpdated);
+                            },
+                            error: () => this.toast.error(ADMIN.failed),
+                        });
+                    },
+                });
             },
             error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
         });
@@ -405,10 +509,23 @@ export class AdminComponent implements OnInit, OnDestroy {
     saveQuota(): void {
         const u = this.selectedUser();
         if (!u) return;
-        this.adminApi.postApiAdminUsersIdQuota(u.id, { quotaGb: this.editQuota() }).subscribe({
+        const oldQuota = Number(u.storageQuotaGb);
+        const newQuota = this.editQuota();
+        this.adminApi.postApiAdminUsersIdQuota(u.id, { quotaGb: newQuota }).subscribe({
             next: () => {
-                this.selectedUser.update(prev => prev ? { ...prev, storageQuotaGb: this.editQuota() } : prev);
-                this.toast.success(ADMIN.quotaUpdated);
+                this.selectedUser.update(prev => prev ? { ...prev, storageQuotaGb: newQuota } : prev);
+                this.toast.success(ADMIN.quotaUpdated, {
+                    onUndo: () => {
+                        this.adminApi.postApiAdminUsersIdQuota(u.id, { quotaGb: oldQuota }).subscribe({
+                            next: () => {
+                                this.selectedUser.update(prev => prev ? { ...prev, storageQuotaGb: oldQuota } : prev);
+                                this.editQuota.set(oldQuota);
+                                this.toast.success(ADMIN.quotaUpdated);
+                            },
+                            error: () => this.toast.error(ADMIN.failed),
+                        });
+                    },
+                });
             },
             error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
         });
@@ -513,12 +630,14 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.loadSchematics();
     }
 
-    toggleSchematicVisibility(s: AdminSchematicResponse): void {
-        const newVis = s.visibility === Visibility.Public ? Visibility.Private : Visibility.Public;
-        this.adminApi.postApiAdminSchematicsIdToggle(s.id, { visibility: newVis, status: null }).subscribe({
+    toggleSchematicStatus(s: AdminSchematicResponse): void {
+        const newStatus = s.status === Status.Active ? Status.Removed : Status.Active;
+        this.adminApi.postApiAdminSchematicsIdToggle(s.id, { status: newStatus }).subscribe({
             next: () => {
-                this.schematics.update(list => list.map(x => x.id === s.id ? { ...x, visibility: newVis } : x));
-                this.toast.success(ADMIN.visibilitySet(newVis));
+                this.schematics.update(list => list.map(x => x.id === s.id ? { ...x, status: newStatus } : x));
+                this.toast.success(ADMIN.statusChanged(newStatus), {
+                    onUndo: () => this.toggleSchematicStatus({ ...s, status: newStatus } as AdminSchematicResponse),
+                });
             },
             error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
         });
@@ -531,6 +650,24 @@ export class AdminComponent implements OnInit, OnDestroy {
                 this.toast.success(ADMIN.reportsReset);
             },
             error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+        });
+    }
+
+    deleteSchematic(s: AdminSchematicResponse): void {
+        const ref = this.dialog.open(ConfirmDialogComponent, {
+            data: { title: 'Delete Schematic', message: `Delete "${s.name}"? This cannot be undone.`, confirmText: 'Delete', warn: true } as ConfirmDialogData,
+        });
+        ref.afterClosed().subscribe((ok) => {
+            if (ok) {
+                this.adminApi.deleteApiAdminSchematicsId(s.id).subscribe({
+                    next: () => {
+                        this.schematics.update(list => list.filter(x => x.id !== s.id));
+                        this.toast.success('Schematic deleted.');
+                        this.markNotificationsByType('schematic_deleted');
+                    },
+                    error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+                });
+            }
         });
     }
 
@@ -566,12 +703,23 @@ export class AdminComponent implements OnInit, OnDestroy {
         if (this.liveMessageForm.invalid || !this.editingLiveMessageId()) return;
         const val = this.liveMessageForm.getRawValue();
         const id = this.editingLiveMessageId()!;
+        const oldMsg = this.liveMessages().find(m => (m.id as any) === id);
         this.adminApi.putApiAdminLiveMessagesId(id, val).subscribe({
             next: (updated) => {
                 this.liveMessages.update(list => list.map(x => (x.id as any) === id ? updated : x));
                 this.liveMessageForm.reset({ message: '', type: 'Info' });
                 this.editingLiveMessageId.set(null);
-                this.toast.success(ADMIN.liveMessageUpdated);
+                this.toast.success(ADMIN.liveMessageUpdated, {
+                    onUndo: oldMsg ? () => {
+                        this.adminApi.putApiAdminLiveMessagesId(id, { message: oldMsg.message, type: oldMsg.type }).subscribe({
+                            next: (reverted) => {
+                                this.liveMessages.update(list => list.map(x => (x.id as any) === id ? reverted : x));
+                                this.toast.success(ADMIN.liveMessageUpdated);
+                            },
+                            error: () => this.toast.error(ADMIN.failed),
+                        });
+                    } : undefined,
+                });
             },
             error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
         });
@@ -684,6 +832,11 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly tags = signal<AllowedTagResponse[]>([]);
     readonly loadingTags = signal(true);
     tagColumns = ['name', 'actions'];
+    readonly tagSearch = signal('');
+    readonly filteredTags = computed(() => {
+        const q = this.tagSearch().toLowerCase();
+        return q ? this.tags().filter(t => t.name.toLowerCase().includes(q)) : this.tags();
+    });
     tagForm = this.fb.nonNullable.group({
         name: ['', Validators.required],
     });
@@ -730,6 +883,11 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly versions = signal<AllowedVersionResponse[]>([]);
     readonly loadingVersions = signal(true);
     versionColumns = ['name', 'actions'];
+    readonly versionSearch = signal('');
+    readonly filteredVersions = computed(() => {
+        const q = this.versionSearch().toLowerCase();
+        return q ? this.versions().filter(v => v.name.toLowerCase().includes(q)) : this.versions();
+    });
     versionForm = this.fb.nonNullable.group({
         name: ['', Validators.required],
     });
@@ -770,5 +928,285 @@ export class AdminComponent implements OnInit, OnDestroy {
                 });
             }
         });
+    }
+
+    // ── Tag Suggestions ──
+    readonly tagSuggestions = signal<TagSuggestionResponse[]>([]);
+    readonly loadingTagSuggestions = signal(false);
+    readonly editingAcceptId = signal<number | null>(null);
+    readonly acceptRenameValue = signal('');
+    tagSuggestionColumns = ['suggestedName', 'username', 'createdAt', 'actions'];
+
+    loadTagSuggestions(): void {
+        this.loadingTagSuggestions.set(true);
+        this.adminApi.getApiAdminTagSuggestions().subscribe({
+            next: (s) => { this.tagSuggestions.set(s); this.loadingTagSuggestions.set(false); },
+            error: () => this.loadingTagSuggestions.set(false),
+        });
+    }
+
+    startAccept(s: TagSuggestionResponse): void {
+        this.editingAcceptId.set(s.id as number);
+        this.acceptRenameValue.set(s.suggestedName);
+    }
+
+    cancelAccept(): void {
+        this.editingAcceptId.set(null);
+        this.acceptRenameValue.set('');
+    }
+
+    acceptSuggestion(s: TagSuggestionResponse): void {
+        const name = this.acceptRenameValue().trim() || s.suggestedName;
+        this.adminApi.postApiAdminTagSuggestionsIdAccept(s.id as number, { name }).subscribe({
+            next: (tag) => {
+                this.tagSuggestions.update(list => list.filter(x => x.id !== s.id));
+                this.tags.update(list => [...list, tag]);
+                this.editingAcceptId.set(null);
+                this.acceptRenameValue.set('');
+                this.toast.success(`Tag "${tag.name}" added.`);
+                this.markNotificationsByType('tag_suggestion');
+            },
+            error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+        });
+    }
+
+    refuseSuggestion(s: TagSuggestionResponse): void {
+        const ref = this.dialog.open(ConfirmDialogComponent, {
+            data: { title: 'Refuse suggestion', message: `Refuse "${s.suggestedName}" by ${s.username}?`, confirmText: 'Refuse', warn: true } as ConfirmDialogData,
+        });
+        ref.afterClosed().subscribe((ok) => {
+            if (ok) {
+                this.adminApi.deleteApiAdminTagSuggestionsId(s.id as number).subscribe({
+                    next: () => {
+                        this.tagSuggestions.update(list => list.filter(x => x.id !== s.id));
+                        this.toast.success('Suggestion refused.');
+                        this.markNotificationsByType('tag_suggestion');
+                    },
+                    error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+                });
+            }
+        });
+    }
+
+    // ── Notifications ──
+    readonly notifications = signal<AdminNotificationResponse[]>([]);
+    readonly loadingNotifications = signal(false);
+    notificationColumns = ['type', 'message', 'isRead', 'createdAt', 'actions'];
+
+    loadNotifications(): void {
+        this.loadingNotifications.set(true);
+        this.adminApi.getApiAdminNotifications().subscribe({
+            next: (n) => { this.notifications.set(n); this.loadingNotifications.set(false); },
+            error: () => this.loadingNotifications.set(false),
+        });
+    }
+
+    markNotificationRead(n: AdminNotificationResponse): void {
+        if (n.isRead) return;
+        this.adminApi.postApiAdminNotificationsIdRead(n.id as number).subscribe({
+            next: () => {
+                this.notifications.update(list => list.map(x => x.id === n.id ? { ...x, isRead: true } : x));
+                this.realtime.markAdminNotificationRead(n.id);
+            },
+        });
+    }
+
+    markAllNotificationsRead(): void {
+        this.notifications().filter(n => !n.isRead).forEach(n => this.markNotificationRead(n));
+    }
+
+    deleteNotification(n: AdminNotificationResponse): void {
+        this.adminApi.deleteApiAdminNotificationsId(n.id as number).subscribe({
+            next: () => {
+                this.notifications.update(list => list.filter(x => x.id !== n.id));
+                this.realtime.removeAdminNotification(n.id);
+            },
+            error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+        });
+    }
+
+    /** Mark all unread notifications of the given type as read */
+    markNotificationsByType(type: string): void {
+        this.realtime.adminNotifications()
+            .filter(n => !n.isRead && n.type === type)
+            .forEach(n => {
+                this.adminApi.postApiAdminNotificationsIdRead(n.id as number).subscribe({
+                    next: () => this.realtime.markAdminNotificationRead(n.id),
+                });
+            });
+    }
+
+    // ── FAQ Admin ──
+    readonly adminFaqs = signal<FaqResponse[]>([]);
+    readonly loadingAdminFaqs = signal(false);
+    readonly editingFaqId = signal<number | null>(null);
+    adminFaqColumns = ['order', 'question', 'actions'];
+    faqCreateForm = this.fb.nonNullable.group({
+        question: ['', Validators.required],
+        answer: ['', Validators.required],
+        order: [0],
+    });
+    faqEditForm = this.fb.nonNullable.group({
+        question: ['', Validators.required],
+        answer: ['', Validators.required],
+        order: [0],
+    });
+
+    loadAdminFaqs(): void {
+        this.loadingAdminFaqs.set(true);
+        this.faqService.getApiFaq().subscribe({
+            next: (f) => { this.adminFaqs.set(f); this.loadingAdminFaqs.set(false); },
+            error: () => this.loadingAdminFaqs.set(false),
+        });
+    }
+
+    createFaq(): void {
+        if (this.faqCreateForm.invalid) return;
+        const val = this.faqCreateForm.getRawValue();
+        this.adminApi.postApiAdminFaq({ question: val.question, answer: val.answer, order: val.order }).subscribe({
+            next: (f) => {
+                this.adminFaqs.update(list => [...list, f].sort((a, b) => Number(a.order) - Number(b.order)));
+                this.faqCreateForm.reset({ question: '', answer: '', order: 0 });
+                this.toast.success('FAQ entry created.');
+            },
+            error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+        });
+    }
+
+    startEditFaq(f: FaqResponse): void {
+        this.editingFaqId.set(f.id as number);
+        this.faqEditForm.patchValue({ question: f.question, answer: f.answer, order: Number(f.order) });
+    }
+
+    cancelEditFaq(): void { this.editingFaqId.set(null); }
+
+    saveEditFaq(f: FaqResponse): void {
+        if (this.faqEditForm.invalid) return;
+        const val = this.faqEditForm.getRawValue();
+        this.adminApi.putApiAdminFaqId(f.id as number, { question: val.question, answer: val.answer, order: val.order }).subscribe({
+            next: (updated) => {
+                this.adminFaqs.update(list => list.map(x => x.id === f.id ? updated : x).sort((a, b) => Number(a.order) - Number(b.order)));
+                this.editingFaqId.set(null);
+                this.toast.success('FAQ entry updated.');
+            },
+            error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+        });
+    }
+
+    deleteFaq(f: FaqResponse): void {
+        const ref = this.dialog.open(ConfirmDialogComponent, {
+            data: { title: 'Delete FAQ', message: `Delete "${f.question}"?`, confirmText: COMMON.delete, warn: true } as ConfirmDialogData,
+        });
+        ref.afterClosed().subscribe((ok) => {
+            if (ok) {
+                this.adminApi.deleteApiAdminFaqId(f.id as number).subscribe({
+                    next: () => {
+                        this.adminFaqs.update(list => list.filter(x => x.id !== f.id));
+                        this.toast.success('FAQ entry deleted.');
+                    },
+                    error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+                });
+            }
+        });
+    }
+
+    // ── Tickets ──
+    readonly tickets = signal<ContactTicketResponse[]>([]);
+    readonly loadingTickets = signal(false);
+    readonly ticketsTotalCount = signal(0);
+    readonly ticketsPage = signal(0);
+    readonly ticketsPageSize = signal(25);
+    readonly ticketsUnreadOnly = signal(false);
+    readonly selectedTicket = signal<ContactTicketResponse | null>(null);
+    ticketColumns = ['title', 'username', 'isRead', 'createdAt', 'actions'];
+
+    loadTickets(): void {
+        this.loadingTickets.set(true);
+        this.adminApi.getApiAdminTickets({
+            page: this.ticketsPage() + 1,
+            pageSize: this.ticketsPageSize(),
+            unreadOnly: this.ticketsUnreadOnly() || undefined,
+        } as GetApiAdminTicketsParams).subscribe({
+            next: (r: any) => {
+                this.tickets.set(r.items ?? r);
+                this.ticketsTotalCount.set(Number(r.totalCount ?? r.length ?? 0));
+                this.loadingTickets.set(false);
+            },
+            error: () => this.loadingTickets.set(false),
+        });
+    }
+
+    viewTicket(t: ContactTicketResponse): void {
+        this.router.navigate([], { queryParams: { ticketId: t.id }, queryParamsHandling: 'merge', replaceUrl: true });
+        this.adminApi.getApiAdminTicketsId(t.id as number).subscribe({
+            next: (full) => {
+                // mark read locally and via API before opening
+                if (!full.isRead) this.markTicketRead(full);
+                this.markNotificationsByType('contact_ticket');
+                const ref = this.dialog.open(AdminTicketDialogComponent, {
+                    data: { ticket: full } as AdminTicketDialogData,
+                    width: '620px',
+                    maxWidth: '95vw',
+                    maxHeight: '90vh',
+                });
+                ref.afterClosed().subscribe((result: AdminTicketDialogResult | undefined) => {
+                    this.router.navigate([], { queryParams: { ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
+                    if (result?.deleted) {
+                        this.tickets.update(list => list.filter(x => x.id !== t.id));
+                    }
+                });
+            },
+            error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+        });
+    }
+
+    closeTicket(): void { this.selectedTicket.set(null); }
+
+    markTicketRead(t: ContactTicketResponse): void {
+        if (t.isRead) return;
+        this.adminApi.postApiAdminTicketsIdRead(t.id as number).subscribe({
+            next: () => {
+                this.tickets.update(list => list.map(x => x.id === t.id ? { ...x, isRead: true } : x));
+                if (this.selectedTicket()?.id === t.id) {
+                    this.selectedTicket.update(x => x ? { ...x, isRead: true } : null);
+                }
+            },
+        });
+    }
+
+    deleteTicket(t: ContactTicketResponse): void {
+        const ref = this.dialog.open(ConfirmDialogComponent, {
+            data: { title: 'Delete Ticket', message: `Delete ticket "${t.title}"? This will also remove attached images.`, confirmText: COMMON.delete, warn: true } as ConfirmDialogData,
+        });
+        ref.afterClosed().subscribe((ok) => {
+            if (ok) {
+                this.adminApi.deleteApiAdminTicketsId(t.id as number).subscribe({
+                    next: () => {
+                        this.tickets.update(list => list.filter(x => x.id !== t.id));
+                        if (this.selectedTicket()?.id === t.id) this.selectedTicket.set(null);
+                        this.toast.success('Ticket deleted.');
+                    },
+                    error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+                });
+            }
+        });
+    }
+
+    onTicketsPageChange(event: PageEvent): void {
+        if (event.pageSize !== this.ticketsPageSize()) {
+            this.ticketsPageSize.set(event.pageSize);
+            this.ticketsPage.set(0);
+        } else {
+            this.ticketsPage.set(event.pageIndex);
+        }
+        this.loadedTabs.delete(9);
+        this.loadTickets();
+    }
+
+    toggleTicketsUnreadOnly(): void {
+        this.ticketsUnreadOnly.update(v => !v);
+        this.ticketsPage.set(0);
+        this.loadedTabs.delete(9);
+        this.loadTickets();
     }
 }

@@ -4,86 +4,87 @@
       <mat-card-title>{{ step() === 'login' ? 'Sign in' : 'Verify your identity' }}</mat-card-title>
       <mat-card-subtitle>
         {{ step() === 'login'
-          ? 'Welcome back to Choculaterie'
-          : 'A code was sent to your email' }}
+        ? 'Welcome back to Choculaterie'
+        : 'A code was sent to your email' }}
       </mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
       @if (errorMsg()) {
-        <div class="error-banner">
-          <mat-icon>error_outline</mat-icon>
-          {{ errorMsg() }}
-        </div>
+      <div class="error-banner">
+        <mat-icon>error_outline</mat-icon>
+        {{ errorMsg() }}
+      </div>
       }
 
       @if (step() === 'login') {
-        <form [formGroup]="loginForm" (ngSubmit)="submitLogin()">
-          <mat-form-field class="full-width" appearance="outline">
-            <mat-label i18n>Email or Username</mat-label>
-            <input matInput type="text" formControlName="identifier" autocomplete="username" />
-            <mat-icon matPrefix>person</mat-icon>
-            <mat-error>
-              @if (loginForm.get('identifier')?.hasError('required')) { Email or username is required }
-            </mat-error>
-          </mat-form-field>
+      <form [formGroup]="loginForm" (ngSubmit)="submitLogin()">
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label i18n>Email or Username</mat-label>
+          <input matInput type="text" formControlName="identifier" autocomplete="username" />
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error>
+            @if (loginForm.get('identifier')?.hasError('required')) { Email or username is required }
+          </mat-error>
+        </mat-form-field>
 
-          <mat-form-field class="full-width" appearance="outline">
-            <mat-label i18n>Password</mat-label>
-            <input matInput [type]="hidePassword() ? 'password' : 'text'"
-                   formControlName="password" autocomplete="current-password" />
-            <mat-icon matPrefix>lock</mat-icon>
-            <button mat-icon-button matSuffix type="button" (click)="hidePassword.set(!hidePassword())">
-              <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-            </button>
-            <mat-error>
-              @if (loginForm.get('password')?.hasError('required')) { Password is required }
-            </mat-error>
-          </mat-form-field>
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label i18n>Password</mat-label>
+          <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password"
+            autocomplete="current-password" />
+          <mat-icon matPrefix>lock</mat-icon>
+          <button mat-icon-button matSuffix type="button" (click)="hidePassword.set(!hidePassword())">
+            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error>
+            @if (loginForm.get('password')?.hasError('required')) { Password is required }
+          </mat-error>
+        </mat-form-field>
 
-          <app-captcha (solved)="onCaptchaSolved($event)" (reset)="captchaData.set(null)" />
+        <app-captcha (solved)="onCaptchaSolved($event)" (reset)="captchaData.set(null)" />
 
-          <div class="form-actions">
-            <button mat-flat-button type="submit" [disabled]="loginForm.invalid || loading() || !captchaData()">
-              @if (loading()) { <mat-spinner diameter="18" /> } @else { Sign in }
-            </button>
-          </div>
+        <div class="form-actions">
+          <a mat-button routerLink="/auth/register">Don't have an account?</a>
+          <button mat-flat-button type="submit" [disabled]="loginForm.invalid || loading() || !captchaData()">
+            @if (loading()) { <mat-spinner diameter="18" /> } @else { Sign in }
+          </button>
+        </div>
 
-          <mat-divider class="divider" />
+        <mat-divider class="divider" />
 
-          <div class="form-actions">
-            <button mat-stroked-button type="button" (click)="loginWithSecurityKey()" [disabled]="loading()">
-              <mat-icon>key</mat-icon> Sign in with security key
-            </button>
-          </div>
-        </form>
+        <div class="form-actions">
+          <button mat-stroked-button type="button" (click)="loginWithSecurityKey()" [disabled]="loading()">
+            <mat-icon>key</mat-icon> Sign in with security key
+          </button>
+        </div>
+      </form>
       }
 
       @if (step() === 'verify') {
-        <form [formGroup]="verifyForm" (ngSubmit)="submitVerify()">
-          <div class="info-banner">
-            <mat-icon>security</mat-icon>
-            New location detected — check your email for the code.
-          </div>
+      <form [formGroup]="verifyForm" (ngSubmit)="submitVerify()">
+        <div class="info-banner">
+          <mat-icon>security</mat-icon>
+          New location detected — check your email for the code.
+        </div>
 
-          <mat-form-field class="full-width" appearance="outline">
-            <mat-label i18n>Verification code</mat-label>
-            <input matInput formControlName="code" autocomplete="one-time-code" maxlength="10" />
-            <mat-icon matPrefix>pin</mat-icon>
-            <mat-error>
-              @if (verifyForm.get('code')?.hasError('required')) { Code is required }
-            </mat-error>
-          </mat-form-field>
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label i18n>Verification code</mat-label>
+          <input matInput formControlName="code" autocomplete="one-time-code" maxlength="10" />
+          <mat-icon matPrefix>pin</mat-icon>
+          <mat-error>
+            @if (verifyForm.get('code')?.hasError('required')) { Code is required }
+          </mat-error>
+        </mat-form-field>
 
-          <div class="form-actions">
-            <button mat-stroked-button type="button" (click)="step.set('login'); errorMsg.set('')">
-              Back
-            </button>
-            <button mat-flat-button type="submit" [disabled]="verifyForm.invalid || loading()">
-              @if (loading()) { <mat-spinner diameter="18" /> } @else { Verify & sign in }
-            </button>
-          </div>
-        </form>
+        <div class="form-actions">
+          <button mat-stroked-button type="button" (click)="step.set('login'); errorMsg.set('')">
+            Back
+          </button>
+          <button mat-flat-button type="submit" [disabled]="verifyForm.invalid || loading()">
+            @if (loading()) { <mat-spinner diameter="18" /> } @else { Verify & sign in }
+          </button>
+        </div>
+      </form>
       }
     </mat-card-content>
   </mat-card>

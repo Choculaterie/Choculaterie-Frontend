@@ -14,6 +14,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSliderModule } from '@angular/material/slider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import {
     BlockDefinition,
@@ -45,6 +46,7 @@ export interface LitematicViewerData {
         MatIconModule,
         MatProgressBarModule,
         MatSliderModule,
+        MatTooltipModule,
         FormsModule,
     ],
     templateUrl: './litematic-viewer.component.html',
@@ -274,6 +276,12 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
                 assets.models[id] as Parameters<typeof BlockModel.fromJson>[1],
             );
         }
+        // Register built-in parent stubs so flatten() can resolve them
+        for (const builtin of ['builtin/generated', 'builtin/entity', 'builtin/block']) {
+            if (!blockModels['minecraft:' + builtin]) {
+                blockModels['minecraft:' + builtin] = BlockModel.fromJson(builtin, {});
+            }
+        }
         Object.values(blockModels).forEach(m =>
             m.flatten({ getBlockModel: (id: Identifier) => blockModels[id.toString()] ?? null }),
         );
@@ -366,6 +374,21 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
 
         this.renderer.drawStructure(view);
         this.renderer.drawGrid(view);
+    }
+
+    private renderStructureOnly(): void {
+        if (!this.renderer) return;
+
+        this.cameraYaw = this.cameraYaw % (Math.PI * 2);
+        this.cameraPitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.cameraPitch));
+
+        const view = mat4.create();
+        mat4.rotateX(view, view, this.cameraPitch);
+        mat4.rotateY(view, view, this.cameraYaw);
+        mat4.translate(view, view, this.cameraPos);
+
+        this.renderer.drawStructure(view);
+        // deliberately skip drawGrid so screenshot has no grid lines
     }
 
     // --- Camera movement ---

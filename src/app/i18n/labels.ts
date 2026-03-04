@@ -147,6 +147,8 @@ export const DIALOGS = {
     unlinkMinecraftMsg: $localize`Are you sure you want to unlink your Minecraft account?`,
     unlinkDiscord: $localize`Unlink Discord`,
     unlinkDiscordMsg: $localize`Are you sure you want to unlink your Discord account?`,
+    removeCover: $localize`Remove Cover`,
+    removeCoverMsg: $localize`Remove your cover image? This cannot be undone.`,
     deleteSchematic: $localize`Delete Schematic`,
     deleteSchematicMsg: (name: string) => $localize`Are you sure you want to delete "${name}"?`,
     deleteVersion: $localize`Delete Version`,

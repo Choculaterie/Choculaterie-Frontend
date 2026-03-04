@@ -9,4 +9,4 @@ Angular frontend, Dotnet Backend, using OpenAPI to link the two, Material 3 for 
 Viewer based on : https://github.com/endingcredits/litematic-viewer/
 
 $sudo npm run api:generate
-$npx orval
+$sudo npx orval

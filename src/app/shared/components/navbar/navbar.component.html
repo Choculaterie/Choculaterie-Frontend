@@ -4,20 +4,38 @@
         <span class="brand-text">Choculaterie</span>
     </a>
 
-    <a mat-button routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">Home</a>
-    <a mat-button routerLink="/schematics" routerLinkActive="active-link">Schematics</a>
-    <a mat-button routerLink="/mods" routerLinkActive="active-link">Mods</a>
-
+    <div class="nav-links">
+        <a mat-button routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">Home</a>
+        <a mat-button routerLink="/schematics" routerLinkActive="active-link">Schematics</a>
+        <a mat-button routerLink="/mods" routerLinkActive="active-link">Mods</a>
+        <a mat-button routerLink="/faq" routerLinkActive="active-link">FAQ</a>
+    </div>
     <span class="spacer"></span>
 
     @if (session.isAuthenticated()) {
+    <!-- ── Admin Inbox ── -->
+    @if (session.isAdminOrMod()) {
+    <div class="inbox-wrap">
+        <button mat-icon-button class="inbox-btn" (click)="openInbox()" matTooltip="Admin inbox" i18n-matTooltip>
+            <mat-icon>inbox</mat-icon>
+            @if (unreadNotifCount()) {
+            <span class="inbox-badge"></span>
+            }
+        </button>
+    </div>
+    }
+
     <button [matMenuTriggerFor]="profileMenu" class="profile-btn">
         <span class="username">{{ session.user()?.username }}</span>
-        @if (session.profile()?.filePath || session.user()?.filePath) {
-        <img [src]="(session.profile()?.filePath ?? session.user()!.filePath!) | userImg" class="avatar" alt="avatar" />
-        } @else {
-        <mat-icon>account_circle</mat-icon>
-        }
+        <span class="avatar-wrap">
+            @if (session.profile()?.filePath || session.user()?.filePath) {
+            <img [src]="(session.profile()?.filePath ?? session.user()!.filePath!) | userImg" class="avatar"
+                alt="avatar" />
+            } @else {
+            <mat-icon>account_circle</mat-icon>
+            }
+
+        </span>
         <mat-icon class="dropdown-arrow">arrow_drop_down</mat-icon>
     </button>
 
@@ -39,13 +57,42 @@
         </button>
     </mat-menu>
     } @else {
-    <a mat-button routerLink="/auth/register" routerLinkActive="active-link">
-        <mat-icon>person_add</mat-icon>
-        Register
-    </a>
-    <a mat-stroked-button routerLink="/auth/login" routerLinkActive="active-link">
-        <mat-icon>login</mat-icon>
-        Login
-    </a>
+    <div class="auth-links">
+        <a mat-button routerLink="/auth/register" routerLinkActive="active-link">
+            <mat-icon>person_add</mat-icon>
+            Register
+        </a>
+        <a mat-stroked-button routerLink="/auth/login" routerLinkActive="active-link">
+            <mat-icon>login</mat-icon>
+            Login
+        </a>
+    </div>
     }
+
+    <button mat-icon-button class="mobile-menu-btn" [matMenuTriggerFor]="mobileMenu">
+        <mat-icon>menu</mat-icon>
+    </button>
+    <mat-menu #mobileMenu="matMenu">
+        <a mat-menu-item routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">
+            <mat-icon>home</mat-icon> Home
+        </a>
+        <a mat-menu-item routerLink="/schematics" routerLinkActive="active-link">
+            <mat-icon>grid_view</mat-icon> Schematics
+        </a>
+        <a mat-menu-item routerLink="/mods" routerLinkActive="active-link">
+            <mat-icon>extension</mat-icon> Mods
+        </a>
+        <a mat-menu-item routerLink="/faq" routerLinkActive="active-link">
+            <mat-icon>help_outline</mat-icon> FAQ
+        </a>
+        @if (!session.isAuthenticated()) {
+        <mat-divider />
+        <a mat-menu-item routerLink="/auth/register">
+            <mat-icon>person_add</mat-icon> Register
+        </a>
+        <a mat-menu-item routerLink="/auth/login">
+            <mat-icon>login</mat-icon> Login
+        </a>
+        }
+    </mat-menu>
 </mat-toolbar>

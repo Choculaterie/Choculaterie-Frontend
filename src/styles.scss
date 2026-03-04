@@ -39,17 +39,41 @@ body {
   }
 }
 
+/* Fix icon button centering — force square 40×40 state layer & centered glyph */
+.mat-mdc-icon-button.mat-mdc-button-base {
+  --mdc-icon-button-state-layer-size: 40px;
+  --mdc-icon-button-icon-size: 24px;
+
+  .mat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    font-size: 24px;
+    line-height: 24px;
+  }
+}
+
 /* ── Utility layout ─────────────────────────────────────────── */
 .page-container {
   max-width: 960px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
+
+  @media (max-width: 600px) {
+    padding: 1rem 0.75rem;
+  }
 }
 
 .page-container--narrow {
   max-width: 480px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
+
+  @media (max-width: 600px) {
+    padding: 1rem 0.75rem;
+  }
 }
 
 .card-page {
@@ -57,6 +81,10 @@ body {
   justify-content: center;
   align-items: flex-start;
   padding: 3rem 1rem;
+
+  @media (max-width: 600px) {
+    padding: 1.5rem 0.75rem;
+  }
 }
 
 .full-width {
@@ -111,10 +139,19 @@ a[mat-stroked-button] {
   --mdc-snackbar-container-shape: 12px;
   margin: 0 0 1rem 1rem !important;
 
+  @media (max-width: 600px) {
+    margin: 0 0.5rem 0.5rem 0.5rem !important;
+  }
+
   .mdc-snackbar__surface {
     box-shadow: var(--mat-sys-level3) !important;
     min-width: 280px;
     max-width: 480px;
+
+    @media (max-width: 600px) {
+      min-width: 0;
+      max-width: 100%;
+    }
   }
 
   .mat-mdc-snack-bar-label {
@@ -237,4 +274,74 @@ a[mat-stroked-button] {
 .litematic-viewer-dialog .mat-mdc-dialog-container .mdc-dialog__surface {
   padding: 0;
   overflow: hidden;
+}
+
+// Inbox dialog — full-bleed content
+.inbox-dialog-panel {
+  .mat-mdc-dialog-container .mdc-dialog__surface {
+    padding: 0;
+  }
+
+  .mat-mdc-dialog-title {
+    padding: 0.75rem 1rem;
+    margin: 0;
+  }
+
+  .mat-mdc-dialog-content,
+  .mdc-dialog__content {
+    padding: 0 !important;
+    margin: 0;
+    max-height: none;
+  }
+}
+
+/* ── Swipeable tab headers ────────────────────────────────────── */
+// Angular Material positions .mat-mdc-tab-list with translateX() internally.
+// Nulling that transform hands scroll control entirely to the container's
+// native overflow-x, so the user can finger-scroll freely in both directions
+// without the browser and Angular fighting each other.
+// disablePagination (on each mat-tab-group) removes the arrow buttons.
+@media (max-width: 600px) {
+  .mat-mdc-tab-label-container {
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .mat-mdc-tab-list {
+    // Make the list as wide as all tab labels combined so the container
+    // actually has content to scroll over.
+    min-width: max-content;
+    // Kill Angular's transform-scroll so it doesn't double-offset tabs.
+    transform: none !important;
+  }
+
+  // Ensure arrows are gone on all screen sizes with disablePagination.
+  .mat-mdc-tab-header-pagination {
+    display: none !important;
+  }
+}
+
+/* ── Scrollable table fix ──────────────────────────────────────── */
+// Tables inside .table-scroll should fill the wrapper width when their content
+// is narrower than the viewport, but overflow (and enable horizontal scroll)
+// when content is wider.
+.table-scroll .mat-mdc-table,
+.table-scroll table.mat-mdc-table {
+  width: 100%;
+  min-width: max-content;
+}
+
+// Actions columns contain icon buttons.  Material's MDC table sets overflow:hidden
+// on cells, which causes icon ligature text to be clipped and rendered as "..."
+// (3 dots). Override globally so icon buttons in actions columns always render.
+.mat-column-actions {
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap;
 }

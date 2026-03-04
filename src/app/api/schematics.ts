@@ -32,7 +32,6 @@ import type {
   GetApiSchematicsSearchNamesParams,
   GetApiSchematicsSearchTagsParams,
   GetApiSchematicsSearchUsersParams,
-  GetApiSchematicsUserUsernameContentParams,
   LikeResponse,
   PostApiSchematicsBody,
   PutApiSchematicsIdBody,
@@ -657,40 +656,34 @@ if(putApiSchematicsIdBody.Visibility !== undefined) {
         params: filteredParams,}
     );
   }
- getApiSchematicsUserUsernameContent<TData = UserContentResponse>(username: string,
-    params?: GetApiSchematicsUserUsernameContentParams, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
- getApiSchematicsUserUsernameContent<TData = UserContentResponse>(username: string,
-    params?: GetApiSchematicsUserUsernameContentParams, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
- getApiSchematicsUserUsernameContent<TData = UserContentResponse>(username: string,
-    params?: GetApiSchematicsUserUsernameContentParams, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+ getApiSchematicsUserUsernameContent<TData = UserContentResponse>(username: string, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ getApiSchematicsUserUsernameContent<TData = UserContentResponse>(username: string, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ getApiSchematicsUserUsernameContent<TData = UserContentResponse>(username: string, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
   getApiSchematicsUserUsernameContent<TData = UserContentResponse>(
-    username: string,
-    params?: GetApiSchematicsUserUsernameContentParams, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
+    username: string, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     if (options?.observe === 'events') {
       return this.http.get<TData>(
       `/api/Schematics/user/${username}/content`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
-        params: filteredParams,}
+      }
     );
     }
 
     if (options?.observe === 'response') {
       return this.http.get<TData>(
       `/api/Schematics/user/${username}/content`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
-        params: filteredParams,}
+      }
     );
     }
 
     return this.http.get<TData>(
       `/api/Schematics/user/${username}/content`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
-        params: filteredParams,}
+      }
     );
   }
 }

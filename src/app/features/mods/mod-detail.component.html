@@ -6,9 +6,9 @@
             </button>
             <h1 class="page-title">
                 @if (modImage(); as img) {
-                    <img [src]="img | modFile" [alt]="modName" class="page-title-img" />
+                <img [src]="img | modFile" [alt]="modName" class="page-title-img" />
                 } @else {
-                    <mat-icon>extension</mat-icon>
+                <mat-icon>extension</mat-icon>
                 }
                 {{ modName }}
             </h1>
@@ -66,25 +66,31 @@
             </div>
             <div class="file-row">
                 <button mat-stroked-button type="button" (click)="fileInput.click()">
-                    <mat-icon>upload_file</mat-icon> {{ formFile ? formFile.name : 'Select Mod File' }}
+                    <mat-icon>upload_file</mat-icon> {{ formFile ? formFile.name : 'Select Mod File (.jar)' }}
                 </button>
-                <input #fileInput type="file" hidden (change)="onFileSelected($event)" />
+                <input #fileInput type="file" accept=".jar" hidden (change)="onFileSelected($event)" />
                 <button mat-stroked-button type="button" (click)="imageInput.click()">
                     <mat-icon>image</mat-icon> {{ formImage ? formImage.name : 'Select Image' }}
                 </button>
                 <input #imageInput type="file" accept="image/*" hidden (change)="onImageSelected($event)" />
             </div>
             @if (imagePreview()) {
-            <div class="image-preview">
-                <img [src]="imagePreview()" alt="Image preview" />
-                <button mat-icon-button type="button" (click)="formImage = null; imagePreview.set(null)" matTooltip="Remove image">
-                    <mat-icon>close</mat-icon>
-                </button>
+            <div class="preview-grid">
+                <div class="preview-item">
+                    <img [src]="imagePreview()" alt="Image preview" />
+                    <div class="preview-actions">
+                        <button mat-icon-button type="button" (click)="formImage = null; imagePreview.set(null)"
+                            matTooltip="Remove image">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                </div>
             </div>
             }
             <div class="form-actions">
                 <button mat-stroked-button (click)="resetForm()">Cancel</button>
-                <button mat-flat-button (click)="editingMod() ? updateMod() : createMod()" [disabled]="formLoading() || !formVersions.length">
+                <button mat-flat-button (click)="editingMod() ? updateMod() : createMod()"
+                    [disabled]="formLoading() || !formVersions.length">
                     {{ editingMod() ? 'Update' : 'Create' }}
                 </button>
             </div>
@@ -98,48 +104,50 @@
     <app-empty-state icon="extension_off" i18n-title title="No versions" i18n-subtitle
         subtitle="This mod has no versions yet." />
     } @else {
-    <table mat-table [dataSource]="versions()" class="mod-table">
-        <ng-container matColumnDef="description">
-            <th mat-header-cell *matHeaderCellDef>Description</th>
-            <td mat-cell *matCellDef="let mod">{{ mod.description }}</td>
-        </ng-container>
-        <ng-container matColumnDef="releaseType">
-            <th mat-header-cell *matHeaderCellDef>Release</th>
-            <td mat-cell *matCellDef="let mod">
-                <mat-chip [class]="'release-' + mod.releaseType">{{ mod.releaseType }}</mat-chip>
-            </td>
-        </ng-container>
-        <ng-container matColumnDef="gameVersion">
-            <th mat-header-cell *matHeaderCellDef>Game Version</th>
-            <td mat-cell *matCellDef="let mod">{{ mod.gameVersion }}</td>
-        </ng-container>
-        <ng-container matColumnDef="platform">
-            <th mat-header-cell *matHeaderCellDef>Platform</th>
-            <td mat-cell *matCellDef="let mod">{{ mod.platform }}</td>
-        </ng-container>
-        <ng-container matColumnDef="downloads">
-            <th mat-header-cell *matHeaderCellDef>Downloads</th>
-            <td mat-cell *matCellDef="let mod">{{ mod.downloadCount | numFmt }}</td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let mod">
-                <button mat-icon-button (click)="downloadMod(mod)" i18n-matTooltip matTooltip="Download">
-                    <mat-icon>download</mat-icon>
-                </button>
-                @if (isAdmin()) {
-                <button mat-icon-button (click)="editMod(mod)" i18n-matTooltip matTooltip="Edit">
-                    <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button (click)="deleteMod(mod)" i18n-matTooltip matTooltip="Delete">
-                    <mat-icon>delete</mat-icon>
-                </button>
-                }
-            </td>
-        </ng-container>
+    <div class="table-scroll">
+        <table mat-table [dataSource]="versions()" class="mod-table">
+            <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef>Description</th>
+                <td mat-cell *matCellDef="let mod">{{ mod.description }}</td>
+            </ng-container>
+            <ng-container matColumnDef="releaseType">
+                <th mat-header-cell *matHeaderCellDef>Release</th>
+                <td mat-cell *matCellDef="let mod">
+                    <mat-chip [class]="'release-' + mod.releaseType">{{ mod.releaseType }}</mat-chip>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="gameVersion">
+                <th mat-header-cell *matHeaderCellDef>Game Version</th>
+                <td mat-cell *matCellDef="let mod">{{ mod.gameVersion }}</td>
+            </ng-container>
+            <ng-container matColumnDef="platform">
+                <th mat-header-cell *matHeaderCellDef>Platform</th>
+                <td mat-cell *matCellDef="let mod">{{ mod.platform }}</td>
+            </ng-container>
+            <ng-container matColumnDef="downloads">
+                <th mat-header-cell *matHeaderCellDef>Downloads</th>
+                <td mat-cell *matCellDef="let mod">{{ mod.downloadCount | numFmt }}</td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let mod">
+                    <button mat-icon-button (click)="downloadMod(mod)" i18n-matTooltip matTooltip="Download">
+                        <mat-icon>download</mat-icon>
+                    </button>
+                    @if (isAdmin()) {
+                    <button mat-icon-button (click)="editMod(mod)" i18n-matTooltip matTooltip="Edit">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="deleteMod(mod)" i18n-matTooltip matTooltip="Delete">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                    }
+                </td>
+            </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+    </div>
     }
 </div>

@@ -5,6 +5,28 @@
     margin-bottom: 1rem;
 }
 
+.upload-btn-label {
+    @media (max-width: 600px) {
+        display: none;
+    }
+}
+
+// Icon-only mode: make it look like a proper square icon button on mobile
+@media (max-width: 600px) {
+    button.upload-btn {
+        min-width: 0;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border-radius: 50%;
+
+        // mat-flat-button puts icon + text in a flex row with a gap — remove it
+        .mat-icon {
+            margin: 0;
+        }
+    }
+}
+
 .page-title {
     display: flex;
     align-items: center;
@@ -20,11 +42,22 @@
     align-items: center;
     margin-bottom: 1rem;
     padding-top: 0.5rem;
+
+    @media (max-width: 600px) {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+    }
 }
 
 .filter-search {
     flex: 1;
     min-width: 150px;
+
+    @media (max-width: 600px) {
+        grid-column: 1 / -1;
+        min-width: 0;
+    }
 }
 
 .suggestion-icon {
@@ -39,6 +72,20 @@
 .filter-sm {
     min-width: 100px;
     max-width: 140px;
+
+    @media (max-width: 600px) {
+        min-width: 0;
+        max-width: none;
+        width: 100%;
+    }
+}
+
+// On mobile grid: direction-toggle (2nd-to-last button) and clear (last button)
+// auto-fill into the bottom 2 columns
+@media (max-width: 600px) {
+    .filters>button:last-child {
+        width: 100%;
+    }
 }
 
 .schematic-grid {
@@ -159,18 +206,25 @@
     border-radius: 6px;
     font-size: 0.85rem;
 
+    .file-name-text {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
     span {
         -webkit-user-select: text;
         user-select: text;
     }
 
-    .file-size {
-        margin-left: auto;
-        color: var(--mat-sys-on-surface-variant);
-        font-size: 0.75rem;
+    .spacer {
+        flex: 1;
     }
 
     button {
+        flex-shrink: 0;
         transform: scale(0.75);
     }
 }
@@ -202,4 +256,19 @@
 .preview-grid.cdk-drop-list-dragging .preview-item:not(.cdk-drag-placeholder),
 .file-list-preview.cdk-drop-list-dragging .file-item:not(.cdk-drag-placeholder) {
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+// ── Propose tag ───────────────────────────────────────────────────────────────
+
+.propose-tag-row {
+    display: flex;
+    align-items: center;
+    margin-top: -0.25rem;
+    padding-bottom: 0.25rem;
+}
+
+.propose-tag-btn {
+    font-size: 0.82rem;
+    opacity: 0.75;
+
+    &:hover { opacity: 1; }
 }

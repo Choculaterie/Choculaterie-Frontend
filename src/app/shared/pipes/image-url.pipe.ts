@@ -24,3 +24,13 @@ export class ModFilePipe implements PipeTransform {
         return `${environment.apiBasePath}/files/mods/${filePath}`;
     }
 }
+
+/** Ticket attachment images — imagePaths come as relative paths like "1/uuid.png" */
+@Pipe({ name: 'ticketImg', standalone: true })
+export class TicketImgPipe implements PipeTransform {
+    transform(filePath: string | null | undefined): string {
+        if (!filePath) return '';
+        if (filePath.startsWith('http')) return filePath;
+        return `${environment.apiBasePath}/images/tickets/${filePath}`;
+    }
+}

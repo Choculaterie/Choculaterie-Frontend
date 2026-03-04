@@ -42,7 +42,15 @@
     <!-- Header -->
     <div class="detail-header">
         <div>
-            <h1>{{ s.name }}</h1>
+            <div class="title-row">
+                <h1>{{ s.name }}</h1>
+                @if (s.forked) {
+                <button mat-icon-button class="forked-badge" i18n-matTooltip matTooltip="View original"
+                    (click)="navigateToOriginal(s.forked)">
+                    <mat-icon>fork_right</mat-icon>
+                </button>
+                }
+            </div>
             <p class="author">by <app-user-link [username]="s.username" /> &middot; {{ s.publishDate | date:'mediumDate'
                 }}</p>
         </div>
@@ -63,9 +71,11 @@
                 <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #moreMenu="matMenu">
+                @if (!s.forked) {
                 <button mat-menu-item (click)="fork()">
                     <mat-icon>fork_right</mat-icon> Fork
                 </button>
+                }
                 <button mat-menu-item (click)="shareSchematic()">
                     <mat-icon>share</mat-icon> Share
                 </button>
@@ -160,6 +170,12 @@
                             }
                         </mat-select>
                     </mat-form-field>
+                    <div class="propose-tag-row">
+                        <button type="button" mat-button class="propose-tag-btn" (click)="openTagSuggest()">
+                            <mat-icon>add_circle_outline</mat-icon>
+                            <span i18n>Propose a new tag</span>
+                        </button>
+                    </div>
                     <mat-form-field appearance="outline">
                         <mat-label i18n>Versions</mat-label>
                         <mat-select formControlName="versions" multiple>
@@ -186,17 +202,22 @@
                     </mat-form-field>
                 </div>
 
-                <!-- Existing Pictures -->
+                <!-- Pictures (unified list — supports cross-category drag & drop) -->
                 <div class="file-previews">
-                    <h4>Pictures ({{ editExistingPictures().length + editNewPictures().length }} / 10)</h4>
-                    <div class="preview-grid" cdkDropList cdkDropListOrientation="horizontal"
-                        (cdkDropListDropped)="dropExistingPicture($event)">
-                        @for (pic of editExistingPictures(); track pic.id; let i = $index) {
-                        <div class="preview-item" [class.cover]="i === 0" cdkDrag>
-                            <img [src]="pic.filePath | schematicImg" alt="Existing picture" />
+                    <h4>Pictures ({{ editPictureItems().length }} / 10)</h4>
+                    <div class="preview-grid" cdkDropList cdkDropListOrientation="mixed"
+                        (cdkDropListDropped)="dropPicture($event)">
+                        @for (item of editPictureItems(); track $index; let i = $index) {
+                        <div class="preview-item" [class.cover]="i === 0" [class.new-file]="item.type === 'new'"
+                            cdkDrag>
+                            @if (item.type === 'existing') {
+                            <img [src]="item.pic.filePath | schematicImg" alt="Existing picture" />
+                            } @else {
+                            <img [src]="item.preview" [alt]="item.file.name" />
+                            }
                             <div class="preview-actions">
-                                <button mat-icon-button type="button" (click)="removeExistingPicture(pic.id)"
-                                    i18n-matTooltip matTooltip="Remove">
+                                <button mat-icon-button type="button" (click)="removePicture(i)" i18n-matTooltip
+                                    matTooltip="Remove">
                                     <mat-icon>close</mat-icon>
                                 </button>
                                 <span class="spacer"></span>
@@ -205,28 +226,13 @@
                             @if (i === 0) {
                             <span class="cover-badge">Cover</span>
                             }
-                        </div>
-                        }
-                        @for (f of editNewPictures(); track $index) {
-                        @let totalIdx = editExistingPictures().length + $index;
-                        <div class="preview-item new-file" [class.cover]="totalIdx === 0" cdkDrag>
-                            <img [src]="editNewPicturePreviews()[$index]" [alt]="f.name" />
-                            <div class="preview-actions">
-                                <button mat-icon-button type="button" (click)="removeNewPicture($index)" i18n-matTooltip
-                                    matTooltip="Remove">
-                                    <mat-icon>close</mat-icon>
-                                </button>
-                                <span class="spacer"></span>
-                                <mat-icon class="drag-handle" cdkDragHandle>drag_indicator</mat-icon>
-                            </div>
-                            @if (totalIdx === 0) {
-                            <span class="cover-badge">Cover</span>
-                            }
+                            @if (item.type === 'new') {
                             <span class="new-badge">New</span>
+                            }
                         </div>
                         }
                     </div>
-                    @if (editExistingPictures().length + editNewPictures().length < 10) { <div class="file-row">
+                    @if (editPictureItems().length < 10) { <div class="file-row">
                         <button mat-stroked-button type="button" (click)="editPictureInput.click()">
                             <mat-icon>add_photo_alternate</mat-icon> Add Pictures
                         </button>
@@ -236,42 +242,37 @@
                 }
 </div>
 
-<!-- Existing Litematic Files -->
+<!-- Litematic Files (unified list — supports cross-category drag & drop) -->
 <div class="file-previews">
-    <h4>Litematic Files ({{ editExistingFiles().length + editNewLitematics().length }} / 10)</h4>
-    <div class="file-list-preview" cdkDropList (cdkDropListDropped)="dropEditLitematic($event)">
-        @for (f of editExistingFiles(); track f.id) {
-        <div class="file-item" cdkDrag>
+    <h4>Litematic Files ({{ editFileItems().length }} / 10)</h4>
+    <div class="file-list-preview" cdkDropList (cdkDropListDropped)="dropFile($event)">
+        @for (item of editFileItems(); track $index; let i = $index) {
+        <div class="file-item" [class.new-file]="item.type === 'new'" cdkDrag>
             <mat-icon>insert_drive_file</mat-icon>
-            <span>{{ f.name }}</span>
+            <span class="file-name-text">{{ item.file.name.endsWith('.litematic') ? item.file.name.slice(0, -10) :
+                item.file.name }}</span>
             <span class="spacer"></span>
-            @if (f.name.endsWith('.litematic')) {
-            <button mat-icon-button type="button" (click)="viewIn3D(f)" i18n-matTooltip matTooltip="View in 3D">
+            @if (item.type === 'new') {
+            <span class="new-badge-inline">New</span>
+            }
+            @if (item.file.name.endsWith('.litematic')) {
+            <button mat-icon-button type="button" (click)="generatePictureForItem(item)" i18n-matTooltip
+                matTooltip="Generate picture">
+                <mat-icon>photo_camera</mat-icon>
+            </button>
+            <button mat-icon-button type="button" (click)="viewIn3DForItem(item)" i18n-matTooltip
+                matTooltip="View in 3D">
                 <mat-icon>view_in_ar</mat-icon>
             </button>
             }
-            <button mat-icon-button type="button" (click)="removeExistingFile(f.id)" i18n-matTooltip
-                matTooltip="Remove">
-                <mat-icon>close</mat-icon>
-            </button>
-            <mat-icon class="drag-handle" cdkDragHandle>drag_indicator</mat-icon>
-        </div>
-        }
-        @for (f of editNewLitematics(); track $index) {
-        <div class="file-item new-file" cdkDrag>
-            <mat-icon>insert_drive_file</mat-icon>
-            <span>{{ f.name }}</span>
-            <span class="file-size">{{ (f.size / 1024).toFixed(1) }} KB</span>
-            <span class="new-badge-inline">New</span>
-            <button mat-icon-button type="button" (click)="removeNewLitematic($index)" i18n-matTooltip
-                matTooltip="Remove">
+            <button mat-icon-button type="button" (click)="removeFile(i)" i18n-matTooltip matTooltip="Remove">
                 <mat-icon>close</mat-icon>
             </button>
             <mat-icon class="drag-handle" cdkDragHandle>drag_indicator</mat-icon>
         </div>
         }
     </div>
-    @if (editExistingFiles().length + editNewLitematics().length < 10) { <div class="file-row">
+    @if (editFileItems().length < 10) { <div class="file-row">
         <button mat-stroked-button type="button" (click)="editLitematicInput.click()">
             <mat-icon>note_add</mat-icon> Add Litematic Files
         </button>
@@ -321,17 +322,19 @@
 <!-- Files -->
 @if (s.files.length) {
 <div class="files-section">
-    <h3><mat-icon>folder</mat-icon> Files <span class="files-hint" i18n>Block textures are generated automatically and
-            may not be accurate.</span></h3>
+    <h3><mat-icon>folder</mat-icon> Files</h3>
     <div class="file-list">
         @for (f of s.files; track f.id) {
         <mat-card appearance="outlined" class="file-card">
             <mat-card-content>
                 <div class="file-header">
                     <mat-icon>insert_drive_file</mat-icon>
-                    <span class="file-name">{{ f.name }}</span>
+                    <span class="file-name">{{ f.name.endsWith('.litematic') ? f.name.slice(0, -10) : f.name }}</span>
                     <span class="spacer"></span>
                     @if (f.name.endsWith('.litematic')) {
+                    <button mat-icon-button i18n-matTooltip matTooltip="Generate picture" (click)="generatePicture(f)">
+                        <mat-icon>photo_camera</mat-icon>
+                    </button>
                     <button mat-icon-button i18n-matTooltip matTooltip="View in 3D" (click)="viewIn3D(f)">
                         <mat-icon>view_in_ar</mat-icon>
                     </button>

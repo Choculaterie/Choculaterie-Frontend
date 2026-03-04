@@ -11,7 +11,7 @@ export class ToastService {
      */
     success(message: string, options?: { duration?: number; onUndo?: () => void }): MatSnackBarRef<TextOnlySnackBar> {
         const duration = options?.duration ?? 5000;
-        const action = options?.onUndo ? 'Undo' : 'OK';
+        const action = options?.onUndo ? 'Undo' : undefined;
         const ref = this.snackBar.open(message, action, {
             duration,
             panelClass: ['toast-success'],

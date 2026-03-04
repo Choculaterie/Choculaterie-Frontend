@@ -4,7 +4,51 @@
   min-height: 100vh;
 }
 
+.site-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  &--info {
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+  }
+
+  &--warning {
+    background: light-dark(oklch(60% 0.16 55deg), oklch(65% 0.14 57deg));
+    color: white;
+  }
+
+  &--alert {
+    background: light-dark(oklch(50% 0.2 22deg), oklch(57% 0.18 22deg));
+    color: white;
+  }
+
+  &--error {
+    background: light-dark(oklch(50% 0.2 22deg), oklch(57% 0.18 22deg));
+    color: white;
+  }
+}
+
 .content {
   flex: 1;
   padding: 1.5rem;
+
+  @media (max-width: 600px) {
+    padding: 0.75rem;
+  }
 }

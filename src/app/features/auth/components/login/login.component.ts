@@ -1,6 +1,6 @@
 import { Component, inject, signal, ViewChild } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -19,6 +19,7 @@ import { AUTH } from '../../../../i18n/labels';
   selector: 'app-login',
   standalone: true,
   imports: [
+    RouterLink,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,

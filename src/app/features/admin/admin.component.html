@@ -1,7 +1,8 @@
 <div class="page-container">
     <h1 i18n>Admin Panel</h1>
 
-    <mat-tab-group dynamicHeight [selectedIndex]="selectedTab()" (selectedTabChange)="onTabChange($event)">
+    <mat-tab-group dynamicHeight disablePagination [selectedIndex]="selectedTab()"
+        (selectedTabChange)="onTabChange($event)">
 
         <!-- ═══ USERS TAB ═══ -->
         <mat-tab i18n-label label="Users">
@@ -145,41 +146,44 @@
                         @if (u.schematics.length > 0) {
                         <mat-divider />
                         <h3 i18n>Schematics ({{ u.schematics.length }})</h3>
-                        <table mat-table [dataSource]="u.schematics" class="full-width compact-table">
-                            <ng-container matColumnDef="name">
-                                <th mat-header-cell *matHeaderCellDef i18n>Name</th>
-                                <td mat-cell *matCellDef="let s"><a [routerLink]="['/schematics', s.id]">{{ s.name
-                                        }}</a></td>
-                            </ng-container>
-                            <ng-container matColumnDef="status">
-                                <th mat-header-cell *matHeaderCellDef i18n>Status</th>
-                                <td mat-cell *matCellDef="let s">{{ s.status }}</td>
-                            </ng-container>
-                            <ng-container matColumnDef="visibility">
-                                <th mat-header-cell *matHeaderCellDef i18n>Visibility</th>
-                                <td mat-cell *matCellDef="let s">{{ s.visibility }}</td>
-                            </ng-container>
-                            <ng-container matColumnDef="reports">
-                                <th mat-header-cell *matHeaderCellDef i18n>Reports</th>
-                                <td mat-cell *matCellDef="let s">{{ s.reportCount }}</td>
-                            </ng-container>
-                            <ng-container matColumnDef="downloads">
-                                <th mat-header-cell *matHeaderCellDef i18n>Downloads</th>
-                                <td mat-cell *matCellDef="let s">{{ s.downloadCount }}</td>
-                            </ng-container>
-                            <tr mat-header-row *matHeaderRowDef="['name','status','visibility','reports','downloads']">
-                            </tr>
-                            <tr mat-row
-                                *matRowDef="let row; columns: ['name','status','visibility','reports','downloads'];">
-                            </tr>
-                        </table>
+                        <div class="table-scroll">
+                            <table mat-table [dataSource]="u.schematics" class="full-width compact-table">
+                                <ng-container matColumnDef="name">
+                                    <th mat-header-cell *matHeaderCellDef i18n>Name</th>
+                                    <td mat-cell *matCellDef="let s"><a [routerLink]="['/schematics', s.id]">{{ s.name
+                                            }}</a></td>
+                                </ng-container>
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell *matHeaderCellDef i18n>Status</th>
+                                    <td mat-cell *matCellDef="let s">{{ s.status }}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="visibility">
+                                    <th mat-header-cell *matHeaderCellDef i18n>Visibility</th>
+                                    <td mat-cell *matCellDef="let s">{{ s.visibility }}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="reports">
+                                    <th mat-header-cell *matHeaderCellDef i18n>Reports</th>
+                                    <td mat-cell *matCellDef="let s">{{ s.reportCount }}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="downloads">
+                                    <th mat-header-cell *matHeaderCellDef i18n>Downloads</th>
+                                    <td mat-cell *matCellDef="let s">{{ s.downloadCount }}</td>
+                                </ng-container>
+                                <tr mat-header-row
+                                    *matHeaderRowDef="['name','status','visibility','reports','downloads']">
+                                </tr>
+                                <tr mat-row
+                                    *matRowDef="let row; columns: ['name','status','visibility','reports','downloads'];">
+                                </tr>
+                            </table>
+                        </div>
                         }
                     </mat-card-content>
                 </mat-card>
                 } @else {
 
                 <!-- User list -->
-                <div class="search-row">
+                <div class="search-col">
                     <mat-form-field appearance="outline" class="search-field">
                         <mat-label i18n>Search users</mat-label>
                         <input matInput [(ngModel)]="usersSearch" (keyup.enter)="searchUsers()"
@@ -194,12 +198,14 @@
                             }
                         </mat-autocomplete>
                     </mat-form-field>
-                    <mat-slide-toggle [checked]="newestOnlyUsers()"
-                        (change)="newestOnlyUsers.set($event.checked); searchUsers()" i18n>Newest
-                        only</mat-slide-toggle>
-                    <button mat-stroked-button (click)="usersSearch = ''; searchUsers()">
-                        <mat-icon>clear</mat-icon> <span i18n>Clear</span>
-                    </button>
+                    <div class="search-actions">
+                        <mat-slide-toggle [checked]="newestOnlyUsers()"
+                            (change)="newestOnlyUsers.set($event.checked); searchUsers()" i18n>Newest
+                            only</mat-slide-toggle>
+                        <button mat-stroked-button (click)="usersSearch = ''; searchUsers()">
+                            <mat-icon>clear</mat-icon> <span i18n>Clear</span>
+                        </button>
+                    </div>
                 </div>
 
                 @if (loadingUsers()) {
@@ -207,70 +213,72 @@
                 } @else if (users().length === 0) {
                 <app-empty-state icon="people" i18n-title title="No users found" />
                 } @else {
-                <table mat-table [dataSource]="users()" matSort (matSortChange)="onUsersSort($event)"
-                    [matSortActive]="usersSort() === 'date' ? 'registrationDate' : usersSort()"
-                    [matSortDirection]="usersDirection()" class="full-width">
-                    <ng-container matColumnDef="username">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Username</th>
-                        <td mat-cell *matCellDef="let u">
-                            <a class="user-detail-link" (click)="openUserDetail(u)">
-                                <app-user-link [username]="u.username" />
-                            </a>
-                        </td>
-                    </ng-container>
-                    <ng-container matColumnDef="email">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Email</th>
-                        <td mat-cell *matCellDef="let u">{{ u.email }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="role">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Role</th>
-                        <td mat-cell *matCellDef="let u">
-                            <mat-select [value]="u.role" (selectionChange)="changeRole(u, $event.value)"
-                                class="inline-select">
-                                @for (r of roles; track r) {
-                                <mat-option [value]="r">{{ roleLabels[r] }}</mat-option>
-                                }
-                            </mat-select>
-                        </td>
-                    </ng-container>
-                    <ng-container matColumnDef="status">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Status</th>
-                        <td mat-cell *matCellDef="let u">
-                            <mat-select [value]="u.status" (selectionChange)="changeStatus(u, $event.value)"
-                                class="inline-select">
-                                @for (s of statuses; track s) {
-                                <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
-                                }
-                            </mat-select>
-                        </td>
-                    </ng-container>
-                    <ng-container matColumnDef="reportCount">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Reports</th>
-                        <td mat-cell *matCellDef="let u">{{ u.reportCount }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="registrationDate">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Joined</th>
-                        <td mat-cell *matCellDef="let u">{{ u.registrationDate | date:'mediumDate' }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="actions">
-                        <th mat-header-cell *matHeaderCellDef></th>
-                        <td mat-cell *matCellDef="let u">
-                            <button mat-icon-button i18n-matTooltip matTooltip="View details"
-                                (click)="openUserDetail(u)">
-                                <mat-icon>visibility</mat-icon>
-                            </button>
-                            <button mat-icon-button i18n-matTooltip matTooltip="Reset reports"
-                                (click)="resetUserReports(u)" [disabled]="!u.reportCount">
-                                <mat-icon>flag</mat-icon>
-                            </button>
-                            <button mat-icon-button i18n-matTooltip matTooltip="Login as" (click)="loginAs(u)">
-                                <mat-icon>login</mat-icon>
-                            </button>
-                        </td>
-                    </ng-container>
-                    <tr mat-header-row *matHeaderRowDef="userColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: userColumns;"></tr>
-                </table>
+                <div class="table-scroll">
+                    <table mat-table [dataSource]="users()" matSort (matSortChange)="onUsersSort($event)"
+                        [matSortActive]="usersSort() === 'date' ? 'registrationDate' : usersSort()"
+                        [matSortDirection]="usersDirection()" class="full-width">
+                        <ng-container matColumnDef="username">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Username</th>
+                            <td mat-cell *matCellDef="let u">
+                                <a class="user-detail-link" (click)="openUserDetail(u)">
+                                    <app-user-link [username]="u.username" />
+                                </a>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="email">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Email</th>
+                            <td mat-cell *matCellDef="let u">{{ u.email }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="role">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Role</th>
+                            <td mat-cell *matCellDef="let u">
+                                <mat-select [value]="u.role" (selectionChange)="changeRole(u, $event.value)"
+                                    class="inline-select">
+                                    @for (r of roles; track r) {
+                                    <mat-option [value]="r">{{ roleLabels[r] }}</mat-option>
+                                    }
+                                </mat-select>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Status</th>
+                            <td mat-cell *matCellDef="let u">
+                                <mat-select [value]="u.status" (selectionChange)="changeStatus(u, $event.value)"
+                                    class="inline-select">
+                                    @for (s of statuses; track s) {
+                                    <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
+                                    }
+                                </mat-select>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="reportCount">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Reports</th>
+                            <td mat-cell *matCellDef="let u">{{ u.reportCount }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="registrationDate">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Joined</th>
+                            <td mat-cell *matCellDef="let u">{{ u.registrationDate | date:'mediumDate' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let u">
+                                <button mat-icon-button i18n-matTooltip matTooltip="View details"
+                                    (click)="openUserDetail(u)">
+                                    <mat-icon>visibility</mat-icon>
+                                </button>
+                                <button mat-icon-button i18n-matTooltip matTooltip="Reset reports"
+                                    (click)="resetUserReports(u)" [disabled]="!u.reportCount">
+                                    <mat-icon>flag</mat-icon>
+                                </button>
+                                <button mat-icon-button i18n-matTooltip matTooltip="Login as" (click)="loginAs(u)">
+                                    <mat-icon>login</mat-icon>
+                                </button>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="userColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: userColumns;"></tr>
+                    </table>
+                </div>
                 <mat-paginator [length]="usersTotalCount()" [pageSize]="usersPageSize()" [pageIndex]="usersPage()"
                     [pageSizeOptions]="[25, 50, 100]" (page)="onUsersPageChange($event)" showFirstLastButtons />
                 }
@@ -279,9 +287,15 @@
         </mat-tab>
 
         <!-- ═══ SCHEMATICS TAB ═══ -->
-        <mat-tab i18n-label label="Schematics">
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <span i18n>Schematics</span>
+                @if (hasSchematicDeletedNotif()) {
+                <span class="tab-dot"></span>
+                }
+            </ng-template>
             <div class="tab-content">
-                <div class="search-row">
+                <div class="search-col">
                     <mat-form-field appearance="outline" class="search-field">
                         <mat-label i18n>Search schematics</mat-label>
                         <input matInput [(ngModel)]="schematicsSearch" (keyup.enter)="searchSchematics()"
@@ -297,9 +311,11 @@
                             }
                         </mat-autocomplete>
                     </mat-form-field>
-                    <button mat-stroked-button (click)="schematicsSearch = ''; searchSchematics()">
-                        <mat-icon>clear</mat-icon> <span i18n>Clear</span>
-                    </button>
+                    <div class="search-actions">
+                        <button mat-stroked-button (click)="schematicsSearch = ''; searchSchematics()">
+                            <mat-icon>clear</mat-icon> <span i18n>Clear</span>
+                        </button>
+                    </div>
                 </div>
 
                 @if (loadingSchematics()) {
@@ -307,54 +323,62 @@
                 } @else if (schematics().length === 0) {
                 <app-empty-state icon="architecture" i18n-title title="No schematics found" />
                 } @else {
-                <table mat-table [dataSource]="schematics()" matSort (matSortChange)="onSchematicsSort($event)"
-                    [matSortActive]="schematicsSort() === 'date' ? 'publishDate' : schematicsSort() === 'author' ? 'username' : schematicsSort() === 'reports' ? 'reportCount' : schematicsSort()"
-                    [matSortDirection]="schematicsDirection()" class="full-width">
-                    <ng-container matColumnDef="name">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Name</th>
-                        <td mat-cell *matCellDef="let s">
-                            <a [routerLink]="['/schematics', s.id]">{{ s.name }}</a>
-                        </td>
-                    </ng-container>
-                    <ng-container matColumnDef="username">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Author</th>
-                        <td mat-cell *matCellDef="let s">
-                            <app-user-link [username]="s.username" />
-                        </td>
-                    </ng-container>
-                    <ng-container matColumnDef="status">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Status</th>
-                        <td mat-cell *matCellDef="let s">{{ s.status }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="visibility">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Visibility</th>
-                        <td mat-cell *matCellDef="let s">{{ s.visibility }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="reportCount">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Reports</th>
-                        <td mat-cell *matCellDef="let s">{{ s.reportCount }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="publishDate">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Published</th>
-                        <td mat-cell *matCellDef="let s">{{ s.publishDate | date:'mediumDate' }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="actions">
-                        <th mat-header-cell *matHeaderCellDef></th>
-                        <td mat-cell *matCellDef="let s">
-                            <button mat-icon-button i18n-matTooltip matTooltip="Toggle visibility"
-                                (click)="toggleSchematicVisibility(s)">
-                                <mat-icon>{{ s.visibility === Visibility.Public ? 'visibility_off' : 'visibility'
-                                    }}</mat-icon>
-                            </button>
-                            <button mat-icon-button i18n-matTooltip matTooltip="Reset reports"
-                                (click)="resetSchematicReports(s)" [disabled]="!s.reportCount">
-                                <mat-icon>flag</mat-icon>
-                            </button>
-                        </td>
-                    </ng-container>
-                    <tr mat-header-row *matHeaderRowDef="schematicColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: schematicColumns;"></tr>
-                </table>
+                <div class="table-scroll">
+                    <table mat-table [dataSource]="schematics()" matSort (matSortChange)="onSchematicsSort($event)"
+                        [matSortActive]="schematicsSort() === 'date' ? 'publishDate' : schematicsSort() === 'author' ? 'username' : schematicsSort() === 'reports' ? 'reportCount' : schematicsSort()"
+                        [matSortDirection]="schematicsDirection()" class="full-width">
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Name</th>
+                            <td mat-cell *matCellDef="let s">
+                                <a [routerLink]="['/schematics', s.id]">{{ s.name }}</a>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="username">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Author</th>
+                            <td mat-cell *matCellDef="let s">
+                                <app-user-link [username]="s.username" />
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Status</th>
+                            <td mat-cell *matCellDef="let s">{{ s.status }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="visibility">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Visibility</th>
+                            <td mat-cell *matCellDef="let s">{{ s.visibility }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="reportCount">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Reports</th>
+                            <td mat-cell *matCellDef="let s">{{ s.reportCount }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="publishDate">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Published</th>
+                            <td mat-cell *matCellDef="let s">{{ s.publishDate | date:'mediumDate' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let s">
+                                <button mat-icon-button i18n-matTooltip matTooltip="Toggle status"
+                                    (click)="toggleSchematicStatus(s)">
+                                    <mat-icon>{{ s.status === 'active' ? 'block' : 'check_circle' }}</mat-icon>
+                                </button>
+                                <button mat-icon-button i18n-matTooltip matTooltip="Reset reports"
+                                    (click)="resetSchematicReports(s)" [disabled]="!s.reportCount">
+                                    <mat-icon>flag</mat-icon>
+                                </button>
+                                <button mat-icon-button color="warn" i18n-matTooltip matTooltip="Delete"
+                                    (click)="deleteSchematic(s)">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="schematicColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: schematicColumns;"
+                            [class.highlight-row]="highlightedSchematicIds().has(row.id)"
+                            (click)="onSchematicRowClick(row)">
+                        </tr>
+                    </table>
+                </div>
                 <mat-paginator [length]="schematicsTotalCount()" [pageSize]="schematicsPageSize()"
                     [pageIndex]="schematicsPage()" [pageSizeOptions]="[25, 50, 100]"
                     (page)="onSchematicsPageChange($event)" showFirstLastButtons />
@@ -371,27 +395,31 @@
                     <mat-card-content>
                         <form [formGroup]="liveMessageForm"
                             (ngSubmit)="editingLiveMessageId() ? updateLiveMessage() : createLiveMessage()"
-                            class="inline-form">
+                            class="live-msg-form">
                             <mat-form-field appearance="outline" class="flex-grow">
                                 <mat-label i18n>Message</mat-label>
-                                <input matInput formControlName="message" />
+                                <textarea matInput formControlName="message" rows="2" class="msg-textarea"></textarea>
                             </mat-form-field>
-                            <mat-form-field appearance="outline">
-                                <mat-label i18n>Type</mat-label>
-                                <mat-select formControlName="type">
-                                    @for (t of messageTypes; track t) {
-                                    <mat-option [value]="t">{{ t }}</mat-option>
+                            <div class="live-msg-bottom">
+                                <mat-form-field appearance="outline" class="live-msg-type">
+                                    <mat-label i18n>Type</mat-label>
+                                    <mat-select formControlName="type">
+                                        @for (t of messageTypes; track t) {
+                                        <mat-option [value]="t">{{ t }}</mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                                <div class="live-msg-btns">
+                                    @if (editingLiveMessageId()) {
+                                    <button mat-stroked-button type="button"
+                                        (click)="editingLiveMessageId.set(null); liveMessageForm.reset({message: '', type: 'Info'})"
+                                        i18n>Cancel</button>
                                     }
-                                </mat-select>
-                            </mat-form-field>
-                            @if (editingLiveMessageId()) {
-                            <button mat-stroked-button type="button"
-                                (click)="editingLiveMessageId.set(null); liveMessageForm.reset({message: '', type: 'Info'})"
-                                i18n>Cancel</button>
-                            }
-                            <button mat-flat-button type="submit" [disabled]="liveMessageForm.invalid">@if
-                                (editingLiveMessageId()) {<span i18n>Update</span>} @else {<span
-                                    i18n>Add</span>}</button>
+                                    <button mat-flat-button type="submit" [disabled]="liveMessageForm.invalid">@if
+                                        (editingLiveMessageId()) {<span i18n>Update</span>} @else {<span
+                                            i18n>Add</span>}</button>
+                                </div>
+                            </div>
                         </form>
                     </mat-card-content>
                 </mat-card>
@@ -401,36 +429,39 @@
                 } @else if (liveMessages().length === 0) {
                 <app-empty-state icon="campaign" i18n-title title="No live messages" />
                 } @else {
-                <table mat-table [dataSource]="liveMessages()" class="full-width">
-                    <ng-container matColumnDef="message">
-                        <th mat-header-cell *matHeaderCellDef i18n>Message</th>
-                        <td mat-cell *matCellDef="let m">{{ m.message }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="type">
-                        <th mat-header-cell *matHeaderCellDef i18n>Type</th>
-                        <td mat-cell *matCellDef="let m">{{ m.type }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="time">
-                        <th mat-header-cell *matHeaderCellDef i18n>Time</th>
-                        <td mat-cell *matCellDef="let m">{{ m.time | date:'medium' }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="actions">
-                        <th mat-header-cell *matHeaderCellDef></th>
-                        <td mat-cell *matCellDef="let m">
-                            <div class="live-msg-actions">
-                                <button mat-icon-button (click)="editLiveMessage(m)" i18n-matTooltip matTooltip="Edit">
-                                    <mat-icon>edit</mat-icon>
-                                </button>
-                                <button mat-icon-button color="warn" (click)="deleteLiveMessage(m)" i18n-matTooltip
-                                    matTooltip="Delete">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </div>
-                        </td>
-                    </ng-container>
-                    <tr mat-header-row *matHeaderRowDef="liveMessageColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: liveMessageColumns;"></tr>
-                </table>
+                <div class="table-scroll">
+                    <table mat-table [dataSource]="liveMessages()" class="full-width">
+                        <ng-container matColumnDef="message">
+                            <th mat-header-cell *matHeaderCellDef i18n>Message</th>
+                            <td mat-cell *matCellDef="let m" class="msg-cell">{{ m.message }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="type">
+                            <th mat-header-cell *matHeaderCellDef i18n>Type</th>
+                            <td mat-cell *matCellDef="let m">{{ m.type }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="time">
+                            <th mat-header-cell *matHeaderCellDef i18n>Time</th>
+                            <td mat-cell *matCellDef="let m">{{ m.time | date:'medium' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let m">
+                                <div class="live-msg-actions">
+                                    <button mat-icon-button (click)="editLiveMessage(m)" i18n-matTooltip
+                                        matTooltip="Edit">
+                                        <mat-icon>edit</mat-icon>
+                                    </button>
+                                    <button mat-icon-button color="warn" (click)="deleteLiveMessage(m)" i18n-matTooltip
+                                        matTooltip="Delete">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="liveMessageColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: liveMessageColumns;"></tr>
+                    </table>
+                </div>
                 }
             </div>
         </mat-tab>
@@ -441,20 +472,25 @@
                 <mat-card appearance="outlined" class="form-card">
                     <mat-card-header><mat-card-title i18n>New Mod Message</mat-card-title></mat-card-header>
                     <mat-card-content>
-                        <form [formGroup]="modMessageForm" (ngSubmit)="createModMessage()" class="inline-form">
+                        <form [formGroup]="modMessageForm" (ngSubmit)="createModMessage()" class="live-msg-form">
                             <mat-form-field appearance="outline" class="flex-grow">
                                 <mat-label i18n>Message</mat-label>
-                                <input matInput formControlName="message" />
+                                <textarea matInput formControlName="message" rows="2" class="msg-textarea"></textarea>
                             </mat-form-field>
-                            <mat-form-field appearance="outline">
-                                <mat-label i18n>Type</mat-label>
-                                <mat-select formControlName="type">
-                                    @for (t of messageTypes; track t) {
-                                    <mat-option [value]="t">{{ t }}</mat-option>
-                                    }
-                                </mat-select>
-                            </mat-form-field>
-                            <button mat-flat-button type="submit" [disabled]="modMessageForm.invalid" i18n>Add</button>
+                            <div class="live-msg-bottom">
+                                <mat-form-field appearance="outline" class="live-msg-type">
+                                    <mat-label i18n>Type</mat-label>
+                                    <mat-select formControlName="type">
+                                        @for (t of messageTypes; track t) {
+                                        <mat-option [value]="t">{{ t }}</mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                                <div class="live-msg-btns">
+                                    <button mat-flat-button type="submit" [disabled]="modMessageForm.invalid"
+                                        i18n>Add</button>
+                                </div>
+                            </div>
                         </form>
                     </mat-card-content>
                 </mat-card>
@@ -464,36 +500,38 @@
                 } @else if (modMessages().length === 0) {
                 <app-empty-state icon="speaker_notes" i18n-title title="No mod messages" />
                 } @else {
-                <table mat-table [dataSource]="modMessages()" class="full-width">
-                    <ng-container matColumnDef="message">
-                        <th mat-header-cell *matHeaderCellDef i18n>Message</th>
-                        <td mat-cell *matCellDef="let m">{{ m.message }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="type">
-                        <th mat-header-cell *matHeaderCellDef i18n>Type</th>
-                        <td mat-cell *matCellDef="let m">{{ m.type }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="isActive">
-                        <th mat-header-cell *matHeaderCellDef i18n>Active</th>
-                        <td mat-cell *matCellDef="let m">
-                            <mat-slide-toggle [checked]="m.isActive" (change)="toggleModMessage(m)" />
-                        </td>
-                    </ng-container>
-                    <ng-container matColumnDef="time">
-                        <th mat-header-cell *matHeaderCellDef i18n>Time</th>
-                        <td mat-cell *matCellDef="let m">{{ m.time | date:'medium' }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="actions">
-                        <th mat-header-cell *matHeaderCellDef></th>
-                        <td mat-cell *matCellDef="let m">
-                            <button mat-icon-button color="warn" (click)="deleteModMessage(m)">
-                                <mat-icon>delete</mat-icon>
-                            </button>
-                        </td>
-                    </ng-container>
-                    <tr mat-header-row *matHeaderRowDef="modMessageColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: modMessageColumns;"></tr>
-                </table>
+                <div class="table-scroll">
+                    <table mat-table [dataSource]="modMessages()" class="full-width">
+                        <ng-container matColumnDef="message">
+                            <th mat-header-cell *matHeaderCellDef i18n>Message</th>
+                            <td mat-cell *matCellDef="let m" class="msg-cell">{{ m.message }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="type">
+                            <th mat-header-cell *matHeaderCellDef i18n>Type</th>
+                            <td mat-cell *matCellDef="let m">{{ m.type }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="isActive">
+                            <th mat-header-cell *matHeaderCellDef i18n>Active</th>
+                            <td mat-cell *matCellDef="let m">
+                                <mat-slide-toggle [checked]="m.isActive" (change)="toggleModMessage(m)" />
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="time">
+                            <th mat-header-cell *matHeaderCellDef i18n>Time</th>
+                            <td mat-cell *matCellDef="let m">{{ m.time | date:'medium' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let m">
+                                <button mat-icon-button color="warn" (click)="deleteModMessage(m)">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="modMessageColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: modMessageColumns;"></tr>
+                    </table>
+                </div>
                 }
             </div>
         </mat-tab>
@@ -520,52 +558,56 @@
                     </div>
                 </div>
 
-                <div class="search-row">
+                <div class="search-col">
                     <mat-form-field appearance="outline" class="search-field">
                         <mat-label i18n>Search storage</mat-label>
                         <input matInput [(ngModel)]="storageSearch" (keyup.enter)="searchStorage()" />
                         <mat-icon matPrefix>search</mat-icon>
                     </mat-form-field>
-                    <button mat-stroked-button (click)="storageSearch = ''; searchStorage()">
-                        <mat-icon>clear</mat-icon> <span i18n>Clear</span>
-                    </button>
+                    <div class="search-actions">
+                        <button mat-stroked-button (click)="storageSearch = ''; searchStorage()">
+                            <mat-icon>clear</mat-icon> <span i18n>Clear</span>
+                        </button>
+                    </div>
                 </div>
 
                 @if (stats.userStorages && stats.userStorages.length > 0) {
-                <table mat-table [dataSource]="stats.userStorages" matSort (matSortChange)="onStorageSort($event)"
-                    [matSortActive]="storageSort() === 'total' ? 'totalMb' : storageSort() === 'saves' ? 'saveCount' : storageSort() === 'usage' ? 'percentageOfQuota' : storageSort() === 'quota' ? 'quotaGb' : storageSort()"
-                    [matSortDirection]="storageDirection()" class="full-width">
-                    <ng-container matColumnDef="username">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>User</th>
-                        <td mat-cell *matCellDef="let u">
-                            <app-user-link [username]="u.username" />
-                        </td>
-                    </ng-container>
-                    <ng-container matColumnDef="saveCount">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Saves</th>
-                        <td mat-cell *matCellDef="let u">{{ u.saveCount }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="totalMb">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Total (MB)</th>
-                        <td mat-cell *matCellDef="let u">{{ u.totalMb | numFmt }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="quotaGb">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Quota (GB)</th>
-                        <td mat-cell *matCellDef="let u">{{ u.quotaGb | numFmt }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="percentageOfQuota">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Usage %</th>
-                        <td mat-cell *matCellDef="let u">
-                            <div class="usage-cell">
-                                <mat-progress-bar mode="determinate" [value]="u.percentageOfQuota"
-                                    [color]="u.percentageOfQuota > 90 ? 'warn' : 'primary'" />
-                                <span>{{ u.percentageOfQuota | numFmt }}%</span>
-                            </div>
-                        </td>
-                    </ng-container>
-                    <tr mat-header-row *matHeaderRowDef="storageColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: storageColumns;"></tr>
-                </table>
+                <div class="table-scroll">
+                    <table mat-table [dataSource]="stats.userStorages" matSort (matSortChange)="onStorageSort($event)"
+                        [matSortActive]="storageSort() === 'total' ? 'totalMb' : storageSort() === 'saves' ? 'saveCount' : storageSort() === 'usage' ? 'percentageOfQuota' : storageSort() === 'quota' ? 'quotaGb' : storageSort()"
+                        [matSortDirection]="storageDirection()" class="full-width">
+                        <ng-container matColumnDef="username">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>User</th>
+                            <td mat-cell *matCellDef="let u">
+                                <app-user-link [username]="u.username" />
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="saveCount">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Saves</th>
+                            <td mat-cell *matCellDef="let u">{{ u.saveCount }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="totalMb">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Total (MB)</th>
+                            <td mat-cell *matCellDef="let u">{{ u.totalMb | numFmt }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="quotaGb">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Quota (GB)</th>
+                            <td mat-cell *matCellDef="let u">{{ u.quotaGb | numFmt }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="percentageOfQuota">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Usage %</th>
+                            <td mat-cell *matCellDef="let u">
+                                <div class="usage-cell">
+                                    <mat-progress-bar mode="determinate" [value]="u.percentageOfQuota"
+                                        [color]="u.percentageOfQuota > 90 ? 'warn' : 'primary'" />
+                                    <span>{{ u.percentageOfQuota | numFmt }}%</span>
+                                </div>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="storageColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: storageColumns;"></tr>
+                    </table>
+                </div>
                 <mat-paginator [length]="storageTotalCount()" [pageSize]="storagePageSize()" [pageIndex]="storagePage()"
                     [pageSizeOptions]="[25, 50, 100]" (page)="onStoragePageChange($event)" showFirstLastButtons />
                 }
@@ -574,8 +616,77 @@
         </mat-tab>
 
         <!-- ═══ TAGS TAB ═══ -->
-        <mat-tab i18n-label label="Tags">
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <span i18n>Tags</span>
+                @if (tagSuggestions().length || hasTagSuggestionNotif()) {
+                <span class="tab-dot"></span>
+                }
+            </ng-template>
             <div class="tab-content">
+
+                <!-- Proposed Tags -->
+                <mat-card appearance="outlined" class="form-card">
+                    <mat-card-header>
+                        <mat-card-title i18n>Pending Tag Suggestions</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        @if (loadingTagSuggestions()) {
+                        <app-loading-spinner />
+                        } @else if (tagSuggestions().length === 0) {
+                        <p class="no-data" i18n>No pending suggestions.</p>
+                        } @else {
+                        <table mat-table [dataSource]="tagSuggestions()" class="full-width">
+                            <ng-container matColumnDef="suggestedName">
+                                <th mat-header-cell *matHeaderCellDef i18n>Tag name</th>
+                                <td mat-cell *matCellDef="let s">
+                                    @if (editingAcceptId() === +s.id) {
+                                    <input class="inline-input" [value]="acceptRenameValue()"
+                                        (input)="acceptRenameValue.set($any($event.target).value)" i18n-placeholder
+                                        placeholder="Tag name" />
+                                    } @else {
+                                    <strong>{{ s.suggestedName }}</strong>
+                                    }
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="username">
+                                <th mat-header-cell *matHeaderCellDef i18n>Proposed by</th>
+                                <td mat-cell *matCellDef="let s">{{ s.username }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="createdAt">
+                                <th mat-header-cell *matHeaderCellDef i18n>Date</th>
+                                <td mat-cell *matCellDef="let s">{{ s.createdAt | date:'mediumDate' }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="actions">
+                                <th mat-header-cell *matHeaderCellDef></th>
+                                <td mat-cell *matCellDef="let s">
+                                    @if (editingAcceptId() === +s.id) {
+                                    <button mat-icon-button color="primary" i18n-matTooltip matTooltip="Confirm accept"
+                                        (click)="acceptSuggestion(s)">
+                                        <mat-icon>check</mat-icon>
+                                    </button>
+                                    <button mat-icon-button i18n-matTooltip matTooltip="Cancel"
+                                        (click)="cancelAccept()">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                                    } @else {
+                                    <button mat-icon-button color="primary" i18n-matTooltip
+                                        matTooltip="Accept (rename before confirming)" (click)="startAccept(s)">
+                                        <mat-icon>check_circle</mat-icon>
+                                    </button>
+                                    <button mat-icon-button color="warn" i18n-matTooltip matTooltip="Refuse"
+                                        (click)="refuseSuggestion(s)">
+                                        <mat-icon>cancel</mat-icon>
+                                    </button>
+                                    }
+                                </td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="tagSuggestionColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: tagSuggestionColumns;"></tr>
+                        </table>
+                        }
+                    </mat-card-content>
+                </mat-card>
                 <mat-card appearance="outlined" class="form-card">
                     <mat-card-header><mat-card-title i18n>Add Tag</mat-card-title></mat-card-header>
                     <mat-card-content>
@@ -594,7 +705,19 @@
                 } @else if (tags().length === 0) {
                 <app-empty-state icon="label" i18n-title title="No tags" i18n-subtitle subtitle="Add a tag above" />
                 } @else {
-                <table mat-table [dataSource]="tags()" class="full-width">
+                <div class="search-col">
+                    <mat-form-field appearance="outline" class="search-field">
+                        <mat-label i18n>Filter tags</mat-label>
+                        <input matInput [ngModel]="tagSearch()" (ngModelChange)="tagSearch.set($event)" />
+                        <mat-icon matPrefix>search</mat-icon>
+                    </mat-form-field>
+                    <div class="search-actions">
+                        <button mat-stroked-button (click)="tagSearch.set('')">
+                            <mat-icon>clear</mat-icon> <span i18n>Clear</span>
+                        </button>
+                    </div>
+                </div>
+                <table mat-table [dataSource]="filteredTags()" class="full-width">
                     <ng-container matColumnDef="name">
                         <th mat-header-cell *matHeaderCellDef i18n>Name</th>
                         <td mat-cell *matCellDef="let t">{{ t.name }}</td>
@@ -637,7 +760,19 @@
                 <app-empty-state icon="numbers" i18n-title title="No versions" i18n-subtitle
                     subtitle="Add a version above" />
                 } @else {
-                <table mat-table [dataSource]="versions()" class="full-width">
+                <div class="search-col">
+                    <mat-form-field appearance="outline" class="search-field">
+                        <mat-label i18n>Filter versions</mat-label>
+                        <input matInput [ngModel]="versionSearch()" (ngModelChange)="versionSearch.set($event)" />
+                        <mat-icon matPrefix>search</mat-icon>
+                    </mat-form-field>
+                    <div class="search-actions">
+                        <button mat-stroked-button (click)="versionSearch.set('')">
+                            <mat-icon>clear</mat-icon> <span i18n>Clear</span>
+                        </button>
+                    </div>
+                </div>
+                <table mat-table [dataSource]="filteredVersions()" class="full-width">
                     <ng-container matColumnDef="name">
                         <th mat-header-cell *matHeaderCellDef i18n>Name</th>
                         <td mat-cell *matCellDef="let v">{{ v.name }}</td>
@@ -654,6 +789,197 @@
                     <tr mat-header-row *matHeaderRowDef="versionColumns"></tr>
                     <tr mat-row *matRowDef="let row; columns: versionColumns;"></tr>
                 </table>
+                }
+            </div>
+        </mat-tab>
+        <!-- ╔═══ FAQ TAB ═══ -->
+        <mat-tab i18n-label label="FAQ">
+            <div class="tab-content">
+                <mat-card appearance="outlined" class="form-card">
+                    <mat-card-header><mat-card-title i18n>Add FAQ Entry</mat-card-title></mat-card-header>
+                    <mat-card-content>
+                        <form [formGroup]="faqCreateForm" (ngSubmit)="createFaq()" class="faq-create-form">
+                            <mat-form-field appearance="outline">
+                                <mat-label i18n>Question</mat-label>
+                                <input matInput formControlName="question" />
+                            </mat-form-field>
+                            <mat-form-field appearance="outline">
+                                <mat-label i18n>Answer</mat-label>
+                                <textarea matInput formControlName="answer" rows="3"></textarea>
+                            </mat-form-field>
+                            <div class="inline-form">
+                                <mat-form-field appearance="outline" style="max-width: 120px">
+                                    <mat-label i18n>Order</mat-label>
+                                    <input matInput type="number" formControlName="order" />
+                                </mat-form-field>
+                                <button mat-flat-button type="submit" [disabled]="faqCreateForm.invalid"
+                                    i18n>Add</button>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+
+                @if (loadingAdminFaqs()) {
+                <app-loading-spinner />
+                } @else if (adminFaqs().length === 0) {
+                <app-empty-state icon="quiz" i18n-title title="No FAQ entries" i18n-subtitle subtitle="Add one above" />
+                } @else {
+                <mat-accordion multi>
+                    @for (f of adminFaqs(); track f.id) {
+                    @if (editingFaqId() === +f.id) {
+                    <mat-expansion-panel expanded>
+                        <mat-expansion-panel-header>
+                            <mat-panel-title i18n>Editing…</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <form [formGroup]="faqEditForm" (ngSubmit)="saveEditFaq(f)" class="faq-create-form">
+                            <mat-form-field appearance="outline">
+                                <mat-label i18n>Question</mat-label>
+                                <input matInput formControlName="question" />
+                            </mat-form-field>
+                            <mat-form-field appearance="outline">
+                                <mat-label i18n>Answer</mat-label>
+                                <textarea matInput formControlName="answer" rows="3"></textarea>
+                            </mat-form-field>
+                            <div class="inline-form">
+                                <mat-form-field appearance="outline" style="max-width: 120px">
+                                    <mat-label i18n>Order</mat-label>
+                                    <input matInput type="number" formControlName="order" />
+                                </mat-form-field>
+                                <button mat-flat-button type="submit" [disabled]="faqEditForm.invalid"
+                                    i18n>Save</button>
+                                <button mat-stroked-button type="button" (click)="cancelEditFaq()" i18n>Cancel</button>
+                            </div>
+                        </form>
+                    </mat-expansion-panel>
+                    } @else {
+                    <mat-expansion-panel>
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>{{ f.question }}</mat-panel-title>
+                            <mat-panel-description>Order: {{ f.order }}</mat-panel-description>
+                        </mat-expansion-panel-header>
+                        <p class="faq-answer">{{ f.answer }}</p>
+                        <mat-action-row>
+                            <button mat-stroked-button (click)="startEditFaq(f)">
+                                <mat-icon>edit</mat-icon> <span i18n>Edit</span>
+                            </button>
+                            <button mat-stroked-button color="warn" (click)="deleteFaq(f)">
+                                <mat-icon>delete</mat-icon> <span i18n>Delete</span>
+                            </button>
+                        </mat-action-row>
+                    </mat-expansion-panel>
+                    }
+                    }
+                </mat-accordion>
+                }
+            </div>
+        </mat-tab>
+
+        <!-- ╔═══ TICKETS TAB ═══ -->
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <span i18n>Tickets</span>
+                @if (tickets().some(t => !t.isRead) || hasContactTicketNotif()) {
+                <span class="tab-dot"></span>
+                }
+            </ng-template>
+            <div class="tab-content">
+
+                <!-- Ticket Detail Panel -->
+                @if (selectedTicket(); as t) {
+                <mat-card appearance="outlined" class="ticket-detail">
+                    <mat-card-header>
+                        <mat-card-title>{{ t.title }}</mat-card-title>
+                        <mat-card-subtitle>
+                            @if (t.username) { <span>{{ t.username }}</span> } @else { <span i18n>Anonymous</span> }
+                            &nbsp;•&nbsp;
+                            {{ t.createdAt | date:'medium' }}
+                        </mat-card-subtitle>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <p class="ticket-body">{{ t.description }}</p>
+                        @if (t.contact) {
+                        <div class="ticket-contact">
+                            <mat-icon>contact_mail</mat-icon>
+                            <span>{{ t.contact }}</span>
+                        </div>
+                        }
+                        @if (t.imagePaths.length) {
+                        <div class="ticket-images">
+                            @for (img of t.imagePaths; track img) {
+                            <a [href]="img" target="_blank">
+                                <img [src]="img" class="ticket-thumb" alt="attachment" />
+                            </a>
+                            }
+                        </div>
+                        }
+                    </mat-card-content>
+                    <mat-card-actions>
+                        <button mat-stroked-button (click)="closeTicket()">
+                            <mat-icon>arrow_back</mat-icon> <span i18n>Back to list</span>
+                        </button>
+                        <button mat-stroked-button color="warn" (click)="deleteTicket(t)">
+                            <mat-icon>delete</mat-icon> <span i18n>Delete</span>
+                        </button>
+                    </mat-card-actions>
+                </mat-card>
+                } @else {
+
+                <div class="search-row">
+                    <button mat-stroked-button (click)="toggleTicketsUnreadOnly()">
+                        <mat-icon>{{ ticketsUnreadOnly() ? 'filter_list_off' : 'filter_list' }}</mat-icon>
+                        {{ ticketsUnreadOnly() ? 'Show all' : 'Unread only' }}
+                    </button>
+                </div>
+
+                @if (loadingTickets()) {
+                <app-loading-spinner />
+                } @else if (tickets().length === 0) {
+                <app-empty-state icon="inbox" i18n-title title="No tickets" i18n-subtitle
+                    subtitle="No contact messages yet" />
+                } @else {
+                <table mat-table [dataSource]="tickets()" class="full-width">
+                    <ng-container matColumnDef="title">
+                        <th mat-header-cell *matHeaderCellDef i18n>Subject</th>
+                        <td mat-cell *matCellDef="let t">
+                            <strong [class.unread-label]="!t.isRead">{{ t.title }}</strong>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="username">
+                        <th mat-header-cell *matHeaderCellDef i18n>From</th>
+                        <td mat-cell *matCellDef="let t">{{ t.username ?? 'Anonymous' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="isRead">
+                        <th mat-header-cell *matHeaderCellDef i18n>Status</th>
+                        <td mat-cell *matCellDef="let t">
+                            @if (t.isRead) {
+                            <span class="status-read" i18n>Read</span>
+                            } @else {
+                            <span class="status-unread" i18n>New</span>
+                            }
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="createdAt">
+                        <th mat-header-cell *matHeaderCellDef i18n>Date</th>
+                        <td mat-cell *matCellDef="let t">{{ t.createdAt | date:'mediumDate' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let t">
+                            <button mat-icon-button i18n-matTooltip matTooltip="View" (click)="viewTicket(t)">
+                                <mat-icon>open_in_new</mat-icon>
+                            </button>
+                            <button mat-icon-button color="warn" i18n-matTooltip matTooltip="Delete"
+                                (click)="deleteTicket(t)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="ticketColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ticketColumns;" [class.unread-row]="!row.isRead"></tr>
+                </table>
+                <mat-paginator [length]="ticketsTotalCount()" [pageSize]="ticketsPageSize()" [pageIndex]="ticketsPage()"
+                    [pageSizeOptions]="[25, 50, 100]" (page)="onTicketsPageChange($event)" showFirstLastButtons />
+                }
                 }
             </div>
         </mat-tab>

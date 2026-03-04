@@ -1,4 +1,6 @@
-import { Component, OnInit, inject, signal, computed, type Signal } from '@angular/core';
+import { Component, OnInit, DestroyRef, inject, signal, computed, type Signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { switchMap } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -33,7 +35,9 @@ import { MarkdownPipe } from '../../shared/pipes/markdown.pipe';
 import { NumberFormatPipe } from '../../shared/pipes/number-format.pipe';
 import { sortVersionsDesc } from '../../shared/utils/version-sort';
 import { LitematicViewerComponent, type LitematicViewerData } from '../../shared/components/litematic-viewer/litematic-viewer.component';
+import { IsometricScreenshotDialogComponent, type IsometricScreenshotData } from '../../shared/components/litematic-viewer/isometric-screenshot-dialog.component';
 import { BlockTextureService } from '../../shared/components/litematic-viewer/block-texture.service';
+import { TagSuggestDialogComponent } from '../../shared/components/tag-suggest-dialog/tag-suggest-dialog.component';
 
 @Component({
     selector: 'app-schematic-detail',
@@ -67,6 +71,7 @@ import { BlockTextureService } from '../../shared/components/litematic-viewer/bl
 })
 export class SchematicDetailComponent implements OnInit {
     private route = inject(ActivatedRoute);
+    private destroyRef = inject(DestroyRef);
     private router = inject(Router);
     private schematicsApi = inject(SchematicsService);
     private reportsApi = inject(ReportsService);
@@ -125,20 +130,23 @@ export class SchematicDetailComponent implements OnInit {
     // Edit file management
     private readonly MAX_FILES = 10;
     private readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-    readonly editExistingPictures = signal<SchematicPictureResponse[]>([]);
-    readonly editExistingFiles = signal<SchematicFileResponse[]>([]);
-    readonly editNewPictures = signal<File[]>([]);
-    readonly editNewPicturePreviews = signal<string[]>([]);
-    readonly editNewLitematics = signal<File[]>([]);
+    /** Unified ordered list of existing + new pictures (supports cross-category D&D) */
+    readonly editPictureItems = signal<(
+        | { type: 'existing'; pic: SchematicPictureResponse }
+        | { type: 'new'; file: File; preview: string }
+    )[]>([]);
+    /** Unified ordered list of existing + new files */
+    readonly editFileItems = signal<(
+        | { type: 'existing'; file: SchematicFileResponse }
+        | { type: 'new'; file: File }
+    )[]>([]);
     readonly editRemovedPictureIds = signal<(number | string)[]>([]);
     readonly editRemovedFileIds = signal<(number | string)[]>([]);
     readonly editFileError = signal('');
     readonly editCoverIndex = signal(0);
 
     isEditFileValid(): boolean {
-        const totalPics = this.editExistingPictures().length + this.editNewPictures().length;
-        const totalFiles = this.editExistingFiles().length + this.editNewLitematics().length;
-        return totalPics >= 1 && totalFiles >= 1;
+        return this.editPictureItems().length >= 1 && this.editFileItems().length >= 1;
     }
 
     isOwner(): boolean {
@@ -151,8 +159,20 @@ export class SchematicDetailComponent implements OnInit {
         this.schematicsApi.getApiSchematicsTags().subscribe(tags => this.allowedTags.set(tags));
         this.schematicsApi.getApiSchematicsVersions().subscribe(versions => this.allowedVersions.set(sortVersionsDesc(versions)));
 
-        const id = this.route.snapshot.paramMap.get('id')!;
-        this.schematicsApi.getApiSchematicsId(id).subscribe({
+        // React to route param changes so re-navigating to a different schematic
+        // (e.g. after forking) reloads the data without tearing down the component.
+        this.route.paramMap.pipe(
+            takeUntilDestroyed(this.destroyRef),
+            switchMap(params => {
+                const id = params.get('id')!;
+                this.loading.set(true);
+                this.error.set('');
+                this.schematic.set(null);
+                this.selectedImage.set(0);
+                this.editing.set(false);
+                return this.schematicsApi.getApiSchematicsId(id);
+            }),
+        ).subscribe({
             next: (res) => {
                 this.schematic.set(res);
                 this.loading.set(false);
@@ -257,15 +277,25 @@ export class SchematicDetailComponent implements OnInit {
                     onUndo: () => {
                         if (forked?.id) {
                             this.schematicsApi.deleteApiSchematicsId(forked.id).subscribe({
-                                next: () => this.toast.success(SCHEMATICS.forkUndone),
+                                next: () => {
+                                    this.toast.success(SCHEMATICS.forkUndone);
+                                    this.router.navigate(['/schematics']);
+                                },
                                 error: () => this.toast.error(SCHEMATICS.failedToUndoFork),
                             });
                         }
                     },
                 });
+                if (forked?.id) {
+                    this.router.navigate(['/schematics', forked.id]);
+                }
             },
             error: (err) => this.toast.error(err.error?.detail ?? SCHEMATICS.forkFailed),
         });
+    }
+
+    navigateToOriginal(id: string): void {
+        this.router.navigate(['/schematics', id]);
     }
 
     report(): void {
@@ -300,12 +330,9 @@ export class SchematicDetailComponent implements OnInit {
             downloadLinkMediaFire: s.downloadLinkMediaFire ?? '',
             youtubeLink: s.youtubeLink ?? '',
         });
-        // Initialize file state
-        this.editExistingPictures.set([...s.pictures]);
-        this.editExistingFiles.set([...s.files]);
-        this.editNewPictures.set([]);
-        this.editNewPicturePreviews.set([]);
-        this.editNewLitematics.set([]);
+        // Initialize unified ordered arrays
+        this.editPictureItems.set(s.pictures.map(p => ({ type: 'existing' as const, pic: p })));
+        this.editFileItems.set(s.files.map(f => ({ type: 'existing' as const, file: f })));
         this.editRemovedPictureIds.set([]);
         this.editRemovedFileIds.set([]);
         this.editFileError.set('');
@@ -317,86 +344,54 @@ export class SchematicDetailComponent implements OnInit {
     // --- Edit file management methods ---
 
     setEditCover(index: number): void {
-        if (index === 0) return; // already first
-        const existingCount = this.editExistingPictures().length;
-        if (index < existingCount) {
-            // Move existing picture to first position
-            const pics = [...this.editExistingPictures()];
-            const [moved] = pics.splice(index, 1);
-            pics.unshift(moved);
-            this.editExistingPictures.set(pics);
-        } else {
-            // Move new picture to first of new pictures, then move it before existing
-            const newIdx = index - existingCount;
-            const newPics = [...this.editNewPictures()];
-            const [moved] = newPics.splice(newIdx, 1);
-            newPics.unshift(moved);
-            this.editNewPictures.set(newPics);
-            this.regenerateEditPicturePreviews();
-            // If there are existing pictures, we can't easily put a new pic before them,
-            // but the server uses the combined order: existing (by PictureOrder) + new pics
-            // So we just make it first of new pics
-        }
+        if (index === 0) return;
+        const items = [...this.editPictureItems()];
+        const [moved] = items.splice(index, 1);
+        items.unshift(moved);
+        this.editPictureItems.set(items);
         this.editCoverIndex.set(0);
     }
 
-    moveExistingPicture(index: number, direction: -1 | 1): void {
-        const pics = [...this.editExistingPictures()];
-        const newIndex = index + direction;
-        if (newIndex < 0 || newIndex >= pics.length) return;
-        [pics[index], pics[newIndex]] = [pics[newIndex], pics[index]];
-        // Adjust cover index to follow the moved picture
-        const cover = this.editCoverIndex();
-        if (cover === index) this.editCoverIndex.set(newIndex);
-        else if (cover === newIndex) this.editCoverIndex.set(index);
-        this.editExistingPictures.set(pics);
-    }
-
-    dropExistingPicture(event: CdkDragDrop<void>): void {
-        const totalExisting = this.editExistingPictures().length;
-        if (event.previousIndex < totalExisting && event.currentIndex < totalExisting) {
-            const pics = [...this.editExistingPictures()];
-            moveItemInArray(pics, event.previousIndex, event.currentIndex);
-            this.editExistingPictures.set(pics);
-        } else if (event.previousIndex >= totalExisting && event.currentIndex >= totalExisting) {
-            const pics = [...this.editNewPictures()];
-            moveItemInArray(pics, event.previousIndex - totalExisting, event.currentIndex - totalExisting);
-            this.editNewPictures.set(pics);
-            this.regenerateEditPicturePreviews();
-        }
+    dropPicture(event: CdkDragDrop<void>): void {
+        const items = [...this.editPictureItems()];
+        moveItemInArray(items, event.previousIndex, event.currentIndex);
+        this.editPictureItems.set(items);
         this.editCoverIndex.set(0);
     }
 
-    dropEditLitematic(event: CdkDragDrop<void>): void {
-        const totalExisting = this.editExistingFiles().length;
-        if (event.previousIndex < totalExisting && event.currentIndex < totalExisting) {
-            const files = [...this.editExistingFiles()];
-            moveItemInArray(files, event.previousIndex, event.currentIndex);
-            this.editExistingFiles.set(files);
-        } else if (event.previousIndex >= totalExisting && event.currentIndex >= totalExisting) {
-            const files = [...this.editNewLitematics()];
-            moveItemInArray(files, event.previousIndex - totalExisting, event.currentIndex - totalExisting);
-            this.editNewLitematics.set(files);
-        }
+    dropFile(event: CdkDragDrop<void>): void {
+        const items = [...this.editFileItems()];
+        moveItemInArray(items, event.previousIndex, event.currentIndex);
+        this.editFileItems.set(items);
     }
 
-    removeExistingPicture(id: number | string): void {
-        const pics = this.editExistingPictures();
-        const removedIdx = pics.findIndex(p => p.id === id);
-        this.editRemovedPictureIds.update(ids => [...ids, id]);
-        this.editExistingPictures.update(pics => pics.filter(p => p.id !== id));
-        // Adjust cover index
-        if (this.editCoverIndex() === removedIdx) {
+    removePicture(index: number): void {
+        const items = [...this.editPictureItems()];
+        const removed = items[index];
+        items.splice(index, 1);
+        if (removed.type === 'existing') {
+            this.editRemovedPictureIds.update(ids => [...ids, removed.pic.id]);
+        }
+        this.editPictureItems.set(items);
+        if (this.editCoverIndex() === index) {
             this.editCoverIndex.set(0);
-        } else if (this.editCoverIndex() > removedIdx) {
+        } else if (this.editCoverIndex() > index) {
             this.editCoverIndex.update(i => i - 1);
+        }
+        if (this.editCoverIndex() >= items.length) {
+            this.editCoverIndex.set(Math.max(0, items.length - 1));
         }
         this.validateEditFiles();
     }
 
-    removeExistingFile(id: number | string): void {
-        this.editRemovedFileIds.update(ids => [...ids, id]);
-        this.editExistingFiles.update(files => files.filter(f => f.id !== id));
+    removeFile(index: number): void {
+        const items = [...this.editFileItems()];
+        const removed = items[index];
+        items.splice(index, 1);
+        if (removed.type === 'existing') {
+            this.editRemovedFileIds.update(ids => [...ids, removed.file.id]);
+        }
+        this.editFileItems.set(items);
         this.validateEditFiles();
     }
 
@@ -409,15 +404,18 @@ export class SchematicDetailComponent implements OnInit {
             this.toast.error(`${oversized.length} file(s) exceed the 5 MB limit and were skipped.`);
         }
         const valid = newFiles.filter(f => f.size <= this.MAX_FILE_SIZE);
-        const totalAfter = this.editExistingPictures().length + this.editNewPictures().length + valid.length;
-        if (totalAfter > this.MAX_FILES) {
-            const allowed = this.MAX_FILES - this.editExistingPictures().length - this.editNewPictures().length;
-            this.toast.error(`Maximum ${this.MAX_FILES} pictures allowed. You have ${this.editExistingPictures().length + this.editNewPictures().length}, tried to add ${valid.length}.`);
-            this.editNewPictures.update(files => [...files, ...valid.slice(0, Math.max(0, allowed))]);
-        } else {
-            this.editNewPictures.update(files => [...files, ...valid]);
+        const currentCount = this.editPictureItems().length;
+        let toAdd = valid;
+        if (currentCount + valid.length > this.MAX_FILES) {
+            toAdd = valid.slice(0, Math.max(0, this.MAX_FILES - currentCount));
+            this.toast.error(`Maximum ${this.MAX_FILES} pictures allowed.`);
         }
-        this.regenerateEditPicturePreviews();
+        const newItems = toAdd.map(f => ({
+            type: 'new' as const,
+            file: f,
+            preview: URL.createObjectURL(f),
+        }));
+        this.editPictureItems.update(items => [...items, ...newItems]);
         this.validateEditFiles();
         input.value = '';
         requestAnimationFrame(() => window.scrollTo(0, scrollY));
@@ -432,49 +430,22 @@ export class SchematicDetailComponent implements OnInit {
             this.toast.error(`${oversized.length} file(s) exceed the 5 MB limit and were skipped.`);
         }
         const valid = newFiles.filter(f => f.size <= this.MAX_FILE_SIZE);
-        const totalAfter = this.editExistingFiles().length + this.editNewLitematics().length + valid.length;
-        if (totalAfter > this.MAX_FILES) {
-            const allowed = this.MAX_FILES - this.editExistingFiles().length - this.editNewLitematics().length;
-            this.toast.error(`Maximum ${this.MAX_FILES} litematic files allowed. You have ${this.editExistingFiles().length + this.editNewLitematics().length}, tried to add ${valid.length}.`);
-            this.editNewLitematics.update(files => [...files, ...valid.slice(0, Math.max(0, allowed))]);
-        } else {
-            this.editNewLitematics.update(files => [...files, ...valid]);
+        const currentCount = this.editFileItems().length;
+        let toAdd = valid;
+        if (currentCount + valid.length > this.MAX_FILES) {
+            toAdd = valid.slice(0, Math.max(0, this.MAX_FILES - currentCount));
+            this.toast.error(`Maximum ${this.MAX_FILES} litematic files allowed.`);
         }
+        const newItems = toAdd.map(f => ({ type: 'new' as const, file: f }));
+        this.editFileItems.update(items => [...items, ...newItems]);
         this.validateEditFiles();
         input.value = '';
         requestAnimationFrame(() => window.scrollTo(0, scrollY));
     }
 
-    removeNewPicture(index: number): void {
-        const totalIdx = this.editExistingPictures().length + index;
-        this.editNewPictures.update(files => files.filter((_, i) => i !== index));
-        this.regenerateEditPicturePreviews();
-        // Adjust cover index
-        const total = this.editExistingPictures().length + this.editNewPictures().length;
-        if (this.editCoverIndex() === totalIdx) {
-            this.editCoverIndex.set(0);
-        } else if (this.editCoverIndex() > totalIdx) {
-            this.editCoverIndex.update(i => i - 1);
-        }
-        if (this.editCoverIndex() >= total) {
-            this.editCoverIndex.set(Math.max(0, total - 1));
-        }
-        this.validateEditFiles();
-    }
-
-    removeNewLitematic(index: number): void {
-        this.editNewLitematics.update(files => files.filter((_, i) => i !== index));
-        this.validateEditFiles();
-    }
-
-    private regenerateEditPicturePreviews(): void {
-        const previews = this.editNewPictures().map(f => URL.createObjectURL(f));
-        this.editNewPicturePreviews.set(previews);
-    }
-
     private validateEditFiles(): void {
-        const totalPics = this.editExistingPictures().length + this.editNewPictures().length;
-        const totalFiles = this.editExistingFiles().length + this.editNewLitematics().length;
+        const totalPics = this.editPictureItems().length;
+        const totalFiles = this.editFileItems().length;
         if (totalPics < 1) {
             this.editFileError.set('At least 1 picture is required.');
         } else if (totalFiles < 1) {
@@ -491,32 +462,34 @@ export class SchematicDetailComponent implements OnInit {
         const v = this.editForm.getRawValue();
         const removePicIds = this.editRemovedPictureIds();
         const removeFileIds = this.editRemovedFileIds();
-        let newPics = [...this.editNewPictures()];
-        const newLitematics = this.editNewLitematics();
-        const existingCount = this.editExistingPictures().length;
-        let coverIndex = this.editCoverIndex();
 
-        // Build PictureOrder from remaining existing pictures (position = Order, first = thumbnail)
-        const existingPics = this.editExistingPictures();
-        const pictureOrder = existingPics.length > 0
-            ? existingPics.map(p => String(p.id)).join(',')
-            : undefined;
-
-        // Build FileOrder from remaining existing files (respects drag-and-drop reorder)
-        const existingFiles = this.editExistingFiles();
-        const fileOrder = existingFiles.length > 0
-            ? existingFiles.map(f => String(f.id)).join(',')
-            : undefined;
-
-        // If the cover is a new picture, reorder so it comes first among new pics
-        if (coverIndex >= existingCount && newPics.length > 0) {
-            const newPicIdx = coverIndex - existingCount;
-            if (newPicIdx > 0) {
-                const [coverPic] = newPics.splice(newPicIdx, 1);
-                newPics.unshift(coverPic);
+        // Build interleaved picture order: "42,new:0,43,new:1"
+        // New files are collected in the order they appear in the unified list.
+        // The backend assigns order via these tokens, so interleaving is fully preserved.
+        const pictureOrderTokens: string[] = [];
+        const newPics: File[] = [];
+        for (const item of this.editPictureItems()) {
+            if (item.type === 'existing') {
+                pictureOrderTokens.push(String(item.pic.id));
+            } else {
+                pictureOrderTokens.push(`new:${newPics.length}`);
+                newPics.push(item.file);
             }
-            coverIndex = existingCount; // first new pic position
         }
+        const pictureOrder = pictureOrderTokens.length > 0 ? pictureOrderTokens.join(',') : undefined;
+
+        // Build interleaved file order: "7,new:0,8,new:1"
+        const fileOrderTokens: string[] = [];
+        const newLitematics: File[] = [];
+        for (const item of this.editFileItems()) {
+            if (item.type === 'existing') {
+                fileOrderTokens.push(String(item.file.id));
+            } else {
+                fileOrderTokens.push(`new:${newLitematics.length}`);
+                newLitematics.push(item.file);
+            }
+        }
+        const fileOrder = fileOrderTokens.length > 0 ? fileOrderTokens.join(',') : undefined;
 
         this.schematicsApi.putApiSchematicsId(
             s.id,
@@ -533,7 +506,6 @@ export class SchematicDetailComponent implements OnInit {
                 RemoveFileIds: removeFileIds.length ? removeFileIds.join(',') : undefined,
                 NewPictureFiles: newPics.length ? newPics as any : undefined,
                 NewLitematicFiles: newLitematics.length ? newLitematics as any : undefined,
-                CoverImageIndex: coverIndex,
                 PictureOrder: pictureOrder,
                 FileOrder: fileOrder,
             },
@@ -543,8 +515,12 @@ export class SchematicDetailComponent implements OnInit {
                 this.editing.set(false);
                 this.toast.success(SCHEMATICS.schematicUpdated);
                 // Reload detail
+                this.selectedImage.set(0);
                 this.schematicsApi.getApiSchematicsId(s.id).subscribe({
-                    next: (updated) => this.schematic.set(updated),
+                    next: (updated) => {
+                        this.schematic.set(updated);
+                        this.resolveBlockTextures(updated);
+                    },
                 });
             },
             error: (err) => {
@@ -589,15 +565,53 @@ export class SchematicDetailComponent implements OnInit {
     }
 
     parseBlockList(blockList: string): { name: string; count: string }[] {
-        return blockList.split(',').map(entry => {
+        const raw = blockList.split(',').map(entry => {
             const [rawName, count] = entry.trim().split(':');
-            const name = (rawName || '').replace(/_/g, ' ').trim();
-            return { name, count: count?.trim() || '1' };
+            return { name: (rawName || '').trim(), count: parseInt(count?.trim() || '1', 10) };
         }).filter(b => b.name);
+
+        // Group similar blocks (e.g. wall_torch + torch → Torch)
+        const grouped = new Map<string, { displayName: string; count: number }>();
+        for (const { name, count } of raw) {
+            const normalized = this.normalizeBlockName(name);
+            const display = normalized.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            const existing = grouped.get(normalized);
+            if (existing) {
+                existing.count += count;
+            } else {
+                grouped.set(normalized, { displayName: display, count });
+            }
+        }
+
+        // Sort by count descending, then alphabetically
+        return [...grouped.values()]
+            .sort((a, b) => b.count - a.count || a.displayName.localeCompare(b.displayName))
+            .map(g => ({ name: g.displayName, count: String(g.count) }));
+    }
+
+    /** Normalize block variant names so wall/directional variants are grouped with their base. */
+    private normalizeBlockName(name: string): string {
+        // Exact renames
+        const ALIASES: Record<string, string> = {
+            wall_torch: 'torch',
+            redstone_wall_torch: 'redstone_torch',
+            soul_wall_torch: 'soul_torch',
+            wall_banner: 'banner',
+        };
+        if (ALIASES[name]) return ALIASES[name];
+
+        // Pattern-based: *_wall_sign → *_sign, *_wall_banner → *_banner, *_wall_hanging_sign → *_hanging_sign
+        if (name.endsWith('_wall_sign')) return name.replace('_wall_sign', '_sign');
+        if (name.endsWith('_wall_banner')) return name.replace('_wall_banner', '_banner');
+        if (name.endsWith('_wall_hanging_sign')) return name.replace('_wall_hanging_sign', '_hanging_sign');
+        if (name.endsWith('_wall_fan')) return name.replace('_wall_fan', '_fan_coral');
+
+        return name;
     }
 
     /**
      * Collect all unique block names from file blockLists and resolve their atlas textures.
+     * Also resolves normalized names so grouped blocks still get textures.
      */
     private resolveBlockTextures(schematic: SchematicDetailResponse): void {
         const allNames = new Set<string>();
@@ -605,7 +619,12 @@ export class SchematicDetailComponent implements OnInit {
             if (f.blockList) {
                 for (const entry of f.blockList.split(',')) {
                     const rawName = entry.trim().split(':')[0];
-                    if (rawName) allNames.add(rawName);
+                    if (rawName) {
+                        allNames.add(rawName);
+                        // Also add the normalized name (for grouped blocks)
+                        const normalized = this.normalizeBlockName(rawName);
+                        if (normalized !== rawName) allNames.add(normalized);
+                    }
                 }
             }
         }
@@ -657,5 +676,102 @@ export class SchematicDetailComponent implements OnInit {
             },
             error: (err) => this.toast.error(err.error?.detail ?? 'Failed to load file for 3D viewer.'),
         });
+    }
+
+    viewIn3DLocal(file: File): void {
+        file.arrayBuffer().then(buffer => {
+            this.dialog.open(LitematicViewerComponent, {
+                data: { fileData: buffer, fileName: file.name } as LitematicViewerData,
+                width: '90vw',
+                maxWidth: '1200px',
+                panelClass: 'litematic-viewer-dialog',
+            });
+        });
+    }
+
+    generatePicture(file: SchematicFileResponse): void {
+        const s = this.schematic()!;
+        this.schematicsApi.getApiSchematicsIdDownloadFileId<Blob>(s.id, Number(file.id), {
+            responseType: 'blob',
+        } as any).subscribe({
+            next: (blob) => {
+                (blob as Blob).arrayBuffer().then(buffer => {
+                    const dialogRef = this.dialog.open(IsometricScreenshotDialogComponent, {
+                        data: {
+                            fileData: buffer,
+                            fileName: file.name,
+                            mode: this.editing() ? 'edit' : 'download',
+                        } as IsometricScreenshotData,
+                        width: '90vw',
+                        maxWidth: '1200px',
+                        panelClass: 'litematic-viewer-dialog',
+                    });
+                    dialogRef.afterClosed().subscribe((result: File | null) => {
+                        if (result instanceof File) {
+                            this.addScreenshotToPictures(result);
+                        }
+                    });
+                });
+            },
+            error: (err) => this.toast.error(err.error?.detail ?? 'Failed to load file.'),
+        });
+    }
+
+    generatePictureLocal(file: File): void {
+        file.arrayBuffer().then(buffer => {
+            const dialogRef = this.dialog.open(IsometricScreenshotDialogComponent, {
+                data: {
+                    fileData: buffer,
+                    fileName: file.name,
+                    mode: 'edit',
+                } as IsometricScreenshotData,
+                width: '90vw',
+                maxWidth: '1200px',
+                panelClass: 'litematic-viewer-dialog',
+            });
+            dialogRef.afterClosed().subscribe((result: File | null) => {
+                if (result instanceof File) {
+                    this.addScreenshotToPictures(result);
+                }
+            });
+        });
+    }
+
+    generatePictureForItem(item: { type: 'existing'; file: SchematicFileResponse } | { type: 'new'; file: File }): void {
+        if (item.type === 'existing') this.generatePicture(item.file);
+        else this.generatePictureLocal(item.file);
+    }
+
+    viewIn3DForItem(item: { type: 'existing'; file: SchematicFileResponse } | { type: 'new'; file: File }): void {
+        if (item.type === 'existing') this.viewIn3D(item.file);
+        else this.viewIn3DLocal(item.file);
+    }
+
+    private addScreenshotToPictures(file: File): void {
+        if (this.editing()) {
+            if (this.editPictureItems().length >= this.MAX_FILES) {
+                this.toast.error(`Maximum ${this.MAX_FILES} pictures allowed.`);
+                return;
+            }
+            this.editPictureItems.update(items => [...items, {
+                type: 'new' as const,
+                file,
+                preview: URL.createObjectURL(file),
+            }]);
+            this.validateEditFiles();
+            this.toast.success('Screenshot added to pictures.');
+        } else {
+            // In read-only mode, download the screenshot
+            const url = URL.createObjectURL(file);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    }
+
+    openTagSuggest(): void {
+        this.dialog.open(TagSuggestDialogComponent, { width: '420px' });
     }
 }

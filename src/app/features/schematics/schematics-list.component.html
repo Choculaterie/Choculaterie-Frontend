@@ -1,12 +1,11 @@
 <div class="page-container">
     <div class="page-header">
-        <h1 class="page-title"><mat-icon>architecture</mat-icon> Schematics</h1>
-        @if (session.isAuthenticated()) {
-        <button mat-flat-button (click)="showCreate.set(!showCreate())">
-            <mat-icon>{{ showCreate() ? 'remove' : 'add' }}</mat-icon> {{ showCreate() ? 'Cancel' : 'Upload Schematic'
-            }}
+        <h1 class="page-title"><mat-icon>construction</mat-icon> Schematics</h1>
+        <button mat-flat-button (click)="onUploadClick()" i18n-matTooltip
+            [matTooltip]="showCreate() ? 'Cancel' : 'Upload Schematic'" class="upload-btn">
+            <mat-icon>{{ showCreate() ? 'close' : 'add' }}</mat-icon>
+            <span class="upload-btn-label">{{ showCreate() ? 'Cancel' : 'Upload Schematic' }}</span>
         </button>
-        }
     </div>
 
     <!-- Create form -->
@@ -39,6 +38,12 @@
                             }
                         </mat-select>
                     </mat-form-field>
+                    <div class="propose-tag-row">
+                        <button type="button" mat-button class="propose-tag-btn" (click)="openTagSuggest()">
+                            <mat-icon>add_circle_outline</mat-icon>
+                            <span i18n>Propose a new tag</span>
+                        </button>
+                    </div>
                     <mat-form-field appearance="outline">
                         <mat-label i18n>Versions</mat-label>
                         <mat-select formControlName="versions" multiple>
@@ -83,7 +88,7 @@
                 @if (pictureFiles.length) {
                 <div class="file-previews">
                     <h4>Pictures</h4>
-                    <div class="preview-grid" cdkDropList cdkDropListOrientation="horizontal"
+                    <div class="preview-grid" cdkDropList cdkDropListOrientation="mixed"
                         (cdkDropListDropped)="dropPicture($event)">
                         @for (f of pictureFiles; track f.name; let i = $index) {
                         <div class="preview-item" [class.cover]="i === 0" cdkDrag>
@@ -113,8 +118,17 @@
                         @for (f of litematicFiles; track f.name; let i = $index) {
                         <div class="file-item" cdkDrag>
                             <mat-icon>insert_drive_file</mat-icon>
-                            <span>{{ f.name }}</span>
-                            <span class="file-size">{{ (f.size / 1024).toFixed(1) }} KB</span>
+                            <span class="file-name-text">{{ f.name.endsWith('.litematic') ? f.name.slice(0, -10) :
+                                f.name }}</span>
+                            <span class="spacer"></span>
+                            <button mat-icon-button type="button" (click)="generatePictureLocal(f)" i18n-matTooltip
+                                matTooltip="Generate picture">
+                                <mat-icon>photo_camera</mat-icon>
+                            </button>
+                            <button mat-icon-button type="button" (click)="viewIn3DLocal(f)" i18n-matTooltip
+                                matTooltip="View in 3D">
+                                <mat-icon>view_in_ar</mat-icon>
+                            </button>
                             <button mat-icon-button type="button" (click)="removeLitematic(i)" i18n-matTooltip
                                 matTooltip="Remove">
                                 <mat-icon>close</mat-icon>

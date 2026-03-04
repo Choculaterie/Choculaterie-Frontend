@@ -48,4 +48,10 @@ export class SchematicCardComponent {
         event.preventDefault();
         this.router.navigate(['/schematics'], { queryParams: { type: this.schematic().schematicType } });
     }
+
+    onViewOriginal(event: Event): void {
+        event.stopPropagation();
+        event.preventDefault();
+        this.router.navigate(['/schematics', this.schematic().forked]);
+    }
 }
