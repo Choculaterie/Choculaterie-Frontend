@@ -1,0 +1,146 @@
+<div class="faq-page">
+
+    <!-- ─── Hero ─── -->
+    <section class="faq-hero">
+        <h1 i18n>Frequently Asked Questions</h1>
+        <p i18n>Can't find what you're looking for? Reach out below.</p>
+    </section>
+
+    <!-- ─── FAQ Accordion ─── -->
+    <section class="faq-section">
+        @if (loadingFaqs()) {
+        <div class="faq-skeleton">
+            @for (n of [1,2,3,4,5]; track n) {
+            <div class="faq-skeleton-item"></div>
+            }
+        </div>
+        } @else if (faqs().length === 0) {
+        <p class="empty-msg" i18n>No questions yet, check back soon!</p>
+        } @else {
+        <mat-accordion multi>
+            @for (faq of faqs(); track faq.id) {
+            <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                    <mat-panel-title>{{ faq.question }}</mat-panel-title>
+                </mat-expansion-panel-header>
+                <p class="faq-answer">{{ faq.answer }}</p>
+            </mat-expansion-panel>
+            }
+        </mat-accordion>
+        }
+    </section>
+
+    <mat-divider class="section-divider" />
+
+    <!-- ─── Contact ─── -->
+    <section class="contact-section">
+        <h2 i18n>Still have questions?</h2>
+        <p i18n>Get in touch through any of the channels below, or fill out the form.</p>
+
+        <div class="contact-channels">
+            <div class="channel channel--copy" role="button" tabindex="0" (click)="copyContactHandle('@Choculat')"
+                (keydown.enter)="copyContactHandle('@Choculat')"
+                (keydown.space)="$event.preventDefault(); copyContactHandle('@Choculat')">
+                <ng-icon name="simpleDiscord" size="16" />
+                <div>
+                    <strong i18n>Discord</strong>
+                    <span>&#64;Choculat</span>
+                </div>
+            </div>
+            <div class="channel channel--copy" role="button" tabindex="0"
+                (click)="copyContactHandle('@choculat:24628528.xyz')"
+                (keydown.enter)="copyContactHandle('@choculat:24628528.xyz')"
+                (keydown.space)="$event.preventDefault(); copyContactHandle('@choculat:24628528.xyz')">
+                <ng-icon name="simpleMatrix" size="16" />
+                <div>
+                    <strong i18n>Matrix</strong>
+                    <span>&#64;choculat:24628528.xyz</span>
+                </div>
+            </div>
+            <div class="channel">
+                <img src="/icons/communication/mail.svg" alt="" aria-hidden="true" class="mc-icon" />
+                <div>
+                    <strong i18n>Email</strong>
+                    <!-- Email assembled only on click - no mailto href in DOM -->
+                    <span class="obf-email" role="link" tabindex="0" aria-label="support@choculaterie.com"
+                        (click)="openEmail()" (keydown.enter)="openEmail()"></span>
+                </div>
+            </div>
+        </div>
+
+        <mat-divider class="channel-divider" />
+
+        @if (submitted()) {
+        <div class="success-state">
+            <img src="/icons/ui/check.svg" alt="" aria-hidden="true" class="mc-icon success-icon" />
+            <h3 i18n>Message sent!</h3>
+            <p i18n>We'll get back to you as soon as possible.</p>
+        </div>
+        } @else {
+        <form [formGroup]="contactForm" (ngSubmit)="submit()" class="contact-form">
+            <mat-form-field appearance="outline">
+                <mat-label i18n>Subject</mat-label>
+                <input matInput formControlName="title" maxlength="150" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label i18n>Message</mat-label>
+                <textarea matInput formControlName="description" rows="5" maxlength="5000"></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label i18n>Your contact (optional)</mat-label>
+                <input matInput formControlName="contact" i18n-placeholder placeholder="email or Discord"
+                    maxlength="200" />
+                <mat-hint i18n>So I can reply to you</mat-hint>
+            </mat-form-field>
+
+            <!-- Image attachments -->
+            <div class="attachments">
+                <button type="button" mat-stroked-button (click)="imgInput.click()" [disabled]="imageFiles.length >= 5">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
+                        height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
+                        <path fill="currentColor"
+                            d="M2,2h3v1h-3zM12,2h4v1h-4zM23,2h4v1h-4zM2,3h3v1h-3zM12,3h4v1h-4zM23,3h4v1h-4zM2,4h3v1h-3zM12,4h4v1h-4zM23,4h4v1h-4zM5,5h4v1h-4zM20,5h3v1h-3zM5,6h4v1h-4zM20,6h3v1h-3zM5,7h4v1h-4zM20,7h3v1h-3zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM9,14h3v1h-3zM16,14h4v1h-4zM9,15h3v1h-3zM16,15h4v1h-4zM9,16h3v1h-3zM16,16h4v1h-4zM9,17h3v1h-3zM16,17h4v1h-4zM5,18h4v1h-4zM20,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM2,21h3v1h-3zM12,21h4v1h-4zM23,21h4v1h-4zM2,22h3v1h-3zM12,22h4v1h-4zM23,22h4v1h-4zM2,23h3v1h-3zM12,23h4v1h-4zM23,23h4v1h-4z" />
+                        <path fill="var(--mc-icon-shadow)"
+                            d="M16,5h4v1h-4zM27,5h3v1h-3zM16,6h4v1h-4zM27,6h3v1h-3zM16,7h4v1h-4zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM27,17h3v1h-3zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM9,21h3v1h-3zM9,22h3v1h-3zM9,23h3v1h-3zM5,24h4v1h-4zM16,24h4v1h-4zM27,24h3v1h-3zM5,25h4v1h-4zM16,25h4v1h-4zM27,25h3v1h-3zM5,26h4v1h-4zM16,26h4v1h-4zM27,26h3v1h-3z" />
+                    </svg>
+                    <span i18n>Attach images ({{ imageFiles.length }}/5)</span>
+                </button>
+                <input #imgInput type="file" accept="image/*" multiple hidden (change)="onImageChange($event)" />
+                @if (imagePreviews().length) {
+                <div class="preview-grid">
+                    @for (preview of imagePreviews(); track preview; let i = $index) {
+                    <div class="preview-item" [class.cover]="true">
+                        <img [src]="preview" [alt]="imageFiles[i]?.name" style="cursor:pointer" />
+                        <div class="preview-actions">
+                            <button mat-icon-button type="button" (click)="removeImage(i)" i18n-matTooltip
+                                matTooltip="Remove">
+                                <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+                            </button>
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+
+            @if (!session.isAuthenticated()) {
+            <div class="captcha-wrap">
+                <app-captcha (solved)="onCaptchaSolved($event)" (reset)="captchaData.set(null)" />
+            </div>
+            }
+
+            <div class="form-actions">
+                <button mat-flat-button type="submit"
+                    [disabled]="contactForm.invalid || submitting() || (!session.isAuthenticated() && !captchaData())">
+                    <img [src]="contactForm.invalid || submitting() || (!session.isAuthenticated() && !captchaData())
+                        ? '/icons/fantasy/potion_throw_disabled.svg'
+                        : '/icons/fantasy/potion_throw.svg'" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
+                    <span i18n>Send message</span>
+                </button>
+            </div>
+        </form>
+        }
+    </section>
+</div>

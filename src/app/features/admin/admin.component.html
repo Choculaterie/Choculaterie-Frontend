@@ -1,0 +1,1076 @@
+<div class="page-container">
+    <h1 i18n>Admin Panel</h1>
+
+    <mat-tab-group dynamicHeight disablePagination [selectedIndex]="selectedTab()"
+        (selectedTabChange)="onTabChange($event)">
+
+        <!-- ═══ USERS TAB ═══ -->
+        <mat-tab i18n-label label="Users">
+            <div class="tab-content">
+
+                <!-- User Detail Panel -->
+                @if (selectedUser(); as u) {
+                <mat-card appearance="outlined" class="detail-card">
+                    <mat-card-header>
+                        <mat-card-title class="detail-header">
+                            <button mat-icon-button (click)="closeUserDetail()" i18n-matTooltip
+                                matTooltip="Back to list">
+                                <mat-icon>arrow_back</mat-icon>
+                            </button>
+                            <div class="detail-user-info">
+                                @if (u.filePath) {
+                                <img [src]="u.filePath | userImg" alt="" class="detail-avatar" />
+                                } @else {
+                                <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" class="mc-icon"
+                                    style="width:48px;height:48px;" />
+                                }
+                                <div>
+                                    <span class="detail-username">{{ u.username }}</span>
+                                    @if (u.badge != null) {
+                                    <mat-icon class="badge-icon" [style.color]="badgeColor(u.badge)"
+                                        [matTooltip]="badgeLabel(u.badge)">{{ badgeIcon(u.badge) }}</mat-icon>
+                                    }
+                                </div>
+                            </div>
+                        </mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content class="detail-body">
+                        <div class="detail-grid">
+                            <div class="detail-item"><span class="detail-label" i18n>User ID</span> <span
+                                    class="detail-value muted">{{ u.id }} <button mat-icon-button class="copy-btn"
+                                        (click)="copyToClipboard(u.id)" i18n-matTooltip matTooltip="Copy ID"><img
+                                            src="/icons/shapes/form_1.svg" alt="" aria-hidden="true"
+                                            class="copy-icon" /></button></span></div>
+                            <div class="detail-item"><span class="detail-label" i18n>Email</span> <span
+                                    class="detail-value">{{ u.email ?? '-' }} @if (u.email) { <button mat-icon-button
+                                        class="copy-btn" (click)="copyToClipboard(u.email)" i18n-matTooltip
+                                        matTooltip="Copy email"><img src="/icons/shapes/form_1.svg" alt=""
+                                            aria-hidden="true" class="copy-icon" /></button> }</span>
+                            </div>
+                            <div class="detail-item"><span class="detail-label" i18n>Role</span> <span
+                                    class="detail-value">{{ u.role }}</span></div>
+                            <div class="detail-item"><span class="detail-label" i18n>Status</span> <span
+                                    class="detail-value">{{ u.status }}</span></div>
+                            <div class="detail-item"><span class="detail-label" i18n>Registered</span> <span
+                                    class="detail-value">{{ u.registrationDate | date:'medium' }}</span></div>
+                            <div class="detail-item"><span class="detail-label" i18n>Reports</span> <span
+                                    class="detail-value">{{ u.reportCount }}</span></div>
+                            <div class="detail-item"><span class="detail-label" i18n>Bio</span> <span
+                                    class="detail-value">{{ u.biographie ?? '-' }}</span></div>
+                        </div>
+
+                        <mat-divider />
+
+                        <!-- Linking info -->
+                        <h3 i18n>Linking</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label" i18n>Minecraft</span>
+                                <span class="detail-value">
+                                    @if (u.isMinecraftLinked) {
+                                    {{ u.minecraftUsername }} <span class="muted">({{ u.minecraftUUID }})</span>
+                                    } @else { <span class="muted" i18n>Not linked</span> }
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label" i18n>Discord</span>
+                                <span class="detail-value">
+                                    @if (u.isDiscordLinked) {
+                                    {{ u.discordUsername }} <span class="muted">({{ u.discordId }})</span>
+                                    } @else { <span class="muted" i18n>Not linked</span> }
+                                </span>
+                            </div>
+                        </div>
+
+                        <mat-divider />
+
+                        <!-- Keys & Storage -->
+                        <h3 i18n>Keys &amp; Storage</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label" i18n>API Key</span>
+                                <span class="detail-value">
+                                    @if (u.hasApiKey) {
+                                    <img src="/icons/ui/check.svg" alt="" aria-hidden="true"
+                                        class="mc-icon key-active" /> <span i18n>Active</span>
+                                    <button mat-icon-button color="warn" (click)="deleteApiKey()" i18n-matTooltip
+                                        matTooltip="Revoke API key">
+                                        <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                    </button>
+                                    } @else { <span class="muted" i18n>None</span> }
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label" i18n>Save Key</span>
+                                <span class="detail-value">
+                                    @if (u.hasSaveKey) {
+                                    <img src="/icons/ui/check.svg" alt="" aria-hidden="true"
+                                        class="mc-icon key-active" /> <span i18n>Active</span>
+                                    <button mat-icon-button color="warn" (click)="deleteSaveKey()" i18n-matTooltip
+                                        matTooltip="Revoke save key">
+                                        <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                    </button>
+                                    } @else { <span class="muted" i18n>None</span> }
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label" i18n>Storage</span>
+                                <span class="detail-value" i18n>{{ u.storageUsedMb | numFmt }} MB / {{ u.storageQuotaGb
+                                    | numFmt }} GB ({{ u.saveCount }} saves)</span>
+                            </div>
+                        </div>
+
+                        <mat-divider />
+
+                        <!-- Admin actions -->
+                        <h3 i18n>Actions</h3>
+                        <div class="detail-actions">
+                            <mat-form-field appearance="outline" class="compact-select badge-select">
+                                <mat-label i18n>Badge</mat-label>
+                                <mat-select [value]="editBadge()" (selectionChange)="editBadge.set($event.value)">
+                                    <mat-option value=""><span i18n>None</span></mat-option>
+                                    @for (b of badges; track b[1]) {
+                                    <mat-option [value]="b[0]">{{ badgeLabels[b[1]] }}</mat-option>
+                                    }
+                                </mat-select>
+                                <mat-icon matPrefix>workspace_premium</mat-icon>
+                            </mat-form-field>
+                            <button mat-stroked-button (click)="saveBadge()"><mat-icon>save</mat-icon> <span i18n>Save
+                                    badge</span></button>
+
+                            <mat-form-field appearance="outline" class="compact-input">
+                                <mat-label i18n>Quota (GB)</mat-label>
+                                <input matInput type="number" [value]="editQuota()"
+                                    (input)="editQuota.set(+$any($event.target).value)" min="0" step="0.5" />
+                            </mat-form-field>
+                            <button mat-stroked-button (click)="saveQuota()"><mat-icon>save</mat-icon> <span i18n>Save
+                                    quota</span></button>
+                        </div>
+
+                        <!-- User's schematics -->
+                        @if (u.schematics.length > 0) {
+                        <mat-divider />
+                        <h3 i18n>Schematics ({{ u.schematics.length }})</h3>
+                        <div class="table-scroll">
+                            <table mat-table [dataSource]="u.schematics" class="full-width compact-table">
+                                <ng-container matColumnDef="name">
+                                    <th mat-header-cell *matHeaderCellDef i18n>Name</th>
+                                    <td mat-cell *matCellDef="let s"><a [routerLink]="['/schematics', s.id]">{{ s.name
+                                            }}</a></td>
+                                </ng-container>
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell *matHeaderCellDef i18n>Status</th>
+                                    <td mat-cell *matCellDef="let s">{{ s.status }}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="visibility">
+                                    <th mat-header-cell *matHeaderCellDef i18n>Visibility</th>
+                                    <td mat-cell *matCellDef="let s">{{ s.visibility }}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="reports">
+                                    <th mat-header-cell *matHeaderCellDef i18n>Reports</th>
+                                    <td mat-cell *matCellDef="let s">{{ s.reportCount }}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="downloads">
+                                    <th mat-header-cell *matHeaderCellDef i18n>Downloads</th>
+                                    <td mat-cell *matCellDef="let s">{{ s.downloadCount }}</td>
+                                </ng-container>
+                                <tr mat-header-row
+                                    *matHeaderRowDef="['name','status','visibility','reports','downloads']">
+                                </tr>
+                                <tr mat-row
+                                    *matRowDef="let row; columns: ['name','status','visibility','reports','downloads'];">
+                                </tr>
+                            </table>
+                        </div>
+                        }
+                    </mat-card-content>
+                </mat-card>
+                } @else {
+
+                <!-- User list -->
+                <div class="search-col">
+                    <mat-form-field appearance="outline" class="search-field">
+                        <mat-label i18n>Search users</mat-label>
+                        <input matInput [(ngModel)]="usersSearch" (keyup.enter)="searchUsers()"
+                            (ngModelChange)="onUserSearchInput($event)" [matAutocomplete]="userSearchAuto" />
+                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                        <mat-autocomplete #userSearchAuto="matAutocomplete"
+                            (optionSelected)="onUserSuggestionSelected($event)">
+                            @for (s of userSearchSuggestions(); track s) {
+                            <mat-option [value]="s">
+                                <span style="display:flex;align-items:center;gap:8px;">
+                                    <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" class="mc-icon"
+                                        style="margin-right:8px;" /> {{ s }}
+                                </span>
+                            </mat-option>
+                            }
+                        </mat-autocomplete>
+                    </mat-form-field>
+                    <div class="search-actions">
+                        <button mat-stroked-button class="newest-toggle"
+                            (click)="newestOnlyUsers.set(!newestOnlyUsers()); searchUsers()"
+                            i18n="admin.newest_only_toggle">
+                            <img [src]="newestOnlyUsers() ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
+                                alt="" aria-hidden="true" class="mc-icon" />
+                            <span style="transform: translateY(1px); display: inline-block;">Newest only</span>
+                        </button>
+                        <button mat-stroked-button (click)="usersSearch = ''; searchUsers()">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
+                                width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
+                                <path fill="currentColor"
+                                    d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
+                                <path fill="var(--mc-icon-shadow)"
+                                    d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
+                            </svg> <span i18n>Clear</span>
+                        </button>
+                    </div>
+                </div>
+
+                @if (loadingUsers()) {
+                <app-loading-spinner i18n-message message="Loading users…" />
+                } @else if (users().length === 0) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No users found" />
+                } @else {
+                <div class="table-scroll">
+                    <table mat-table [dataSource]="users()" matSort (matSortChange)="onUsersSort($event)"
+                        [matSortActive]="usersSort() === 'date' ? 'registrationDate' : usersSort() === 'reports' ? 'reportCount' : usersSort()"
+                        [matSortDirection]="usersDirection()" class="full-width">
+                        <ng-container matColumnDef="username">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Username</th>
+                            <td mat-cell *matCellDef="let u">
+                                <a class="user-detail-link" (click)="openUserDetail(u)">
+                                    <app-user-link [username]="u.username" />
+                                </a>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="email">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Email</th>
+                            <td mat-cell *matCellDef="let u">{{ u.email }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="role">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Role</th>
+                            <td mat-cell *matCellDef="let u">
+                                <mat-select [value]="u.role" (selectionChange)="changeRole(u, $event.value)"
+                                    class="inline-select">
+                                    @for (r of roles; track r) {
+                                    <mat-option [value]="r">{{ roleLabels[r] }}</mat-option>
+                                    }
+                                </mat-select>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Status</th>
+                            <td mat-cell *matCellDef="let u">
+                                <mat-select [value]="u.status" (selectionChange)="changeStatus(u, $event.value)"
+                                    class="inline-select">
+                                    @for (s of statuses; track s) {
+                                    <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
+                                    }
+                                </mat-select>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="reportCount">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Reports</th>
+                            <td mat-cell *matCellDef="let u">{{ u.reportCount }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="registrationDate">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Joined</th>
+                            <td mat-cell *matCellDef="let u">{{ u.registrationDate | date:'mediumDate' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let u">
+                                <button mat-icon-button i18n-matTooltip matTooltip="View details"
+                                    (click)="openUserDetail(u)">
+                                    <img src="/icons/math/infinite.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                </button>
+                                <button mat-icon-button i18n-matTooltip matTooltip="Reset reports"
+                                    (click)="resetUserReports(u)" [disabled]="!u.reportCount" class="flag-btn">
+                                    <img src="/icons/ui/flag.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                </button>
+                                <button mat-icon-button i18n-matTooltip matTooltip="Login as" (click)="loginAs(u)">
+                                    <img src="/icons/arrows/symbol_arrow_right.svg" alt="" aria-hidden="true"
+                                        class="mc-icon" />
+                                </button>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="userColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: userColumns;"></tr>
+                    </table>
+                </div>
+                <mat-paginator [length]="usersTotalCount()" [pageSize]="usersPageSize()" [pageIndex]="usersPage()"
+                    [pageSizeOptions]="[25, 50, 100]" (page)="onUsersPageChange($event)" showFirstLastButtons />
+                }
+                }
+            </div>
+        </mat-tab>
+
+        <!-- ═══ SCHEMATICS TAB ═══ -->
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <span i18n>Schematics</span>
+                @if (hasSchematicDeletedNotif()) {
+                <span class="tab-dot"></span>
+                }
+            </ng-template>
+            <div class="tab-content">
+                <div class="search-col">
+                    <mat-form-field appearance="outline" class="search-field">
+                        <mat-label i18n>Search schematics</mat-label>
+                        <input matInput [(ngModel)]="schematicsSearch" (keyup.enter)="searchSchematics()"
+                            (ngModelChange)="onSchematicSearchInput($event)" [matAutocomplete]="schematicSearchAuto" />
+                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                        <mat-autocomplete #schematicSearchAuto="matAutocomplete"
+                            [displayWith]="displaySchematicSuggestion"
+                            (optionSelected)="onSchematicSuggestionSelected($event)">
+                            @for (s of schematicSearchSuggestions(); track s.label + s.type) {
+                            <mat-option [value]="s">
+                                <span style="display:flex;align-items:center;gap:8px;">
+                                    @if (s.type === 'user') {
+                                    <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" class="mc-icon"
+                                        style="margin-right:8px;" />
+                                    } @else {
+                                    <img src="/icons/weapons/pickaxe.svg" alt="" aria-hidden="true" class="mc-icon"
+                                        style="margin-right:8px;" />
+                                    }
+                                    {{ s.label }}
+                                </span>
+                            </mat-option>
+                            }
+                        </mat-autocomplete>
+                    </mat-form-field>
+                    <div class="search-actions">
+                        <button mat-stroked-button (click)="schematicsSearch = ''; searchSchematics()">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
+                                width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
+                                <path fill="currentColor"
+                                    d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
+                                <path fill="var(--mc-icon-shadow)"
+                                    d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
+                            </svg> <span i18n>Clear</span>
+                        </button>
+                    </div>
+                </div>
+
+                @if (loadingSchematics()) {
+                <app-loading-spinner i18n-message message="Loading schematics…" />
+                } @else if (schematics().length === 0) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No schematics found" />
+                } @else {
+                <div class="table-scroll">
+                    <table mat-table [dataSource]="schematics()" matSort (matSortChange)="onSchematicsSort($event)"
+                        [matSortActive]="schematicsSort() === 'date' ? 'publishDate' : schematicsSort() === 'author' ? 'username' : schematicsSort() === 'reports' ? 'reportCount' : schematicsSort()"
+                        [matSortDirection]="schematicsDirection()" class="full-width">
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Name</th>
+                            <td mat-cell *matCellDef="let s">
+                                <a [routerLink]="['/schematics', s.id]">{{ s.name }}</a>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="username">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Author</th>
+                            <td mat-cell *matCellDef="let s">
+                                <app-user-link [username]="s.username" />
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Status</th>
+                            <td mat-cell *matCellDef="let s">{{ s.status }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="visibility">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Visibility</th>
+                            <td mat-cell *matCellDef="let s">{{ s.visibility }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="reportCount">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Reports</th>
+                            <td mat-cell *matCellDef="let s">{{ s.reportCount }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="publishDate">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Published</th>
+                            <td mat-cell *matCellDef="let s">{{ s.publishDate | date:'mediumDate' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let s">
+                                <button mat-icon-button i18n-matTooltip matTooltip="Toggle status"
+                                    (click)="toggleSchematicStatus(s)">
+                                    <img [src]="s.status === 'active' ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
+                                        alt="" aria-hidden="true" class="mc-icon" />
+                                </button>
+                                <button mat-icon-button i18n-matTooltip matTooltip="Reset reports"
+                                    (click)="resetSchematicReports(s)" [disabled]="!s.reportCount" class="flag-btn">
+                                    <img src="/icons/ui/flag.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                </button>
+                                <button mat-icon-button color="warn" i18n-matTooltip matTooltip="Delete"
+                                    (click)="deleteSchematic(s)">
+                                    <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                </button>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="schematicColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: schematicColumns;"
+                            [class.highlight-row]="highlightedSchematicIds().has(row.id)"
+                            (click)="onSchematicRowClick(row)">
+                        </tr>
+                    </table>
+                </div>
+                <mat-paginator [length]="schematicsTotalCount()" [pageSize]="schematicsPageSize()"
+                    [pageIndex]="schematicsPage()" [pageSizeOptions]="[25, 50, 100]"
+                    (page)="onSchematicsPageChange($event)" showFirstLastButtons />
+                }
+            </div>
+        </mat-tab>
+
+        <!-- ═══ LIVE MESSAGES TAB ═══ -->
+        <mat-tab i18n-label label="Live Messages">
+            <div class="tab-content">
+                <mat-card appearance="outlined" class="form-card">
+                    <mat-card-header><mat-card-title>@if (editingLiveMessageId()) {<span i18n>Edit Live Message</span>}
+                            @else {<span i18n>New Live Message</span>}</mat-card-title></mat-card-header>
+                    <mat-card-content>
+                        <form [formGroup]="liveMessageForm"
+                            (ngSubmit)="editingLiveMessageId() ? updateLiveMessage() : createLiveMessage()"
+                            class="live-msg-form">
+                            <mat-form-field appearance="outline" class="flex-grow">
+                                <mat-label i18n>Message</mat-label>
+                                <textarea matInput formControlName="message" rows="2" class="msg-textarea"
+                                    maxlength="2000"></textarea>
+                            </mat-form-field>
+                            <div class="live-msg-bottom">
+                                <mat-form-field appearance="outline" class="live-msg-type">
+                                    <mat-label i18n>Type</mat-label>
+                                    <mat-select formControlName="type">
+                                        @for (t of messageTypes; track t) {
+                                        <mat-option [value]="t">{{ t }}</mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                                <div class="live-msg-btns">
+                                    @if (editingLiveMessageId()) {
+                                    <button mat-stroked-button type="button"
+                                        (click)="editingLiveMessageId.set(null); liveMessageForm.reset({message: '', type: 'Info'})"
+                                        i18n>Cancel</button>
+                                    }
+                                    <button mat-flat-button type="submit" [disabled]="liveMessageForm.invalid">@if
+                                        (editingLiveMessageId()) {<span i18n>Update</span>} @else {<span
+                                            i18n>Add</span>}</button>
+                                </div>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+
+                @if (loadingLiveMessages()) {
+                <app-loading-spinner />
+                } @else if (liveMessages().length === 0) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No live messages" />
+                } @else {
+                <div class="table-scroll">
+                    <table mat-table [dataSource]="liveMessages()" class="full-width">
+                        <ng-container matColumnDef="message">
+                            <th mat-header-cell *matHeaderCellDef i18n>Message</th>
+                            <td mat-cell *matCellDef="let m" class="msg-cell">{{ m.message }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="type">
+                            <th mat-header-cell *matHeaderCellDef i18n>Type</th>
+                            <td mat-cell *matCellDef="let m">{{ m.type }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="time">
+                            <th mat-header-cell *matHeaderCellDef i18n>Time</th>
+                            <td mat-cell *matCellDef="let m">{{ m.time | date:'medium' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let m">
+                                <div class="live-msg-actions">
+                                    <button mat-icon-button (click)="editLiveMessage(m)" i18n-matTooltip
+                                        matTooltip="Edit">
+                                        <img src="/icons/weapons/pen.svg" alt="" aria-hidden="true" matButtonIcon
+                                            class="mc-icon" />
+                                    </button>
+                                    <button mat-icon-button color="warn" (click)="deleteLiveMessage(m)" i18n-matTooltip
+                                        matTooltip="Delete">
+                                        <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                    </button>
+                                </div>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="liveMessageColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: liveMessageColumns;"></tr>
+                    </table>
+                </div>
+                }
+            </div>
+        </mat-tab>
+
+        <!-- ═══ MOD MESSAGES TAB ═══ -->
+        <mat-tab i18n-label label="Mod Messages">
+            <div class="tab-content">
+                <mat-card appearance="outlined" class="form-card">
+                    <mat-card-header><mat-card-title i18n>New Mod Message</mat-card-title></mat-card-header>
+                    <mat-card-content>
+                        <form [formGroup]="modMessageForm" (ngSubmit)="createModMessage()" class="live-msg-form">
+                            <mat-form-field appearance="outline" class="flex-grow">
+                                <mat-label i18n>Message</mat-label>
+                                <textarea matInput formControlName="message" rows="2" class="msg-textarea"
+                                    maxlength="2000"></textarea>
+                            </mat-form-field>
+                            <div class="live-msg-bottom">
+                                <mat-form-field appearance="outline" class="live-msg-type">
+                                    <mat-label i18n>Type</mat-label>
+                                    <mat-select formControlName="type">
+                                        @for (t of messageTypes; track t) {
+                                        <mat-option [value]="t">{{ t }}</mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                                <div class="live-msg-btns">
+                                    <button mat-flat-button type="submit" [disabled]="modMessageForm.invalid"
+                                        i18n>Add</button>
+                                </div>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+
+                @if (loadingModMessages()) {
+                <app-loading-spinner />
+                } @else if (modMessages().length === 0) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No mod messages" />
+                } @else {
+                <div class="table-scroll">
+                    <table mat-table [dataSource]="modMessages()" class="full-width">
+                        <ng-container matColumnDef="message">
+                            <th mat-header-cell *matHeaderCellDef i18n>Message</th>
+                            <td mat-cell *matCellDef="let m" class="msg-cell">{{ m.message }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="type">
+                            <th mat-header-cell *matHeaderCellDef i18n>Type</th>
+                            <td mat-cell *matCellDef="let m">{{ m.type }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="isActive">
+                            <th mat-header-cell *matHeaderCellDef i18n>Active</th>
+                            <td mat-cell *matCellDef="let m">
+                                <button mat-icon-button (click)="toggleModMessage(m)">
+                                    <img [src]="m.isActive ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
+                                        alt="" aria-hidden="true" class="mc-icon" />
+                                </button>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="time">
+                            <th mat-header-cell *matHeaderCellDef i18n>Time</th>
+                            <td mat-cell *matCellDef="let m">{{ m.time | date:'medium' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let m">
+                                <button mat-icon-button color="warn" (click)="deleteModMessage(m)">
+                                    <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                </button>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="modMessageColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: modMessageColumns;"></tr>
+                    </table>
+                </div>
+                }
+            </div>
+        </mat-tab>
+
+        <!-- ═══ STORAGE TAB ═══ -->
+        <mat-tab i18n-label label="Storage">
+            <div class="tab-content">
+                @if (loadingStorage()) {
+                <app-loading-spinner i18n-message message="Loading storage stats…" />
+                } @else if (storageStats(); as stats) {
+                <div class="disk-progress">
+                    <div class="disk-progress-header">
+                        <span i18n>Disk Usage</span>
+                        <span>{{ stats.usedDiskGb | numFmt }} / {{ stats.totalDiskGb | numFmt }} GB ({{
+                            stats.diskUsagePercent | numFmt }}%)</span>
+                    </div>
+                    <mat-progress-bar mode="determinate" [value]="stats.diskUsagePercent"
+                        [color]="+stats.diskUsagePercent > 90 ? 'warn' : 'primary'" />
+                    <div class="disk-progress-footer">
+                        <span class="disk-footer-left"><img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true"
+                                class="mc-icon"
+                                style="width: 20px; height: 20px; transform: translateY(-2px);margin-right: 2px;" />
+                            <span i18n>{{
+                                stats.totalUsersWithSaves }} users
+                                with saves &middot; {{ stats.currentSaveUsageGb | numFmt }} GB used</span></span>
+                        <span class="disk-footer-right"><img src="/icons/ui/warning.svg" alt="" aria-hidden="true"
+                                class="mc-icon"
+                                style="width: 16px; height: 16px; transform: translateY(-2px);margin-right: 2px;" />
+                            <span i18n>Max potential: {{
+                                stats.maxPotentialGb | numFmt }} GB &middot; Free: {{ stats.freeDiskGb | numFmt }}
+                                GB</span></span>
+                    </div>
+                </div>
+
+                <div class="search-col">
+                    <mat-form-field appearance="outline" class="search-field">
+                        <mat-label i18n>Search storage</mat-label>
+                        <input matInput [(ngModel)]="storageSearch" (keyup.enter)="searchStorage()" />
+                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                    </mat-form-field>
+                    <div class="search-actions">
+                        <button mat-stroked-button (click)="storageSearch = ''; searchStorage()">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
+                                width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
+                                <path fill="currentColor"
+                                    d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
+                                <path fill="var(--mc-icon-shadow)"
+                                    d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
+                            </svg> <span i18n>Clear</span>
+                        </button>
+                    </div>
+                </div>
+
+                @if (stats.userStorages && stats.userStorages.length > 0) {
+                <div class="table-scroll">
+                    <table mat-table [dataSource]="stats.userStorages" matSort (matSortChange)="onStorageSort($event)"
+                        [matSortActive]="storageSort() === 'total' ? 'totalMb' : storageSort() === 'saves' ? 'saveCount' : storageSort() === 'usage' ? 'percentageOfQuota' : storageSort() === 'quota' ? 'quotaGb' : storageSort()"
+                        [matSortDirection]="storageDirection()" class="full-width">
+                        <ng-container matColumnDef="username">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>User</th>
+                            <td mat-cell *matCellDef="let u">
+                                <app-user-link [username]="u.username" />
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="saveCount">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Saves</th>
+                            <td mat-cell *matCellDef="let u">{{ u.saveCount }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="totalMb">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Total (MB)</th>
+                            <td mat-cell *matCellDef="let u">{{ u.totalMb | numFmt }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="quotaGb">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Quota (GB)</th>
+                            <td mat-cell *matCellDef="let u">{{ u.quotaGb | numFmt }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="percentageOfQuota">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Usage %</th>
+                            <td mat-cell *matCellDef="let u">
+                                <div class="usage-cell">
+                                    <mat-progress-bar mode="determinate" [value]="u.percentageOfQuota"
+                                        [color]="u.percentageOfQuota > 90 ? 'warn' : 'primary'" />
+                                    <span>{{ u.percentageOfQuota | numFmt }}%</span>
+                                </div>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="storageColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: storageColumns;"></tr>
+                    </table>
+                </div>
+                <mat-paginator [length]="storageTotalCount()" [pageSize]="storagePageSize()" [pageIndex]="storagePage()"
+                    [pageSizeOptions]="[25, 50, 100]" (page)="onStoragePageChange($event)" showFirstLastButtons />
+                }
+                }
+            </div>
+        </mat-tab>
+
+        <!-- ═══ TAGS TAB ═══ -->
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <span i18n>Tags</span>
+                @if (tagSuggestions().length || hasTagSuggestionNotif()) {
+                <span class="tab-dot"></span>
+                }
+            </ng-template>
+            <div class="tab-content">
+
+                <!-- Proposed Tags -->
+                <mat-card appearance="outlined" class="form-card">
+                    <mat-card-header>
+                        <mat-card-title i18n>Pending Tag Suggestions</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        @if (loadingTagSuggestions()) {
+                        <app-loading-spinner />
+                        } @else if (tagSuggestions().length === 0) {
+                        <p class="no-data" i18n>No pending suggestions.</p>
+                        } @else {
+                        <table mat-table [dataSource]="tagSuggestions()" class="full-width">
+                            <ng-container matColumnDef="suggestedName">
+                                <th mat-header-cell *matHeaderCellDef i18n>Tag name</th>
+                                <td mat-cell *matCellDef="let s">
+                                    @if (editingAcceptId() === +s.id) {
+                                    <input class="inline-input" [value]="acceptRenameValue()"
+                                        (input)="acceptRenameValue.set($any($event.target).value)" i18n-placeholder
+                                        placeholder="Tag name" />
+                                    } @else {
+                                    <strong>{{ s.suggestedName }}</strong>
+                                    }
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="username">
+                                <th mat-header-cell *matHeaderCellDef i18n>Proposed by</th>
+                                <td mat-cell *matCellDef="let s">{{ s.username }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="createdAt">
+                                <th mat-header-cell *matHeaderCellDef i18n>Date</th>
+                                <td mat-cell *matCellDef="let s">{{ s.createdAt | date:'mediumDate' }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="actions">
+                                <th mat-header-cell *matHeaderCellDef></th>
+                                <td mat-cell *matCellDef="let s">
+                                    @if (editingAcceptId() === +s.id) {
+                                    <button mat-icon-button color="primary" i18n-matTooltip matTooltip="Confirm accept"
+                                        (click)="acceptSuggestion(s)">
+                                        <img src="/icons/ui/check.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                    </button>
+                                    <button mat-icon-button i18n-matTooltip matTooltip="Cancel"
+                                        (click)="cancelAccept()">
+                                        <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                    </button>
+                                    } @else {
+                                    <button mat-icon-button color="primary" i18n-matTooltip
+                                        matTooltip="Accept (rename before confirming)" (click)="startAccept(s)">
+                                        <img src="/icons/ui/check.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                    </button>
+                                    <button mat-icon-button color="warn" i18n-matTooltip matTooltip="Refuse"
+                                        (click)="refuseSuggestion(s)">
+                                        <img src="/icons/ui/forbidden_circle.svg" alt="" aria-hidden="true"
+                                            class="mc-icon" />
+                                    </button>
+                                    }
+                                </td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="tagSuggestionColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: tagSuggestionColumns;"></tr>
+                        </table>
+                        }
+                    </mat-card-content>
+                </mat-card>
+                <mat-card appearance="outlined" class="form-card">
+                    <mat-card-header><mat-card-title i18n>Add Tag</mat-card-title></mat-card-header>
+                    <mat-card-content>
+                        <form [formGroup]="tagForm" (ngSubmit)="createTag()" class="inline-form">
+                            <mat-form-field appearance="outline" class="flex-grow">
+                                <mat-label i18n>Tag name</mat-label>
+                                <input matInput formControlName="name" />
+                            </mat-form-field>
+                            <button mat-flat-button type="submit" [disabled]="tagForm.invalid" i18n>Add</button>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+
+                @if (loadingTags()) {
+                <app-loading-spinner />
+                } @else if (tags().length === 0) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No tags" i18n-subtitle
+                    subtitle="Add a tag above" />
+                } @else {
+                <div class="search-col">
+                    <mat-form-field appearance="outline" class="search-field">
+                        <mat-label i18n>Filter tags</mat-label>
+                        <input matInput [ngModel]="tagSearch()" (ngModelChange)="tagSearch.set($event)" />
+                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                    </mat-form-field>
+                    <div class="search-actions">
+                        <button mat-stroked-button (click)="tagSearch.set('')">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
+                                width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
+                                <path fill="currentColor"
+                                    d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
+                                <path fill="var(--mc-icon-shadow)"
+                                    d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
+                            </svg> <span i18n>Clear</span>
+                        </button>
+                    </div>
+                </div>
+                <table mat-table [dataSource]="filteredTags()" class="full-width">
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef i18n>Name</th>
+                        <td mat-cell *matCellDef="let t">{{ t.name }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let t">
+                            <button mat-icon-button color="warn" (click)="deleteTag(t)" i18n-matTooltip
+                                matTooltip="Delete">
+                                <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                            </button>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="tagColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: tagColumns;"></tr>
+                </table>
+                }
+            </div>
+        </mat-tab>
+
+        <!-- ═══ VERSIONS TAB ═══ -->
+        <mat-tab i18n-label label="Versions">
+            <div class="tab-content">
+                <mat-card appearance="outlined" class="form-card">
+                    <mat-card-header><mat-card-title i18n>Add Version</mat-card-title></mat-card-header>
+                    <mat-card-content>
+                        <form [formGroup]="versionForm" (ngSubmit)="createVersion()" class="inline-form">
+                            <mat-form-field appearance="outline" class="flex-grow">
+                                <mat-label i18n>Version name</mat-label>
+                                <input matInput formControlName="name" placeholder="1.21.4" />
+                            </mat-form-field>
+                            <button mat-flat-button type="submit" [disabled]="versionForm.invalid" i18n>Add</button>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+
+                @if (loadingVersions()) {
+                <app-loading-spinner />
+                } @else if (versions().length === 0) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No versions" i18n-subtitle
+                    subtitle="Add a version above" />
+                } @else {
+                <div class="search-col">
+                    <mat-form-field appearance="outline" class="search-field">
+                        <mat-label i18n>Filter versions</mat-label>
+                        <input matInput [ngModel]="versionSearch()" (ngModelChange)="versionSearch.set($event)" />
+                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                    </mat-form-field>
+                    <div class="search-actions">
+                        <button mat-stroked-button (click)="versionSearch.set('')">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
+                                width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
+                                <path fill="currentColor"
+                                    d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
+                                <path fill="var(--mc-icon-shadow)"
+                                    d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
+                            </svg> <span i18n>Clear</span>
+                        </button>
+                    </div>
+                </div>
+                <table mat-table [dataSource]="filteredVersions()" class="full-width">
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef i18n>Name</th>
+                        <td mat-cell *matCellDef="let v">{{ v.name }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let v">
+                            <button mat-icon-button color="warn" (click)="deleteVersion(v)" i18n-matTooltip
+                                matTooltip="Delete">
+                                <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                            </button>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="versionColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: versionColumns;"></tr>
+                </table>
+                }
+            </div>
+        </mat-tab>
+        <!-- ╔═══ FAQ TAB ═══ -->
+        <mat-tab i18n-label label="FAQ">
+            <div class="tab-content">
+                <mat-card appearance="outlined" class="form-card">
+                    <mat-card-header><mat-card-title i18n>Add FAQ Entry</mat-card-title></mat-card-header>
+                    <mat-card-content>
+                        <form [formGroup]="faqCreateForm" (ngSubmit)="createFaq()" class="faq-create-form">
+                            <mat-form-field appearance="outline">
+                                <mat-label i18n>Question</mat-label>
+                                <input matInput formControlName="question" maxlength="300" />
+                            </mat-form-field>
+                            <mat-form-field appearance="outline">
+                                <mat-label i18n>Answer</mat-label>
+                                <textarea matInput formControlName="answer" rows="3" maxlength="2000"></textarea>
+                            </mat-form-field>
+                            <div class="inline-form">
+                                <mat-form-field appearance="outline" style="max-width: 120px">
+                                    <mat-label i18n>Order</mat-label>
+                                    <input matInput type="number" formControlName="order" />
+                                </mat-form-field>
+                                <button mat-flat-button type="submit" [disabled]="faqCreateForm.invalid"
+                                    i18n>Add</button>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+
+                @if (loadingAdminFaqs()) {
+                <app-loading-spinner />
+                } @else if (adminFaqs().length === 0) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No FAQ entries" i18n-subtitle
+                    subtitle="Add one above" />
+                } @else {
+                <mat-accordion multi class="faq-accordion">
+                    @for (f of adminFaqs(); track f.id) {
+                    @if (editingFaqId() === +f.id) {
+                    <mat-expansion-panel expanded>
+                        <mat-expansion-panel-header>
+                            <mat-panel-title i18n>Editing…</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <form [formGroup]="faqEditForm" (ngSubmit)="saveEditFaq(f)" class="faq-create-form">
+                            <mat-form-field appearance="outline">
+                                <mat-label i18n>Question</mat-label>
+                                <input matInput formControlName="question" maxlength="300" />
+                            </mat-form-field>
+                            <mat-form-field appearance="outline">
+                                <mat-label i18n>Answer</mat-label>
+                                <textarea matInput formControlName="answer" rows="3" maxlength="2000"></textarea>
+                            </mat-form-field>
+                            <div class="inline-form">
+                                <mat-form-field appearance="outline" style="max-width: 120px">
+                                    <mat-label i18n>Order</mat-label>
+                                    <input matInput type="number" formControlName="order" />
+                                </mat-form-field>
+                                <button mat-flat-button type="submit" [disabled]="faqEditForm.invalid"
+                                    i18n>Save</button>
+                                <button mat-stroked-button type="button" (click)="cancelEditFaq()" i18n>Cancel</button>
+                            </div>
+                        </form>
+                    </mat-expansion-panel>
+                    } @else {
+                    <mat-expansion-panel>
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>{{ f.question }}</mat-panel-title>
+                            <mat-panel-description i18n>Order: {{ f.order }}</mat-panel-description>
+                        </mat-expansion-panel-header>
+                        <p class="faq-answer">{{ f.answer }}</p>
+                        <mat-action-row>
+                            <button mat-stroked-button color="primary" (click)="startEditFaq(f)">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
+                                    width="18" height="18" matButtonIcon class="mc-icon"
+                                    style="transform: translateY(1px)">
+                                    <path fill="currentColor"
+                                        d="M9,4h3v1h-3zM9,5h3v1h-3zM9,6h3v1h-3zM5,7h4v1h-4zM12,7h4v1h-4zM5,8h4v1h-4zM12,8h4v1h-4zM5,9h4v1h-4zM12,9h4v1h-4zM2,10h3v1h-3zM9,10h3v1h-3zM16,10h4v1h-4zM2,11h3v1h-3zM9,11h3v1h-3zM16,11h4v1h-4zM2,12h3v1h-3zM9,12h3v1h-3zM16,12h4v1h-4zM5,13h4v1h-4zM20,13h3v1h-3zM5,14h4v1h-4zM20,14h3v1h-3zM5,15h4v1h-4zM20,15h3v1h-3zM9,16h3v1h-3zM23,16h4v1h-4zM9,17h3v1h-3zM23,17h4v1h-4zM9,18h3v1h-3zM23,18h4v1h-4zM12,19h4v1h-4zM20,19h7v1h-7zM12,20h4v1h-4zM20,20h7v1h-7zM12,21h4v1h-4zM20,21h7v1h-7zM16,22h11v1h-11zM16,23h11v1h-11zM16,24h11v1h-11z" />
+                                    <path fill="var(--mc-icon-shadow)"
+                                        d="M12,13h4v1h-4zM12,14h4v1h-4zM12,15h4v1h-4zM27,19h3v1h-3zM27,20h3v1h-3zM27,21h3v1h-3zM27,22h3v1h-3zM27,23h3v1h-3zM27,24h3v1h-3zM20,25h10v1h-10zM20,26h10v1h-10zM20,27h10v1h-10z" />
+                                </svg> <span i18n>Edit</span>
+                            </button>
+                            <button mat-stroked-button color="primary" (click)="deleteFaq(f)">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
+                                    width="18" height="18" matButtonIcon class="mc-icon"
+                                    style="transform: translateY(1px)">
+                                    <path fill="currentColor"
+                                        d="M5,2h18v1h-18zM5,3h18v1h-18zM5,4h18v1h-18zM2,5h25v1h-25zM2,6h25v1h-25zM2,7h25v1h-25zM2,8h3v1h-3zM12,8h4v1h-4zM23,8h4v1h-4zM2,9h3v1h-3zM12,9h4v1h-4zM23,9h4v1h-4zM2,10h3v1h-3zM12,10h4v1h-4zM23,10h4v1h-4zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM2,14h10v1h-10zM16,14h11v1h-11zM2,15h10v1h-10zM16,15h11v1h-11zM2,16h10v1h-10zM16,16h11v1h-11zM2,17h10v1h-10zM16,17h11v1h-11zM5,18h7v1h-7zM16,18h7v1h-7zM5,19h7v1h-7zM16,19h7v1h-7zM5,20h7v1h-7zM16,20h7v1h-7zM5,21h4v1h-4zM12,21h4v1h-4zM20,21h3v1h-3zM5,22h4v1h-4zM12,22h4v1h-4zM20,22h3v1h-3zM5,23h4v1h-4zM12,23h4v1h-4zM20,23h3v1h-3z" />
+                                    <path fill="var(--mc-icon-shadow)"
+                                        d="M5,8h7v1h-7zM16,8h7v1h-7zM27,8h3v1h-3zM5,9h7v1h-7zM16,9h7v1h-7zM27,9h3v1h-3zM5,10h7v1h-7zM16,10h7v1h-7zM27,10h3v1h-3zM5,11h4v1h-4zM16,11h4v1h-4zM27,11h3v1h-3zM5,12h4v1h-4zM16,12h4v1h-4zM27,12h3v1h-3zM5,13h4v1h-4zM16,13h4v1h-4zM27,13h3v1h-3zM27,14h3v1h-3zM27,15h3v1h-3zM27,16h3v1h-3zM27,17h3v1h-3zM12,18h4v1h-4zM23,18h7v1h-7zM12,19h4v1h-4zM23,19h7v1h-7zM12,20h4v1h-4zM23,20h7v1h-7zM9,21h3v1h-3zM23,21h4v1h-4zM9,22h3v1h-3zM23,22h4v1h-4zM9,23h3v1h-3zM23,23h4v1h-4zM9,24h3v1h-3zM16,24h4v1h-4zM23,24h4v1h-4zM9,25h3v1h-3zM16,25h4v1h-4zM23,25h4v1h-4zM9,26h3v1h-3zM16,26h4v1h-4zM23,26h4v1h-4z" />
+                                </svg> <span i18n>Delete</span>
+                            </button>
+                        </mat-action-row>
+                    </mat-expansion-panel>
+                    }
+                    }
+                </mat-accordion>
+                }
+            </div>
+        </mat-tab>
+
+        <!-- ╔═══ TICKETS TAB ═══ -->
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <span i18n>Tickets</span>
+                @if (tickets().some(t => !t.isRead) || hasContactTicketNotif()) {
+                <span class="tab-dot"></span>
+                }
+            </ng-template>
+            <div class="tab-content">
+
+                <!-- Ticket Detail Panel -->
+                @if (selectedTicket(); as t) {
+                <mat-card appearance="outlined" class="ticket-detail">
+                    <mat-card-header>
+                        <mat-card-title>{{ t.title }}</mat-card-title>
+                        <mat-card-subtitle>
+                            @if (t.username) { <span>{{ t.username }}</span> } @else { <span i18n>Anonymous</span> }
+                            &nbsp;•&nbsp;
+                            {{ t.createdAt | date:'medium' }}
+                        </mat-card-subtitle>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <p class="ticket-body">{{ t.description }}</p>
+                        @if (t.contact) {
+                        <div class="ticket-contact">
+                            <mat-icon>contact_mail</mat-icon>
+                            <span>{{ t.contact }}</span>
+                        </div>
+                        }
+                        @if (t.imagePaths.length) {
+                        <div class="ticket-images">
+                            @for (img of t.imagePaths; track img) {
+                            <a [href]="img" target="_blank">
+                                <img [src]="img" class="ticket-thumb" alt="attachment" />
+                            </a>
+                            }
+                        </div>
+                        }
+                    </mat-card-content>
+                    <mat-card-actions>
+                        <button mat-stroked-button (click)="closeTicket()">
+                            <mat-icon>arrow_back</mat-icon> <span i18n>Back to list</span>
+                        </button>
+                        <button mat-stroked-button color="warn" (click)="deleteTicket(t)">
+                            <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" matButtonIcon
+                                class="mc-icon" /> <span i18n>Delete</span>
+                        </button>
+                    </mat-card-actions>
+                </mat-card>
+                } @else {
+
+                <div class="search-row">
+                    <button mat-stroked-button class="newest-toggle" (click)="toggleTicketsUnreadOnly()">
+                        <img [src]="ticketsUnreadOnly() ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
+                            alt="" aria-hidden="true" class="mc-icon" />
+                        @if (ticketsUnreadOnly()) { <span i18n
+                            style="transform: translateY(1px); display: inline-block;">Show all</span> } @else { <span
+                            i18n style="transform: translateY(1px); display: inline-block;">Unread only</span> }
+                    </button>
+                </div>
+
+                @if (loadingTickets()) {
+                <app-loading-spinner />
+                } @else if (tickets().length === 0) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No tickets" i18n-subtitle
+                    subtitle="No contact messages yet" />
+                } @else {
+                <table mat-table [dataSource]="tickets()" class="full-width">
+                    <ng-container matColumnDef="title">
+                        <th mat-header-cell *matHeaderCellDef i18n>Subject</th>
+                        <td mat-cell *matCellDef="let t">
+                            <strong [class.unread-label]="!t.isRead">{{ t.title }}</strong>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="username">
+                        <th mat-header-cell *matHeaderCellDef i18n>From</th>
+                        <td mat-cell *matCellDef="let t">{{ t.username ?? 'Anonymous' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="isRead">
+                        <th mat-header-cell *matHeaderCellDef i18n>Status</th>
+                        <td mat-cell *matCellDef="let t">
+                            @if (t.isRead) {
+                            <span class="status-read" i18n>Read</span>
+                            } @else {
+                            <span class="status-unread" i18n>New</span>
+                            }
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="createdAt">
+                        <th mat-header-cell *matHeaderCellDef i18n>Date</th>
+                        <td mat-cell *matCellDef="let t">{{ t.createdAt | date:'mediumDate' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let t">
+                            <button mat-icon-button i18n-matTooltip matTooltip="View" (click)="viewTicket(t)">
+                                <img src="/icons/math/infinite.svg" alt="" aria-hidden="true" class="mc-icon" />
+                            </button>
+                            <button mat-icon-button color="warn" i18n-matTooltip matTooltip="Delete"
+                                (click)="deleteTicket(t)">
+                                <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                            </button>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="ticketColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ticketColumns;" [class.unread-row]="!row.isRead"></tr>
+                </table>
+                <mat-paginator [length]="ticketsTotalCount()" [pageSize]="ticketsPageSize()" [pageIndex]="ticketsPage()"
+                    [pageSizeOptions]="[25, 50, 100]" (page)="onTicketsPageChange($event)" showFirstLastButtons />
+                }
+                }
+            </div>
+        </mat-tab>
+
+    </mat-tab-group>
+</div>

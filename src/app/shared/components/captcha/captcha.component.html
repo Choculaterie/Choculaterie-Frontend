@@ -1,0 +1,54 @@
+<div class="captcha-field" [class.captcha-field-active]="phase() !== 'checkbox'">
+    <span class="captcha-label" i18n>Security check</span>
+    <div class="captcha-inner">
+        @if (phase() === 'checkbox') {
+        <div class="captcha-checkbox" (click)="onCheckboxClick()">
+            <div class="captcha-checkbox-box">
+                <img src="/icons/shapes/box.svg" alt="" aria-hidden="true" class="mc-icon" />
+            </div>
+            <span class="captcha-checkbox-label" i18n>I'm not a robot</span>
+        </div>
+        } @else if (phase() === 'loading') {
+        <div class="captcha-checkbox">
+            <img src="loading.gif" alt="" style="width:22px;height:22px;object-fit:contain" />
+            <span class="captcha-checkbox-label" i18n>Loading puzzle…</span>
+        </div>
+        } @else if (phase() === 'error') {
+        <div class="captcha-error">
+            <span>{{ errorMsg() }}</span>
+            <button mat-stroked-button (click)="onCheckboxClick()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
+                    height="18" matButtonIcon class="mc-icon" style="transform: translate(0px, 1px);">
+                    <path fill="currentColor"
+                        d="M2,4h25v1h-25zM2,5h25v1h-25zM2,6h25v1h-25zM2,7h3v1h-3zM9,7h11v1h-11zM23,7h4v1h-4zM2,8h3v1h-3zM9,8h11v1h-11zM23,8h4v1h-4zM2,9h3v1h-3zM9,9h11v1h-11zM23,9h4v1h-4zM2,10h25v1h-25zM2,11h25v1h-25zM2,12h25v1h-25zM2,13h10v1h-10zM16,13h11v1h-11zM2,14h10v1h-10zM16,14h11v1h-11zM2,15h10v1h-10zM16,15h11v1h-11zM2,16h25v1h-25zM2,17h25v1h-25zM2,18h25v1h-25zM2,19h3v1h-3zM9,19h11v1h-11zM23,19h4v1h-4zM2,20h3v1h-3zM9,20h11v1h-11zM23,20h4v1h-4zM2,21h3v1h-3zM9,21h11v1h-11zM23,21h4v1h-4zM2,22h25v1h-25zM2,23h25v1h-25zM2,24h25v1h-25z" />
+                    <path fill="var(--mc-icon-shadow)"
+                        d="M5,7h4v1h-4zM20,7h3v1h-3zM27,7h3v1h-3zM5,8h4v1h-4zM20,8h3v1h-3zM27,8h3v1h-3zM5,9h4v1h-4zM20,9h3v1h-3zM27,9h3v1h-3zM27,10h3v1h-3zM27,11h3v1h-3zM27,12h3v1h-3zM12,13h4v1h-4zM27,13h3v1h-3zM12,14h4v1h-4zM27,14h3v1h-3zM12,15h4v1h-4zM27,15h3v1h-3zM27,16h3v1h-3zM27,17h3v1h-3zM27,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM27,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM27,20h3v1h-3zM5,21h4v1h-4zM20,21h3v1h-3zM27,21h3v1h-3zM27,22h3v1h-3zM27,23h3v1h-3zM27,24h3v1h-3zM5,25h25v1h-25zM5,26h25v1h-25zM5,27h25v1h-25z" />
+                </svg> <span i18n>Retry</span>
+            </button>
+        </div>
+        } @else if (phase() === 'challenge') {
+        <p class="captcha-instructions">{{ instructions() }}</p>
+        <canvas #canvas [width]="canvasWidth" [height]="canvasHeight" (mousedown)="onPointerDown($event)"
+            (mousemove)="onPointerMove($event)" (mouseup)="onPointerUp($event)" (mouseleave)="onPointerUp($event)"
+            (touchstart)="onTouchStart($event)" (touchmove)="onTouchMove($event)" (touchend)="onTouchEnd($event)"
+            class="captcha-canvas">
+        </canvas>
+        <div class="captcha-actions">
+            <button mat-stroked-button type="button" (click)="resetChallenge()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
+                    height="18" matButtonIcon class="mc-icon" style="transform: translate(0px, 1px);">
+                    <path fill="currentColor"
+                        d="M2,4h25v1h-25zM2,5h25v1h-25zM2,6h25v1h-25zM2,7h3v1h-3zM9,7h11v1h-11zM23,7h4v1h-4zM2,8h3v1h-3zM9,8h11v1h-11zM23,8h4v1h-4zM2,9h3v1h-3zM9,9h11v1h-11zM23,9h4v1h-4zM2,10h25v1h-25zM2,11h25v1h-25zM2,12h25v1h-25zM2,13h10v1h-10zM16,13h11v1h-11zM2,14h10v1h-10zM16,14h11v1h-11zM2,15h10v1h-10zM16,15h11v1h-11zM2,16h25v1h-25zM2,17h25v1h-25zM2,18h25v1h-25zM2,19h3v1h-3zM9,19h11v1h-11zM23,19h4v1h-4zM2,20h3v1h-3zM9,20h11v1h-11zM23,20h4v1h-4zM2,21h3v1h-3zM9,21h11v1h-11zM23,21h4v1h-4zM2,22h25v1h-25zM2,23h25v1h-25zM2,24h25v1h-25z" />
+                    <path fill="var(--mc-icon-shadow)"
+                        d="M5,7h4v1h-4zM20,7h3v1h-3zM27,7h3v1h-3zM5,8h4v1h-4zM20,8h3v1h-3zM27,8h3v1h-3zM5,9h4v1h-4zM20,9h3v1h-3zM27,9h3v1h-3zM27,10h3v1h-3zM27,11h3v1h-3zM27,12h3v1h-3zM12,13h4v1h-4zM27,13h3v1h-3zM12,14h4v1h-4zM27,14h3v1h-3zM12,15h4v1h-4zM27,15h3v1h-3zM27,16h3v1h-3zM27,17h3v1h-3zM27,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM27,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM27,20h3v1h-3zM5,21h4v1h-4zM20,21h3v1h-3zM27,21h3v1h-3zM27,22h3v1h-3zM27,23h3v1h-3zM27,24h3v1h-3zM5,25h25v1h-25zM5,26h25v1h-25zM5,27h25v1h-25z" />
+                </svg> <span i18n>New puzzle</span>
+            </button>
+        </div>
+        } @else if (phase() === 'solved') {
+        <div class="captcha-checkbox captcha-solved">
+            <img src="/icons/shapes/box_checked.svg" alt="" aria-hidden="true" class="mc-icon solved-icon" />
+            <span class="captcha-checkbox-label" i18n>Verified</span>
+        </div>
+        }
+    </div>
+</div>

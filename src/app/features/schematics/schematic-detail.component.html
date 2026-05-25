@@ -1,0 +1,515 @@
+<div class="page-container">
+    @if (loading()) {
+    <div class="skeleton-page">
+        <div class="skeleton-gallery"></div>
+        <div class="skeleton-header">
+            <div>
+                <div class="skeleton-line" style="width: 40%; height: 2rem; margin-bottom: 0.5rem;"></div>
+                <div class="skeleton-line" style="width: 25%; height: 1rem;"></div>
+            </div>
+            <div class="skeleton-actions">
+                <div class="skeleton-btn" style="width: 80px;"></div>
+                <div class="skeleton-btn" style="width: 110px;"></div>
+                <div class="skeleton-btn" style="width: 140px;"></div>
+                <div class="skeleton-btn skeleton-icon-btn"></div>
+            </div>
+        </div>
+        <div class="skeleton-grid">
+            <div class="skeleton-card">
+                <div class="skeleton-line" style="width: 35%; height: 1.25rem; margin-bottom: 1rem;"></div>
+                <div class="skeleton-line" style="width: 100%; height: 0.875rem; margin-bottom: 0.5rem;"></div>
+                <div class="skeleton-line" style="width: 90%; height: 0.875rem; margin-bottom: 0.5rem;"></div>
+                <div class="skeleton-line" style="width: 70%; height: 0.875rem;"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-line" style="width: 35%; height: 1.25rem; margin-bottom: 1rem;"></div>
+                <div class="skeleton-line" style="width: 80%; height: 0.875rem; margin-bottom: 0.5rem;"></div>
+                <div class="skeleton-line" style="width: 60%; height: 0.875rem; margin-bottom: 0.5rem;"></div>
+                <div class="skeleton-line" style="width: 75%; height: 0.875rem;"></div>
+            </div>
+        </div>
+    </div>
+    } @else if (error()) {
+    <div class="error-banner"><img src="/icons/ui/warning.svg" alt="" aria-hidden="true" class="mc-icon" /> {{ error()
+        }}</div>
+    } @else if (schematic()) {
+    @let s = schematic()!;
+
+    <!-- Image gallery -->
+    @if (s.pictures.length || getYouTubeId(s.youtubeLink)) {
+    @let videoIdx = s.pictures.length;
+    @let hasVideo = !!getYouTubeId(s.youtubeLink);
+    @let totalItems = s.pictures.length + (hasVideo ? 1 : 0);
+    <div class="gallery">
+        <div class="gallery-main">
+            @if (selectedImage()
+            < s.pictures.length) { <div class="gallery-main-inner"
+                (click)="imageFit.set(imageFit() === 'cover' ? 'contain' : 'cover')">
+                <app-skeleton-img [src]="s.pictures[selectedImage()].filePath | schematicImg" [alt]="s.name"
+                    height="500px" [objectFit]="imageFit()" borderRadius="12px" />
+        </div>
+        } @else if (hasVideo) {
+        <iframe class="video-embed" [src]="getYouTubeEmbedUrl(s.youtubeLink)" frameborder="0" allowfullscreen
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+        </iframe>
+        }
+    </div>
+    @if (totalItems > 1) {
+    <div class="gallery-thumbs">
+        @for (pic of s.pictures; track pic.id; let i = $index) {
+        <app-skeleton-img [src]="pic.filePath | schematicImg" [alt]="'Image ' + (i + 1)" height="60px"
+            borderRadius="8px" [class.active]="i === selectedImage()" (click)="selectedImage.set(i)" />
+        }
+        @if (hasVideo) {
+        <div class="video-thumb" [class.active]="selectedImage() === videoIdx" (click)="selectedImage.set(videoIdx)">
+            <img [src]="getYouTubeThumb(s.youtubeLink)" alt="Video" />
+            <mat-icon class="play-overlay">play_circle</mat-icon>
+        </div>
+        }
+    </div>
+    }
+</div>
+}
+
+<!-- Header -->
+<div class="detail-header">
+    <div>
+        <div class="title-row">
+            <h1>{{ s.name }}</h1>
+            @if (s.forked) {
+            <button mat-icon-button class="forked-badge" i18n-matTooltip matTooltip="View original"
+                (click)="navigateToOriginal(s.forked)">
+                <img src="/icons/weapons/trident.svg" alt="" aria-hidden="true" class="mc-icon" />
+            </button>
+            }
+        </div>
+        <p class="author"><span i18n>by</span>&nbsp;<app-user-link [username]="s.username" /> &middot; {{
+            s.publishDate |
+            date:'mediumDate'
+            }}</p>
+    </div>
+    <div class="header-actions">
+        <button mat-flat-button (click)="toggleLike()">
+            <img [src]="s.isLiked ? '/icons/ui/star_thick.svg' : '/icons/ui/start_thick_empty.svg'" alt=""
+                aria-hidden="true" matButtonIcon class="mc-icon" />
+            @if (s.isLiked) { <span i18n>Starred</span> } @else { <span i18n>Star</span> }
+        </button>
+        @if (hasLitematicFiles()) {
+        <button mat-stroked-button (click)="viewIn3DAction()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
+                height="18" matButtonIcon class="mc-icon" style="transform: translateY(2px)">
+                <path fill="currentColor"
+                    d="M14,2h7v1h-7zM14,3h7v1h-7zM14,4h7v1h-7zM11,5h3v1h-3zM21,5h3v1h-3zM11,6h3v1h-3zM21,6h3v1h-3zM11,7h3v1h-3zM21,7h3v1h-3zM5,8h6v1h-6zM21,8h3v1h-3zM5,9h6v1h-6zM21,9h3v1h-3zM5,10h6v1h-6zM21,10h3v1h-3zM2,11h3v1h-3zM24,11h3v1h-3zM2,12h3v1h-3zM24,12h3v1h-3zM2,13h3v1h-3zM24,13h3v1h-3zM2,14h3v1h-3zM24,14h3v1h-3zM2,15h3v1h-3zM24,15h3v1h-3zM2,16h3v1h-3zM24,16h3v1h-3zM2,17h3v1h-3zM24,17h3v1h-3zM5,18h19v1h-19zM5,19h19v1h-19zM5,20h19v1h-19z" />
+                <path fill="var(--mc-icon-shadow)"
+                    d="M18,5h3v1h-3zM18,6h3v1h-3zM18,7h3v1h-3zM14,8h4v1h-4zM24,8h3v1h-3zM14,9h4v1h-4zM24,9h3v1h-3zM14,10h4v1h-4zM24,10h3v1h-3zM8,11h6v1h-6zM8,12h6v1h-6zM8,13h6v1h-6zM5,14h3v1h-3zM27,14h3v1h-3zM5,15h3v1h-3zM27,15h3v1h-3zM5,16h3v1h-3zM27,16h3v1h-3zM5,17h3v1h-3zM27,17h3v1h-3zM27,18h3v1h-3zM27,19h3v1h-3zM27,20h3v1h-3zM8,21h19v1h-19zM8,22h19v1h-19zM8,23h19v1h-19z" />
+            </svg> <span i18n>View in 3D</span>
+        </button>
+        }
+        <button mat-stroked-button (click)="download()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
+                height="18" matButtonIcon class="mc-icon">
+                <path fill="currentColor"
+                    d="M11,2h5v1h-5zM11,3h5v1h-5zM11,4h5v1h-5zM11,5h5v1h-5zM11,6h5v1h-5zM11,7h5v1h-5zM11,8h5v1h-5zM11,9h5v1h-5zM11,10h5v1h-5zM11,11h5v1h-5zM11,12h5v1h-5zM11,13h5v1h-5zM2,14h23v1h-23zM2,15h23v1h-23zM2,16h23v1h-23zM2,17h23v1h-23zM7,18h14v1h-14zM7,19h14v1h-14zM7,20h14v1h-14zM11,21h5v1h-5zM11,22h5v1h-5zM11,23h5v1h-5z" />
+                <path fill="var(--mc-icon-shadow)"
+                    d="M16,5h5v1h-5zM16,6h5v1h-5zM16,7h5v1h-5zM16,8h5v1h-5zM16,9h5v1h-5zM16,10h5v1h-5zM16,11h5v1h-5zM16,12h5v1h-5zM16,13h5v1h-5zM21,18h9v1h-9zM21,19h9v1h-9zM21,20h9v1h-9zM16,21h9v1h-9zM16,22h9v1h-9zM16,23h9v1h-9zM16,24h5v1h-5zM16,25h5v1h-5zM16,26h5v1h-5z" />
+            </svg> <span i18n>Download ({{ s.downloadCount | numFmt }})</span>
+        </button>
+        <button mat-icon-button [matMenuTriggerFor]="moreMenu">
+            <img src="/icons/ui/power_2.svg" alt="" aria-hidden="true" class="mc-icon"
+                style="transform: translateY(1px)" />
+        </button>
+        <mat-menu #moreMenu="matMenu">
+            <!-- @if (!s.forked) {
+            <button mat-menu-item (click)="fork()">
+                <img src="/icons/weapons/trident.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" /> <span
+                    i18n>Fork</span>
+            </button>
+            } -->
+            <button mat-menu-item (click)="shareSchematic()">
+                <img src="/icons/misc/anchor.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" /> <span
+                    i18n>Share</span>
+            </button>
+            @if (!isOwner()) {
+            <button mat-menu-item (click)="report()">
+                <img src="/icons/ui/flag.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" /> <span
+                    i18n>Report</span>
+            </button>
+            }
+            @if (isOwner()) {
+            <button mat-menu-item (click)="startEdit()">
+                <img src="/icons/weapons/pen.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" /> <span
+                    i18n>Edit</span>
+            </button>
+            <button mat-menu-item (click)="deleteSchematic()" class="warn-item">
+                <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" /> <span
+                    i18n>Delete</span>
+            </button>
+            }
+        </mat-menu>
+    </div>
+</div>
+
+<mat-divider />
+
+<div class="tags-versions-grid">
+    @if (s.tags.length) {
+    <div class="tags-section">
+        <h3 i18n>Tags</h3>
+        <mat-chip-set>
+            @for (tag of s.tags; track tag) {
+            <mat-chip [routerLink]="['/schematics']" [queryParams]="{tag: tag}">{{ tag }}</mat-chip>
+            }
+        </mat-chip-set>
+    </div>
+    }
+    @if (s.versions.length) {
+    <div class="tags-section">
+        <h3 i18n>Versions</h3>
+        <mat-chip-set>
+            @for (ver of s.versions; track ver) {
+            <mat-chip [routerLink]="['/schematics']" [queryParams]="{version: ver}">{{ ver }}</mat-chip>
+            }
+        </mat-chip-set>
+    </div>
+    }
+</div>
+
+<!-- Info cards -->
+<div class="detail-grid">
+    <!-- Description -->
+    <mat-card appearance="outlined">
+        <mat-card-header><mat-card-title i18n>Description</mat-card-title></mat-card-header>
+        <mat-card-content>
+            <div class="description markdown-content" [innerHTML]="(s.description || noDescriptionText) | markdown">
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Details -->
+    <mat-card appearance="outlined">
+        <mat-card-header><mat-card-title i18n>Details</mat-card-title></mat-card-header>
+        <mat-card-content>
+            <ul class="detail-list">
+                <li><mat-icon>category</mat-icon> <strong i18n>Type:</strong> {{ s.schematicType }}</li>
+                <li><svg class="detail-icon" viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">
+                        <path fill="currentColor"
+                            d="M5,8h7v1h-7zM16,8h7v1h-7zM5,9h7v1h-7zM16,9h7v1h-7zM5,10h7v1h-7zM16,10h7v1h-7zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM2,14h3v1h-3zM12,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM12,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM12,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM12,17h4v1h-4zM23,17h4v1h-4zM5,18h7v1h-7zM16,18h7v1h-7zM5,19h7v1h-7zM16,19h7v1h-7zM5,20h7v1h-7zM16,20h7v1h-7z" />
+                        <path fill="var(--mc-icon-shadow)"
+                            d="M9,11h3v1h-3zM20,11h3v1h-3zM9,12h3v1h-3zM20,12h3v1h-3zM9,13h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM16,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM16,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM16,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM16,17h4v1h-4zM27,17h3v1h-3zM27,18h3v1h-3zM27,19h3v1h-3zM27,20h3v1h-3zM9,21h7v1h-7zM20,21h7v1h-7zM9,22h7v1h-7zM20,22h7v1h-7zM9,23h7v1h-7zM20,23h7v1h-7z" />
+                    </svg> <strong i18n>Visibility:</strong> {{ s.visibility }}</li>
+                <li><svg class="detail-icon" viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">
+                        <path fill="currentColor"
+                            d="M5,8h7v1h-7zM16,8h7v1h-7zM5,9h7v1h-7zM16,9h7v1h-7zM5,10h7v1h-7zM16,10h7v1h-7zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM2,14h3v1h-3zM12,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM12,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM12,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM12,17h4v1h-4zM23,17h4v1h-4zM5,18h7v1h-7zM16,18h7v1h-7zM5,19h7v1h-7zM16,19h7v1h-7zM5,20h7v1h-7zM16,20h7v1h-7z" />
+                        <path fill="var(--mc-icon-shadow)"
+                            d="M9,11h3v1h-3zM20,11h3v1h-3zM9,12h3v1h-3zM20,12h3v1h-3zM9,13h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM16,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM16,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM16,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM16,17h4v1h-4zM27,17h3v1h-3zM27,18h3v1h-3zM27,19h3v1h-3zM27,20h3v1h-3zM9,21h7v1h-7zM20,21h7v1h-7zM9,22h7v1h-7zM20,22h7v1h-7zM9,23h7v1h-7zM20,23h7v1h-7z" />
+                    </svg> <strong i18n>Views:</strong> {{ s.viewCount | numFmt }}</li>
+                @if (s.authorName) {
+                <li><svg class="detail-icon mc-icon" viewBox="0 0 32 32" shape-rendering="crispEdges"
+                        aria-hidden="true">
+                        <path fill="currentColor"
+                            d="M5,4h18v1h-18zM5,5h18v1h-18zM5,6h18v1h-18zM2,7h7v1h-7zM12,7h4v1h-4zM20,7h7v1h-7zM2,8h7v1h-7zM12,8h4v1h-4zM20,8h7v1h-7zM2,9h7v1h-7zM12,9h4v1h-4zM20,9h7v1h-7zM2,10h7v1h-7zM12,10h4v1h-4zM20,10h7v1h-7zM2,11h7v1h-7zM12,11h4v1h-4zM20,11h7v1h-7zM2,12h7v1h-7zM12,12h4v1h-4zM20,12h7v1h-7zM2,13h25v1h-25zM2,14h25v1h-25zM2,15h25v1h-25zM2,16h3v1h-3zM9,16h11v1h-11zM23,16h4v1h-4zM2,17h3v1h-3zM9,17h11v1h-11zM23,17h4v1h-4zM2,18h3v1h-3zM9,18h11v1h-11zM23,18h4v1h-4zM2,19h7v1h-7zM20,19h7v1h-7zM2,20h7v1h-7zM20,20h7v1h-7zM2,21h7v1h-7zM20,21h7v1h-7zM5,22h18v1h-18zM5,23h18v1h-18zM5,24h18v1h-18z" />
+                        <path fill="var(--mc-icon-shadow)"
+                            d="M9,7h3v1h-3zM16,7h4v1h-4zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM27,10h3v1h-3zM9,11h3v1h-3zM16,11h4v1h-4zM27,11h3v1h-3zM9,12h3v1h-3zM16,12h4v1h-4zM27,12h3v1h-3zM27,13h3v1h-3zM27,14h3v1h-3zM27,15h3v1h-3zM5,16h4v1h-4zM20,16h3v1h-3zM27,16h3v1h-3zM5,17h4v1h-4zM20,17h3v1h-3zM27,17h3v1h-3zM5,18h4v1h-4zM20,18h3v1h-3zM27,18h3v1h-3zM12,19h8v1h-8zM27,19h3v1h-3zM12,20h8v1h-8zM27,20h3v1h-3zM12,21h8v1h-8zM27,21h3v1h-3zM23,22h7v1h-7zM23,23h7v1h-7zM23,24h7v1h-7zM9,25h18v1h-18zM9,26h18v1h-18zM9,27h18v1h-18z" />
+                    </svg> <strong i18n>Author:</strong>
+                    @if (s.authorExist) {
+                    <a [routerLink]="['/users', s.authorExist]">{{ s.authorExist }}</a>
+                    } @else {
+                    {{ s.authorName }}
+                    }
+                </li>
+                }
+                @if (s.forked) {
+                <li><svg class="detail-icon" viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">
+                        <path fill="currentColor"
+                            d="M18,2h3v1h-3zM24,2h3v1h-3zM18,3h3v1h-3zM24,3h3v1h-3zM18,4h3v1h-3zM24,4h3v1h-3zM14,5h4v1h-4zM21,5h3v1h-3zM14,6h4v1h-4zM21,6h3v1h-3zM14,7h4v1h-4zM21,7h3v1h-3zM14,8h7v1h-7zM24,8h3v1h-3zM14,9h7v1h-7zM24,9h3v1h-3zM14,10h7v1h-7zM24,10h3v1h-3zM14,11h10v1h-10zM14,12h10v1h-10zM14,13h10v1h-10zM11,14h3v1h-3zM11,15h3v1h-3zM11,16h3v1h-3zM11,17h3v1h-3zM8,18h3v1h-3zM8,19h3v1h-3zM8,20h3v1h-3zM5,21h3v1h-3zM5,22h3v1h-3zM5,23h3v1h-3zM2,24h3v1h-3zM2,25h3v1h-3zM2,26h3v1h-3z" />
+                        <path fill="var(--mc-icon-shadow)"
+                            d="M27,5h3v1h-3zM27,6h3v1h-3zM27,7h3v1h-3zM27,11h3v1h-3zM27,12h3v1h-3zM27,13h3v1h-3zM18,14h9v1h-9zM18,15h9v1h-9zM18,16h9v1h-9zM18,17h9v1h-9zM14,18h4v1h-4zM14,19h4v1h-4zM14,20h4v1h-4zM11,21h3v1h-3zM11,22h3v1h-3zM11,23h3v1h-3zM8,24h3v1h-3zM8,25h3v1h-3zM8,26h3v1h-3zM5,27h3v1h-3zM5,28h3v1h-3zM5,29h3v1h-3z" />
+                    </svg> <strong i18n>Forked from:</strong>
+                    <a [routerLink]="['/schematics', s.forked]">{{ s.forked }}</a>
+                </li>
+                }
+                @if (s.downloadLinkMediaFire) {
+                <li><svg class="detail-icon" viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">
+                        <path fill="currentColor"
+                            d="M12,2h4v1h-4zM12,3h4v1h-4zM12,4h4v1h-4zM9,5h3v1h-3zM16,5h4v1h-4zM9,6h3v1h-3zM16,6h4v1h-4zM9,7h3v1h-3zM16,7h4v1h-4zM12,8h4v1h-4zM12,9h4v1h-4zM12,10h4v1h-4zM9,11h11v1h-11zM9,12h11v1h-11zM9,13h11v1h-11zM2,14h3v1h-3zM12,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM12,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM12,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM12,17h4v1h-4zM23,17h4v1h-4zM2,18h3v1h-3zM12,18h4v1h-4zM23,18h4v1h-4zM2,19h3v1h-3zM12,19h4v1h-4zM23,19h4v1h-4zM2,20h3v1h-3zM12,20h4v1h-4zM23,20h4v1h-4zM5,21h4v1h-4zM12,21h4v1h-4zM20,21h3v1h-3zM5,22h4v1h-4zM12,22h4v1h-4zM20,22h3v1h-3zM5,23h4v1h-4zM12,23h4v1h-4zM20,23h3v1h-3zM9,24h11v1h-11zM9,25h11v1h-11zM9,26h11v1h-11z" />
+                        <path fill="var(--mc-icon-shadow)"
+                            d="M20,8h3v1h-3zM20,9h3v1h-3zM20,10h3v1h-3zM16,14h7v1h-7zM16,15h7v1h-7zM16,16h7v1h-7zM16,17h7v1h-7zM5,18h4v1h-4zM16,18h4v1h-4zM27,18h3v1h-3zM5,19h4v1h-4zM16,19h4v1h-4zM27,19h3v1h-3zM5,20h4v1h-4zM16,20h4v1h-4zM27,20h3v1h-3zM16,21h4v1h-4zM27,21h3v1h-3zM16,22h4v1h-4zM27,22h3v1h-3zM16,23h4v1h-4zM27,23h3v1h-3zM23,24h4v1h-4zM23,25h4v1h-4zM23,26h4v1h-4zM12,27h11v1h-11zM12,28h11v1h-11zM12,29h11v1h-11z" />
+                    </svg> <strong i18n>External download:</strong>
+                    <a [href]="s.downloadLinkMediaFire" target="_blank" rel="noopener" i18n>Download link</a>
+                </li>
+                }
+                @if (s.youtubeLink) {
+                <li><mat-icon>smart_display</mat-icon> <strong i18n>External video:</strong>
+                    <a [href]="s.youtubeLink" target="_blank" rel="noopener" i18n>Watch video</a>
+                </li>
+                }
+            </ul>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<!-- Tags -->
+@if (editing()) {
+<mat-card appearance="outlined" class="edit-card" appDropZone [fullPage]="true" accept="image/*,.litematic"
+    (filesDrop)="onEditFilesDropped($event)">
+    <mat-card-header><mat-card-title i18n>Edit Schematic</mat-card-title></mat-card-header>
+    <mat-card-content>
+        <form [formGroup]="editForm" (ngSubmit)="submitEdit()">
+            <div class="edit-grid">
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Name</mat-label>
+                    <input matInput formControlName="name" maxlength="50" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Type</mat-label>
+                    <mat-select formControlName="schematicType">
+                        <mat-option value="Build" i18n>Build</mat-option>
+                        <mat-option value="Redstone" i18n>Redstone</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="span-2">
+                    <mat-label i18n>Description</mat-label>
+                    <textarea matInput formControlName="description" rows="3" maxlength="2000"></textarea>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Tags</mat-label>
+                    <mat-chip-grid #editTagChipGrid>
+                        @for (tag of editTagList(); track tag) {
+                        <mat-chip-row (removed)="removeEditTag(tag)">
+                            {{ tag }}
+                            <button matChipRemove aria-label="Remove tag"><img src="/icons/letters/X.svg" alt=""
+                                    aria-hidden="true" class="mc-icon" /></button>
+                        </mat-chip-row>
+                        }
+                        <input [matChipInputFor]="editTagChipGrid" [matChipInputSeparatorKeyCodes]="[]"
+                            [matAutocomplete]="editTagAuto" (input)="onTagInput($any($event.target).value)"
+                            #editTagInput />
+                    </mat-chip-grid>
+                    <mat-autocomplete #editTagAuto="matAutocomplete"
+                        (optionSelected)="onEditTagSelected($event, editTagInput)">
+                        @for (tag of filteredTags(); track tag) {
+                        <mat-option [value]="tag">{{ tag }}</mat-option>
+                        }
+                        @if (filteredTags().length === 0 && tagInputValue().length > 0) {
+                        <mat-option value="__suggest__">
+                            <span style="display:flex;align-items:center;gap:8px;">
+                                <img src="/icons/weapons/pen.svg" alt="" aria-hidden="true" class="mc-icon"
+                                    style="transform: translate(-2px, -2px)" />
+                                <span i18n>Propose a new tag</span>
+                            </span>
+                        </mat-option>
+                        }
+                    </mat-autocomplete>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Versions</mat-label>
+                    <mat-chip-grid #editVersionChipGrid>
+                        @for (ver of editVersionList(); track ver) {
+                        <mat-chip-row (removed)="removeEditVersion(ver)">
+                            {{ ver }}
+                            <button matChipRemove aria-label="Remove version"><img src="/icons/letters/X.svg" alt=""
+                                    aria-hidden="true" class="mc-icon" /></button>
+                        </mat-chip-row>
+                        }
+                        <input [matChipInputFor]="editVersionChipGrid" [matChipInputSeparatorKeyCodes]="[]"
+                            [matAutocomplete]="editVersionAuto" (input)="onVersionInput($any($event.target).value)"
+                            #editVersionInput />
+                    </mat-chip-grid>
+                    <mat-autocomplete #editVersionAuto="matAutocomplete"
+                        (optionSelected)="onEditVersionSelected($event, editVersionInput)">
+                        @for (ver of filteredVersions(); track ver) {
+                        <mat-option [value]="ver">{{ ver }}</mat-option>
+                        }
+                    </mat-autocomplete>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Author Name</mat-label>
+                    <input matInput formControlName="authorName" maxlength="100" [matAutocomplete]="editAuthorAuto"
+                        (input)="onAuthorInput($any($event.target).value)" />
+                    <mat-autocomplete #editAuthorAuto="matAutocomplete" [displayWith]="displayAuthor"
+                        (optionSelected)="onEditAuthorSelected($event)">
+                        @for (author of authorSuggestions(); track author.userId) {
+                        <mat-option [value]="author">{{ author.username }}</mat-option>
+                        }
+                    </mat-autocomplete>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Visibility</mat-label>
+                    <mat-select formControlName="visibility">
+                        <mat-option value="Public" i18n>Public</mat-option>
+                        <mat-option value="Unlisted" i18n>Unlisted</mat-option>
+                        <mat-option value="Private" i18n>Private</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>External download link</mat-label>
+                    <input matInput formControlName="downloadLinkMediaFire" maxlength="500" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>External video link</mat-label>
+                    <input matInput formControlName="youtubeLink" maxlength="500" />
+                </mat-form-field>
+            </div>
+
+            <!-- Pictures (unified list - supports cross-category drag & drop) -->
+            <div class="file-previews">
+                <h4 i18n>Pictures ({{ editPictureItems().length }} / 10)</h4>
+                <div class="preview-grid" cdkDropList cdkDropListOrientation="mixed"
+                    (cdkDropListDropped)="dropPicture($event)">
+                    @for (item of editPictureItems(); track $index; let i = $index) {
+                    <div class="preview-item" [class.cover]="i === 0" [class.new-file]="item.type === 'new'" cdkDrag>
+                        @if (item.type === 'existing') {
+                        <img [src]="item.pic.filePath | schematicImg" alt="Existing picture" (click)="setEditCover(i)"
+                            style="cursor:pointer" />
+                        } @else {
+                        <img [src]="item.preview" [alt]="item.file.name" (click)="setEditCover(i)"
+                            style="cursor:pointer" />
+                        }
+                        <div class="preview-actions">
+                            <button mat-icon-button type="button" (click)="removePicture(i)" i18n-matTooltip
+                                matTooltip="Remove">
+                                <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+                            </button>
+                            <span class="spacer"></span>
+                            <button mat-icon-button type="button" class="drag-handle" cdkDragHandle i18n-matTooltip
+                                matTooltip="Drag">
+                                <img src="/icons/letters/side.svg" alt="" aria-hidden="true" class="mc-icon" />
+                            </button>
+                        </div>
+                        @if (i === 0) {
+                        <span class="cover-badge" i18n>Cover</span>
+                        }
+                        @if (item.type === 'new') {
+                        <span class="new-badge" i18n>New</span>
+                        }
+                    </div>
+                    }
+                </div>
+                @if (editPictureItems().length < 10) { <div class="file-row">
+                    <button mat-stroked-button type="button" (click)="editPictureInput.click()">
+                        <mat-icon>add_photo_alternate</mat-icon> <span i18n>Add Pictures</span>
+                    </button>
+                    <input #editPictureInput type="file" accept="image/*" multiple hidden
+                        (change)="onEditPicturesSelected($event)" />
+            </div>
+            }
+            </div>
+
+            <!-- Litematic Files (unified list - supports cross-category drag & drop) -->
+            <div class="file-previews">
+                <h4 i18n>Litematic Files ({{ editFileItems().length }} / 10)</h4>
+                <div class="file-list-preview" cdkDropList (cdkDropListDropped)="dropFile($event)">
+                    @for (item of editFileItems(); track $index; let i = $index) {
+                    <div class="file-item" [class.new-file]="item.type === 'new'" cdkDrag>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
+                            width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
+                            <path fill="currentColor"
+                                d="M8,2h13v1h-13zM8,3h13v1h-13zM8,4h13v1h-13zM18,5h6v1h-6zM18,6h6v1h-6zM18,7h6v1h-6zM18,8h9v1h-9zM18,9h9v1h-9zM18,10h9v1h-9zM14,11h4v1h-4zM24,11h3v1h-3zM14,12h4v1h-4zM24,12h3v1h-3zM14,13h4v1h-4zM24,13h3v1h-3zM11,14h3v1h-3zM24,14h3v1h-3zM11,15h3v1h-3zM24,15h3v1h-3zM11,16h3v1h-3zM24,16h3v1h-3zM11,17h3v1h-3zM24,17h3v1h-3zM8,18h3v1h-3zM24,18h3v1h-3zM8,19h3v1h-3zM24,19h3v1h-3zM8,20h3v1h-3zM24,20h3v1h-3zM5,21h3v1h-3zM5,22h3v1h-3zM5,23h3v1h-3zM2,24h3v1h-3zM2,25h3v1h-3zM2,26h3v1h-3z" />
+                            <path fill="var(--mc-icon-shadow)"
+                                d="M11,5h7v1h-7zM11,6h7v1h-7zM11,7h7v1h-7zM21,11h3v1h-3zM27,11h3v1h-3zM21,12h3v1h-3zM27,12h3v1h-3zM21,13h3v1h-3zM27,13h3v1h-3zM18,14h3v1h-3zM27,14h3v1h-3zM18,15h3v1h-3zM27,15h3v1h-3zM18,16h3v1h-3zM27,16h3v1h-3zM18,17h3v1h-3zM27,17h3v1h-3zM14,18h4v1h-4zM27,18h3v1h-3zM14,19h4v1h-4zM27,19h3v1h-3zM14,20h4v1h-4zM27,20h3v1h-3zM11,21h3v1h-3zM27,21h3v1h-3zM11,22h3v1h-3zM27,22h3v1h-3zM11,23h3v1h-3zM27,23h3v1h-3zM8,24h3v1h-3zM8,25h3v1h-3zM8,26h3v1h-3zM5,27h3v1h-3zM5,28h3v1h-3zM5,29h3v1h-3z" />
+                        </svg>
+                        <span class="file-name-text">{{ item.file.name.endsWith('.litematic') ? item.file.name.slice(0,
+                            -10) :
+                            item.file.name }}</span>
+                        <span class="spacer"></span>
+                        @if (item.type === 'new') {
+                        <span class="new-badge-inline" i18n>New</span>
+                        }
+                        @if (item.file.name.endsWith('.litematic')) {
+                        <button mat-icon-button type="button" (click)="generatePictureForItem(item)" i18n-matTooltip
+                            matTooltip="Generate picture">
+                            <mat-icon>photo_camera</mat-icon>
+                        </button>
+                        <button mat-icon-button type="button" (click)="viewIn3DForItem(item)" i18n-matTooltip
+                            matTooltip="View in 3D">
+                            <mat-icon>view_in_ar</mat-icon>
+                        </button>
+                        }
+                        <button mat-icon-button type="button" (click)="removeFile(i)" i18n-matTooltip
+                            matTooltip="Remove">
+                            <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        </button>
+                        <button mat-icon-button type="button" class="drag-handle" cdkDragHandle i18n-matTooltip
+                            matTooltip="Drag">
+                            <img src="/icons/letters/side.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        </button>
+                    </div>
+                    }
+                </div>
+                @if (editFileItems().length < 10) { <div class="file-row">
+                    <button mat-stroked-button type="button" (click)="editLitematicInput.click()">
+                        <mat-icon>note_add</mat-icon> <span i18n>Add Litematic Files</span>
+                    </button>
+                    <input #editLitematicInput type="file" accept=".litematic" multiple hidden
+                        (change)="onEditLitematicsSelected($event)" />
+            </div>
+            }
+            </div>
+
+            @if (editFileError()) {
+            <div class="edit-file-error"><img src="/icons/ui/warning.svg" alt="" aria-hidden="true" class="mc-icon" />
+                {{ editFileError() }}</div>
+            }
+
+            <div class="edit-actions">
+                <button mat-stroked-button type="button" (click)="editing.set(false)" i18n>Cancel</button>
+                <button mat-flat-button type="submit" [disabled]="editForm.invalid || saving() || !isEditFileValid()">
+                    @if (saving()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span i18n>Save
+                        Changes</span> }
+                </button>
+            </div>
+        </form>
+    </mat-card-content>
+</mat-card>
+}
+
+<!-- Files -->
+@if (s.files.length) {
+<div class="files-section">
+    <h3><span i18n>Files</span></h3>
+    <div class="file-list">
+        @for (f of s.files; track f.id) {
+        <mat-card appearance="outlined" class="file-card">
+            <mat-card-content>
+                <div class="file-header">
+                    <img src="/icons/ui/info.svg" alt="" aria-hidden="true" class="mc-icon"
+                        style="width: 20px; height: 20px; margin-right: 4px; transform: translateY(-1px);" />
+                    <span class="file-name">{{ f.name.endsWith('.litematic') ? f.name.slice(0, -10) : f.name }}</span>
+                    <span class="spacer"></span>
+                    @if (f.name.endsWith('.litematic')) {
+                    <button mat-icon-button i18n-matTooltip matTooltip="Generate picture" (click)="generatePicture(f)">
+                        <img src="/icons/ui/smile.svg" alt="" aria-hidden="true" class="mc-icon" />
+                    </button>
+                    <button mat-icon-button i18n-matTooltip matTooltip="View in 3D" (click)="viewIn3D(f)">
+                        <img src="/icons/weather/cloud.svg" alt="" aria-hidden="true" class="mc-icon"
+                            style="transform: translateY(2px)" />
+                    </button>
+                    }
+                    <button mat-icon-button i18n-matTooltip matTooltip="Download file" (click)="downloadSingleFile(f)">
+                        <img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" />
+                    </button>
+                </div>
+                @if (f.blockList) {
+                <div class="block-list">
+                    @for (block of parseBlockList(f.blockList); track block.name) {
+                    <span class="block-chip">
+                        @if (getBlockRect(block.name); as rect) {
+                        <span class="block-tex" [style.background-image]="'url(' + atlasUrl + ')'"
+                            [style.background-position]="'-' + rect[0] + 'px -' + rect[1] + 'px'"></span>
+                        } @else {
+                        <mat-icon class="block-icon">widgets</mat-icon>
+                        }
+                        <span class="block-name">{{ block.name }}</span>
+                        <span class="block-count">&times;{{ block.count }}</span>
+                    </span>
+                    }
+                </div>
+                }
+            </mat-card-content>
+        </mat-card>
+        }
+    </div>
+</div>
+}
+}
+</div>

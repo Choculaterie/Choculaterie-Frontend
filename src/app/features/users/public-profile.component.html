@@ -1,0 +1,825 @@
+<div class="page-container">
+    @if (loading() && !displayProfile()) {
+    <div class="profile-skeleton">
+        <div class="profile-skeleton-banner"></div>
+        <div class="profile-skeleton-content">
+            <div class="profile-skeleton-avatar"></div>
+            <div class="profile-skeleton-info">
+                <div class="profile-skeleton-line profile-skeleton-name"></div>
+                <div class="profile-skeleton-line profile-skeleton-bio"></div>
+            </div>
+        </div>
+    </div>
+    } @else if (error()) {
+    <div class="error-banner"><img src="/icons/ui/warning.svg" alt="" aria-hidden="true" class="mc-icon" /> {{ error()
+        }}</div>
+    } @else if (displayProfile(); as p) {
+
+    <!-- Split drag-drop overlay (own profile only) -->
+    @if (dragOver() && isOwnProfile()) {
+    <div class="split-overlay" (dragover)="$event.preventDefault()" (dragleave)="onOverlayLeave($event)"
+        (drop)="$event.preventDefault()">
+        <div class="split-half split-left" (dragover)="$event.preventDefault()" (drop)="onSplitDrop($event, 'avatar')">
+            <div class="split-frame">
+                <span class="material-icons split-icon">account_circle</span>
+                <span i18n>Profile Picture</span>
+            </div>
+        </div>
+        <div class="split-half split-right" (dragover)="$event.preventDefault()" (drop)="onSplitDrop($event, 'cover')">
+            <div class="split-frame">
+                <span class="material-icons split-icon">panorama</span>
+                <span i18n>Banner Picture</span>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- Banner Header (show if has cover or if own profile) -->
+    @if (p.coverImagePath || isOwnProfile()) {
+    <div class="profile-header" [class.has-cover]="p.coverImagePath">
+        @if (p.coverImagePath) {
+        <div class="cover-pic">
+            <app-skeleton-img [src]="p.coverImagePath | userImg" [alt]="p.username + ' cover'" height="100%"
+                objectFit="cover" />
+        </div>
+        }
+        @if (isOwnProfile()) {
+        <div class="cover-actions">
+            <button class="cover-edit-btn" i18n-matTooltip
+                [matTooltip]="p.coverImagePath ? 'Change cover (5:1 ratio recommended)' : 'Add cover image (5:1 ratio recommended)'"
+                (click)="coverInput.click()" [disabled]="coverUploading()">
+                <img [src]="p.coverImagePath ? '/icons/weapons/pen_white.svg' : '/icons/ui/add_image.svg'" alt=""
+                    aria-hidden="true" class="mc-icon" [class.mc-icon--fixed-white]="p.coverImagePath" />
+            </button>
+            @if (p.coverImagePath) {
+            <button class="cover-delete-btn" i18n-matTooltip matTooltip="Remove cover" (click)="deleteCoverImage()"
+                [disabled]="coverUploading()">
+                <img src="/icons/letters/X_white.svg" alt="" aria-hidden="true" class="mc-icon mc-icon--fixed-white" />
+            </button>
+            }
+        </div>
+        <input #coverInput type="file" accept="image/jpeg,image/png,image/webp" hidden
+            (change)="onCoverSelected($event)" />
+        }
+    </div>
+    }
+
+    <!-- Profile Info Section (below banner) -->
+    <div class="profile-content">
+        <div class="profile-avatar" [class.editable]="isOwnProfile()">
+            @if (isOwnProfile() && picUploading()) {
+            <div class="avatar-loading"><img src="loading.gif" alt=""
+                    style="width:48px;height:48px;object-fit:contain" /></div>
+            } @else if (p.filePath) {
+            <app-skeleton-img [src]="p.filePath | userImg" [alt]="p.username" height="100%" />
+            } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="80"
+                height="80" aria-hidden="true" class="mc-icon" style="transform:translate(4px,4px);">
+                <path fill="currentColor"
+                    d="M5,4h18v1h-18zM5,5h18v1h-18zM5,6h18v1h-18zM2,7h7v1h-7zM12,7h4v1h-4zM20,7h7v1h-7zM2,8h7v1h-7zM12,8h4v1h-4zM20,8h7v1h-7zM2,9h7v1h-7zM12,9h4v1h-4zM20,9h7v1h-7zM2,10h7v1h-7zM12,10h4v1h-4zM20,10h7v1h-7zM2,11h7v1h-7zM12,11h4v1h-4zM20,11h7v1h-7zM2,12h7v1h-7zM12,12h4v1h-4zM20,12h7v1h-7zM2,13h25v1h-25zM2,14h25v1h-25zM2,15h25v1h-25zM2,16h3v1h-3zM9,16h11v1h-11zM23,16h4v1h-4zM2,17h3v1h-3zM9,17h11v1h-11zM23,17h4v1h-4zM2,18h3v1h-3zM9,18h11v1h-11zM23,18h4v1h-4zM2,19h7v1h-7zM20,19h7v1h-7zM2,20h7v1h-7zM20,20h7v1h-7zM2,21h7v1h-7zM20,21h7v1h-7zM5,22h18v1h-18zM5,23h18v1h-18zM5,24h18v1h-18z" />
+                <path fill="var(--mc-icon-shadow)"
+                    d="M9,7h3v1h-3zM16,7h4v1h-4zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM27,10h3v1h-3zM9,11h3v1h-3zM16,11h4v1h-4zM27,11h3v1h-3zM9,12h3v1h-3zM16,12h4v1h-4zM27,12h3v1h-3zM27,13h3v1h-3zM27,14h3v1h-3zM27,15h3v1h-3zM5,16h4v1h-4zM20,16h3v1h-3zM27,16h3v1h-3zM5,17h4v1h-4zM20,17h3v1h-3zM27,17h3v1h-3zM5,18h4v1h-4zM20,18h3v1h-3zM27,18h3v1h-3zM12,19h8v1h-8zM27,19h3v1h-3zM12,20h8v1h-8zM27,20h3v1h-3zM12,21h8v1h-8zM27,21h3v1h-3zM23,22h7v1h-7zM23,23h7v1h-7zM23,24h7v1h-7zM9,25h18v1h-18zM9,26h18v1h-18zM9,27h18v1h-18z" />
+            </svg>
+            }
+            @if (isOwnProfile()) {
+            <button class="avatar-edit-btn" i18n-matTooltip matTooltip="Change picture" (click)="picInput.click()"
+                [disabled]="picUploading()">
+                <img src="/icons/weather/snow.svg" alt="" aria-hidden="true" class="mc-icon" />
+            </button>
+            <input #picInput type="file" accept="image/jpeg,image/png,image/webp" hidden
+                (change)="onPictureSelected($event)" />
+            }
+        </div>
+
+        <div class="profile-info">
+            <div class="name-row">
+                <h1>{{ p.username }}</h1>
+                @if (memberYears(p) != null) {
+                <span class="year-badge" [matTooltip]="'Member since ' + (p.registrationDate | date:'mediumDate')">{{
+                    memberYears(p)
+                    }}</span>
+                }
+                @if (p.badge != null) {
+                <mat-icon class="badge-icon" [style.color]="badgeColor(p.badge)" [matTooltip]="badgeLabel(p.badge)">{{
+                    badgeIcon(p.badge) }}</mat-icon>
+                }
+            </div>
+            @if (p.biographie) {
+            <div class="bio markdown-content" [innerHTML]="p.biographie | markdown"></div>
+            }
+        </div>
+    </div>
+
+    <!-- Meta Grid -->
+    <div class="meta-grid">
+        @if (p.minecraftUsername || p.isMinecraftLinked) {
+        <div class="meta-item" [class.meta-item--mc]="p.minecraftUsername"
+            (click)="p.minecraftUsername && openSkinViewer(p.minecraftUsername)">
+            <ng-icon name="matfMinecraftColored" size="18" /> <strong i18n>Minecraft:</strong>
+            @if (p.minecraftUsername) {
+            <span class="mc-name">{{ p.minecraftUsername }}</span>
+            }
+        </div>
+        }
+        @if (p.discordUsername || p.isDiscordLinked) {
+        <div class="meta-item"><ng-icon name="simpleDiscord" size="18" /> <strong i18n>Discord:</strong> {{
+            p.discordUsername
+            }}</div>
+        }
+        @if (isOwnProfile() && ownProfile()?.hasSecurityKeys) {
+        <div class="meta-item"><img src="/icons/weather/lightning.svg" alt="" aria-hidden="true" class="mc-icon" />
+            <span i18n>Security keys active</span>
+        </div>
+        }
+        @if (p.socialLinks?.length) {
+        <div class="social-links-meta">
+            @for (link of p.socialLinks; track link.id) {
+            <a [href]="link.url" target="_blank" rel="noopener" [matTooltip]="link.platform" class="social-link">
+                @if (isBrandIcon(link.platform)) {
+                <ng-icon [name]="socialIcon(link.platform)" size="20" />
+                } @else {
+                <img src="/icons/weather/meteor.svg" alt="" aria-hidden="true" class="mc-icon" />
+                }
+            </a>
+            }
+        </div>
+        }
+        <div class="meta-actions">
+            @if (!isOwnProfile() && enrichedProfile()) {
+            <button mat-flat-button (click)="toggleLike()">
+                <img [src]="enrichedProfile()!.isLiked ? '/icons/ui/star_thick.svg' : '/icons/ui/start_thick_empty.svg'"
+                    alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
+                @if (enrichedProfile()!.isLiked) { <span i18n>Starred</span> } @else { <span i18n>Star</span> }
+            </button>
+            <button mat-stroked-button (click)="reportUser()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
+                    height="18" matButtonIcon class="mc-icon mc-icon--draw" aria-hidden="true">
+                    <path fill="currentColor"
+                        d="M2,4h10v1h-10zM20,4h7v1h-7zM2,5h10v1h-10zM20,5h7v1h-7zM2,6h10v1h-10zM20,6h7v1h-7zM2,7h3v1h-3zM12,7h8v1h-8zM23,7h4v1h-4zM2,8h3v1h-3zM12,8h8v1h-8zM23,8h4v1h-4zM2,9h3v1h-3zM12,9h8v1h-8zM23,9h4v1h-4zM2,10h3v1h-3zM23,10h4v1h-4zM2,11h3v1h-3zM23,11h4v1h-4zM2,12h3v1h-3zM23,12h4v1h-4zM2,13h3v1h-3zM23,13h4v1h-4zM2,14h3v1h-3zM23,14h4v1h-4zM2,15h3v1h-3zM23,15h4v1h-4zM2,16h10v1h-10zM20,16h7v1h-7zM2,17h10v1h-10zM20,17h7v1h-7zM2,18h10v1h-10zM20,18h7v1h-7zM2,19h3v1h-3zM12,19h8v1h-8zM2,20h3v1h-3zM12,20h8v1h-8zM2,21h3v1h-3zM12,21h8v1h-8zM2,22h3v1h-3zM2,23h3v1h-3zM2,24h3v1h-3zM2,25h3v1h-3zM2,26h3v1h-3zM2,27h3v1h-3z" />
+                    <path fill="var(--mc-icon-shadow)"
+                        d="M5,7h7v1h-7zM27,7h3v1h-3zM5,8h7v1h-7zM27,8h3v1h-3zM5,9h7v1h-7zM27,9h3v1h-3zM5,10h4v1h-4zM16,10h7v1h-7zM27,10h3v1h-3zM5,11h4v1h-4zM16,11h7v1h-7zM27,11h3v1h-3zM5,12h4v1h-4zM16,12h7v1h-7zM27,12h3v1h-3zM5,13h4v1h-4zM27,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM27,16h3v1h-3zM27,17h3v1h-3zM27,18h3v1h-3zM5,19h7v1h-7zM23,19h7v1h-7zM5,20h7v1h-7zM23,20h7v1h-7zM5,21h7v1h-7zM23,21h7v1h-7zM5,22h4v1h-4zM16,22h7v1h-7zM5,23h4v1h-4zM16,23h7v1h-7zM5,24h4v1h-4zM16,24h7v1h-7zM5,25h4v1h-4zM5,26h4v1h-4zM5,27h4v1h-4zM5,28h4v1h-4zM5,29h4v1h-4zM5,30h4v1h-4z" />
+                </svg> <span i18n>Report</span>
+            </button>
+            @if (isAdmin()) {
+            <a mat-stroked-button routerLink="/admin" [queryParams]="{ tab: 0, userId: enrichedProfile()!.id }"
+                class="admin-manage-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
+                    height="18" matButtonIcon class="mc-icon mc-icon--draw" aria-hidden="true">
+                    <path fill="currentColor"
+                        d="M12,2h4v1h-4zM12,3h4v1h-4zM12,4h4v1h-4zM5,5h7v1h-7zM16,5h7v1h-7zM5,6h7v1h-7zM16,6h7v1h-7zM5,7h7v1h-7zM16,7h7v1h-7zM2,8h3v1h-3zM23,8h4v1h-4zM2,9h3v1h-3zM23,9h4v1h-4zM2,10h3v1h-3zM23,10h4v1h-4zM2,11h3v1h-3zM23,11h4v1h-4zM2,12h3v1h-3zM23,12h4v1h-4zM2,13h3v1h-3zM23,13h4v1h-4zM5,14h4v1h-4zM20,14h3v1h-3zM5,15h4v1h-4zM20,15h3v1h-3zM5,16h4v1h-4zM20,16h3v1h-3zM5,17h4v1h-4zM20,17h3v1h-3zM5,18h4v1h-4zM20,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM9,21h3v1h-3zM16,21h4v1h-4zM9,22h3v1h-3zM16,22h4v1h-4zM9,23h3v1h-3zM16,23h4v1h-4zM12,24h4v1h-4zM12,25h4v1h-4zM12,26h4v1h-4z" />
+                    <path fill="var(--mc-icon-shadow)"
+                        d="M9,8h7v1h-7zM20,8h3v1h-3zM9,9h7v1h-7zM20,9h3v1h-3zM9,10h7v1h-7zM20,10h3v1h-3zM5,11h4v1h-4zM27,11h3v1h-3zM5,12h4v1h-4zM27,12h3v1h-3zM5,13h4v1h-4zM27,13h3v1h-3zM27,14h3v1h-3zM27,15h3v1h-3zM27,16h3v1h-3zM27,17h3v1h-3zM9,18h3v1h-3zM23,18h4v1h-4zM9,19h3v1h-3zM23,19h4v1h-4zM9,20h3v1h-3zM23,20h4v1h-4zM23,21h4v1h-4zM23,22h4v1h-4zM23,23h4v1h-4zM20,24h3v1h-3zM20,25h3v1h-3zM20,26h3v1h-3zM16,27h4v1h-4zM16,28h4v1h-4zM16,29h4v1h-4z" />
+                </svg> <span i18n>Manage User</span>
+            </a>
+            }
+            }
+        </div>
+    </div>
+
+    <!-- Content Tabs -->
+    <mat-tab-group dynamicHeight disablePagination [selectedIndex]="selectedTab()"
+        (selectedTabChange)="onTabChange($event.index)">
+
+        <mat-tab i18n-label label="Schematics">
+            <div class="tab-content">
+                @if (loadingContent()) {
+                <app-loading-spinner [diameter]="36" />
+                } @else if (schematics().length === 0) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title
+                    [title]="isOwnProfile() ? 'No schematics yet' : 'No schematics'" i18n-subtitle
+                    [subtitle]="isOwnProfile() ? 'Upload your first schematic to see it here.' : 'This user hasn\'t published any schematics yet'" />
+                } @else {
+                <div class="schematic-grid">
+                    @for (s of schematics(); track s.id) {
+                    <app-schematic-card [schematic]="s" />
+                    }
+                </div>
+                }
+            </div>
+        </mat-tab>
+
+        <mat-tab i18n-label label="Starred Schematics">
+            <div class="tab-content">
+                @if (likedSchematics().length === 0) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No starred schematics"
+                    i18n-subtitle [subtitle]="isOwnProfile() ? 'Star schematics to save them here.' : ''" />
+                } @else {
+                <div class="schematic-grid">
+                    @for (s of likedSchematics(); track s.id) {
+                    <app-schematic-card [schematic]="s" />
+                    }
+                </div>
+                }
+            </div>
+        </mat-tab>
+
+        <mat-tab i18n-label label="Starred Users">
+            <div class="tab-content">
+                @if (likedUsers().length === 0) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No starred users" i18n-subtitle
+                    [subtitle]="isOwnProfile() ? 'Star other users to see them here.' : ''" />
+                } @else {
+                <div class="user-grid">
+                    @for (u of likedUsers(); track u.id) {
+                    <app-user-card [user]="u" />
+                    }
+                </div>
+                }
+            </div>
+        </mat-tab>
+
+        @if (isOwnProfile()) {
+
+        <!-- Account -->
+        <mat-tab i18n-label label="Account">
+            <div class="tab-content">
+                @let op = ownProfile()!;
+
+                <h3 class="section-heading"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
+                        shape-rendering="crispEdges" width="18" height="18" matButtonIcon class="mc-icon"
+                        style="color: var(--mat-sys-primary); transform: translateY(-1px);">
+                        <path fill="currentColor"
+                            d="M5,4h18v1h-18zM5,5h18v1h-18zM5,6h18v1h-18zM2,7h7v1h-7zM12,7h4v1h-4zM20,7h7v1h-7zM2,8h7v1h-7zM12,8h4v1h-4zM20,8h7v1h-7zM2,9h7v1h-7zM12,9h4v1h-4zM20,9h7v1h-7zM2,10h7v1h-7zM12,10h4v1h-4zM20,10h7v1h-7zM2,11h7v1h-7zM12,11h4v1h-4zM20,11h7v1h-7zM2,12h7v1h-7zM12,12h4v1h-4zM20,12h7v1h-7zM2,13h25v1h-25zM2,14h25v1h-25zM2,15h25v1h-25zM2,16h3v1h-3zM9,16h11v1h-11zM23,16h4v1h-4zM2,17h3v1h-3zM9,17h11v1h-11zM23,17h4v1h-4zM2,18h3v1h-3zM9,18h11v1h-11zM23,18h4v1h-4zM2,19h7v1h-7zM20,19h7v1h-7zM2,20h7v1h-7zM20,20h7v1h-7zM2,21h7v1h-7zM20,21h7v1h-7zM5,22h18v1h-18zM5,23h18v1h-18zM5,24h18v1h-18z" />
+                        <path fill="var(--mc-icon-shadow)"
+                            d="M9,7h3v1h-3zM16,7h4v1h-4zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM27,10h3v1h-3zM9,11h3v1h-3zM16,11h4v1h-4zM27,11h3v1h-3zM9,12h3v1h-3zM16,12h4v1h-4zM27,12h3v1h-3zM27,13h3v1h-3zM27,14h3v1h-3zM27,15h3v1h-3zM5,16h4v1h-4zM20,16h3v1h-3zM27,16h3v1h-3zM5,17h4v1h-4zM20,17h3v1h-3zM27,17h3v1h-3zM5,18h4v1h-4zM20,18h3v1h-3zM27,18h3v1h-3zM12,19h8v1h-8zM27,19h3v1h-3zM12,20h8v1h-8zM27,20h3v1h-3zM12,21h8v1h-8zM27,21h3v1h-3zM23,22h7v1h-7zM23,23h7v1h-7zM23,24h7v1h-7zM9,25h18v1h-18zM9,26h18v1h-18zM9,27h18v1h-18z" />
+                    </svg> <span i18n>Profile</span></h3>
+                <form [formGroup]="profileForm" (ngSubmit)="submitProfile()">
+                    <mat-form-field class="full-width" appearance="outline">
+                        <mat-label i18n>Username</mat-label>
+                        <input matInput formControlName="username" maxlength="15" />
+                        <img matPrefix src="/icons/ui/smile.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        @if (usernameChecking()) { <img src="loading.gif" alt="" matSuffix class="btn-loading-gif" /> }
+                        <mat-error>
+                            @if (profileForm.get('username')?.hasError('required')) { <span i18n>Username is
+                                required</span> }
+                            @else if (profileForm.get('username')?.hasError('minlength')) { <span i18n>Minimum 3
+                                characters</span> }
+                            @else if (profileForm.get('username')?.hasError('pattern')) { <span i18n>Only letters,
+                                numbers,
+                                hyphens, underscores</span> }
+                            @else if (profileForm.get('username')?.hasError('usernameTaken')) { <span i18n>Username is
+                                already
+                                taken</span> }
+                        </mat-error>
+                    </mat-form-field>
+                    <mat-form-field class="full-width profile-bio-field" appearance="outline">
+                        <mat-label i18n>Bio</mat-label>
+                        <textarea matInput formControlName="bio" rows="3" maxlength="500"></textarea>
+                        <img matPrefix src="/icons/ui/info.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        <mat-hint>{{ profileForm.get('bio')?.value?.length || 0 }} / 500</mat-hint>
+                    </mat-form-field>
+                    <div class="form-actions">
+                        <button mat-flat-button type="submit"
+                            [disabled]="profileForm.invalid || profileForm.pending || profileSaving()">
+                            @if (profileSaving()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
+                            <span i18n>Save
+                                profile</span> }
+                        </button>
+                    </div>
+                </form>
+
+                <mat-divider class="section-divider" />
+
+                <h3 class="section-heading"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
+                        shape-rendering="crispEdges" width="18" height="18" matButtonIcon class="mc-icon"
+                        style="color: var(--mat-sys-primary); transform: translateY(-2px);">
+                        <path fill="currentColor"
+                            d="M12,2h4v1h-4zM12,3h4v1h-4zM12,4h4v1h-4zM9,5h3v1h-3zM16,5h4v1h-4zM9,6h3v1h-3zM16,6h4v1h-4zM9,7h3v1h-3zM16,7h4v1h-4zM12,8h4v1h-4zM12,9h4v1h-4zM12,10h4v1h-4zM9,11h11v1h-11zM9,12h11v1h-11zM9,13h11v1h-11zM2,14h3v1h-3zM12,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM12,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM12,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM12,17h4v1h-4zM23,17h4v1h-4zM2,18h3v1h-3zM12,18h4v1h-4zM23,18h4v1h-4zM2,19h3v1h-3zM12,19h4v1h-4zM23,19h4v1h-4zM2,20h3v1h-3zM12,20h4v1h-4zM23,20h4v1h-4zM5,21h4v1h-4zM12,21h4v1h-4zM20,21h3v1h-3zM5,22h4v1h-4zM12,22h4v1h-4zM20,22h3v1h-3zM5,23h4v1h-4zM12,23h4v1h-4zM20,23h3v1h-3zM9,24h11v1h-11zM9,25h11v1h-11zM9,26h11v1h-11z" />
+                        <path fill="var(--mc-icon-shadow)"
+                            d="M20,8h3v1h-3zM20,9h3v1h-3zM20,10h3v1h-3zM16,14h7v1h-7zM16,15h7v1h-7zM16,16h7v1h-7zM16,17h7v1h-7zM5,18h4v1h-4zM16,18h4v1h-4zM27,18h3v1h-3zM5,19h4v1h-4zM16,19h4v1h-4zM27,19h3v1h-3zM5,20h4v1h-4zM16,20h4v1h-4zM27,20h3v1h-3zM16,21h4v1h-4zM27,21h3v1h-3zM16,22h4v1h-4zM27,22h3v1h-3zM16,23h4v1h-4zM27,23h3v1h-3zM23,24h4v1h-4zM23,25h4v1h-4zM23,26h4v1h-4zM12,27h11v1h-11zM12,28h11v1h-11zM12,29h11v1h-11z" />
+                    </svg> <span i18n>Social Links</span></h3>
+                <div class="social-links-list" cdkDropList (cdkDropListDropped)="dropSocialLink($event)">
+                    @for (link of editSocialLinks(); track $index) {
+                    <div class="social-link-row" cdkDrag>
+                        <mat-form-field appearance="outline" class="social-platform-field">
+                            <mat-label i18n>Platform</mat-label>
+                            <mat-select [value]="link.platform"
+                                (selectionChange)="updateSocialLink($index, 'platform', $event.value)">
+                                <mat-select-trigger>
+                                    <span class="select-trigger">
+                                        <ng-icon [name]="socialIcon(link.platform)" size="18" />
+                                        {{ link.platform === 'youtube' ? 'YouTube' : link.platform === 'twitch' ?
+                                        'Twitch' : link.platform === 'discord' ? 'Discord' : link.platform === 'matrix'
+                                        ? 'Matrix' : link.platform === 'github' ? 'GitHub' : 'Website' }}
+                                    </span>
+                                </mat-select-trigger>
+                                <mat-option value="youtube">
+                                    <span class="option-row"><ng-icon name="simpleYoutube" size="18" /> YouTube</span>
+                                </mat-option>
+                                <mat-option value="twitch">
+                                    <span class="option-row"><ng-icon name="simpleTwitch" size="18" /> Twitch</span>
+                                </mat-option>
+                                <mat-option value="discord">
+                                    <span class="option-row"><ng-icon name="simpleDiscord" size="18" /> Discord</span>
+                                </mat-option>
+                                <mat-option value="matrix">
+                                    <span class="option-row"><ng-icon name="simpleMatrix" size="18" /> Matrix</span>
+                                </mat-option>
+                                <mat-option value="github">
+                                    <span class="option-row"><ng-icon name="simpleGithub" size="18" /> GitHub</span>
+                                </mat-option>
+                                <mat-option value="website">
+                                    <span class="option-row"><ng-icon name="simpleFirefoxbrowser" size="18" />
+                                        Website</span>
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="social-url-field">
+                            <mat-label i18n>URL</mat-label>
+                            <input matInput [value]="link.url" required
+                                (input)="updateSocialLink($index, 'url', $any($event.target).value)"
+                                placeholder="https://..." maxlength="500" />
+                            @if (!link.url.trim()) {
+                            <mat-error i18n>URL is required</mat-error>
+                            }
+                        </mat-form-field>
+                        <button mat-icon-button (click)="removeSocialLink($index)" i18n-matTooltip matTooltip="Remove">
+                            <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        </button>
+                        <button mat-icon-button type="button" class="drag-handle" cdkDragHandle i18n-matTooltip
+                            matTooltip="Drag">
+                            <img src="/icons/letters/side.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        </button>
+                    </div>
+                    }
+                </div>
+                @if (editSocialLinks().length < 10) { <button mat-stroked-button (click)="addSocialLink()">
+                    <img src="/icons/math/plus.svg" alt="" aria-hidden="true" matButtonIcon class="mc-icon" /> <span
+                        i18n>Add link</span></button>
+                    }
+                    <div class="form-actions">
+                        <button mat-flat-button (click)="saveSocialLinks()"
+                            [disabled]="socialSaving() || hasEmptyUrls()">
+                            @if (socialSaving()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
+                            <span i18n>Save links</span>
+                            }
+                        </button>
+                    </div>
+
+                    <mat-divider class="section-divider" />
+
+                    <h3 class="section-heading"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
+                            shape-rendering="crispEdges" width="18" height="18" matButtonIcon class="mc-icon"
+                            style="color: var(--mat-sys-primary); transform: translateY(-2px);">
+                            <path fill="currentColor"
+                                d="M2,7h25v1h-25zM2,8h25v1h-25zM2,9h25v1h-25zM2,10h7v1h-7zM20,10h7v1h-7zM2,11h7v1h-7zM20,11h7v1h-7zM2,12h7v1h-7zM20,12h7v1h-7zM2,13h3v1h-3zM9,13h3v1h-3zM16,13h4v1h-4zM23,13h4v1h-4zM2,14h3v1h-3zM9,14h3v1h-3zM16,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM9,15h3v1h-3zM16,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM12,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM12,17h4v1h-4zM23,17h4v1h-4zM2,18h3v1h-3zM12,18h4v1h-4zM23,18h4v1h-4zM2,19h3v1h-3zM23,19h4v1h-4zM2,20h3v1h-3zM23,20h4v1h-4zM2,21h3v1h-3zM23,21h4v1h-4zM2,22h25v1h-25zM2,23h25v1h-25zM2,24h25v1h-25z" />
+                            <path fill="var(--mc-icon-shadow)"
+                                d="M9,10h11v1h-11zM27,10h3v1h-3zM9,11h11v1h-11zM27,11h3v1h-3zM9,12h11v1h-11zM27,12h3v1h-3zM5,13h4v1h-4zM27,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM20,16h3v1h-3zM27,16h3v1h-3zM5,17h4v1h-4zM20,17h3v1h-3zM27,17h3v1h-3zM5,18h4v1h-4zM20,18h3v1h-3zM27,18h3v1h-3zM5,19h4v1h-4zM16,19h4v1h-4zM27,19h3v1h-3zM5,20h4v1h-4zM16,20h4v1h-4zM27,20h3v1h-3zM5,21h4v1h-4zM16,21h4v1h-4zM27,21h3v1h-3zM27,22h3v1h-3zM27,23h3v1h-3zM27,24h3v1h-3zM5,25h25v1h-25zM5,26h25v1h-25zM5,27h25v1h-25z" />
+                        </svg> <span i18n>Email</span></h3>
+                    @if (editStep() === 'form') {
+                    <form [formGroup]="emailForm" (ngSubmit)="submitEmail()">
+                        <mat-form-field class="full-width" appearance="outline">
+                            <mat-label i18n>Email</mat-label>
+                            <input matInput type="email" formControlName="email" />
+                            <img matPrefix src="/icons/communication/mail.svg" alt="" aria-hidden="true"
+                                class="mc-icon" />
+                            @if (emailChecking()) { <img src="loading.gif" alt="" matSuffix class="btn-loading-gif" /> }
+                            <mat-hint i18n>Changing email requires a verification code</mat-hint>
+                            <mat-error>
+                                @if (emailForm.get('email')?.hasError('required')) { <span i18n>Email is required</span>
+                                }
+                                @else if (emailForm.get('email')?.hasError('email')) { <span i18n>Enter a valid
+                                    email</span> }
+                                @else if (emailForm.get('email')?.hasError('emailTaken')) { <span i18n>Email is already
+                                    in use</span> }
+                            </mat-error>
+                        </mat-form-field>
+                        <div class="form-actions">
+                            <button mat-flat-button type="submit"
+                                [disabled]="emailForm.invalid || emailForm.pending || editLoading()">
+                                @if (editLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
+                                <span i18n>Update
+                                    email</span> }
+                            </button>
+                        </div>
+                    </form>
+                    }
+                    @if (editStep() === 'confirm') {
+                    <div class="info-banner">
+                        <img src="/icons/communication/mail.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        <span i18n>A verification code was sent to <strong>{{ pendingEmail() }}</strong>. Enter it below
+                            to
+                            confirm.</span>
+                    </div>
+                    <form [formGroup]="confirmForm" (ngSubmit)="submitConfirm()">
+                        <mat-form-field class="full-width" appearance="outline">
+                            <mat-label i18n>Verification code</mat-label>
+                            <input matInput formControlName="code" autocomplete="one-time-code" maxlength="10" />
+                            <mat-icon matPrefix>pin</mat-icon>
+                            <mat-error>@if (confirmForm.get('code')?.hasError('required')) { <span i18n>Code is
+                                    required</span>
+                                }</mat-error>
+                        </mat-form-field>
+                        <div class="form-actions">
+                            <button mat-stroked-button type="button" (click)="cancelConfirm()" i18n>Cancel</button>
+                            <button mat-flat-button type="submit" [disabled]="confirmForm.invalid || editLoading()">
+                                @if (editLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
+                                <span i18n>Confirm</span>
+                                }
+                            </button>
+                        </div>
+                    </form>
+                    }
+
+                    <mat-divider class="section-divider" />
+
+                    <h3 class="section-heading"><svg style="color: var(--mat-sys-primary);"
+                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
+                            width="18" height="18" matButtonIcon class="mc-icon">
+                            <path fill="currentColor"
+                                d="M2,2h3v1h-3zM23,2h4v1h-4zM2,3h3v1h-3zM23,3h4v1h-4zM2,4h3v1h-3zM23,4h4v1h-4zM5,5h4v1h-4zM20,5h3v1h-3zM5,6h4v1h-4zM20,6h3v1h-3zM5,7h4v1h-4zM20,7h3v1h-3zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM12,11h4v1h-4zM12,12h4v1h-4zM12,13h4v1h-4zM2,14h3v1h-3zM9,14h3v1h-3zM16,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM9,15h3v1h-3zM16,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM9,16h3v1h-3zM16,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM9,17h3v1h-3zM16,17h4v1h-4zM23,17h4v1h-4zM5,18h4v1h-4zM20,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM2,21h3v1h-3zM9,21h3v1h-3zM16,21h4v1h-4zM23,21h4v1h-4zM2,22h3v1h-3zM9,22h3v1h-3zM16,22h4v1h-4zM23,22h4v1h-4zM2,23h3v1h-3zM9,23h3v1h-3zM16,23h4v1h-4zM23,23h4v1h-4z" />
+                            <path fill="var(--mc-icon-shadow)"
+                                d="M27,5h3v1h-3zM27,6h3v1h-3zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM12,18h4v1h-4zM27,18h3v1h-3zM12,19h4v1h-4zM27,19h3v1h-3zM12,20h4v1h-4zM27,20h3v1h-3zM5,24h4v1h-4zM12,24h4v1h-4zM20,24h3v1h-3zM27,24h3v1h-3zM5,25h4v1h-4zM12,25h4v1h-4zM20,25h3v1h-3zM27,25h3v1h-3zM5,26h4v1h-4zM12,26h4v1h-4zM20,26h3v1h-3zM27,26h3v1h-3z" />
+                        </svg> <span i18n>Password</span></h3>
+                    @if (resetStep() === 'request') {
+                    <p i18n>Request a password reset code to change your password.</p>
+                    <div class="form-actions">
+                        <button mat-flat-button (click)="requestPasswordReset()" [disabled]="resetLoading()">
+                            @if (resetLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
+                            <span i18n>Send reset
+                                code</span> }
+                        </button>
+                    </div>
+                    }
+                    @if (resetStep() === 'confirm') {
+                    <div class="info-banner"><img src="/icons/communication/mail.svg" alt="" aria-hidden="true"
+                            class="mc-icon" /> <span i18n>A reset code was sent to
+                            <strong>{{
+                                op.email }}</strong>.</span></div>
+                    <form [formGroup]="resetForm" (ngSubmit)="confirmPasswordReset()">
+                        <mat-form-field class="full-width" appearance="outline">
+                            <mat-label i18n>Reset code</mat-label>
+                            <input matInput formControlName="code" autocomplete="one-time-code" maxlength="10" />
+                            <mat-icon matPrefix>pin</mat-icon>
+                        </mat-form-field>
+                        <mat-form-field class="full-width" appearance="outline">
+                            <mat-label i18n>New password</mat-label>
+                            <input matInput [type]="hideResetPassword() ? 'password' : 'text'"
+                                formControlName="newPassword" autocomplete="new-password" />
+                            <img matPrefix src="/icons/weapons/swords.svg" alt="" aria-hidden="true" class="mc-icon"
+                                style="transform: translate(1px, 1px);" />
+                            <button mat-icon-button matSuffix type="button"
+                                (click)="hideResetPassword.set(!hideResetPassword())"
+                                [matTooltip]="hideResetPassword() ? 'Show password' : 'Hide password'" i18n-matTooltip>
+                                <img [src]="hideResetPassword() ? '/icons/ui/forbidden_circle.svg' : '/icons/circled/circle_empty_2.svg'"
+                                    alt="" aria-hidden="true" class="mc-icon" />
+                            </button>
+                            <mat-error>@if (resetForm.get('newPassword')?.hasError('required')) { <span i18n>Password is
+                                    required</span>
+                                }</mat-error>
+                        </mat-form-field>
+
+                        @if (resetForm.get('newPassword')?.value) {
+                        <ul class="password-rules">
+                            <li [class.met]="resetForm.get('newPassword')!.value!.length >= 6">
+                                <img [src]="resetForm.get('newPassword')!.value!.length >= 6 ? '/icons/ui/check.svg' : '/icons/letters/X_diagonal.svg'"
+                                    alt="" aria-hidden="true" class="mc-icon" />
+                                <span i18n>Min 6 characters</span>
+                            </li>
+                            <li [class.met]="pwHasUppercase()">
+                                <img [src]="pwHasUppercase() ? '/icons/ui/check.svg' : '/icons/letters/X_diagonal.svg'"
+                                    alt="" aria-hidden="true" class="mc-icon" />
+                                <span i18n>At least one uppercase letter</span>
+                            </li>
+                            <li [class.met]="pwHasLowercase()">
+                                <img [src]="pwHasLowercase() ? '/icons/ui/check.svg' : '/icons/letters/X_diagonal.svg'"
+                                    alt="" aria-hidden="true" class="mc-icon" />
+                                <span i18n>At least one lowercase letter</span>
+                            </li>
+                            <li [class.met]="pwHasDigit()">
+                                <img [src]="pwHasDigit() ? '/icons/ui/check.svg' : '/icons/letters/X_diagonal.svg'"
+                                    alt="" aria-hidden="true" class="mc-icon" />
+                                <span i18n>At least one digit</span>
+                            </li>
+                            <li [class.met]="pwHasSpecial()">
+                                <img [src]="pwHasSpecial() ? '/icons/ui/check.svg' : '/icons/letters/X_diagonal.svg'"
+                                    alt="" aria-hidden="true" class="mc-icon" />
+                                <span i18n>At least one special character</span>
+                            </li>
+                        </ul>
+                        }
+
+                        <mat-form-field class="full-width" appearance="outline">
+                            <mat-label i18n>Confirm password</mat-label>
+                            <input matInput [type]="hideResetPassword() ? 'password' : 'text'"
+                                formControlName="confirmPassword" autocomplete="new-password" />
+                            <img matPrefix src="/icons/weapons/swords.svg" alt="" aria-hidden="true" class="mc-icon"
+                                style="transform: translate(1px, 1px);" />
+                            <mat-error>
+                                @if (resetForm.get('confirmPassword')?.hasError('required')) { <span i18n>Please confirm
+                                    your
+                                    password</span> }
+                                @else if (resetForm.hasError('mismatch')) { <span i18n>Passwords do not match</span> }
+                            </mat-error>
+                        </mat-form-field>
+
+                        <div class="form-actions">
+                            <button mat-flat-button type="submit" [disabled]="resetForm.invalid || resetLoading()">
+                                @if (resetLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else
+                                { <span i18n>Change
+                                    password</span> }
+                            </button>
+                        </div>
+                    </form>
+                    }
+
+                    <mat-divider class="section-divider" />
+
+                    <h3 id="minecraft-section" class="section-heading"
+                        [class.section-highlight]="highlightSection() === 'minecraft'">
+                        <ng-icon name="matfMinecraftColored" size="20" /> <span i18n>Minecraft</span>
+                    </h3>
+                    @if (op.isMinecraftLinked) {
+                    <div class="link-status linked">
+                        <img src="/icons/ui/check.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        <span i18n>Linked to <strong>{{ op.minecraftUsername }}</strong></span>
+                        <span class="spacer"></span>
+                        <button mat-stroked-button color="warn" (click)="unlinkMc()" [disabled]="mcLoading()">
+                            @if (mcLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
+                                i18n>Unlink</span> }
+                        </button>
+                    </div>
+                    } @else {
+                    <div class="link-status"><img src="/icons/ui/forbidden_circle.svg" alt="" aria-hidden="true"
+                            class="mc-icon" /> <span i18n>Not linked</span></div>
+                    @if (mcLinkData(); as mc) {
+                    <div class="link-code-box">
+                        <div class="link-instructions">
+                            <p i18n>{{ mc.instructions ?? 'Enter this code in the Minecraft server:' }}</p>
+                        </div>
+                        <div class="code-row">
+                            <code class="code-value" style="font-family: 'Minecraft'">/link {{ mc.code }}</code>
+                            <button mat-icon-button (click)="copyLinkCode(mc.code)" i18n-matTooltip
+                                matTooltip="Copy command">
+                                <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
+                            </button>
+                        </div>
+                        @if (mc.serverAddress) {
+                        <div class="link-detail">
+                            <img src="/icons/ui/house.svg" alt="" aria-hidden="true" class="mc-icon" />
+                            <span i18n>Server: <strong>{{ mc.serverAddress }}</strong></span>
+                            <button mat-icon-button (click)="copyText(mc.serverAddress)" i18n-matTooltip
+                                matTooltip="Copy address">
+                                <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
+                            </button>
+                        </div>
+                        }
+                        <div class="link-detail"><img src="/icons/misc/clock.svg" alt="" aria-hidden="true"
+                                class="mc-icon" />
+                            @if (mcTimerSeconds() > 0) { <span i18n>Expires in {{ formatTimer(mcTimerSeconds())
+                                }}</span> }
+                            @else { <span i18n>Code expired</span> }
+                        </div>
+                        <div class="form-actions">
+                            <button mat-stroked-button (click)="checkMcStatus()" [disabled]="mcLoading()">@if
+                                (mcLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
+                                    i18n>Check status</span>
+                                }</button>
+                            <button mat-stroked-button (click)="generateMcCode()"
+                                [disabled]="mcLoading() || mcTimerSeconds() > 0">
+                                <span i18n>Regenerate code</span> @if (mcTimerSeconds() > 0) { ({{
+                                formatTimer(mcTimerSeconds()) }}) }
+                            </button>
+                        </div>
+                    </div>
+                    } @else {
+                    <div class="form-actions">
+                        <button mat-flat-button (click)="generateMcCode()" [disabled]="mcLoading()">
+                            @if (mcLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
+                                i18n>Generate linking
+                                code</span> }
+                        </button>
+                    </div>
+                    }
+                    }
+
+                    <mat-divider class="section-divider" />
+
+                    <h3 class="section-heading"><ng-icon name="simpleDiscord" size="20" /> <span i18n>Discord</span>
+                    </h3>
+                    @if (op.isDiscordLinked) {
+                    <div class="link-status linked">
+                        <img src="/icons/ui/check.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        <span i18n>Linked to <strong>{{ op.discordUsername }}</strong></span>
+                        <span class="spacer"></span>
+                        <button mat-stroked-button color="warn" (click)="unlinkDc()" [disabled]="dcLoading()">
+                            @if (dcLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
+                                i18n>Unlink</span> }
+                        </button>
+                    </div>
+                    } @else {
+                    <div class="link-status"><img src="/icons/ui/forbidden_circle.svg" alt="" aria-hidden="true"
+                            class="mc-icon" /> <span i18n>Not linked</span></div>
+                    @if (dcLinkData(); as dc) {
+                    <div class="link-code-box">
+                        <div class="link-instructions">
+                            <p i18n>{{ dc.instructions ?? 'Use this code with the Discord bot:' }}</p>
+                        </div>
+                        <div class="code-row">
+                            <code class="code-value" style="font-family: 'Minecraft'">/link {{ dc.code }}</code>
+                            <button mat-icon-button (click)="copyLinkCode(dc.code)" i18n-matTooltip
+                                matTooltip="Copy command">
+                                <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
+                            </button>
+                        </div>
+                        @if (dc.discordUrl) {
+                        <div class="link-detail">
+                            <img src="/icons/weather/meteor.svg" alt="" aria-hidden="true" class="mc-icon" />
+                            <a [href]="dc.discordUrl" target="_blank" rel="noopener" style="font-family: 'Minecraft'">{{
+                                dc.discordUrl }}</a>
+                            <button mat-icon-button (click)="copyText(dc.discordUrl)" i18n-matTooltip
+                                matTooltip="Copy URL">
+                                <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
+                            </button>
+                        </div>
+                        }
+                        <div class="link-detail"><img src="/icons/misc/clock.svg" alt="" aria-hidden="true"
+                                class="mc-icon" />
+                            @if (dcTimerSeconds() > 0) { <span i18n>Expires in {{ formatTimer(dcTimerSeconds())
+                                }}</span> }
+                            @else { <span i18n>Code expired</span> }
+                        </div>
+                        <div class="form-actions">
+                            <button mat-stroked-button (click)="checkDcStatus()" [disabled]="dcLoading()">@if
+                                (dcLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
+                                    i18n>Check status</span>
+                                }</button>
+                            <button mat-stroked-button (click)="generateDcCode()"
+                                [disabled]="dcLoading() || dcTimerSeconds() > 0">
+                                <span i18n>Regenerate code</span> @if (dcTimerSeconds() > 0) { ({{
+                                formatTimer(dcTimerSeconds()) }}) }
+                            </button>
+                        </div>
+                    </div>
+                    } @else {
+                    <div class="form-actions">
+                        <button mat-flat-button (click)="generateDcCode()" [disabled]="dcLoading()">
+                            @if (dcLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
+                                i18n>Generate linking
+                                code</span> }
+                        </button>
+                    </div>
+                    }
+                    }
+
+            </div>
+        </mat-tab>
+
+        <!-- Security Keys -->
+        <mat-tab i18n-label label="Security Keys">
+            <div class="tab-content">
+                @if (loadingKeys()) {
+                <app-loading-spinner i18n-message message="Loading security keys…" />
+                } @else if (securityKeys().length === 0) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No security keys" i18n-subtitle
+                    subtitle="Add a security key for extra account protection." />
+                } @else {
+                <div class="table-scroll">
+                    <table mat-table [dataSource]="securityKeys()" class="full-width keys-table">
+                        <ng-container matColumnDef="keyName">
+                            <th mat-header-cell *matHeaderCellDef i18n>Name</th>
+                            <td mat-cell *matCellDef="let key">{{ key.keyName }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="dateAdded">
+                            <th mat-header-cell *matHeaderCellDef i18n>Added</th>
+                            <td mat-cell *matCellDef="let key">{{ key.dateAdded | date:'mediumDate' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="lastUsed">
+                            <th mat-header-cell *matHeaderCellDef i18n>Last used</th>
+                            <td mat-cell *matCellDef="let key">@if (key.lastUsed) { {{ key.lastUsed | date:'medium' }} }
+                                @else { <span i18n>Never</span> }
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="useCount">
+                            <th mat-header-cell *matHeaderCellDef i18n>Uses</th>
+                            <td mat-cell *matCellDef="let key">{{ key.useCount }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let key"><button mat-icon-button color="warn"
+                                    (click)="deleteKey(key)" i18n-matTooltip matTooltip="Delete key"><img
+                                        src="/icons/fantasy/skull.svg" alt="" aria-hidden="true"
+                                        class="mc-icon" /></button></td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="secKeyColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: secKeyColumns;"></tr>
+                    </table>
+                </div>
+                }
+
+                <mat-divider class="section-divider" />
+                <div class="key-actions">
+                    <mat-form-field appearance="outline" class="key-name-field">
+                        <mat-label i18n>Key name</mat-label>
+                        <input matInput [(ngModel)]="newKeyName" i18n-placeholder placeholder="e.g. YubiKey 5"
+                            maxlength="100" />
+                        <img matPrefix src="/icons/weather/lightning.svg" alt="" aria-hidden="true" class="mc-icon"
+                            style="transform: translate(1px, 1px);" />
+                    </mat-form-field>
+                    <button mat-flat-button (click)="registerSecurityKey()"
+                        [disabled]="!newKeyName || registeringKey()">
+                        @if (registeringKey()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
+                        <ng-container><span i18n>Register Key</span></ng-container> }
+                    </button>
+                </div>
+            </div>
+        </mat-tab>
+
+        <!-- Save Manager -->
+        <mat-tab i18n-label label="Save Manager">
+            <div class="tab-content">
+                @if (saveQuota(); as q) {
+                <mat-card appearance="outlined" class="quota-card">
+                    <mat-card-content>
+                        <div class="quota-stats">
+                            <div class="quota-item"><span class="quota-label" i18n>Used</span> <span
+                                    class="quota-value">{{
+                                    q.usedSpaceBytes | fileSize }}</span></div>
+                            <div class="quota-item"><span class="quota-label" i18n>Total</span> <span
+                                    class="quota-value">{{
+                                    q.totalSpaceBytes | fileSize }}</span></div>
+                            <div class="quota-item"><span class="quota-label" i18n>Remaining</span> <span
+                                    class="quota-value">{{ q.remainingSpaceBytes | fileSize }}</span></div>
+                            <div class="quota-item"><span class="quota-label" i18n>Saves</span> <span
+                                    class="quota-value">{{
+                                    q.saveCount }}</span></div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+                }
+
+                @if (loadingSaves()) {
+                <app-loading-spinner i18n-message message="Loading saves…" />
+                } @else if (saves().length === 0) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No saves" i18n-subtitle
+                    subtitle="Your Minecraft world saves will appear here." />
+                } @else {
+                <div class="table-scroll">
+                    <table mat-table [dataSource]="saves()" class="full-width saves-table">
+                        <ng-container matColumnDef="worldName">
+                            <th mat-header-cell *matHeaderCellDef i18n>World</th>
+                            <td mat-cell *matCellDef="let s">{{ s.worldName }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="fileSizeBytes">
+                            <th mat-header-cell *matHeaderCellDef i18n>Size</th>
+                            <td mat-cell *matCellDef="let s">{{ s.fileSizeBytes | fileSize }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="createdAt">
+                            <th mat-header-cell *matHeaderCellDef i18n>Created</th>
+                            <td mat-cell *matCellDef="let s">{{ s.createdAt | date:'medium' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="updatedAt">
+                            <th mat-header-cell *matHeaderCellDef i18n>Updated</th>
+                            <td mat-cell *matCellDef="let s">{{ s.updatedAt | date:'medium' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let s">
+                                <button mat-icon-button (click)="downloadSave(s)" i18n-matTooltip
+                                    matTooltip="Download"><img src="/icons/arrows/arrow_down.svg" alt=""
+                                        aria-hidden="true" class="mc-icon" /></button>
+                                <button mat-icon-button color="warn" (click)="deleteSave(s)" i18n-matTooltip
+                                    matTooltip="Delete"><img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true"
+                                        class="mc-icon" /></button>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="saveColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: saveColumns;"></tr>
+                    </table>
+                </div>
+                }
+
+                <mat-divider class="section-divider" />
+                <div class="form-actions save-key-actions">
+                    @if (saveVerified()) {
+                    <button mat-stroked-button (click)="regenerateKey()" i18n-matTooltip
+                        matTooltip="Regenerate save key">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
+                            width="18" height="18" matButtonIcon class="mc-icon"
+                            style="transform: translate(1px, 1px);">
+                            <path fill="currentColor"
+                                d="M2,4h25v1h-25zM2,5h25v1h-25zM2,6h25v1h-25zM2,7h3v1h-3zM9,7h11v1h-11zM23,7h4v1h-4zM2,8h3v1h-3zM9,8h11v1h-11zM23,8h4v1h-4zM2,9h3v1h-3zM9,9h11v1h-11zM23,9h4v1h-4zM2,10h25v1h-25zM2,11h25v1h-25zM2,12h25v1h-25zM2,13h10v1h-10zM16,13h11v1h-11zM2,14h10v1h-10zM16,14h11v1h-11zM2,15h10v1h-10zM16,15h11v1h-11zM2,16h25v1h-25zM2,17h25v1h-25zM2,18h25v1h-25zM2,19h3v1h-3zM9,19h11v1h-11zM23,19h4v1h-4zM2,20h3v1h-3zM9,20h11v1h-11zM23,20h4v1h-4zM2,21h3v1h-3zM9,21h11v1h-11zM23,21h4v1h-4zM2,22h25v1h-25zM2,23h25v1h-25zM2,24h25v1h-25z" />
+                            <path fill="var(--mc-icon-shadow)"
+                                d="M5,7h4v1h-4zM20,7h3v1h-3zM27,7h3v1h-3zM5,8h4v1h-4zM20,8h3v1h-3zM27,8h3v1h-3zM5,9h4v1h-4zM20,9h3v1h-3zM27,9h3v1h-3zM27,10h3v1h-3zM27,11h3v1h-3zM27,12h3v1h-3zM12,13h4v1h-4zM27,13h3v1h-3zM12,14h4v1h-4zM27,14h3v1h-3zM12,15h4v1h-4zM27,15h3v1h-3zM27,16h3v1h-3zM27,17h3v1h-3zM27,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM27,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM27,20h3v1h-3zM5,21h4v1h-4zM20,21h3v1h-3zM27,21h3v1h-3zM27,22h3v1h-3zM27,23h3v1h-3zM27,24h3v1h-3zM5,25h25v1h-25zM5,26h25v1h-25zM5,27h25v1h-25z" />
+                        </svg> <span i18n>Regenerate save key</span>
+                    </button>
+                    } @else {
+                    <button mat-stroked-button (click)="unlockSaveKey()" [disabled]="verifyingSave()">
+                        @if (verifyingSave()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
+                        <ng-container><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
+                                shape-rendering="crispEdges" width="18" height="18" matButtonIcon class="mc-icon"
+                                style="transform: translate(1px, 1px);">
+                                <path fill="currentColor"
+                                    d="M2,2h3v1h-3zM23,2h4v1h-4zM2,3h3v1h-3zM23,3h4v1h-4zM2,4h3v1h-3zM23,4h4v1h-4zM5,5h4v1h-4zM20,5h3v1h-3zM5,6h4v1h-4zM20,6h3v1h-3zM5,7h4v1h-4zM20,7h3v1h-3zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM12,11h4v1h-4zM12,12h4v1h-4zM12,13h4v1h-4zM2,14h3v1h-3zM9,14h3v1h-3zM16,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM9,15h3v1h-3zM16,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM9,16h3v1h-3zM16,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM9,17h3v1h-3zM16,17h4v1h-4zM23,17h4v1h-4zM5,18h4v1h-4zM20,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM2,21h3v1h-3zM9,21h3v1h-3zM16,21h4v1h-4zM23,21h4v1h-4zM2,22h3v1h-3zM9,22h3v1h-3zM16,22h4v1h-4zM23,22h4v1h-4zM2,23h3v1h-3zM9,23h3v1h-3zM16,23h4v1h-4zM23,23h4v1h-4z" />
+                                <path fill="var(--mc-icon-shadow)"
+                                    d="M27,5h3v1h-3zM27,6h3v1h-3zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM12,18h4v1h-4zM27,18h3v1h-3zM12,19h4v1h-4zM27,19h3v1h-3zM12,20h4v1h-4zM27,20h3v1h-3zM5,24h4v1h-4zM12,24h4v1h-4zM20,24h3v1h-3zM27,24h3v1h-3zM5,25h4v1h-4zM12,25h4v1h-4zM20,25h3v1h-3zM27,25h3v1h-3zM5,26h4v1h-4zM12,26h4v1h-4zM20,26h3v1h-3zM27,26h3v1h-3z" />
+                            </svg> <span i18n>Unlock save key</span></ng-container> }
+                    </button>
+                    }
+                </div>
+            </div>
+        </mat-tab>
+        }
+    </mat-tab-group>
+    }
+</div>

@@ -1,0 +1,177 @@
+<div class="page-container">
+    <div class="page-header">
+        <div class="header-left">
+            <button mat-icon-button routerLink="/mods" i18n-matTooltip matTooltip="Back to mods">
+                <img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" class="mc-icon" />
+            </button>
+            <h1 class="page-title">
+                @if (modImage(); as img) {
+                <app-skeleton-img [src]="img | modFile" [alt]="modName" height="28px" borderRadius="6px"
+                    class="page-title-img" />
+                } @else if (loading()) {
+                <div class="page-title-img-skeleton"></div>
+                }
+                {{ modName }}
+            </h1>
+        </div>
+        @if (isAdmin()) {
+        <button mat-flat-button (click)="toggleForm()">
+            <img [src]="showForm() ? '/icons/letters/X.svg' : '/icons/arrows/arrow_up.svg'" alt="" aria-hidden="true"
+                matButtonIcon class="mc-icon" />
+            <span i18n>{{ showForm() ? 'Cancel' : 'Add Version' }}</span>
+        </button>
+        }
+    </div>
+
+    <!-- Create / Edit form -->
+    @if (showForm() && isAdmin()) {
+    <mat-card appearance="outlined" class="form-card" #formCard appDropZone [fullPage]="true" accept="image/*,.jar"
+        (filesDrop)="onFilesDropped($event)">
+        <mat-card-header>
+            <mat-card-title>@if (editingMod()) { <span i18n>Edit Version</span> } @else { <span i18n>New Version</span>
+                }</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="form-grid">
+                <mat-form-field appearance="outline" class="form-span">
+                    <mat-label i18n>Title</mat-label>
+                    <input matInput [(ngModel)]="formTitle" [placeholder]="modName" maxlength="100" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="form-span">
+                    <mat-label i18n>Description</mat-label>
+                    <textarea matInput [(ngModel)]="formDesc" rows="2" maxlength="5000"></textarea>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Release Type</mat-label>
+                    <mat-select [(ngModel)]="formRelease">
+                        <mat-option value="Stable" i18n>Stable</mat-option>
+                        <mat-option value="Beta" i18n>Beta</mat-option>
+                        <mat-option value="Alpha" i18n>Alpha</mat-option>
+                        <mat-option value="Experimental" i18n>Experimental</mat-option>
+                        <mat-option value="Broken" i18n>Broken</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Game Versions</mat-label>
+                    <mat-select [(ngModel)]="formVersions" multiple>
+                        @for (v of allowedVersions(); track v.id) {
+                        <mat-option [value]="v.name">{{ v.name }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Platform</mat-label>
+                    <mat-select [(ngModel)]="formPlatform">
+                        <mat-option value="Fabric">Fabric</mat-option>
+                        <mat-option value="Forge">Forge</mat-option>
+                        <mat-option value="NeoForge">NeoForge</mat-option>
+                        <mat-option value="Bukkit">Bukkit</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div class="file-row">
+                <button mat-stroked-button type="button" (click)="fileInput.click()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
+                        height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
+                        <path fill="currentColor"
+                            d="M16,4h5v1h-5zM16,5h5v1h-5zM16,6h5v1h-5zM7,7h4v1h-4zM16,7h9v1h-9zM7,8h4v1h-4zM16,8h9v1h-9zM7,9h4v1h-4zM16,9h9v1h-9zM7,10h14v1h-14zM7,11h14v1h-14zM7,12h14v1h-14zM2,13h9v1h-9zM16,13h9v1h-9zM2,14h9v1h-9zM16,14h9v1h-9zM2,15h9v1h-9zM16,15h9v1h-9zM7,16h14v1h-14zM7,17h14v1h-14zM7,18h14v1h-14zM2,19h9v1h-9zM16,19h5v1h-5zM2,20h9v1h-9zM16,20h5v1h-5zM2,21h9v1h-9zM16,21h5v1h-5zM7,22h4v1h-4zM7,23h4v1h-4zM7,24h4v1h-4z" />
+                        <path fill="var(--mc-icon-shadow)"
+                            d="M21,10h9v1h-9zM21,11h9v1h-9zM21,12h9v1h-9zM11,13h5v1h-5zM11,14h5v1h-5zM11,15h5v1h-5zM21,16h9v1h-9zM21,17h9v1h-9zM21,18h9v1h-9zM11,19h5v1h-5zM21,19h4v1h-4zM11,20h5v1h-5zM21,20h4v1h-4zM11,21h5v1h-5zM21,21h4v1h-4zM11,22h5v1h-5zM21,22h4v1h-4zM11,23h5v1h-5zM21,23h4v1h-4zM11,24h5v1h-5zM21,24h4v1h-4zM11,25h5v1h-5zM11,26h5v1h-5zM11,27h5v1h-5z" />
+                    </svg>
+                    <span class="file-name-text">
+                        @if (formFile) { {{ formFile.name }} } @else { <span i18n>Select Mod File (.jar)</span> }
+                    </span>
+                </button>
+                <input #fileInput type="file" accept=".jar" hidden (change)="onFileSelected($event)" />
+                <button mat-stroked-button type="button" (click)="imageInput.click()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
+                        height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
+                        <path fill="currentColor"
+                            d="M2,2h3v1h-3zM12,2h4v1h-4zM23,2h4v1h-4zM2,3h3v1h-3zM12,3h4v1h-4zM23,3h4v1h-4zM2,4h3v1h-3zM12,4h4v1h-4zM23,4h4v1h-4zM5,5h4v1h-4zM20,5h3v1h-3zM5,6h4v1h-4zM20,6h3v1h-3zM5,7h4v1h-4zM20,7h3v1h-3zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM9,14h3v1h-3zM16,14h4v1h-4zM9,15h3v1h-3zM16,15h4v1h-4zM9,16h3v1h-3zM16,16h4v1h-4zM9,17h3v1h-3zM16,17h4v1h-4zM5,18h4v1h-4zM20,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM2,21h3v1h-3zM12,21h4v1h-4zM23,21h4v1h-4zM2,22h3v1h-3zM12,22h4v1h-4zM23,22h4v1h-4zM2,23h3v1h-3zM12,23h4v1h-4zM23,23h4v1h-4z" />
+                        <path fill="var(--mc-icon-shadow)"
+                            d="M16,5h4v1h-4zM27,5h3v1h-3zM16,6h4v1h-4zM27,6h3v1h-3zM16,7h4v1h-4zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM27,17h3v1h-3zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM9,21h3v1h-3zM9,22h3v1h-3zM9,23h3v1h-3zM5,24h4v1h-4zM16,24h4v1h-4zM27,24h3v1h-3zM5,25h4v1h-4zM16,25h4v1h-4zM27,25h3v1h-3zM5,26h4v1h-4zM16,26h4v1h-4zM27,26h3v1h-3z" />
+                    </svg>
+                    <span class="file-name-text">
+                        @if (formImage) { {{ formImage.name }} } @else { <span i18n>Select Image</span> }
+                    </span>
+                </button>
+                <input #imageInput type="file" accept="image/*" hidden (change)="onImageSelected($event)" />
+            </div>
+            @if (imagePreview()) {
+            <div class="preview-grid">
+                <div class="preview-item" [class.cover]="true">
+                    <img [src]="imagePreview()" alt="Image preview" style="cursor:pointer" />
+                    <div class="preview-actions">
+                        <button mat-icon-button type="button" (click)="formImage = null; imagePreview.set(null)"
+                            i18n-matTooltip matTooltip="Remove">
+                            <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            }
+            <div class="form-actions">
+                <button mat-stroked-button (click)="resetForm()" i18n>Cancel</button>
+                <button mat-flat-button (click)="editingMod() ? updateMod() : createMod()"
+                    [disabled]="formLoading() || !formVersions.length">
+                    @if (editingMod()) { <span i18n>Update</span> } @else { <span i18n>Create</span> }
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+    }
+
+    @if (loading()) {
+    <app-loading-spinner i18n-message message="Loading versions..." />
+    } @else if (versions().length === 0) {
+    <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No versions" i18n-subtitle
+        subtitle="This mod has no versions yet." />
+    } @else {
+    <div class="table-scroll">
+        <table mat-table [dataSource]="versions()" class="mod-table">
+            <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef i18n>Description</th>
+                <td mat-cell *matCellDef="let mod">{{ mod.description }}</td>
+            </ng-container>
+            <ng-container matColumnDef="releaseType">
+                <th mat-header-cell *matHeaderCellDef i18n>Release</th>
+                <td mat-cell *matCellDef="let mod">
+                    <mat-chip [class]="'release-' + mod.releaseType">{{ mod.releaseType }}</mat-chip>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="gameVersion">
+                <th mat-header-cell *matHeaderCellDef i18n>Game Version</th>
+                <td mat-cell *matCellDef="let mod">{{ mod.gameVersion }}</td>
+            </ng-container>
+            <ng-container matColumnDef="platform">
+                <th mat-header-cell *matHeaderCellDef i18n>Platform</th>
+                <td mat-cell *matCellDef="let mod">{{ mod.platform }}</td>
+            </ng-container>
+            <ng-container matColumnDef="downloads">
+                <th mat-header-cell *matHeaderCellDef i18n>Downloads</th>
+                <td mat-cell *matCellDef="let mod">{{ mod.downloadCount | numFmt }}</td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let mod">
+                    <button mat-icon-button (click)="downloadMod(mod)" i18n-matTooltip matTooltip="Download">
+                        <img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" />
+                    </button>
+                    @if (isAdmin()) {
+                    <button mat-icon-button (click)="editMod(mod)" i18n-matTooltip matTooltip="Edit">
+                        <img src="/icons/weapons/pen.svg" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
+                    </button>
+                    <button mat-icon-button (click)="deleteMod(mod)" i18n-matTooltip matTooltip="Delete">
+                        <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                    </button>
+                    }
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+    </div>
+    }
+</div>

@@ -1,0 +1,12 @@
+@for (a of announcements(); track a.id) {
+@let t = a.type.toLowerCase();
+<div class="site-banner" [class]="'site-banner--' + t">
+  <img [src]="t === 'info' ? '/icons/ui/info.svg' : '/icons/ui/warning.svg'" alt="" aria-hidden="true" class="mc-icon" />
+  <span>{{ a.message }}</span>
+</div>
+}
+<app-navbar />
+<main class="content">
+  <router-outlet />
+</main>
+<app-footer />

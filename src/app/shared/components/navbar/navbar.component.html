@@ -1,0 +1,121 @@
+<mat-toolbar class="navbar">
+    <a routerLink="/" class="brand">
+        <img src="server_logo.png" alt="Choculaterie" class="brand-logo" />
+        <span class="brand-text">Choculaterie</span>
+    </a>
+
+    <div class="nav-links">
+        <a mat-button routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}"
+            i18n>Home</a>
+        <a mat-button routerLink="/schematics" routerLinkActive="active-link" i18n>Schematics</a>
+        <a mat-button routerLink="/mods" routerLinkActive="active-link" i18n>Mods</a>
+        <a mat-button routerLink="/faq" routerLinkActive="active-link" i18n>FAQ</a>
+    </div>
+    <span class="spacer"></span>
+
+    <button mat-icon-button (click)="theme.toggle()"
+        [matTooltip]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'" i18n-matTooltip>
+        <img [src]="theme.isDark() ? '/icons/weather/sun.svg' : '/icons/weather/moon.svg'" alt="" aria-hidden="true"
+            class="mc-icon" />
+    </button>
+
+    @if (session.isAuthenticated()) {
+    <!-- ── Admin Inbox ── -->
+    @if (session.isAdminOrMod()) {
+    <div class="inbox-wrap">
+        <button mat-icon-button class="inbox-btn" (click)="openInbox($event)" matTooltip="Admin inbox" i18n-matTooltip>
+            <img src="/icons/communication/mail.svg" alt="" aria-hidden="true" class="mc-icon" />
+            @if (unreadNotifCount()) {
+            <span class="inbox-badge"></span>
+            }
+        </button>
+    </div>
+    }
+
+    <button mat-button [matMenuTriggerFor]="profileMenu" class="profile-btn">
+        <span class="username">{{ session.user()?.username }}</span>
+        <span class="avatar-wrap">
+            @if (session.profile()?.filePath || session.user()?.filePath) {
+            <app-skeleton-img [src]="(session.profile()?.filePath ?? session.user()!.filePath!) | userImg" alt="avatar"
+                height="24px" borderRadius="50%" />
+            } @else {
+            <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" class="mc-icon" />
+            }
+
+        </span>
+        <img src="/icons/arrows/tild_full_down.svg" alt="" aria-hidden="true" class="mc-icon dropdown-arrow" />
+    </button>
+
+    <mat-menu #profileMenu="matMenu" xPosition="before" class="profile-menu">
+        <div class="mobile-nav-links">
+            <a mat-menu-item routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">
+                <img src="/icons/ui/house.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+                <span i18n>Home</span>
+            </a>
+            <a mat-menu-item routerLink="/schematics" routerLinkActive="active-link">
+                <img src="/icons/weapons/pickaxe.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+                <span i18n>Schematics</span>
+            </a>
+            <a mat-menu-item routerLink="/mods" routerLinkActive="active-link">
+                <img src="/icons/ui/hashtag.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+                <span i18n>Mods</span>
+            </a>
+            <a mat-menu-item routerLink="/faq" routerLinkActive="active-link">
+                <img src="/icons/ui/info.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+                <span i18n>FAQ</span>
+            </a>
+            <mat-divider />
+        </div>
+        <a mat-menu-item [routerLink]="['/users', session.user()?.username]">
+            <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+            <span i18n>My Profile</span>
+        </a>
+        @if (session.isAdminOrMod()) {
+        <a mat-menu-item routerLink="/admin">
+            <img src="/icons/ui/shield.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+            <span i18n>Admin Panel</span>
+        </a>
+        }
+        <mat-divider />
+        <button mat-menu-item (click)="logout()" class="logout-item">
+            <img src="/icons/ui/power.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+            <span i18n>Logout</span>
+        </button>
+    </mat-menu>
+    } @else {
+    <div class="auth-links">
+        <a mat-button [routerLink]="['/auth/register']" [queryParams]="returnUrl ? {returnUrl: returnUrl} : {}"
+            routerLinkActive="active-link">
+            <img src="/icons/ui/smile.svg" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
+            <span i18n>Register</span>
+        </a>
+        <a mat-stroked-button [routerLink]="['/auth/login']" [queryParams]="returnUrl ? {returnUrl: returnUrl} : {}"
+            routerLinkActive="active-link">
+            <img src="/icons/arrows/arrow_right.svg" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
+            <span i18n>Login</span>
+        </a>
+    </div>
+
+    <button mat-icon-button class="mobile-menu-btn" [matMenuTriggerFor]="mobileMenu">
+        <img src="/icons/ui/hamburger.svg" alt="" aria-hidden="true" class="mc-icon" />
+    </button>
+    <mat-menu #mobileMenu="matMenu">
+        <a mat-menu-item routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">
+            <img src="/icons/ui/house.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+            <span i18n>Home</span>
+        </a>
+        <a mat-menu-item routerLink="/schematics" routerLinkActive="active-link">
+            <img src="/icons/weapons/pickaxe.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+            <span i18n>Schematics</span>
+        </a>
+        <a mat-menu-item routerLink="/mods" routerLinkActive="active-link">
+            <img src="/icons/ui/hashtag.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+            <span i18n>Mods</span>
+        </a>
+        <a mat-menu-item routerLink="/faq" routerLinkActive="active-link">
+            <img src="/icons/ui/info.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+            <span i18n>FAQ</span>
+        </a>
+    </mat-menu>
+    }
+</mat-toolbar>

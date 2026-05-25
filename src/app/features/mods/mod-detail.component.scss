@@ -1,0 +1,169 @@
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    @media (max-width: 600px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.page-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font: var(--mat-sys-headline-medium);
+    margin: 0;
+}
+
+.page-title-img {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.page-title-img-skeleton {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    animation: shimmer 1.5s infinite;
+    background: linear-gradient(90deg,
+            var(--mat-sys-surface-variant) 25%,
+            var(--mat-sys-surface-container-highest) 50%,
+            var(--mat-sys-surface-variant) 75%);
+    background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.form-card {
+    margin-bottom: 1.5rem;
+    scroll-margin-top: 72px;
+}
+
+.form-card mat-card-header {
+    margin-bottom: 1rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-span {
+    grid-column: 1 / -1;
+}
+
+.form-desc {
+    grid-column: 1 / -1;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.file-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+}
+
+.table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mod-table {
+    width: 100%;
+}
+
+.release-Stable {
+    --mdc-chip-label-text-color: green;
+}
+
+.release-Beta {
+    --mdc-chip-label-text-color: orange;
+}
+
+.release-Alpha {
+    --mdc-chip-label-text-color: red;
+}
+
+.release-Experimental {
+    --mdc-chip-label-text-color: purple;
+}
+
+.release-Broken {
+    --mdc-chip-label-text-color: darkred;
+}
+
+mat-chip {
+    text-transform: capitalize;
+}
+
+.preview-grid {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+}
+
+.preview-item {
+    width: 120px;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+
+    img {
+        width: 100%;
+        height: 80px;
+        object-fit: cover;
+        display: block;
+    }
+}
+
+.preview-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    background: var(--mat-sys-surface-container);
+    padding: 0 0.25rem;
+
+    button {
+        transform: scale(0.75);
+    }
+
+    button img.mc-icon {
+        width: 24px;
+        height: 24px;
+    }
+}

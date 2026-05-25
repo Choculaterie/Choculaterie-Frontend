@@ -1,0 +1,1000 @@
+// ═══ Skeleton loader ═══
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+$sk: linear-gradient(90deg,
+        var(--mat-sys-surface-variant) 25%,
+        var(--mat-sys-surface-container-highest) 50%,
+        var(--mat-sys-surface-variant) 75%);
+
+.profile-skeleton-banner {
+    aspect-ratio: 5 / 1;
+    min-height: 80px;
+    border-radius: 12px;
+    animation: shimmer 1.5s infinite;
+    background: $sk;
+    background-size: 200% 100%;
+}
+
+.profile-skeleton-content {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    padding: 1.5rem;
+}
+
+.profile-skeleton-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: -60px;
+    align-self: flex-start;
+    animation: shimmer 1.5s infinite;
+    background: $sk;
+    background-size: 200% 100%;
+}
+
+.profile-skeleton-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.profile-skeleton-line {
+    height: 16px;
+    border-radius: 6px;
+    animation: shimmer 1.5s infinite;
+    background: $sk;
+    background-size: 200% 100%;
+}
+
+.profile-skeleton-name {
+    width: 200px;
+    max-width: 100%;
+}
+
+.profile-skeleton-bio {
+    width: 300px;
+    max-width: 100%;
+    height: 13px;
+}
+
+// ═══ Split drag-drop overlay ═══
+.split-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+}
+
+.split-half {
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+    padding: 16px 8px;
+    transition: background 0.15s ease;
+
+    &:first-child {
+        padding-left: 16px;
+    }
+
+    &:last-child {
+        padding-right: 16px;
+    }
+
+    &:hover .split-frame,
+    &.drag-over .split-frame {
+        background: rgba(var(--mat-sys-primary-rgb, 103, 80, 164), 0.15);
+    }
+}
+
+.split-frame {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    border: 2.5px dashed var(--mat-sys-primary);
+    border-radius: 16px;
+    color: #fff;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    transition: background 0.15s ease;
+}
+
+.split-icon {
+    font-size: 3rem;
+    width: 3rem;
+    height: 3rem;
+    background: var(--mat-sys-surface);
+    color: var(--mat-sys-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+// ═══ Banner Header ═══
+.profile-header {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    padding: 0;
+    background-color: var(--mat-sys-surface-container);
+    aspect-ratio: 5 / 1;
+    max-width: 100%;
+
+    &.has-cover {
+        background-color: transparent;
+    }
+
+    &:not(.has-cover) {
+        min-height: 80px;
+    }
+}
+
+// ═══ Cover image element ═══
+.cover-pic {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    app-skeleton-img {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+// ═══ Profile Content Section ═══
+.profile-content {
+    position: relative;
+    padding: 1.5rem;
+    border-radius: 0 0 12px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+// When there's no banner at all (not own profile, no cover), undo the avatar overlap
+.page-container>.profile-content:first-of-type {
+    padding-left: 0;
+    padding-right: 0;
+
+    .profile-avatar {
+        margin-top: 0;
+    }
+
+    .profile-info {
+        min-height: 0;
+        max-height: 64px; // 36px headline + 8px gap + 20px body-medium = exactly 1 bio line, caps centering there
+    }
+}
+
+// ═══ Cover Actions (own profile) ═══
+.cover-actions {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 2;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.cover-edit-btn,
+.cover-delete-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.2s;
+
+    &:hover {
+        background: rgba(0, 0, 0, 0.7);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+    }
+}
+
+// ═══ Avatar ═══
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--mat-sys-surface-variant);
+    border: 3px solid var(--mat-sys-primary);
+    margin-top: -60px;
+    align-self: flex-start;
+    position: relative;
+    cursor: default;
+
+    img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        background: var(--mat-sys-surface-variant);
+    }
+
+    /* Ensure inline SVG fallback fills the avatar and is clipped to the circle */
+    .mc-icon {
+        width: 75% !important;
+        height: 75% !important;
+        display: block;
+        object-fit: cover;
+    }
+
+    app-skeleton-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+
+    mat-icon {
+        font-size: 80px;
+        width: 80px;
+        height: 80px;
+        color: var(--mat-sys-on-surface-variant);
+    }
+
+    .avatar-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.avatar-edit-btn {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0;
+    transition: opacity 0.15s ease, background 0.15s ease;
+    overflow: visible;
+
+    img.mc-icon {
+        visibility: hidden !important;
+    }
+
+    &::after {
+        content: '';
+        display: block;
+        width: 24px;
+        height: 24px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(calc(-50% + 1px), calc(-50% + 1px));
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+        image-rendering: pixelated;
+        pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' shape-rendering='crispEdges'%3E%3Cpath fill='white' d='M2,2h3v1h-3zM12,2h4v1h-4zM23,2h4v1h-4zM2,3h3v1h-3zM12,3h4v1h-4zM23,3h4v1h-4zM2,4h3v1h-3zM12,4h4v1h-4zM23,4h4v1h-4zM5,5h4v1h-4zM20,5h3v1h-3zM5,6h4v1h-4zM20,6h3v1h-3zM5,7h4v1h-4zM20,7h3v1h-3zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM9,14h3v1h-3zM16,14h4v1h-4zM9,15h3v1h-3zM16,15h4v1h-4zM9,16h3v1h-3zM16,16h4v1h-4zM9,17h3v1h-3zM16,17h4v1h-4zM5,18h4v1h-4zM20,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM2,21h3v1h-3zM12,21h4v1h-4zM23,21h4v1h-4zM2,22h3v1h-3zM12,22h4v1h-4zM23,22h4v1h-4zM2,23h3v1h-3zM12,23h4v1h-4zM23,23h4v1h-4z'/%3E%3Cpath fill='%233e3e3e' d='M16,5h4v1h-4zM27,5h3v1h-3zM16,6h4v1h-4zM27,6h3v1h-3zM16,7h4v1h-4zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM27,17h3v1h-3zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM9,21h3v1h-3zM9,22h3v1h-3zM9,23h3v1h-3zM5,24h4v1h-4zM16,24h4v1h-4zM27,24h3v1h-3zM5,25h4v1h-4zM16,25h4v1h-4zM27,25h3v1h-3zM5,26h4v1h-4zM16,26h4v1h-4zM27,26h3v1h-3z'/%3E%3C/svg%3E");
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+.profile-avatar:hover .avatar-edit-btn,
+.profile-avatar.editable .avatar-edit-btn:focus-visible {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.35);
+}
+
+// ═══ Profile Info ═══
+.profile-info {
+    flex: 1 1 180px;
+    min-width: 0;
+    min-height: 68px;
+    max-height: 68px; // caps flexbox centering contribution so bio beyond 1 line doesn't shift the name further up
+    overflow: visible;
+}
+
+.name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    h1 {
+        margin: 0;
+        font: var(--mat-sys-headline-medium);
+        color: var(--mat-sys-on-surface);
+        overflow-wrap: break-word;
+        min-width: 0;
+    }
+
+}
+
+.badge-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    cursor: default;
+}
+
+.year-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: color-mix(in srgb, var(--mat-sys-primary) 15%, transparent);
+    color: var(--mat-sys-on-surface);
+    white-space: nowrap;
+    cursor: default;
+}
+
+.bio {
+    color: var(--mat-sys-on-surface-variant);
+    margin: 0.5rem 0 0;
+}
+
+// No cover on desktop: also use normal bio color
+.profile-header:not(.has-cover) .bio {
+    color: var(--mat-sys-on-surface-variant);
+    text-shadow: none;
+}
+
+// ═══ Social Links ═══
+.social-links {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--mat-sys-surface-container);
+    color: var(--mat-sys-primary);
+
+    transition: background 0.2s;
+
+    &:hover {
+        background: var(--mat-sys-surface-variant);
+    }
+
+    mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+    }
+}
+
+// ═══ Meta Grid ═══
+.meta-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+
+    mat-icon,
+    ng-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: var(--mat-sys-primary);
+    }
+}
+
+.meta-item--mc {
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 2px 6px;
+    margin: -2px -6px;
+    transition: background 0.15s;
+    user-select: none;
+
+    .mc-name {
+        color: var(--mat-sys-primary);
+    }
+
+    .mc-hover-icon {
+        opacity: 0;
+        transition: opacity 0.15s;
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+    }
+
+    &:hover {
+        background: var(--mat-sys-surface-variant);
+
+        .mc-hover-icon {
+            opacity: 1;
+        }
+    }
+}
+
+.social-links-meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+
+.meta-actions {
+    display: none;
+
+    button,
+    a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    &:has(> button, > a) {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+}
+
+.meta-grid:not(:has(.social-links-meta)) .meta-actions {
+    margin-left: auto;
+}
+
+// ═══ Tabs & Content ═══
+::ng-deep {
+
+    // Allow the tab body to scroll vertically without clipping CDK drag previews.
+    // CDK drag uses a portal to <body> for previews, so overflow here is irrelevant
+    // to them - we can safely set overflow: hidden and they still work.
+    .mat-mdc-tab-body-content {
+        overflow: hidden !important;
+    }
+
+    .mat-mdc-tab-body {
+        overflow: hidden !important;
+    }
+
+    .social-link-row.cdk-drag-preview {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0 2px;
+        background: var(--mat-sys-surface);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, .3);
+        opacity: .9;
+        overflow: visible;
+
+        .mat-mdc-form-field {
+            overflow: visible;
+        }
+    }
+}
+
+.tab-content {
+    padding: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    // With overflow:hidden on the tab body, width is now properly constrained.
+    // These elements will resolve 100% against the real viewport-width parent.
+    min-width: 0;
+    max-width: 100%;
+}
+
+.schematic-grid {
+    columns: 260px auto;
+    column-gap: 1rem;
+}
+
+.user-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+mat-divider {
+    margin: 0.5rem 0;
+}
+
+.full-width {
+    width: 100%;
+}
+
+// ═══ Account / Form styles ═══
+.profile-bio-field {
+    margin-top: 0.5rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: calc(100vw - 1.5rem);
+
+    button,
+    a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+}
+
+.password-rules {
+    list-style: none;
+    margin: -0.5rem 0 0.5rem;
+    padding: 0;
+    font-size: 0.8125rem;
+    color: var(--mat-sys-on-surface-variant);
+
+    li {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.15rem 0;
+
+        mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+        }
+
+        &.met {
+            color: var(--mat-sys-primary);
+        }
+    }
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font: var(--mat-sys-title-medium);
+    margin: 0.5rem 0;
+    color: var(--mat-sys-on-surface);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    transition: background 0.5s ease;
+
+    mat-icon,
+    ng-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        color: var(--mat-sys-primary);
+    }
+
+    &.section-highlight {
+        background: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+        animation: highlight-pulse 2s ease-out;
+    }
+}
+
+@keyframes highlight-pulse {
+    0% {
+        background: color-mix(in srgb, var(--mat-sys-primary) 25%, transparent);
+    }
+
+    100% {
+        background: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+    }
+}
+
+.section-divider {
+    margin: 1.5rem 0;
+}
+
+.error-banner,
+.info-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+
+    mat-icon {
+        flex-shrink: 0;
+    }
+
+    span {
+        flex: 1;
+    }
+}
+
+.error-banner {
+    background: var(--mat-sys-error-container);
+    color: var(--mat-sys-on-error-container);
+}
+
+.info-banner {
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+}
+
+// ═══ Linking ═══
+.link-status {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    background: var(--mat-sys-surface-container);
+    margin-bottom: 0.75rem;
+
+    @media (max-width: 600px) {
+        flex-wrap: wrap;
+    }
+
+    mat-icon {
+        color: var(--mat-sys-on-surface-variant);
+    }
+
+    .spacer {
+        flex: 1;
+    }
+
+    &.linked mat-icon {
+        color: var(--mat-sys-primary);
+    }
+
+    button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+}
+
+.link-code-box {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    background: var(--mat-sys-surface-container-high);
+    margin-bottom: 0.75rem;
+
+    p {
+        margin: 0 0 0.5rem;
+        font-size: 0.9rem;
+        color: var(--mat-sys-on-surface-variant);
+    }
+}
+
+.code-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    background: var(--mat-sys-surface);
+    border: 1px solid var(--mat-sys-outline-variant);
+    margin-bottom: 0.75rem;
+
+    @media (max-width: 600px) {
+        flex-wrap: wrap;
+    }
+}
+
+.code-value {
+    flex: 1;
+    font-family: monospace;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--mat-sys-primary);
+    user-select: all;
+}
+
+.link-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--mat-sys-on-surface-variant);
+    margin-bottom: 0.5rem;
+
+    mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+    }
+
+    a {
+        color: var(--mat-sys-primary);
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    button[mat-icon-button] {
+        --mdc-icon-button-state-layer-size: 28px;
+        --mdc-icon-button-icon-size: 16px;
+        width: 28px !important;
+        height: 28px !important;
+        padding: 0 !important;
+        flex-shrink: 0;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        vertical-align: middle;
+
+        .copy-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+    }
+}
+
+// ═══ Social Link Editor ═══
+.social-links-list {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+}
+
+.social-link-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 2px;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    box-sizing: border-box;
+    overflow: visible;
+
+    // Ensure mat-form-field outlines are never clipped after drag
+    .mat-mdc-form-field {
+        overflow: visible;
+    }
+
+    @media (max-width: 600px) {
+        flex-wrap: wrap;
+    }
+}
+
+.drag-handle {
+    cursor: grab;
+    opacity: 0.5;
+}
+
+.social-link-row.cdk-drag-placeholder {
+    opacity: .3;
+}
+
+.social-link-row.cdk-drag-animating,
+.social-links-list.cdk-drop-list-dragging .social-link-row:not(.cdk-drag-placeholder) {
+    transition: transform 250ms cubic-bezier(0, 0, .2, 1);
+}
+
+
+.social-platform-field {
+    width: 160px;
+    flex-shrink: 0;
+
+    @media (max-width: 600px) {
+        width: 100%;
+    }
+}
+
+.social-url-field {
+    flex: 1;
+    min-width: 0;
+}
+
+.social-prefix-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-right: 0.25rem;
+}
+
+.select-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.option-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+// ═══ Security Key Actions ═══
+.key-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    align-items: flex-end;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+
+    .key-name-field .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+    }
+
+    button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+}
+
+.key-name-field {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 0 !important;
+
+    .mat-mdc-form-field-infix {
+        min-width: 0 !important;
+    }
+}
+
+.quota-card {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+
+    mat-card-content {
+        padding: 1rem;
+
+        @media (max-width: 600px) {
+            padding: 0.75rem;
+        }
+    }
+}
+
+.quota-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    text-align: center;
+
+    @media (max-width: 600px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.quota-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.quota-label {
+    font-size: 0.75rem;
+    color: var(--mat-sys-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.quota-value {
+    font: var(--mat-sys-title-medium);
+    color: var(--mat-sys-on-surface);
+    overflow-wrap: anywhere;
+
+    @media (max-width: 600px) {
+        font: var(--mat-sys-title-small);
+    }
+}
+
+.save-key-actions {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    justify-content: flex-end;
+
+    >button {
+        min-width: 0;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+}
+
+// ═══ Fix action icon buttons in saves/keys tables (prevent dots) ═══
+::ng-deep {
+
+    .saves-table .mat-column-actions,
+    .keys-table .mat-column-actions {
+        white-space: nowrap;
+        width: 1%;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+}
+
+// ═══ Scrollable table wrapper (security keys, save manager) ═══
+.table-scroll {
+    // The table must be contained to the visible page width so overflow-x
+    // actually triggers.  We can't rely on parent width constraints because
+    // the Angular tab body has overflow-y: visible which can break width
+    // containment in some browsers.  Using 100vw minus the page padding
+    // guarantees the wrapper never exceeds the viewport.
+    max-width: calc(100vw - 1.5rem);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    @media (max-width: 600px) {
+        max-width: calc(100vw - 1.5rem);
+    }
+
+    .full-width {
+        width: auto !important;
+        min-width: max-content !important;
+    }
+}
+
+button img.mc-icon--fixed-white {
+    filter: none !important;
+}

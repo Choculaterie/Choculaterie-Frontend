@@ -1,0 +1,48 @@
+<a class="card-link" [routerLink]="['/schematics', schematic().id]">
+    <mat-card class="schematic-card" appearance="outlined">
+        @if (imageUrl(); as imageUrl) {
+        @if (imageFit(); as imageFit) {
+        <app-skeleton-img [src]="imageUrl" [alt]="schematic().name" height="160px" borderRadius="12px 12px 0 0"
+            class="card-img" [objectFit]="imageFit" [fetchPriority]="priority()" />
+        } @else {
+        <div class="card-img-loading" aria-hidden="true"></div>
+        }
+        } @else {
+        <div class="card-img-placeholder">
+            <mat-icon>architecture</mat-icon>
+        </div>
+        }
+        @if (schematic().forked) {
+        <button class="fork-badge" i18n-matTooltip matTooltip="View original" (click)="onViewOriginal($event)">
+            <img src="/icons/weapons/trident.svg" alt="" aria-hidden="true" class="mc-icon" />
+        </button>
+        }
+        <mat-card-content>
+            <span class="card-title">{{ schematic().name }}</span>
+            <p class="card-author"><span i18n>by</span>&nbsp;<app-user-link [username]="schematic().username" /></p>
+            @if (schematic().description) {
+            <p class="card-desc">{{ schematic().description }}</p>
+            }
+            <div class="card-meta">
+                <span i18n-matTooltip matTooltip="Downloads"><img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" /> {{ schematic().downloadCount
+                    | numFmt }}</span>
+                <span i18n-matTooltip matTooltip="Views"><img src="/icons/math/infinite.svg" alt="" aria-hidden="true" class="mc-icon" /> {{ schematic().viewCount |
+                    numFmt }}</span>
+            </div>
+            @if (schematic().tags.length) {
+            <mat-chip-set class="card-tags">
+                @for (tag of visibleTags(); track tag) {
+                <mat-chip (click)="onTagClick($event, tag)">{{ tag }}</mat-chip>
+                }
+                @if (hasOverflowTags()) {
+                <mat-chip class="more-chip">…</mat-chip>
+                }
+            </mat-chip-set>
+            }
+            <div class="card-footer">
+                <span class="card-type" (click)="onTypeClick($event)">{{ schematic().schematicType }}</span>
+                <span class="card-date">{{ schematic().publishDate | date:'mediumDate' }}</span>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</a>
