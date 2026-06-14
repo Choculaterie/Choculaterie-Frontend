@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject } from '@angular/core';
+import { Component, OnInit, computed, effect, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -53,10 +53,23 @@ export class NavbarComponent implements OnInit {
         return url.startsWith('/auth') ? null : url;
     }
 
+    private profileFetchPending = false;
+
+    constructor() {
+        // Re-fetch the profile whenever it's missing (initial load, or after a
+        // token refresh clears the cached profile via setSession).
+        effect(() => {
+            if (this.session.isAuthenticated() && !this.session.profile() && !this.profileFetchPending) {
+                this.profileFetchPending = true;
+                this.usersApi.getApiUsersMe().subscribe({
+                    next: (p) => { this.profileFetchPending = false; this.session.setProfile(p); },
+                    error: () => { this.profileFetchPending = false; },
+                });
+            }
+        });
+    }
+
     ngOnInit(): void {
-        if (this.session.isAuthenticated() && !this.session.profile()) {
-            this.usersApi.getApiUsersMe().subscribe((p) => this.session.setProfile(p));
-        }
         // Seed existing admin notifications from REST API on page load
         this.realtime.seedAdminNotifications();
     }
