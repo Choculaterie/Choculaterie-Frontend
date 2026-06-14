@@ -482,6 +482,34 @@ img[src*='icons/'] {
   }
 }
 
+/* Game version multi-select → box.svg / box_checked.svg */
+.game-versions-panel .mat-pseudo-checkbox-full {
+  border: none !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  background-image: url('/icons/shapes/box.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  image-rendering: pixelated;
+  -webkit-mask: none !important;
+  mask: none !important;
+
+  &.mat-pseudo-checkbox-checked,
+  &.mat-pseudo-checkbox-indeterminate {
+    background-color: transparent !important;
+    background-image: url('/icons/shapes/box_checked.svg');
+  }
+
+  &::after {
+    display: none !important;
+  }
+}
+
+:root[data-theme='light'] .game-versions-panel .mat-pseudo-checkbox-full {
+  filter: invert(1);
+}
+
 /* ── MC icon replacements ── */
 .mat-mdc-form-field-icon-prefix>img.mc-icon,
 .mat-mdc-form-field-icon-suffix>img.mc-icon {

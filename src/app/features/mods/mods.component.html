@@ -49,7 +49,7 @@
                 </mat-form-field>
                 <mat-form-field appearance="outline">
                     <mat-label i18n>Game Versions</mat-label>
-                    <mat-select [(ngModel)]="formVersions" multiple>
+                    <mat-select [(ngModel)]="formVersions" multiple panelClass="game-versions-panel">
                         @for (v of allowedVersions(); track v.id) {
                         <mat-option [value]="v.name">{{ v.name }}</mat-option>
                         }
