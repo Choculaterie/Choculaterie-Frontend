@@ -106,6 +106,7 @@ export class SchematicCardComponent {
 
     private readonly maxTags = 3;
     visibleTags = computed(() => this.schematic().tags.slice(0, this.maxTags));
+    hiddenTags = computed(() => this.schematic().tags.slice(this.maxTags));
     hasOverflowTags = computed(() => this.schematic().tags.length > this.maxTags);
 
     onTagClick(event: Event, tag: string): void {

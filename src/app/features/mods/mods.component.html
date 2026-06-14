@@ -164,12 +164,14 @@
                         </div>
                     </div>
                     <div class="mod-card-meta">
-                        <mat-chip i18n>{{ mod.versionCount }} version{{ mod.versionCount > 1 ? 's' : '' }}</mat-chip>
-                        <span class="meta-stat"><img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true"
-                                class="mc-icon" /> {{ mod.totalDownloads | numFmt }}</span>
-                        <span class="meta-stat"><ng-icon name="matfMinecraftColored" size="16" /> {{ mod.versionRange
-                            }}</span>
-                        <span class="meta-stat">
+                        <mat-chip i18n-matTooltip matTooltip="Versions" i18n>{{ mod.versionCount }} version{{
+                            mod.versionCount > 1 ? 's' : '' }}</mat-chip>
+                        <span class="meta-stat" i18n-matTooltip matTooltip="Downloads"><img
+                                src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" /> {{
+                            mod.totalDownloads | numFmt }}</span>
+                        <span class="meta-stat" i18n-matTooltip matTooltip="Minecraft Version"><ng-icon
+                                name="matfMinecraftColored" size="16" /> {{ mod.versionRange }}</span>
+                        <span class="meta-stat" i18n-matTooltip matTooltip="Platform">
                             @if (mod.platform === 'Fabric') {
                             <ng-icon name="matfMinecraftFabricColored" size="16" />
                             } @else {

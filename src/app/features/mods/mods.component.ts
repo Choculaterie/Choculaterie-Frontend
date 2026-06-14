@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { matfMinecraftColored, matfMinecraftFabricColored } from '@ng-icons/material-file-icons/colored';
 import { ModsService } from '../../api/mods';
@@ -48,6 +49,7 @@ interface ModSummary {
         MatSelectModule,
         MatFormFieldModule,
         MatInputModule,
+        MatTooltipModule,
         EmptyStateComponent,
         NumberFormatPipe,
         NgIconComponent,
