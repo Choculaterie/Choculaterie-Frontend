@@ -36,12 +36,17 @@
 
     mat-expansion-panel-header {
         font-weight: 600;
+        --mat-expansion-header-collapsed-state-height: auto;
+        --mat-expansion-header-expanded-state-height: auto;
+        padding: 12px 24px;
     }
 }
 
 .faq-answer {
     line-height: 1.6;
     white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .faq-skeleton {
