@@ -1,6 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { interval } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { interval, of } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
 import { SessionService } from './session.service';
 import { AdminService } from '../../api/admin';
 import type { LiveMessageResponse, AdminNotificationResponse } from '../../api/generated.schemas';
@@ -69,10 +69,11 @@ export class RealtimeService {
     /** Poll for live message changes every 10s instead of pushing them over a websocket. */
     startLiveMessagePolling(): void {
         interval(LIVE_MESSAGES_POLL_INTERVAL).pipe(
-            switchMap(() => this.adminApi.getApiAdminLiveMessages()),
+            switchMap(() => this.adminApi.getApiAdminLiveMessages().pipe(
+                catchError(() => of(null)),
+            )),
         ).subscribe({
-            next: (msgs) => this.announcements.set(msgs),
-            error: () => { },
+            next: (msgs) => { if (msgs) this.announcements.set(msgs); },
         });
     }
 }
