@@ -116,6 +116,17 @@
             <img src="/icons/ui/info.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
             <span i18n>FAQ</span>
         </a>
+        <mat-divider />
+        <a mat-menu-item [routerLink]="['/auth/register']" [queryParams]="returnUrl ? {returnUrl: returnUrl} : {}"
+            routerLinkActive="active-link">
+            <img src="/icons/ui/smile.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+            <span i18n>Register</span>
+        </a>
+        <a mat-menu-item [routerLink]="['/auth/login']" [queryParams]="returnUrl ? {returnUrl: returnUrl} : {}"
+            routerLinkActive="active-link">
+            <img src="/icons/arrows/arrow_right.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+            <span i18n>Login</span>
+        </a>
     </mat-menu>
     }
 </mat-toolbar>

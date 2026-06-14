@@ -36,7 +36,8 @@
         border-radius: 50%;
 
         // mat-flat-button puts icon + text in a flex row with a gap - remove it
-        .mat-icon {
+        .mat-icon,
+        img.mc-icon {
             margin: 0;
         }
     }
