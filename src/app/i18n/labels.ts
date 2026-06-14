@@ -309,7 +309,6 @@ export const COMMON = {
 
 // ── Interceptors ──
 export const ERRORS = {
-    cannotConnect: $localize`Cannot connect to the server. Check your connection.`,
     sessionExpired: $localize`Your session has expired. Please sign in again.`,
     noPermission: $localize`You do not have permission to do that.`,
     serverError: (status: number) => $localize`Server error (${status}). Try again later.`,

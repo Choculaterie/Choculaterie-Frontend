@@ -1072,5 +1072,111 @@
             </div>
         </mat-tab>
 
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <span i18n>Server Logs</span>
+                @if (serverLogs().length > 0 || hasServerErrorNotif()) {
+                <span class="tab-dot"></span>
+                }
+            </ng-template>
+            <div class="tab-content">
+
+                <h3 i18n>Logged Errors</h3>
+
+                <div class="search-row">
+                    <mat-chip-listbox aria-label="Source filter" (change)="setServerLogsSourceFilter($event.value)">
+                        <mat-chip-option value="all" [selected]="serverLogsSourceFilter() === 'all'" i18n>All</mat-chip-option>
+                        <mat-chip-option value="Backend" [selected]="serverLogsSourceFilter() === 'Backend'">Backend</mat-chip-option>
+                        <mat-chip-option value="API" [selected]="serverLogsSourceFilter() === 'API'">API</mat-chip-option>
+                    </mat-chip-listbox>
+                    @if (serverLogs().length > 0) {
+                    <button mat-stroked-button color="warn" (click)="clearServerLogs()">
+                        <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" /> <span i18n>Clear all</span>
+                    </button>
+                    }
+                </div>
+
+                @if (loadingServerLogs()) {
+                <app-loading-spinner />
+                } @else if (serverLogs().length === 0) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No logged errors" i18n-subtitle
+                    subtitle="Errors and crashes will appear here" />
+                } @else {
+                <table mat-table [dataSource]="serverLogs()" class="full-width">
+                    <ng-container matColumnDef="source">
+                        <th mat-header-cell *matHeaderCellDef i18n>Source</th>
+                        <td mat-cell *matCellDef="let e">{{ e.source }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="level">
+                        <th mat-header-cell *matHeaderCellDef i18n>Level</th>
+                        <td mat-cell *matCellDef="let e">{{ e.level }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="category">
+                        <th mat-header-cell *matHeaderCellDef i18n>Category</th>
+                        <td mat-cell *matCellDef="let e">{{ e.category }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="message">
+                        <th mat-header-cell *matHeaderCellDef i18n>Message</th>
+                        <td mat-cell *matCellDef="let e">
+                            {{ e.message }}
+                            @if (e.exception) {
+                            <pre class="log-exception">{{ e.exception }}</pre>
+                            }
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="timestamp">
+                        <th mat-header-cell *matHeaderCellDef i18n>Time</th>
+                        <td mat-cell *matCellDef="let e">{{ e.timestamp | date:'medium' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let e">
+                            <button mat-icon-button color="warn" i18n-matTooltip matTooltip="Dismiss"
+                                (click)="deleteServerLog(e)">
+                                <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                            </button>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="serverLogColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: serverLogColumns;"
+                        [class.highlight-row]="row.level === 'Critical'"></tr>
+                </table>
+                <mat-paginator [length]="serverLogsTotalCount()" [pageSize]="serverLogsPageSize()" [pageIndex]="serverLogsPage()"
+                    [pageSizeOptions]="[25, 50, 100]" (page)="onServerLogsPageChange($event)" showFirstLastButtons />
+                }
+
+                <mat-divider />
+
+                <div class="section-header">
+                    <h3 i18n>Live Stream</h3>
+                    <button mat-stroked-button class="newest-toggle" (click)="autoScrollLogs.set(!autoScrollLogs())">
+                        <img [src]="autoScrollLogs() ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
+                            alt="" aria-hidden="true" class="mc-icon" />
+                        <span i18n style="transform: translateY(1px); display: inline-block;">Auto-scroll</span>
+                    </button>
+                </div>
+
+                <div class="log-list" #logList>
+                    @for (e of adminLogsService.entries(); track e.timestamp + e.category + $index) {
+                    <div class="log-row" [class.log-warning]="e.level === 'Warning'"
+                        [class.log-error]="e.level === 'Error' || e.level === 'Critical'">
+                        <span class="log-time">{{ e.timestamp | date:'HH:mm:ss' }}</span>
+                        <span class="log-source">{{ e.source }}</span>
+                        <span class="log-level">{{ e.level }}</span>
+                        <span class="log-category">{{ e.category }}</span>
+                        <span class="log-message">{{ e.message }}</span>
+                        @if (e.exception) {
+                        <pre class="log-exception">{{ e.exception }}</pre>
+                        }
+                    </div>
+                    }
+                    @if (adminLogsService.entries().length === 0) {
+                    <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No live activity yet"
+                        i18n-subtitle subtitle="Logs will stream here in real time" />
+                    }
+                </div>
+            </div>
+        </mat-tab>
+
     </mat-tab-group>
 </div>

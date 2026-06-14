@@ -26,9 +26,6 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             const msg = error.error?.detail ?? error.error?.title ?? error.message;
 
             switch (error.status) {
-                case 0:
-                    toast.error(ERRORS.cannotConnect);
-                    break;
                 case 401: {
                     // Don't refresh on auth-related requests (login, refresh itself)
                     if (req.url.includes('/api/Auth/')) {

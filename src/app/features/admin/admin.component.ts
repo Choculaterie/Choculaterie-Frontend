@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, effect, viewChild, ElementRef } from '@angular/core';
 import { DatePipe, Location } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -29,7 +29,8 @@ import { SessionService } from '../../core/services/session.service';
 import { ToastService } from '../../core/services/toast.service';
 import { RealtimeService } from '../../core/services/realtime.service';
 import type { AdminUserResponse, AdminSchematicResponse, AdminUserDetailResponse, AdminUserSchematicResponse, LiveMessageResponse, ModMessageResponse, StorageStatsResponse, UserStorageResponse, AllowedTagResponse, AllowedVersionResponse, TagSuggestionResponse, AdminNotificationResponse, FaqResponse, ContactTicketResponse } from '../../api/generated.schemas';
-import type { GetApiAdminTicketsParams } from '../../api/generated.schemas';
+import type { GetApiAdminTicketsParams, GetApiAdminServerLogsParams } from '../../api/generated.schemas';
+import { AdminLogsService } from './services/admin-logs.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
@@ -40,6 +41,16 @@ import { AdminTicketDialogComponent, AdminTicketDialogData, AdminTicketDialogRes
 import { AdminUserDialogComponent } from './admin-user-dialog.component';
 import { Role, ROLE_LABELS, Status, STATUS_LABELS, Visibility, Badge, BADGE_LABELS, BADGE_ICONS, BADGE_COLORS, resolveBadge } from '../../core/enums';
 import { ADMIN, DIALOGS, COMMON } from '../../i18n/labels';
+
+export interface ServerLogEntryResponse {
+    id: number;
+    timestamp: string;
+    source: string;
+    level: string;
+    category: string;
+    message: string;
+    exception?: string | null;
+}
 
 @Component({
     selector: 'app-admin',
@@ -84,6 +95,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     private toast = inject(ToastService);
     private session = inject(SessionService);
     readonly realtime = inject(RealtimeService);
+    readonly adminLogsService = inject(AdminLogsService);
     private location = inject(Location);
     private router = inject(Router);
     private route = inject(ActivatedRoute);
@@ -179,6 +191,9 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly hasContactTicketNotif = computed(() =>
         this.realtime.adminNotifications().some(n => !n.isRead && n.type === 'contact_ticket')
     );
+    readonly hasServerErrorNotif = computed(() =>
+        this.realtime.adminNotifications().some(n => !n.isRead && n.type === 'server_error')
+    );
 
     /** IDs of schematics mentioned in unread schematic_deleted notifications */
     readonly highlightedSchematicIds = computed(() => {
@@ -240,10 +255,14 @@ export class AdminComponent implements OnInit, OnDestroy {
                 case 1: this.schematicsPage.set(zeroIdx); break;
                 case 4: this.storagePage.set(zeroIdx); break;
                 case 8: this.ticketsPage.set(zeroIdx); break;
+                case 9: this.serverLogsPage.set(zeroIdx); break;
             }
         }
 
         this.loadTabData(tab);
+
+        // Live tail only connects while the Server Logs tab is visible
+        if (tab === 9) this.adminLogsService.connect();
 
         // Auto-open user detail if userId query param is present
         const userId = this.route.snapshot.queryParams['userId'];
@@ -282,6 +301,7 @@ export class AdminComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.autoSubs.forEach(s => s.unsubscribe());
+        this.adminLogsService.disconnect();
     }
 
     private autoOpenUserDetail(userId: string): void {
@@ -308,6 +328,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     onTabChange(event: MatTabChangeEvent): void {
+        const prevIdx = this.selectedTab();
         const idx = event.index;
         this.selectedTab.set(idx);
         const params = new URLSearchParams(window.location.search);
@@ -322,8 +343,13 @@ export class AdminComponent implements OnInit, OnDestroy {
             case 1: this.schematicsPage.set(0); this.loadedTabs.delete(1); break;
             case 4: this.storagePage.set(0); this.loadedTabs.delete(4); break;
             case 8: this.ticketsPage.set(0); this.loadedTabs.delete(8); break;
+            case 9: this.serverLogsPage.set(0); this.loadedTabs.delete(9); break;
         }
         this.loadTabData(idx);
+
+        // Live tail only connects while the Server Logs tab is visible
+        if (idx === 9) this.adminLogsService.connect();
+        else if (prevIdx === 9) this.adminLogsService.disconnect();
 
         // Scroll the active tab label into view (disablePagination disables Angular's auto-scroll)
         setTimeout(() => {
@@ -345,6 +371,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             case 6: this.loadVersions(); break;
             case 7: this.loadAdminFaqs(); break;
             case 8: this.loadTickets(); break;
+            case 9: this.loadServerLogs(); this.markNotificationsByType('server_error'); break;
         }
     }
 
@@ -1162,6 +1189,24 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly selectedTicket = signal<ContactTicketResponse | null>(null);
     ticketColumns = ['title', 'username', 'isRead', 'createdAt', 'actions'];
 
+    // ── Server Logs ──
+    readonly serverLogs = signal<ServerLogEntryResponse[]>([]);
+    readonly loadingServerLogs = signal(false);
+    readonly serverLogsTotalCount = signal(0);
+    readonly serverLogsPage = signal(0);
+    readonly serverLogsPageSize = signal(25);
+    readonly serverLogsSourceFilter = signal<'all' | 'Backend' | 'API'>('all');
+    readonly autoScrollLogs = signal(true);
+    private readonly logListRef = viewChild<ElementRef<HTMLDivElement>>('logList');
+    serverLogColumns = ['source', 'level', 'category', 'message', 'timestamp', 'actions'];
+
+    private readonly autoScrollEffect = effect(() => {
+        this.adminLogsService.entries();
+        if (!this.autoScrollLogs()) return;
+        const el = this.logListRef()?.nativeElement;
+        if (el) requestAnimationFrame(() => el.scrollTop = el.scrollHeight);
+    });
+
     loadTickets(): void {
         this.loadingTickets.set(true);
         this.adminApi.getApiAdminTickets({
@@ -1252,5 +1297,69 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.syncPageParam(0);
         this.loadedTabs.delete(9);
         this.loadTickets();
+    }
+
+    // ── Server Logs ──
+    loadServerLogs(): void {
+        this.loadingServerLogs.set(true);
+        const filter = this.serverLogsSourceFilter();
+        this.adminApi.getApiAdminServerLogs({
+            page: this.serverLogsPage() + 1,
+            pageSize: this.serverLogsPageSize(),
+            source: filter !== 'all' ? filter : undefined,
+        } as GetApiAdminServerLogsParams).subscribe({
+            next: (r: any) => {
+                this.serverLogs.set(r.items ?? r);
+                this.serverLogsTotalCount.set(Number(r.totalCount ?? r.length ?? 0));
+                this.loadingServerLogs.set(false);
+            },
+            error: () => this.loadingServerLogs.set(false),
+        });
+    }
+
+    setServerLogsSourceFilter(filter: 'all' | 'Backend' | 'API'): void {
+        this.serverLogsSourceFilter.set(filter);
+        this.serverLogsPage.set(0);
+        this.syncPageParam(0);
+        this.loadServerLogs();
+    }
+
+    onServerLogsPageChange(event: PageEvent): void {
+        if (event.pageSize !== this.serverLogsPageSize()) {
+            this.serverLogsPageSize.set(event.pageSize);
+            this.serverLogsPage.set(0);
+        } else {
+            this.serverLogsPage.set(event.pageIndex);
+        }
+        this.syncPageParam(this.serverLogsPage());
+        this.loadServerLogs();
+    }
+
+    deleteServerLog(entry: ServerLogEntryResponse): void {
+        this.adminApi.deleteApiAdminServerLogsId(entry.id).subscribe({
+            next: () => {
+                this.serverLogs.update(list => list.filter(x => x.id !== entry.id));
+                this.serverLogsTotalCount.update(c => Math.max(0, c - 1));
+            },
+            error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+        });
+    }
+
+    clearServerLogs(): void {
+        const ref = this.dialog.open(ConfirmDialogComponent, {
+            data: { title: 'Clear Logged Errors', message: 'Delete all logged error entries?', confirmText: COMMON.delete, warn: true } as ConfirmDialogData,
+        });
+        ref.afterClosed().subscribe((ok) => {
+            if (ok) {
+                this.adminApi.deleteApiAdminServerLogs().subscribe({
+                    next: () => {
+                        this.serverLogs.set([]);
+                        this.serverLogsTotalCount.set(0);
+                        this.toast.success('Logged errors cleared.');
+                    },
+                    error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+                });
+            }
+        });
     }
 }
