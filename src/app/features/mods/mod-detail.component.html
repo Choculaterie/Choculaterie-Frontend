@@ -123,7 +123,34 @@
     }
 
     @if (loading()) {
-    <app-loading-spinner i18n-message message="Loading versions..." />
+    <div class="table-scroll">
+        <div class="skeleton-table">
+            <div class="skeleton-table-row skeleton-table-header">
+                <span i18n>Description</span>
+                <span i18n>Release</span>
+                <span i18n>Game Version</span>
+                <span i18n>Platform</span>
+                <span i18n>Downloads</span>
+                <span></span>
+            </div>
+            @for (n of [1,2,3,4,5]; track n) {
+            <div class="skeleton-table-row">
+                <div class="skeleton-line sk-desc"></div>
+                <div class="skeleton-chip"></div>
+                <div class="skeleton-line sk-version"></div>
+                <div class="skeleton-line sk-platform"></div>
+                <div class="skeleton-line sk-downloads"></div>
+                <div class="skeleton-actions">
+                    <div class="skeleton-icon-btn"></div>
+                    @if (isAdmin()) {
+                    <div class="skeleton-icon-btn"></div>
+                    <div class="skeleton-icon-btn"></div>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+    </div>
     } @else if (versions().length === 0) {
     <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No versions" i18n-subtitle
         subtitle="This mod has no versions yet." />

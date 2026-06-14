@@ -15,7 +15,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ModsService } from '../../api/mods';
 import { SchematicsService } from '../../api/schematics';
 import type { ModListItemResponse, AllowedVersionResponse } from '../../api/generated.schemas';
-import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SessionService } from '../../core/services/session.service';
@@ -43,7 +42,6 @@ import { sortVersionsDesc } from '../../shared/utils/version-sort';
         MatInputModule,
         MatSelectModule,
         MatTooltipModule,
-        LoadingSpinnerComponent,
         EmptyStateComponent,
         NumberFormatPipe,
         ModFilePipe,
