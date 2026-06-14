@@ -139,19 +139,24 @@ export class DropZoneDirective implements OnInit, OnDestroy {
         this.renderer.setStyle(frame, 'justify-content', 'center');
         this.renderer.appendChild(this.fpOverlay, frame);
 
-        const icon = this.renderer.createElement('span');
-        this.renderer.addClass(icon, 'material-icons');
-        this.renderer.appendChild(icon, this.renderer.createText('upload'));
-        this.renderer.setStyle(icon, 'font-size', '3rem');
-        this.renderer.setStyle(icon, 'color', 'var(--mat-sys-primary)');
-        this.renderer.setStyle(icon, 'background', 'var(--mat-sys-surface)');
-        this.renderer.setStyle(icon, 'border-radius', '50%');
-        this.renderer.setStyle(icon, 'width', '72px');
-        this.renderer.setStyle(icon, 'height', '72px');
-        this.renderer.setStyle(icon, 'display', 'flex');
-        this.renderer.setStyle(icon, 'align-items', 'center');
-        this.renderer.setStyle(icon, 'justify-content', 'center');
-        this.renderer.appendChild(frame, icon);
+        const badge = this.renderer.createElement('div');
+        this.renderer.setStyle(badge, 'background', 'var(--mat-sys-surface)');
+        this.renderer.setStyle(badge, 'border-radius', '50%');
+        this.renderer.setStyle(badge, 'width', '72px');
+        this.renderer.setStyle(badge, 'height', '72px');
+        this.renderer.setStyle(badge, 'display', 'flex');
+        this.renderer.setStyle(badge, 'align-items', 'center');
+        this.renderer.setStyle(badge, 'justify-content', 'center');
+        this.renderer.appendChild(frame, badge);
+
+        const icon = this.renderer.createElement('img');
+        this.renderer.setAttribute(icon, 'src', '/icons/arrows/arrow_up.svg');
+        this.renderer.setAttribute(icon, 'alt', '');
+        this.renderer.setAttribute(icon, 'aria-hidden', 'true');
+        this.renderer.addClass(icon, 'mc-icon');
+        this.renderer.setStyle(icon, 'width', '40px');
+        this.renderer.setStyle(icon, 'height', '40px');
+        this.renderer.appendChild(badge, icon);
 
         this.renderer.appendChild(document.body, this.fpOverlay);
     }

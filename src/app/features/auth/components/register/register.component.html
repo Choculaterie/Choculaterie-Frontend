@@ -119,7 +119,7 @@
         <mat-form-field class="full-width" appearance="outline">
           <mat-label i18n>Verification code</mat-label>
           <input matInput formControlName="code" autocomplete="one-time-code" maxlength="10" />
-          <mat-icon matPrefix>pin</mat-icon>
+          <img matPrefix src="/icons/ui/hashtag.svg" alt="" aria-hidden="true" class="mc-icon" />
           <mat-error>
             @if (confirmForm.get('code')?.hasError('required')) { <span i18n>Code is required</span> }
           </mat-error>

@@ -21,13 +21,13 @@
         (drop)="$event.preventDefault()">
         <div class="split-half split-left" (dragover)="$event.preventDefault()" (drop)="onSplitDrop($event, 'avatar')">
             <div class="split-frame">
-                <span class="material-icons split-icon">account_circle</span>
+                <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" class="mc-icon split-icon" />
                 <span i18n>Profile Picture</span>
             </div>
         </div>
         <div class="split-half split-right" (dragover)="$event.preventDefault()" (drop)="onSplitDrop($event, 'cover')">
             <div class="split-frame">
-                <span class="material-icons split-icon">panorama</span>
+                <img src="/icons/ui/house.svg" alt="" aria-hidden="true" class="mc-icon split-icon" />
                 <span i18n>Banner Picture</span>
             </div>
         </div>
@@ -405,7 +405,7 @@
                         <mat-form-field class="full-width" appearance="outline">
                             <mat-label i18n>Verification code</mat-label>
                             <input matInput formControlName="code" autocomplete="one-time-code" maxlength="10" />
-                            <mat-icon matPrefix>pin</mat-icon>
+                            <img matPrefix src="/icons/ui/hashtag.svg" alt="" aria-hidden="true" class="mc-icon" />
                             <mat-error>@if (confirmForm.get('code')?.hasError('required')) { <span i18n>Code is
                                     required</span>
                                 }</mat-error>
@@ -450,7 +450,7 @@
                         <mat-form-field class="full-width" appearance="outline">
                             <mat-label i18n>Reset code</mat-label>
                             <input matInput formControlName="code" autocomplete="one-time-code" maxlength="10" />
-                            <mat-icon matPrefix>pin</mat-icon>
+                            <img matPrefix src="/icons/ui/hashtag.svg" alt="" aria-hidden="true" class="mc-icon" />
                         </mat-form-field>
                         <mat-form-field class="full-width" appearance="outline">
                             <mat-label i18n>New password</mat-label>

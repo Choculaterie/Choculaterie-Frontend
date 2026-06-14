@@ -1,19 +1,18 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'app-not-found',
     standalone: true,
-    imports: [RouterLink, MatButtonModule, MatIconModule],
+    imports: [RouterLink, MatButtonModule],
     template: `
     <div class="not-found">
-        <mat-icon class="big-icon">explore_off</mat-icon>
+        <img src="/icons/ui/forbidden_circle.svg" alt="" aria-hidden="true" class="mc-icon big-icon" />
         <h1>404</h1>
         <p>The page you're looking for doesn't exist or has been moved.</p>
         <a mat-flat-button routerLink="/">
-            <mat-icon>home</mat-icon> Back to Home
+            <img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" matButtonIcon class="mc-icon" /> Back to Home
         </a>
     </div>
     `,
