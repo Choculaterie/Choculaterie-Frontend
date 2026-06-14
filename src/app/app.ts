@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, DestroyRef, effect } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
@@ -28,15 +28,6 @@ export class App implements OnInit {
 
   private readonly siteName = 'Choculaterie';
 
-  constructor() {
-    // Toggle a CSS class on <body> to disable all buttons when disconnected
-    effect(() => {
-      const state = this.realtime.connectionState();
-      const disconnected = state === 'reconnecting' || state === 'disconnected';
-      document.body.classList.toggle('server-disconnected', disconnected);
-    });
-  }
-
   /** Routes whose components set their own page title via OgMetaService */
   private readonly selfTitledRoutes = new Set(['schematics', 'users', 'qs']);
 
@@ -44,14 +35,11 @@ export class App implements OnInit {
   readonly announcements = this.realtime.announcements;
 
   ngOnInit(): void {
-    // Seed initial announcements via HTTP, then real-time hub keeps them live
+    // Seed initial announcements via HTTP, then poll for changes every 10s
     this.adminApi.getApiAdminLiveMessages().subscribe({
-      next: (res) => {
-        this.realtime.seedAnnouncements(res);
-        this.realtime.connect();
-      },
-      error: () => this.realtime.connect(),
+      next: (res) => this.realtime.seedAnnouncements(res),
     });
+    this.realtime.startLiveMessagePolling();
 
     // Set page title from the first URL segment
     this.router.events.pipe(

@@ -39,7 +39,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     readonly latestSchematics = computed(() => this.reorderForRowFirst(this.rawSchematics(), this.numColumns()));
     readonly loadingSchematics = signal(true);
 
-    // Live-updated via SignalR; seeded from HTTP on first load
     readonly stats = this.realtime.stats;
 
     readonly isAuthenticated = this.session.isAuthenticated;
@@ -59,7 +58,7 @@ export class HomeComponent implements OnInit, OnDestroy {
             error: () => this.loadingSchematics.set(false),
         });
 
-        // Seed stats via HTTP (SignalR StatsUpdated keeps it live after that)
+        // Seed stats via HTTP
         if (!this.realtime.stats()) {
             this.statsApi.getApiStats<ReturnType<typeof this.realtime.stats>>().subscribe({
                 next: (res) => this.realtime.seedStats(res as any),

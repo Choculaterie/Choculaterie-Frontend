@@ -8,7 +8,6 @@ import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { routes } from './app.routes';
 import { baseUrlInterceptor } from './core/interceptors/base-url.interceptor';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
-import { connectionGuardInterceptor } from './core/interceptors/connection-guard.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { timeoutInterceptor } from './core/interceptors/timeout.interceptor';
 
@@ -16,7 +15,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'enabled' })),
-    provideHttpClient(withInterceptors([baseUrlInterceptor, authInterceptor, connectionGuardInterceptor, errorInterceptor, timeoutInterceptor])),
+    provideHttpClient(withInterceptors([baseUrlInterceptor, authInterceptor, errorInterceptor, timeoutInterceptor])),
     provideAnimationsAsync(),
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher },
     // Focus the dialog container on open instead of the first tabbable control

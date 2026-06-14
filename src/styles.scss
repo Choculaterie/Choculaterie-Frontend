@@ -869,16 +869,3 @@ img[src*='icons/'] {
     filter: none;
   }
 }
-
-/* ── Disable all buttons when server is disconnected ── */
-body.server-disconnected {
-
-  button:not(.mat-mdc-snack-bar-action):not(.mdc-icon-button),
-  a[mat-button]:not(.brand),
-  a[mat-flat-button],
-  a[mat-stroked-button],
-  a[mat-raised-button] {
-    pointer-events: none;
-    opacity: 0.45;
-  }
-}

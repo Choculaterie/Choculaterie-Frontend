@@ -1,14 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, TextOnlySnackBar } from '@angular/material/snack-bar';
-import { ReconnectingToastComponent } from '../../shared/components/reconnecting-toast/reconnecting-toast.component';
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
     private snackBar = inject(MatSnackBar);
     private _muteNextSuccess = false;
-    private _reconnectingRef: MatSnackBarRef<ReconnectingToastComponent> | null = null;
-    private _reconnectingActive = false;
-    private _reconnectingPending = false;
 
     /**
      * Show a success toast. If an `onUndo` callback is provided, the action
@@ -23,14 +19,12 @@ export class ToastService {
         }
         const duration = options?.duration ?? 5000;
         const action = options?.onUndo ? 'Undo' : 'Dismiss';
-        this.suspendReconnecting();
         const ref = this.snackBar.open(message, action, {
             duration,
             panelClass: ['toast-success'],
             horizontalPosition: 'start',
             verticalPosition: 'bottom',
         });
-        ref.afterDismissed().subscribe(() => this.restoreReconnecting());
         if (options?.onUndo) {
             const undoFn = options.onUndo;
             ref.onAction().subscribe(() => {
@@ -50,7 +44,6 @@ export class ToastService {
     }
 
     error(message: string, duration = 5000): MatSnackBarRef<TextOnlySnackBar> {
-        this.suspendReconnecting();
         const ref = this.snackBar.open(message, 'Copy', {
             duration,
             panelClass: ['toast-error'],
@@ -60,19 +53,16 @@ export class ToastService {
         ref.onAction().subscribe(() => {
             navigator.clipboard.writeText(message).catch(() => { });
         });
-        ref.afterDismissed().subscribe(() => this.restoreReconnecting());
         return ref;
     }
 
     info(message: string, duration = 3000): MatSnackBarRef<TextOnlySnackBar> {
-        this.suspendReconnecting();
         const ref = this.snackBar.open(message, 'Dismiss', {
             duration,
             panelClass: ['toast-info'],
             horizontalPosition: 'start',
             verticalPosition: 'bottom',
         });
-        ref.afterDismissed().subscribe(() => this.restoreReconnecting());
         return ref;
     }
 
@@ -97,58 +87,5 @@ export class ToastService {
     dismissSpamHint(): void {
         this._spamRef?.dismiss();
         this._spamRef = null;
-    }
-
-    /** Persistent reconnecting toast with loading gif. Only one at a time. */
-    reconnecting(): void {
-        this._reconnectingActive = true;
-        if (this._reconnectingRef) return;
-        this._showReconnectingToast();
-    }
-
-    /** Dismiss the reconnecting toast (called on reconnect). */
-    dismissReconnecting(): void {
-        this._reconnectingActive = false;
-        this._reconnectingPending = false;
-        this._reconnectingRef?.dismiss();
-        this._reconnectingRef = null;
-    }
-
-    /** Actually open the reconnecting snackbar. */
-    private _showReconnectingToast(): void {
-        if (this._reconnectingRef) return;
-        this._reconnectingPending = false;
-        this._reconnectingRef = this.snackBar.openFromComponent(ReconnectingToastComponent, {
-            panelClass: ['toast-error'],
-            horizontalPosition: 'start',
-            verticalPosition: 'bottom',
-        });
-        this._reconnectingRef.afterDismissed().subscribe(() => {
-            this._reconnectingRef = null;
-            // If still disconnected, re-show after a brief delay
-            if (this._reconnectingPending) {
-                this._reconnectingPending = false;
-                this._showReconnectingToast();
-            }
-        });
-    }
-
-    /** Temporarily hide reconnecting toast so another toast can show. */
-    private suspendReconnecting(): void {
-        if (!this._reconnectingActive || !this._reconnectingRef) return;
-        this._reconnectingPending = true;
-        this._reconnectingRef.dismiss();
-        this._reconnectingRef = null;
-    }
-
-    /** Restore reconnecting toast after a normal toast dismissed. */
-    private restoreReconnecting(): void {
-        if (!this._reconnectingActive) return;
-        // Small delay to not overlap with the outgoing toast animation
-        setTimeout(() => {
-            if (this._reconnectingActive && !this._reconnectingRef) {
-                this._showReconnectingToast();
-            }
-        }, 300);
     }
 }
