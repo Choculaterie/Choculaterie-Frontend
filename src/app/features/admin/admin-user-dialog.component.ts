@@ -1,4 +1,5 @@
 import { Component, inject, signal, computed } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
@@ -166,14 +167,24 @@ export type AdminUserDialogResult = 'deleted' | null;
             </mat-select>
             <mat-icon matPrefix><img src="/icons/ui/start.svg" alt="" aria-hidden="true" style="width: 100%; height: 100%;" /></mat-icon>
         </mat-form-field>
-        <button mat-stroked-button (click)="saveBadge()">Save badge</button>
 
         <mat-form-field appearance="outline" class="compact-input">
             <mat-label>Quota (GB)</mat-label>
             <input matInput type="number" [value]="editQuota()"
                 (input)="editQuota.set(+$any($event.target).value)" min="0" step="0.5" />
         </mat-form-field>
-        <button mat-stroked-button (click)="saveQuota()">Save quota</button>
+    </div>
+
+    <mat-divider class="section-div" />
+
+    <!-- Admin Note -->
+    <h4 class="section-title">Admin Note</h4>
+    <div class="note-row">
+        <mat-form-field appearance="outline" class="note-field">
+            <mat-label>Private note (admins only)</mat-label>
+            <textarea matInput rows="3" maxlength="2000" [value]="editNote()"
+                (input)="editNote.set($any($event.target).value)"></textarea>
+        </mat-form-field>
     </div>
 
     <!-- Schematics -->
@@ -207,6 +218,7 @@ export type AdminUserDialogResult = 'deleted' | null;
 
 <mat-dialog-actions align="end">
     <button mat-stroked-button mat-dialog-close>Close</button>
+    <button mat-flat-button (click)="saveAll()">Save</button>
 </mat-dialog-actions>
     `,
     styles: [`
@@ -243,8 +255,11 @@ export type AdminUserDialogResult = 'deleted' | null;
 
         .key-active { color: var(--mat-sys-primary); font-size: 16px; width: 16px; height: 16px; flex-shrink: 0; }
         .detail-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; padding-bottom: 0.25rem; }
-        .compact-select { max-width: 160px; }
+        .compact-select { max-width: 200px; }
         .compact-input { max-width: 120px; }
+        .note-row { display: flex; padding-bottom: 0.25rem; }
+        .note-field { flex: 1; }
+        .note-field textarea { resize: vertical; }
         .table-scroll { overflow-x: auto; width: 100%; }
         .compact-table .mat-mdc-cell, .compact-table .mat-mdc-header-cell { padding: 4px 8px; font-size: 0.85rem; }
     `],
@@ -259,6 +274,7 @@ export class AdminUserDialogComponent {
     readonly user = signal<AdminUserDetailResponse>({ ...this.u });
     readonly editBadge = signal<string>(this.u.badge ?? '');
     readonly editQuota = signal<number>(Number(this.u.storageQuotaGb));
+    readonly editNote = signal<string>(this.u.adminNote ?? '');
 
     readonly badges = Object.entries(Badge).filter(([, v]) => typeof v === 'number') as [string, number][];
     readonly badgeLabels = BADGE_LABELS;
@@ -274,23 +290,19 @@ export class AdminUserDialogComponent {
         );
     }
 
-    saveBadge(): void {
+    saveAll(): void {
         const newBadge = this.editBadge() || null;
-        this.adminApi.postApiAdminUsersIdBadge(this.u.id, { badge: newBadge }).subscribe({
-            next: () => {
-                this.user.update(prev => ({ ...prev, badge: newBadge }));
-                this.toast.success(ADMIN.badgeUpdated);
-            },
-            error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
-        });
-    }
-
-    saveQuota(): void {
         const newQuota = this.editQuota();
-        this.adminApi.postApiAdminUsersIdQuota(this.u.id, { quotaGb: newQuota }).subscribe({
+        const newNote = this.editNote().trim() || null;
+
+        forkJoin([
+            this.adminApi.postApiAdminUsersIdBadge(this.u.id, { badge: newBadge }),
+            this.adminApi.postApiAdminUsersIdQuota(this.u.id, { quotaGb: newQuota }),
+            this.adminApi.postApiAdminUsersIdNote(this.u.id, { note: newNote }),
+        ]).subscribe({
             next: () => {
-                this.user.update(prev => ({ ...prev, storageQuotaGb: newQuota }));
-                this.toast.success(ADMIN.quotaUpdated);
+                this.user.update(prev => ({ ...prev, badge: newBadge, storageQuotaGb: newQuota, adminNote: newNote }));
+                this.toast.success(ADMIN.changesSaved);
             },
             error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
         });

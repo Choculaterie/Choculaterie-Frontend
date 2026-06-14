@@ -37,6 +37,7 @@ import type {
   AllowedVersionRequest,
   AllowedVersionResponse,
   ChangeUserBadgeRequest,
+  ChangeUserNoteRequest,
   ChangeUserQuotaRequest,
   ChangeUserRoleRequest,
   ChangeUserStatusRequest,
@@ -321,6 +322,43 @@ export class AdminService {
     return this.http.post<TData>(
       `/api/Admin/users/${id}/quota`,
       changeUserQuotaRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ postApiAdminUsersIdNote<TData = unknown>(id: string,
+    changeUserNoteRequest: ChangeUserNoteRequest, options?: HttpClientOptions & { observe?: 'body' }): Observable<TData>;
+ postApiAdminUsersIdNote<TData = unknown>(id: string,
+    changeUserNoteRequest: ChangeUserNoteRequest, options?: HttpClientOptions & { observe: 'events' }): Observable<HttpEvent<TData>>;
+ postApiAdminUsersIdNote<TData = unknown>(id: string,
+    changeUserNoteRequest: ChangeUserNoteRequest, options?: HttpClientOptions & { observe: 'response' }): Observable<AngularHttpResponse<TData>>;
+  postApiAdminUsersIdNote<TData = unknown>(
+    id: string,
+    changeUserNoteRequest: ChangeUserNoteRequest, options?: HttpClientOptions & { observe?: 'body' | 'events' | 'response' }): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/Admin/users/${id}/note`,
+      changeUserNoteRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/Admin/users/${id}/note`,
+      changeUserNoteRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/Admin/users/${id}/note`,
+      changeUserNoteRequest,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }

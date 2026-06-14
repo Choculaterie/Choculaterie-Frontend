@@ -121,6 +121,8 @@ export interface AdminUserDetailResponse {
   storageUsedMb: number | string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   saveCount: number | string;
+  /** @nullable */
+  adminNote: string | null;
   schematics: AdminUserSchematicResponse[];
 }
 
@@ -294,6 +296,11 @@ export interface CaptchaPositionDto {
 export interface ChangeUserBadgeRequest {
   /** @nullable */
   badge: string | null;
+}
+
+export interface ChangeUserNoteRequest {
+  /** @nullable */
+  note: string | null;
 }
 
 export interface ChangeUserQuotaRequest {

@@ -267,6 +267,7 @@ export const ADMIN = {
     noVersions: $localize`No versions`,
     badgeUpdated: $localize`Badge updated.`,
     quotaUpdated: $localize`Storage quota updated.`,
+    changesSaved: $localize`Changes saved.`,
     deleteApiKey: $localize`Revoke API Key`,
     deleteApiKeyMsg: (username: string) => $localize`Revoke the API key for "${username}"? They will need to generate a new one.`,
     apiKeyDeleted: $localize`API key revoked.`,
