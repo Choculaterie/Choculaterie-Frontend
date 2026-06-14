@@ -1207,6 +1207,12 @@ export class AdminComponent implements OnInit, OnDestroy {
         if (el) requestAnimationFrame(() => el.scrollTop = el.scrollHeight);
     });
 
+    readonly filteredLiveLogs = computed(() => {
+        const filter = this.serverLogsSourceFilter();
+        const entries = this.adminLogsService.entries();
+        return filter === 'all' ? entries : entries.filter(e => e.source === filter);
+    });
+
     loadTickets(): void {
         this.loadingTickets.set(true);
         this.adminApi.getApiAdminTickets({

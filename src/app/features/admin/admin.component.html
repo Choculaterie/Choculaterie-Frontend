@@ -1010,7 +1010,7 @@
                 } @else {
 
                 <div class="search-row">
-                    <button mat-stroked-button class="newest-toggle" (click)="toggleTicketsUnreadOnly()">
+                    <button mat-stroked-button class="newest-toggle" style="margin-left: auto;" (click)="toggleTicketsUnreadOnly()">
                         <img [src]="ticketsUnreadOnly() ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
                             alt="" aria-hidden="true" class="mc-icon" />
                         @if (ticketsUnreadOnly()) { <span i18n
@@ -1157,7 +1157,7 @@
                 </div>
 
                 <div class="log-list" #logList>
-                    @for (e of adminLogsService.entries(); track e.timestamp + e.category + $index) {
+                    @for (e of filteredLiveLogs(); track e.timestamp + e.category + $index) {
                     <div class="log-row" [class.log-warning]="e.level === 'Warning'"
                         [class.log-error]="e.level === 'Error' || e.level === 'Critical'">
                         <span class="log-time">{{ e.timestamp | date:'HH:mm:ss' }}</span>
@@ -1170,7 +1170,7 @@
                         }
                     </div>
                     }
-                    @if (adminLogsService.entries().length === 0) {
+                    @if (filteredLiveLogs().length === 0) {
                     <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No live activity yet"
                         i18n-subtitle subtitle="Logs will stream here in real time" />
                     }
