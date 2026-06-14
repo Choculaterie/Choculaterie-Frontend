@@ -225,6 +225,8 @@ export const USERS = {
     userNotFound: $localize`User not found.`,
     noUsersFound: $localize`No users found`,
     tryDifferentSearch: $localize`Try a different search`,
+    liked: $localize`Liked!`,
+    likeRemoved: $localize`Like removed.`,
     failedToToggleLike: $localize`Failed to toggle like.`,
     reportSubmitted: $localize`Report submitted. Thank you.`,
     failedToReport: $localize`Failed to submit report.`,

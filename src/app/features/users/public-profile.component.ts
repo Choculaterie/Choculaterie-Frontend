@@ -463,7 +463,12 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         if (!this.session.isAuthenticated()) { this.router.navigate(['/auth/register']); return; }
         const p = this.enrichedProfile()!;
         this.userBrowseApi.postApiUserBrowseUserIdLike(p.id).subscribe({
-            next: (res) => this.enrichedProfile.set({ ...p, isLiked: res.isLiked }),
+            next: (res) => {
+                this.enrichedProfile.set({ ...p, isLiked: res.isLiked });
+                this.toast.success(res.isLiked ? USERS.liked : USERS.likeRemoved, {
+                    onUndo: () => this.toggleLike(),
+                });
+            },
             error: (err) => this.toast.error(err.error?.detail ?? USERS.failedToToggleLike),
         });
     }
