@@ -1387,21 +1387,4 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
-    clearServerLogs(): void {
-        const ref = this.dialog.open(ConfirmDialogComponent, {
-            data: { title: 'Clear Logged Errors', message: 'Delete all logged error entries?', confirmText: COMMON.delete, warn: true } as ConfirmDialogData,
-        });
-        ref.afterClosed().subscribe((ok) => {
-            if (ok) {
-                this.adminApi.deleteApiAdminServerLogs().subscribe({
-                    next: () => {
-                        this.serverLogs.set([]);
-                        this.serverLogsTotalCount.set(0);
-                        this.toast.success('Logged errors cleared.');
-                    },
-                    error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
-                });
-            }
-        });
-    }
 }

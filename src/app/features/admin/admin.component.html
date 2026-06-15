@@ -1089,11 +1089,6 @@
                         <mat-chip-option value="Backend" [selected]="serverLogsSourceFilter() === 'Backend'">Backend</mat-chip-option>
                         <mat-chip-option value="API" [selected]="serverLogsSourceFilter() === 'API'">API</mat-chip-option>
                     </mat-chip-listbox>
-                    @if (serverLogs().length > 0) {
-                    <button mat-stroked-button color="warn" (click)="clearServerLogs()">
-                        <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" /> <span i18n>Clear all</span>
-                    </button>
-                    }
                 </div>
 
                 @if (loadingServerLogs()) {
