@@ -239,6 +239,42 @@ export class AdminComponent implements OnInit, OnDestroy {
             });
     }
 
+    /** IDs of server log entries mentioned in unread server_error notifications */
+    readonly highlightedServerLogIds = computed(() => {
+        const ids = new Set<number>();
+        this.realtime.adminNotifications()
+            .filter(n => !n.isRead && n.type === 'server_error' && n.data)
+            .forEach(n => {
+                try {
+                    const parsed = JSON.parse(n.data!);
+                    const id = typeof parsed === 'number' ? parsed : Number(parsed?.id);
+                    if (!isNaN(id)) ids.add(id);
+                } catch { /* ignore */ }
+            });
+        return ids;
+    });
+
+    /** Called when user clicks on a highlighted server log row – marks only the matching notification(s) as read */
+    onServerLogRowClick(e: ServerLogEntryResponse): void {
+        if (!this.highlightedServerLogIds().has(e.id)) return;
+        this.realtime.adminNotifications()
+            .filter(n => !n.isRead && n.type === 'server_error' && n.data)
+            .filter(n => {
+                try {
+                    const parsed = JSON.parse(n.data!);
+                    const id = typeof parsed === 'number' ? parsed : Number(parsed?.id);
+                    return id === e.id;
+                } catch {
+                    return false;
+                }
+            })
+            .forEach(n => {
+                this.adminApi.postApiAdminNotificationsIdRead(n.id as number).subscribe({
+                    next: () => this.realtime.markAdminNotificationRead(n.id),
+                });
+            });
+    }
+
     // Track which tabs have been loaded
     private loadedTabs = new Set<number>();
 
@@ -371,7 +407,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             case 6: this.loadVersions(); break;
             case 7: this.loadAdminFaqs(); break;
             case 8: this.loadTickets(); break;
-            case 9: this.loadServerLogs(); this.markNotificationsByType('server_error'); break;
+            case 9: this.loadServerLogs(); break;
         }
     }
 

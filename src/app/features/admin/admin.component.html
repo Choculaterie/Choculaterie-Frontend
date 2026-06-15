@@ -1139,7 +1139,8 @@
                     </ng-container>
                     <tr mat-header-row *matHeaderRowDef="serverLogColumns"></tr>
                     <tr mat-row *matRowDef="let row; columns: serverLogColumns;"
-                        [class.highlight-row]="row.level === 'Critical'"></tr>
+                        [class.highlight-row]="row.level === 'Critical' || highlightedServerLogIds().has(row.id)"
+                        (click)="onServerLogRowClick(row)"></tr>
                 </table>
                 <mat-paginator [length]="serverLogsTotalCount()" [pageSize]="serverLogsPageSize()" [pageIndex]="serverLogsPage()"
                     [pageSizeOptions]="[25, 50, 100]" (page)="onServerLogsPageChange($event)" showFirstLastButtons />

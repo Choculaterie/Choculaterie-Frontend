@@ -148,12 +148,13 @@ export class InboxDialogComponent {
             case 'tag_suggestion': return 5;
             case 'schematic_deleted': return 1;
             case 'contact_ticket': return 8;
+            case 'server_error': return 9;
             default: return 0;
         }
     }
 
     openNotification(n: AdminNotificationResponse): void {
-        if (!n.isRead && n.type !== 'schematic_deleted') {
+        if (!n.isRead && n.type !== 'schematic_deleted' && n.type !== 'server_error') {
             this.adminApi.postApiAdminNotificationsIdRead(n.id as number).subscribe({
                 next: () => this.realtime.markAdminNotificationRead(n.id),
             });
