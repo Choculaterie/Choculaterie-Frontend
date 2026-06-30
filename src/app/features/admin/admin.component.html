@@ -1174,5 +1174,43 @@
             </div>
         </mat-tab>
 
+        <!-- ═══ MODULES TAB ═══ -->
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <span>Modules</span>
+            </ng-template>
+            <div class="tab-content">
+                <div class="search-col">
+                    <mat-form-field appearance="outline" class="search-field">
+                        <mat-label>Search modules</mat-label>
+                        <input matInput [(ngModel)]="modulesSearch" (keyup.enter)="searchModules()" />
+                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                    </mat-form-field>
+                    <div class="search-actions">
+                        <button mat-stroked-button (click)="modulesSearch = ''; searchModules()">
+                            <mat-icon>close</mat-icon> <span>Clear</span>
+                        </button>
+                    </div>
+                </div>
+                @if (loadingModules()) {
+                <app-loading-spinner />
+                } @else if (modules().length === 0) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" title="No modules found" />
+                } @else {
+                <div class="modules-grid">
+                    @for (m of modules(); track m.id; let i = $index) {
+                    <app-schematic-card [schematic]="m" [priority]="i < 8 ? 'high' : 'low'" />
+                    }
+                </div>
+                <mat-paginator
+                    [length]="modulesTotalCount()"
+                    [pageIndex]="modulesPage()"
+                    [pageSize]="modulesPageSize()"
+                    [pageSizeOptions]="[12, 24, 48]"
+                    (page)="onModulesPageChange($event)" />
+                }
+            </div>
+        </mat-tab>
+
     </mat-tab-group>
 </div>

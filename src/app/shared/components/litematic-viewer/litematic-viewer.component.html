@@ -4,6 +4,12 @@
             <img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" />
         </button>
         <h2>{{ data.fileName }}</h2>
+        @if (isDiffMode() && diffSummary()) {
+        <span class="diff-summary">
+            <span class="diff-added">+{{ diffSummary()!.added }}</span>
+            <span class="diff-removed">-{{ diffSummary()!.removed }}</span>
+        </span>
+        }
         <button mat-icon-button mat-dialog-close>
             <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
         </button>

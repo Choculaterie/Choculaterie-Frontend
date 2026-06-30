@@ -98,7 +98,14 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
 
     private readonly rawSchematics = signal<SchematicListItemResponse[]>([]);
     private readonly numColumns = signal(1);
-    readonly schematics = computed(() => this.reorderForRowFirst(this.rawSchematics(), this.numColumns()));
+    readonly schematics = computed(() => this.rawSchematics());
+    // Cards have variable height (description length, tags, etc.), so CSS `columns:` balances
+    // column breaks by total height, not by item count - any fixed count-per-column
+    // redistribution meant to "undo" its column-major fill silently desyncs from where the
+    // browser actually breaks columns, scrambling the read order. Explicit per-column arrays
+    // sidestep this entirely: each item's column is assigned here, not guessed at by the browser.
+    readonly schematicColumns = computed(() =>
+        this.distributeIntoColumns(this.rawSchematics(), this.numColumns()));
     @ViewChild('schematicGrid') private schematicGrid?: ElementRef<HTMLElement>;
     readonly totalCount = signal(0);
     readonly currentPage = signal(1);
@@ -112,6 +119,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     sort = 'date';
     direction = 'desc';
     includeUnverified = false;
+    includeModules = false;
 
     readonly showAdvancedFilters = signal(false);
     readonly filtersHeight = signal('0px');
@@ -156,6 +164,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     // Create form
     readonly showCreate = signal(false);
     readonly creating = signal(false);
+    readonly isModuleUpload = signal(false);
     pictureFiles: File[] = [];
     litematicFiles: File[] = [];
     readonly picturePreviews = signal<string[]>([]);
@@ -223,6 +232,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
             this.sort = params['sort'] ?? 'date';
             this.direction = params['direction'] ?? 'desc';
             this.includeUnverified = params['includeUnverified'] === 'true';
+            this.includeModules = params['includeModules'] === 'true';
             const parsedPageSize = Number.parseInt(params['pageSize'], 10);
             this.pageSize.set(this.normalizePageSize(Number.isNaN(parsedPageSize) ? null : parsedPageSize));
             // Auto-expand advanced filters when any advanced filter is active (no animation)
@@ -331,6 +341,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
                 sort: this.sort !== 'date' ? this.sort : null,
                 direction: this.direction !== 'desc' ? this.direction : null,
                 includeUnverified: this.includeUnverified ? 'true' : null,
+                includeModules: this.includeModules ? 'true' : null,
                 pageSize: this.pageSize() !== this.defaultPageSize ? this.pageSize() : null,
                 page: page > 1 ? page : null,
             },
@@ -353,6 +364,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
             sort: this.sort || undefined,
             direction: this.direction || undefined,
             includeUnverified: this.includeUnverified || undefined,
+            includeModules: this.includeModules || undefined,
         }).subscribe({
             next: (res) => {
                 this.rawSchematics.set(res.items);
@@ -405,11 +417,17 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         this.sort = 'date';
         this.direction = 'desc';
         this.includeUnverified = false;
+        this.includeModules = false;
         this.loadPage(1);
     }
 
     toggleIncludeUnverified(): void {
         this.includeUnverified = !this.includeUnverified;
+        this.loadPage(1);
+    }
+
+    toggleIncludeModules(): void {
+        this.includeModules = !this.includeModules;
         this.loadPage(1);
     }
 
@@ -572,7 +590,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
 
         this.schematicsApi.postApiSchematics({
             Name: v.name,
-            AuthorName: this.selectedAuthorId() || this.session.profile()?.id || undefined,
+            AuthorName: this.selectedAuthorId() || v.authorName || undefined,
             Description: v.description ?? undefined,
             SchematicsPictureFiles: ordered.length ? ordered as any : undefined,
             LitematicFiles: this.litematicFiles.length ? this.litematicFiles as any : undefined,
@@ -583,10 +601,12 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
             CoverImageIndex: ordered.length > 1 ? 0 : undefined,
             SchematicType: v.schematicType,
             Visibility: v.visibility,
+            IsModule: this.isModuleUpload() || undefined,
         }).subscribe({
             next: (created: any) => {
                 this.creating.set(false);
                 this.showCreate.set(false);
+                this.isModuleUpload.set(false);
                 this.selectedAuthorId.set(null);
                 this.createTagList.set([]);
                 this.createVersionList.set([]);
@@ -660,12 +680,10 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         if (!el) return;
         this.gridResizeObserver?.disconnect();
         // Use entry.contentRect.width - the actual rendered width of the grid element.
-        // This is accurate in every browser regardless of scrollbar model, unlike
-        // reading the page container width or getComputedStyle(el).columnCount
-        // (which returns "auto" for `columns: 260px auto` and can't be parsed).
+        // This is accurate in every browser regardless of scrollbar model.
         this.gridResizeObserver = new ResizeObserver((entries) => {
             const width = entries[0]?.contentRect.width ?? el.clientWidth;
-            // column-gap is 1rem = 16px; min column width is 260px (from `columns: 260px auto`)
+            // gap is 1rem = 16px; 260px matches `.schematic-column`'s intended min width.
             const cols = Math.max(1, Math.floor((width + 16) / (260 + 16)));
             if (cols !== this.numColumns()) {
                 this.numColumns.set(cols);
@@ -674,19 +692,12 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         this.gridResizeObserver.observe(el);
     }
 
-    private reorderForRowFirst(items: SchematicListItemResponse[], numCols: number): SchematicListItemResponse[] {
-        const n = items.length;
-        if (numCols <= 1 || n <= numCols) return items;
-        const baseRows = Math.floor(n / numCols);
-        const extraCols = n % numCols;
-        const result: SchematicListItemResponse[] = [];
-        for (let c = 0; c < numCols; c++) {
-            const colRows = c < extraCols ? baseRows + 1 : baseRows;
-            for (let r = 0; r < colRows; r++) {
-                const origIdx = r * numCols + c;
-                if (origIdx < n) result.push(items[origIdx]);
-            }
-        }
-        return result;
+    /** Round-robin item `i` into column `i % numCols`, so reading across columns (row-major) always matches `items`' own order, regardless of how tall any individual card renders. */
+    private distributeIntoColumns(
+        items: SchematicListItemResponse[], numCols: number,
+    ): { item: SchematicListItemResponse; index: number }[][] {
+        const cols: { item: SchematicListItemResponse; index: number }[][] = Array.from({ length: Math.max(1, numCols) }, () => []);
+        items.forEach((item, index) => cols[index % cols.length].push({ item, index }));
+        return cols;
     }
 }

@@ -58,6 +58,26 @@ html[data-theme='dark'] {
   }
 }
 
+// Material's generated elevation shadows (mat-sys-level*) are plain black at every theme-type -
+// on a dark surface a black drop shadow barely reads against the equally-dark background, so
+// every card/element hovering via `box-shadow: var(--mat-sys-levelN)` looked like it wasn't
+// doing anything in dark mode. Add a light-tinted glow alongside the drop shadow so the same
+// hover styling stays visible in both themes without touching each component.
+@mixin visible-dark-elevation {
+  --mat-sys-level2: 0px 3px 3px -2px rgba(0, 0, 0, .4), 0px 3px 4px 0px rgba(0, 0, 0, .3), 0px 0px 0px 1px rgba(255, 255, 255, .12);
+  --mat-sys-level3: 0px 3px 5px -1px rgba(0, 0, 0, .4), 0px 6px 10px 0px rgba(0, 0, 0, .3), 0px 0px 0px 1px rgba(255, 255, 255, .14);
+}
+
+html[data-theme='dark'] {
+  @include visible-dark-elevation;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) {
+    @include visible-dark-elevation;
+  }
+}
+
 body {
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);

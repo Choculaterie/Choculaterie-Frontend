@@ -151,16 +151,38 @@
     }
 }
 
+// Real content uses explicit per-column arrays (assigned in the component) instead of CSS
+// `columns:` masonry - `columns:` balances breaks by total column height, which silently
+// disagreed with any JS-side assumption about how many items land in each column once card
+// heights vary, scrambling the reading order. Flex columns keep the same masonry look (each
+// column independently stacks its own variable-height cards) while keeping order deterministic.
 .schematic-grid {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: flex-start;
+}
+
+.schematic-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1 1 0;
+    min-width: 0;
+
+    // app-schematic-card's own host already has margin-bottom: 1rem (for its other,
+    // non-grid usages) - without this it stacks with this column's `gap`, doubling the spacing.
+    app-schematic-card {
+        margin-bottom: 0;
+    }
+}
+
+// Skeleton placeholders are uniform height, so plain CSS-column masonry (no reordering concerns)
+// is fine here.
+.skeleton-grid {
     columns: 260px auto;
     column-gap: 1rem;
     margin-bottom: 1rem;
-
-    app-schematic-card {
-        break-inside: avoid;
-        display: block;
-        margin-bottom: 1rem;
-    }
 }
 
 @keyframes shimmer {
@@ -264,9 +286,11 @@
 
 .form-actions {
     display: flex;
+    align-items: center;
     gap: 0.75rem;
-    justify-content: flex-end;
     margin-top: 1rem;
+
+    .spacer { flex: 1; }
 }
 
 .file-previews {

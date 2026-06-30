@@ -29,6 +29,22 @@
     }
 }
 
+.diff-summary {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    flex-shrink: 0;
+
+    .diff-added {
+        color: #3fb950;
+    }
+
+    .diff-removed {
+        color: #f85149;
+    }
+}
+
 .viewer-body {
     flex: 1;
     position: relative;

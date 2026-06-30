@@ -27,6 +27,9 @@ import {
 import type {
   AcceptTagSuggestionRequest,
   AdminLoginAsRequest,
+  AdminModuleListResponse,
+  AdminModuleResponse,
+  AdminModuleUpdateRequest,
   AdminNotificationResponse,
   AdminSchematicListResponse,
   AdminToggleSchematicRequest,
@@ -45,6 +48,7 @@ import type {
   FaqCreateRequest,
   FaqResponse,
   FaqUpdateRequest,
+  GetApiAdminModulesParams,
   GetApiAdminSchematicsParams,
   GetApiAdminServerLogsParams,
   GetApiAdminStorageParams,
@@ -55,6 +59,7 @@ import type {
   LoginResponse,
   ModMessageRequest,
   ModMessageResponse,
+  PostApiAdminModulesBody,
   StorageStatsResponse,
   TagSuggestionResponse
 } from './generated.schemas';
@@ -1056,6 +1061,154 @@ export class AdminService {
       }
     );
   }
+ getApiAdminModules<TData = AdminModuleListResponse>(params?: GetApiAdminModulesParams, options?: HttpClientBodyOptions): Observable<TData>;
+ getApiAdminModules<TData = AdminModuleListResponse>(params?: GetApiAdminModulesParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ getApiAdminModules<TData = AdminModuleListResponse>(params?: GetApiAdminModulesParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  getApiAdminModules<TData = AdminModuleListResponse>(
+    params?: GetApiAdminModulesParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/Admin/modules`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/Admin/modules`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/Admin/modules`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+ postApiAdminModules<TData = AdminModuleResponse>(postApiAdminModulesBody: PostApiAdminModulesBody, options?: HttpClientBodyOptions): Observable<TData>;
+ postApiAdminModules<TData = AdminModuleResponse>(postApiAdminModulesBody: PostApiAdminModulesBody, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ postApiAdminModules<TData = AdminModuleResponse>(postApiAdminModulesBody: PostApiAdminModulesBody, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  postApiAdminModules<TData = AdminModuleResponse>(
+    postApiAdminModulesBody: PostApiAdminModulesBody, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {const formData = new FormData();
+if(postApiAdminModulesBody.Name !== undefined) {
+ formData.append(`Name`, postApiAdminModulesBody.Name);
+ }
+if(postApiAdminModulesBody.Description !== undefined) {
+ formData.append(`Description`, postApiAdminModulesBody.Description);
+ }
+if(postApiAdminModulesBody.AuthorName !== undefined) {
+ formData.append(`AuthorName`, postApiAdminModulesBody.AuthorName);
+ }
+if(postApiAdminModulesBody.LitematicFile !== undefined) {
+ formData.append(`LitematicFile`, postApiAdminModulesBody.LitematicFile);
+ }
+if(postApiAdminModulesBody.ThumbnailFile !== undefined) {
+ formData.append(`ThumbnailFile`, postApiAdminModulesBody.ThumbnailFile);
+ }
+
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/Admin/modules`,
+      formData,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/Admin/modules`,
+      formData,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/Admin/modules`,
+      formData,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ putApiAdminModulesId<TData = unknown>(id: string,
+    adminModuleUpdateRequest: AdminModuleUpdateRequest, options?: HttpClientBodyOptions): Observable<TData>;
+ putApiAdminModulesId<TData = unknown>(id: string,
+    adminModuleUpdateRequest: AdminModuleUpdateRequest, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ putApiAdminModulesId<TData = unknown>(id: string,
+    adminModuleUpdateRequest: AdminModuleUpdateRequest, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  putApiAdminModulesId<TData = unknown>(
+    id: string,
+    adminModuleUpdateRequest: AdminModuleUpdateRequest, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.put<TData>(
+      `/api/Admin/modules/${id}`,
+      adminModuleUpdateRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.put<TData>(
+      `/api/Admin/modules/${id}`,
+      adminModuleUpdateRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.put<TData>(
+      `/api/Admin/modules/${id}`,
+      adminModuleUpdateRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ deleteApiAdminModulesId<TData = unknown>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
+ deleteApiAdminModulesId<TData = unknown>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ deleteApiAdminModulesId<TData = unknown>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  deleteApiAdminModulesId<TData = unknown>(
+    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.delete<TData>(
+      `/api/Admin/modules/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.delete<TData>(
+      `/api/Admin/modules/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.delete<TData>(
+      `/api/Admin/modules/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
  getApiAdminVersions<TData = AllowedVersionResponse[]>( options?: HttpClientBodyOptions): Observable<TData>;
  getApiAdminVersions<TData = AllowedVersionResponse[]>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
  getApiAdminVersions<TData = AllowedVersionResponse[]>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
@@ -1718,6 +1871,10 @@ export type GetApiAdminStorageClientResult = NonNullable<StorageStatsResponse>
 export type GetApiAdminTagsClientResult = NonNullable<AllowedTagResponse[]>
 export type PostApiAdminTagsClientResult = NonNullable<AllowedTagResponse>
 export type DeleteApiAdminTagsIdClientResult = NonNullable<unknown>
+export type GetApiAdminModulesClientResult = NonNullable<AdminModuleListResponse>
+export type PostApiAdminModulesClientResult = NonNullable<AdminModuleResponse>
+export type PutApiAdminModulesIdClientResult = NonNullable<unknown>
+export type DeleteApiAdminModulesIdClientResult = NonNullable<unknown>
 export type GetApiAdminVersionsClientResult = NonNullable<AllowedVersionResponse[]>
 export type PostApiAdminVersionsClientResult = NonNullable<AllowedVersionResponse>
 export type DeleteApiAdminVersionsIdClientResult = NonNullable<unknown>

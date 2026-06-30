@@ -424,7 +424,7 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
 
                         this.resources = this.buildResources(assets, img);
 
-                        const litematic = parseLitematic(new Uint8Array(this.data.fileData));
+                        const litematic = await parseLitematic(new Uint8Array(this.data.fileData));
                         if (!litematic.regions.length) {
                             this.error.set('No regions found in litematic file.');
                             this.loading.set(false);

@@ -22,10 +22,15 @@ import {
     parseLitematic,
     structureFromLitematicAsync,
     countNonAirBlocks,
+    getNonAirBounds,
+    type NonAirBounds,
 } from './litematic-utils';
 import { OPAQUE_BLOCKS, TRANSPARENT_BLOCKS, NON_SELF_CULLING } from './opaque-blocks';
 
-const RENDER_SIZE = 1024; // smaller than the interactive dialog to keep it fast
+// Square, so there's equal headroom for tall and wide structures alike - the card displays
+// these with `object-fit: contain` (never crops), so there's no benefit to a non-square render.
+const RENDER_WIDTH = 1024;
+const RENDER_HEIGHT = 1024;
 const MAX_BLOCKS = 250_000;
 
 /**
@@ -68,7 +73,7 @@ export async function renderLitematicHeadless(
     const resources = buildResources(assets, img);
 
     // 4. Parse the litematic
-    const litematic = parseLitematic(new Uint8Array(fileData));
+    const litematic = await parseLitematic(new Uint8Array(fileData));
     if (!litematic.regions.length) throw new Error('No regions found in litematic');
 
     // 5. Clamp maxY if structure is very large
@@ -88,14 +93,15 @@ export async function renderLitematicHeadless(
     await yieldToMain();
     const structure = await structureFromLitematicAsync(litematic, 0, maxY);
     if (!structure) throw new Error('Failed to build Structure from litematic');
+    const bounds = getNonAirBounds(litematic, 0, maxY);
 
     // 7. Create offscreen WebGL canvas
     const canvas = document.createElement('canvas');
-    canvas.width = RENDER_SIZE;
-    canvas.height = RENDER_SIZE;
+    canvas.width = RENDER_WIDTH;
+    canvas.height = RENDER_HEIGHT;
     // deepslate reads clientWidth/clientHeight for projection - spoof them
-    Object.defineProperty(canvas, 'clientWidth', { value: RENDER_SIZE });
-    Object.defineProperty(canvas, 'clientHeight', { value: RENDER_SIZE });
+    Object.defineProperty(canvas, 'clientWidth', { value: RENDER_WIDTH });
+    Object.defineProperty(canvas, 'clientHeight', { value: RENDER_HEIGHT });
 
     const gl = canvas.getContext('webgl', {
         preserveDrawingBuffer: true,
@@ -104,7 +110,7 @@ export async function renderLitematicHeadless(
         antialias: true,
     });
     if (!gl) throw new Error('WebGL not available');
-    gl.viewport(0, 0, RENDER_SIZE, RENDER_SIZE);
+    gl.viewport(0, 0, RENDER_WIDTH, RENDER_HEIGHT);
 
     // 8. Render
     const size = structure.getSize();
@@ -113,15 +119,15 @@ export async function renderLitematicHeadless(
         chunkSize: volume > 500_000 ? 32 : 16,
     });
 
-    const view = buildViewMatrix(structure, yaw, pitch, zoom);
+    const view = buildViewMatrix(bounds ?? boundsFromSize(structure.getSize()), yaw, pitch, zoom);
     gl.clearColor(0, 0, 0, 0); // transparent background for OG image
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     renderer.drawStructure(view);
 
     // Free the WebGL context immediately after reading pixels
     const copyCanvas = document.createElement('canvas');
-    copyCanvas.width = RENDER_SIZE;
-    copyCanvas.height = RENDER_SIZE;
+    copyCanvas.width = RENDER_WIDTH;
+    copyCanvas.height = RENDER_HEIGHT;
     copyCanvas.getContext('2d')!.drawImage(canvas, 0, 0);
     gl.getExtension('WEBGL_lose_context')?.loseContext();
 
@@ -215,19 +221,28 @@ function buildResources(
     };
 }
 
+function boundsFromSize(size: [number, number, number]): NonAirBounds {
+    return { minX: 0, maxX: size[0] - 1, minY: 0, maxY: size[1] - 1, minZ: 0, maxZ: size[2] - 1 };
+}
+
 function buildViewMatrix(
-    structure: { getSize(): [number, number, number] },
+    bounds: NonAirBounds,
     yaw: number,
     pitch: number,
     zoom: number,
 ): mat4 {
-    const size = structure.getSize();
-    const cx = size[0] / 2, cy = size[1] / 2, cz = size[2] / 2;
+    // Frame around the tight non-air bounding box (not the full structure/region size) so a
+    // capture zone with empty padding around the actual build doesn't render it tiny and
+    // off-centre.
+    const halfX = (bounds.maxX - bounds.minX + 1) / 2;
+    const halfY = (bounds.maxY - bounds.minY + 1) / 2;
+    const halfZ = (bounds.maxZ - bounds.minZ + 1) / 2;
+    const cx = bounds.minX + halfX, cy = bounds.minY + halfY, cz = bounds.minZ + halfZ;
 
     const pitchRad = (pitch * Math.PI) / 180;
     const yawRad = (yaw * Math.PI) / 180;
 
-    const radius = Math.sqrt(cx * cx + cy * cy + cz * cz);
+    const radius = Math.sqrt(halfX * halfX + halfY * halfY + halfZ * halfZ);
     const baseDist = Math.max(radius * 2.2, 5);
     const dist = baseDist * (100 / zoom);
 
@@ -259,6 +274,8 @@ function trimCanvas(canvas: HTMLCanvasElement): HTMLCanvasElement {
         }
     }
     if (maxX < minX) return canvas;
+    // Trim tight to the actual rendered content, no extra padding - the card's
+    // `object-fit: cover` relies on this to fill its box edge-to-edge with no empty margin.
     const pad = 8;
     minX = Math.max(0, minX - pad);
     minY = Math.max(0, minY - pad);

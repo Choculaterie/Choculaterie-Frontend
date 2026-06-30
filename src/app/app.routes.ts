@@ -38,6 +38,11 @@ export const routes: Routes = [
             import('./features/users/public-profile.component').then((m) => m.PublicProfileComponent),
     },
     {
+        path: 'repos/:repoId',
+        loadComponent: () =>
+            import('./features/repos/repo-detail.component').then((m) => m.RepoDetailComponent),
+    },
+    {
         path: 'profile',
         redirectTo: 'not-found',
     },
@@ -63,6 +68,12 @@ export const routes: Routes = [
         canActivate: [authGuard],
         loadComponent: () =>
             import('./features/save-manager/save-manager-authorize.component').then((m) => m.SaveManagerAuthorizeComponent),
+    },
+    {
+        path: 'gitlite/authorize/:flowId',
+        canActivate: [authGuard],
+        loadComponent: () =>
+            import('./features/gitlite/gitlite-authorize.component').then((m) => m.GitLiteAuthorizeComponent),
     },
     {
         path: 'not-found',

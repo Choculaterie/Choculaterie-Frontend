@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { Subscription, interval, switchMap, catchError, of } from 'rxjs';
 import { SchematicsService } from '../../../api/schematics';
 import { StatsService } from '../../../api/stats';
 import { RealtimeService } from '../../../core/services/realtime.service';
@@ -31,6 +32,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private router = inject(Router);
     private injector = inject(Injector);
     private gridResizeObserver?: ResizeObserver;
+    private statsPollSub?: Subscription;
 
     @ViewChild('schematicGrid') private schematicGrid?: ElementRef<HTMLElement>;
 
@@ -58,13 +60,16 @@ export class HomeComponent implements OnInit, OnDestroy {
             error: () => this.loadingSchematics.set(false),
         });
 
-        // Seed stats via HTTP
-        if (!this.realtime.stats()) {
-            this.statsApi.getApiStats<ReturnType<typeof this.realtime.stats>>().subscribe({
-                next: (res) => this.realtime.seedStats(res as any),
-                error: () => { },
-            });
-        }
+        this.statsApi.getApiStats<ReturnType<typeof this.realtime.stats>>().subscribe({
+            next: (res) => this.realtime.seedStats(res as any),
+            error: () => { },
+        });
+
+        this.statsPollSub = interval(30_000).pipe(
+            switchMap(() => this.statsApi.getApiStats<ReturnType<typeof this.realtime.stats>>().pipe(
+                catchError(() => of(null)),
+            )),
+        ).subscribe({ next: (res) => { if (res) this.realtime.seedStats(res as any); } });
     }
 
     openQuickShareLink(): void {
@@ -73,6 +78,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.gridResizeObserver?.disconnect();
+        this.statsPollSub?.unsubscribe();
     }
 
     private attachGridObserver(): void {

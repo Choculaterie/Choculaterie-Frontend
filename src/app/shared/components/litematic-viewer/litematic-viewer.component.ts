@@ -29,12 +29,19 @@ import {
 import { mat4, vec3 } from 'gl-matrix';
 
 
-import { parseLitematic, structureFromLitematicAsync, countNonAirBlocks, type Litematic } from './litematic-utils';
+import { parseLitematic, structureFromLitematicAsync, countNonAirBlocks, computeLitematicDiff, type Litematic, type LitematicDiffResult } from './litematic-utils';
 import { OPAQUE_BLOCKS, TRANSPARENT_BLOCKS, NON_SELF_CULLING } from './opaque-blocks';
 
 export interface LitematicViewerData {
     fileData: ArrayBuffer;
     fileName: string;
+    /**
+     * Enables diff mode: blocks added/changed relative to this older snapshot render with a
+     * green tint, blocks removed render as a red-tinted ghost of the old block. Pass `null`
+     * (rather than omitting the field) to diff against "nothing" - i.e. treat every block as
+     * added, matching how GitHub renders the diff for a commit with no parent.
+     */
+    parentFileData?: ArrayBuffer | null;
 }
 
 @Component({
@@ -63,6 +70,8 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
     readonly loadingStatus = signal('Loading block definitions…');
     readonly error = signal('');
     readonly blockCountInfo = signal('');
+    readonly isDiffMode = signal(false);
+    readonly diffSummary = signal<{ added: number; removed: number } | null>(null);
 
     // Y-layer sliders
     minY = 0;
@@ -81,6 +90,15 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
     // Track previous Y range for partial chunk updates
     private prevMinY = 0;
     private prevMaxY = 0;
+
+    // Diff overlay - a small, separate WebGL program drawing translucent colour-tinted "glow
+    // shells" slightly outside each diffed block's bounds, so they win the depth test against
+    // the real (opaque) block geometry instead of being hidden behind it.
+    private diffTints = new Map<string, [number, number, number, number]>();
+    private overlayProgram: WebGLProgram | null = null;
+    private overlayPositionBuffer: WebGLBuffer | null = null;
+    private overlayColorBuffer: WebGLBuffer | null = null;
+    private overlayVertexCount = 0;
 
     // Camera state
     private cameraPitch = 0.8;
@@ -178,7 +196,8 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
                         if (this.destroyed) return;
 
                         this.resources = this.buildResources(assets, img);
-                        this.litematic = parseLitematic(new Uint8Array(this.data.fileData));
+                        this.litematic = await parseLitematic(new Uint8Array(this.data.fileData));
+                        if (this.destroyed) return;
 
                         if (!this.litematic.regions.length) {
                             this.error.set('No regions found in litematic file.');
@@ -191,29 +210,66 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
                         await new Promise<void>(r => setTimeout(r, 0));
                         if (this.destroyed) return;
 
+                        const hasDiff = this.data.parentFileData !== undefined;
+                        let diffResult: LitematicDiffResult | null = null;
+                        if (hasDiff) {
+                            this.isDiffMode.set(true);
+                            this.loadingStatus.set('Diffing against previous commit…');
+                            const parentLitematic = this.data.parentFileData
+                                ? await parseLitematic(new Uint8Array(this.data.parentFileData))
+                                : null;
+                            if (this.destroyed) return;
+                            diffResult = await computeLitematicDiff(
+                                parentLitematic, this.litematic,
+                                (frac) => this.loadingProgress.set(85 + Math.round(frac * 2)),
+                            );
+                            if (this.destroyed) return;
+
+                            if (diffResult.tooLarge) {
+                                this.error.set(`Diff bounding box is too large to preview (${diffResult.width}×${diffResult.height}×${diffResult.depth}).`);
+                                this.loading.set(false);
+                                return;
+                            }
+
+                            this.diffSummary.set({
+                                added: diffResult.addedCount + diffResult.changedCount,
+                                removed: diffResult.removedCount,
+                            });
+
+                            if (diffResult.blocks.length > LitematicViewerComponent.MAX_BLOCKS) {
+                                this.error.set(`Diff is too large to preview (${diffResult.blocks.length.toLocaleString()} blocks, max ${LitematicViewerComponent.MAX_BLOCKS.toLocaleString()}).`);
+                                this.loading.set(false);
+                                return;
+                            }
+                        }
+
                         // Set up Y sliders
                         const region = this.litematic.regions[0];
                         this.minY = 0;
-                        this.maxY = region.absHeight;
+                        this.maxY = diffResult ? diffResult.height : region.absHeight;
                         this.currentMinY = 0;
-                        this.currentMaxY = region.absHeight;
+                        this.currentMaxY = this.maxY;
 
-                        // Check total block count - auto-limit Y range for very large structures
-                        const totalBlocks = countNonAirBlocks(this.litematic);
-                        if (totalBlocks > LitematicViewerComponent.MAX_BLOCKS) {
-                            // Binary-search for how many Y layers we can afford
-                            let lo = 1, hi = region.absHeight;
-                            while (lo < hi) {
-                                const mid = Math.ceil((lo + hi) / 2);
-                                const c = countNonAirBlocks(this.litematic, 0, mid);
-                                if (c <= LitematicViewerComponent.MAX_BLOCKS) lo = mid; else hi = mid - 1;
-                            }
-                            this.currentMaxY = lo;
-                            this.blockCountInfo.set(
-                                `Showing Y 0\u2013${lo} of ${region.absHeight} (${totalBlocks.toLocaleString()} blocks total, limited for performance)`,
-                            );
+                        if (diffResult) {
+                            this.blockCountInfo.set(`${diffResult.blocks.length.toLocaleString()} blocks total`);
                         } else {
-                            this.blockCountInfo.set(`${totalBlocks.toLocaleString()} blocks`);
+                            // Check total block count - auto-limit Y range for very large structures
+                            const totalBlocks = countNonAirBlocks(this.litematic);
+                            if (totalBlocks > LitematicViewerComponent.MAX_BLOCKS) {
+                                // Binary-search for how many Y layers we can afford
+                                let lo = 1, hi = region.absHeight;
+                                while (lo < hi) {
+                                    const mid = Math.ceil((lo + hi) / 2);
+                                    const c = countNonAirBlocks(this.litematic, 0, mid);
+                                    if (c <= LitematicViewerComponent.MAX_BLOCKS) lo = mid; else hi = mid - 1;
+                                }
+                                this.currentMaxY = lo;
+                                this.blockCountInfo.set(
+                                    `Showing Y 0\u2013${lo} of ${region.absHeight} (${totalBlocks.toLocaleString()} blocks total, limited for performance)`,
+                                );
+                            } else {
+                                this.blockCountInfo.set(`${totalBlocks.toLocaleString()} blocks`);
+                            }
                         }
 
                         this.loadingProgress.set(87);
@@ -221,11 +277,33 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
 
                         this.setupCanvas();
                         this.setupControls();
+                        this.initOverlayProgram();
 
-                        const structure = await structureFromLitematicAsync(
-                            this.litematic, this.currentMinY, this.currentMaxY,
-                            (frac) => this.loadingProgress.set(87 + Math.round(frac * 8)),
-                        );
+                        let structure: Structure | null;
+                        if (diffResult) {
+                            structure = new Structure([diffResult.width, diffResult.height, diffResult.depth]);
+                            // Chunked, same as structureFromLitematicAsync below - addBlock() does real
+                            // work per call (model/state resolution), so a tight synchronous loop over a
+                            // large diff is exactly the kind of thing that freezes the tab.
+                            const DIFF_BATCH_SIZE = 5_000;
+                            for (let i = 0; i < diffResult.blocks.length; i++) {
+                                const b = diffResult.blocks[i];
+                                if (b.properties) structure.addBlock(b.pos, b.name, b.properties);
+                                else structure.addBlock(b.pos, b.name);
+                                if ((i + 1) % DIFF_BATCH_SIZE === 0) {
+                                    this.loadingProgress.set(87 + Math.round(((i + 1) / diffResult.blocks.length) * 8));
+                                    await new Promise<void>(r => setTimeout(r, 0));
+                                    if (this.destroyed) return;
+                                }
+                            }
+                            this.diffTints = diffResult.tints;
+                        } else {
+                            structure = await structureFromLitematicAsync(
+                                this.litematic, this.currentMinY, this.currentMaxY,
+                                (frac) => this.loadingProgress.set(87 + Math.round(frac * 8)),
+                            );
+                            this.diffTints = new Map();
+                        }
 
                         if (!structure || this.destroyed) return;
 
@@ -241,6 +319,8 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
                         this.allBlocks = (structure as any).blocks.slice();
                         this.prevMinY = this.currentMinY;
                         this.prevMaxY = this.currentMaxY;
+                        await this.buildOverlayBuffers();
+                        if (this.destroyed) return;
 
                         this.loadingProgress.set(100);
                         this.loading.set(false);
@@ -383,6 +463,7 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
         mat4.translate(view, view, this.cameraPos);
 
         this.renderer.drawStructure(view);
+        this.drawDiffOverlay(view);
         this.renderer.drawGrid(view);
     }
 
@@ -398,7 +479,136 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
         mat4.translate(view, view, this.cameraPos);
 
         this.renderer.drawStructure(view);
+        this.drawDiffOverlay(view);
         // deliberately skip drawGrid so screenshot has no grid lines
+    }
+
+    // --- Diff overlay rendering ---
+    //
+    // deepslate's own colour shader programs aren't suited to this: vsColor encodes block
+    // position as colour (used for mouse-picking, not freely settable colour), and vsGrid
+    // hardcodes alpha to 1.0 (no translucency). So this is a small, separate WebGL program
+    // sharing the same gl context, drawn after the textured structure each frame.
+
+    private initOverlayProgram(): void {
+        const gl = this.gl;
+        if (!gl || this.overlayProgram) return;
+
+        const vsSource = `
+            attribute vec3 aPos;
+            attribute vec4 aColor;
+            uniform mat4 mView;
+            uniform mat4 mProj;
+            varying vec4 vColor;
+            void main(void) {
+                gl_Position = mProj * mView * vec4(aPos, 1.0);
+                vColor = aColor;
+            }
+        `;
+        const fsSource = `
+            precision mediump float;
+            varying vec4 vColor;
+            void main(void) {
+                gl_FragColor = vColor;
+            }
+        `;
+
+        const compile = (type: number, source: string): WebGLShader => {
+            const shader = gl.createShader(type)!;
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            return shader;
+        };
+
+        const program = gl.createProgram()!;
+        gl.attachShader(program, compile(gl.VERTEX_SHADER, vsSource));
+        gl.attachShader(program, compile(gl.FRAGMENT_SHADER, fsSource));
+        gl.linkProgram(program);
+
+        this.overlayProgram = program;
+        this.overlayPositionBuffer = gl.createBuffer();
+        this.overlayColorBuffer = gl.createBuffer();
+    }
+
+    /**
+     * Rebuilds the overlay's vertex buffers from {@link diffTints}, restricted to the current
+     * Y range. Each tinted position gets a cube slightly *larger* than the real block (a "glow
+     * shell") so its near faces win the depth test against the real, opaque block geometry
+     * instead of being hidden behind it.
+     */
+    private async buildOverlayBuffers(): Promise<void> {
+        const gl = this.gl;
+        if (!gl || !this.overlayProgram) return;
+
+        const MARGIN = 0.03;
+        const lo = -MARGIN, hi = 1 + MARGIN;
+        // 6 faces, 2 triangles each, wound CCW when viewed from outside.
+        const cubeTriangles: [number, number, number][][] = [
+            // -X / +X
+            [[lo, lo, lo], [lo, lo, hi], [lo, hi, hi]], [[lo, lo, lo], [lo, hi, hi], [lo, hi, lo]],
+            [[hi, lo, hi], [hi, lo, lo], [hi, hi, lo]], [[hi, lo, hi], [hi, hi, lo], [hi, hi, hi]],
+            // -Y / +Y
+            [[lo, lo, lo], [hi, lo, lo], [hi, lo, hi]], [[lo, lo, lo], [hi, lo, hi], [lo, lo, hi]],
+            [[lo, hi, hi], [hi, hi, hi], [hi, hi, lo]], [[lo, hi, hi], [hi, hi, lo], [lo, hi, lo]],
+            // -Z / +Z
+            [[hi, lo, lo], [lo, lo, lo], [lo, hi, lo]], [[hi, lo, lo], [lo, hi, lo], [hi, hi, lo]],
+            [[lo, lo, hi], [hi, lo, hi], [hi, hi, hi]], [[lo, lo, hi], [hi, hi, hi], [lo, hi, hi]],
+        ];
+
+        const positions: number[] = [];
+        const colors: number[] = [];
+        // Chunked - building geometry for a large diff (thousands of tinted cubes x 36 verts
+        // each) synchronously was the other half of what froze the tab on large diffs.
+        const BATCH_SIZE = 2_000;
+        let processed = 0;
+        for (const [key, color] of this.diffTints) {
+            const [x, y, z] = key.split(',').map(Number);
+            if (y >= this.currentMinY && y < this.currentMaxY) {
+                for (const tri of cubeTriangles) {
+                    for (const [dx, dy, dz] of tri) {
+                        positions.push(x + dx, y + dy, z + dz);
+                        colors.push(...color);
+                    }
+                }
+            }
+
+            processed++;
+            if (processed % BATCH_SIZE === 0) {
+                await new Promise<void>(r => setTimeout(r, 0));
+                if (this.destroyed) return;
+            }
+        }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.overlayPositionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.overlayColorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+        this.overlayVertexCount = positions.length / 3;
+        this.zone.runOutsideAngular(() => requestAnimationFrame(() => this.render()));
+    }
+
+    private drawDiffOverlay(view: mat4): void {
+        const gl = this.gl;
+        if (!gl || !this.overlayProgram || this.overlayVertexCount === 0) return;
+
+        gl.useProgram(this.overlayProgram);
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.overlayProgram, 'mProj'), false, (this.renderer as any).projMatrix);
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.overlayProgram, 'mView'), false, view);
+
+        const posLoc = gl.getAttribLocation(this.overlayProgram, 'aPos');
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.overlayPositionBuffer);
+        gl.enableVertexAttribArray(posLoc);
+        gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
+
+        const colorLoc = gl.getAttribLocation(this.overlayProgram, 'aColor');
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.overlayColorBuffer);
+        gl.enableVertexAttribArray(colorLoc);
+        gl.vertexAttribPointer(colorLoc, 4, gl.FLOAT, false, 0, 0);
+
+        // Ghost cubes should be visible from inside (e.g. a removed block the camera is near).
+        gl.disable(gl.CULL_FACE);
+        gl.drawArrays(gl.TRIANGLES, 0, this.overlayVertexCount);
+        gl.enable(gl.CULL_FACE);
     }
 
     // --- Camera movement ---
@@ -683,6 +893,7 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
 
         this.prevMinY = yMin;
         this.prevMaxY = yMax;
+        void this.buildOverlayBuffers();
 
         this.zone.runOutsideAngular(() => requestAnimationFrame(() => this.render()));
     }

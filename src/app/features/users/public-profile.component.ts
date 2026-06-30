@@ -1,5 +1,6 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, effect, Injector, ElementRef, ViewChild, afterNextRender } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { DatePipe, Location } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, AsyncValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -13,6 +14,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle, moveItemInArray } from '@angular/cdk/drag-drop';
 import { of, timer } from 'rxjs';
@@ -20,6 +22,7 @@ import { switchMap, map, catchError } from 'rxjs/operators';
 import { UserBrowseService } from '../../api/user-browse';
 import { UsersService } from '../../api/users';
 import { SchematicsService } from '../../api/schematics';
+import { GitReposService } from '../../api/git-repos';
 import { ReportsService } from '../../api/reports';
 import { SecurityKeysService } from '../../api/security-keys';
 import { SaveManagerService } from '../../api/save-manager';
@@ -29,9 +32,11 @@ import type {
     OwnProfileResponse, PublicProfileResponse, UserProfileResponse,
     SchematicListItemResponse, PublicUserListItemResponse,
     SecurityKeyResponse, SaveListItemResponse, SaveQuotaResponse,
+    GitRepoSummaryResponse,
 } from '../../api/generated.schemas';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { SchematicCardComponent } from '../../shared/components/schematic-card/schematic-card.component';
+import { renderLitematicHeadless } from '../../shared/components/litematic-viewer/litematic-headless-render';
 import { UserCardComponent } from '../../shared/components/user-card/user-card.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { ReportDialogComponent, ReportDialogData, ReportDialogResult } from '../../shared/components/report-dialog/report-dialog.component';
@@ -75,6 +80,7 @@ import { matfMinecraftColored } from '@ng-icons/material-file-icons/colored';
         MatTableModule,
         MatTooltipModule,
         MatSelectModule,
+        MatPaginatorModule,
         CdkDrag,
         CdkDropList,
         CdkDragHandle,
@@ -104,11 +110,14 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     private usersApi = inject(UsersService);
     private userBrowseApi = inject(UserBrowseService);
     private schematicsApi = inject(SchematicsService);
+    private gitReposApi = inject(GitReposService);
+    private http = inject(HttpClient);
     private reportsApi = inject(ReportsService);
     private securityKeysApi = inject(SecurityKeysService);
     private saveManagerApi = inject(SaveManagerService);
     private passwordResetApi = inject(PasswordResetService);
     private linkingApi = inject(LinkingService);
+    private injector = inject(Injector);
     private dialog = inject(MatDialog);
     private toast = inject(ToastService);
     private location = inject(Location);
@@ -175,6 +184,125 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     readonly schematics = signal<SchematicListItemResponse[]>([]);
     readonly likedSchematics = signal<SchematicListItemResponse[]>([]);
     readonly likedUsers = signal<PublicUserListItemResponse[]>([]);
+
+    // Schematics tab: server-paginated (modules excluded server-side), masonry-reordered to match schematics-list
+    private gridResizeObserver?: ResizeObserver;
+    private readonly numColumns = signal(1);
+    @ViewChild('schematicGrid') private schematicGrid?: ElementRef<HTMLElement>;
+    readonly loadingSchematics = signal(true);
+    readonly schematicsPage = signal(0);
+    readonly schematicsPageSize = signal(24);
+    readonly schematicsTotalCount = signal(0);
+    readonly pagedSchematics = computed(() => this.reorderForRowFirst(this.schematics(), this.numColumns()));
+
+    private loadSchematics(username: string): void {
+        this.loadingSchematics.set(true);
+        this.schematicsApi.getApiSchematicsUserUsernameSchematics(username, {
+            page: this.schematicsPage() + 1,
+            pageSize: this.schematicsPageSize(),
+        }).subscribe({
+            next: (res) => {
+                this.schematics.set(res.items);
+                this.schematicsTotalCount.set(res.totalCount as any);
+                this.loadingSchematics.set(false);
+            },
+            error: () => this.loadingSchematics.set(false),
+        });
+    }
+
+    onSchematicsPageChange(event: PageEvent): void {
+        if (event.pageSize !== this.schematicsPageSize()) this.schematicsPageSize.set(event.pageSize);
+        this.schematicsPage.set(event.pageIndex);
+        const username = this.route.snapshot.paramMap.get('username');
+        if (username) this.loadSchematics(username);
+    }
+
+    // Repos tab
+    readonly repos = signal<GitRepoSummaryResponse[]>([]);
+    readonly loadingRepos = signal(true);
+    readonly reposPage = signal(0);
+    readonly reposPageSize = signal(20);
+    readonly reposTotalCount = signal(0);
+    /** repoId -> locally-rendered blob URL, shown immediately while the upload lands server-side. */
+    readonly repoThumbnails = signal<Map<string, string>>(new Map());
+
+    private loadRepos(username: string): void {
+        this.loadingRepos.set(true);
+        this.gitReposApi.getApiGitReposUserUsername(username, {
+            page: this.reposPage() + 1,
+            pageSize: this.reposPageSize(),
+        }).subscribe({
+            next: (res) => {
+                this.repos.set(res.items);
+                this.reposTotalCount.set(res.totalCount as any);
+                this.loadingRepos.set(false);
+                this.generateMissingRepoThumbnails(res.items);
+            },
+            error: () => this.loadingRepos.set(false),
+        });
+    }
+
+    /**
+     * Lazily renders a thumbnail for any repo with commits but no release/cached thumbnail yet,
+     * same headless-render-then-cache mechanism as Quick Share: render offscreen in the browser,
+     * upload once, the backend serves the cached copy on every later visit.
+     */
+    private generateMissingRepoThumbnails(items: GitRepoSummaryResponse[]): void {
+        for (const r of items) {
+            if (r.thumbnailUrl || !r.latestCommitId) continue;
+            const commitId = r.latestCommitId;
+
+            this.gitReposApi.getApiGitReposCommitsCommitIdDownload<Blob>(commitId, { responseType: 'blob' } as any).subscribe({
+                next: (blob) => {
+                    (blob as Blob).arrayBuffer().then(async (buffer) => {
+                        try {
+                            const file = await renderLitematicHeadless(buffer, this.http);
+                            this.repoThumbnails.update(map => new Map(map).set(r.id, URL.createObjectURL(file)));
+                            this.gitReposApi.putApiGitReposRepoIdThumbnail(r.id, { CommitId: commitId, File: file } as any).subscribe();
+                        } catch {
+                            // Render failed (e.g. unsupported block) - leave the placeholder icon, silently.
+                        }
+                    });
+                },
+                error: () => { /* commit fetch failed - silently ignore, placeholder stays */ },
+            });
+        }
+    }
+
+    onReposPageChange(event: PageEvent): void {
+        if (event.pageSize !== this.reposPageSize()) this.reposPageSize.set(event.pageSize);
+        this.reposPage.set(event.pageIndex);
+        const username = this.route.snapshot.paramMap.get('username');
+        if (username) this.loadRepos(username);
+    }
+
+    private reorderForRowFirst(items: SchematicListItemResponse[], numCols: number): SchematicListItemResponse[] {
+        const n = items.length;
+        if (numCols <= 1 || n <= numCols) return items;
+        const baseRows = Math.floor(n / numCols);
+        const extraCols = n % numCols;
+        const result: SchematicListItemResponse[] = [];
+        for (let c = 0; c < numCols; c++) {
+            const colRows = c < extraCols ? baseRows + 1 : baseRows;
+            for (let r = 0; r < colRows; r++) {
+                const origIdx = r * numCols + c;
+                if (origIdx < n) result.push(items[origIdx]);
+            }
+        }
+        return result;
+    }
+
+    private attachGridObserver(): void {
+        const el = this.schematicGrid?.nativeElement;
+        if (!el) return;
+        this.gridResizeObserver?.disconnect();
+        this.gridResizeObserver = new ResizeObserver((entries) => {
+            const width = entries[0]?.contentRect.width ?? el.clientWidth;
+            const cols = Math.max(1, Math.floor((width + 16) / (260 + 16)));
+            if (cols !== this.numColumns()) this.numColumns.set(cols);
+        });
+        this.gridResizeObserver.observe(el);
+    }
 
     // ── Own Profile: Validators ──
     private usernameAvailableValidator(): AsyncValidatorFn {
@@ -291,6 +419,13 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         this.emailForm.get('email')!.statusChanges.subscribe(
             status => this.emailChecking.set(status === 'PENDING'),
         );
+
+        // Attach the masonry-column ResizeObserver once the schematics grid renders.
+        effect(() => {
+            if (!this.loadingSchematics() && this.schematics().length > 0) {
+                afterNextRender(() => this.attachGridObserver(), { injector: this.injector });
+            }
+        });
     }
 
     isAdmin(): boolean {
@@ -340,6 +475,8 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
             } else {
                 this.loadPublicProfile(username);
             }
+            this.loadSchematics(username);
+            this.loadRepos(username);
         });
     }
 
@@ -354,6 +491,10 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         this.likedSchematics.set([]);
         this.likedUsers.set([]);
         this.selectedTab.set(0);
+        this.schematicsPage.set(0);
+        this.schematicsTotalCount.set(0);
+        this.reposPage.set(0);
+        this.repos.set([]);
     }
 
     private loadOwnProfile(username: string): void {
@@ -372,7 +513,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
 
         this.schematicsApi.getApiSchematicsUserUsernameContent(username).subscribe({
             next: (res) => {
-                this.schematics.set(res.schematics);
                 this.likedSchematics.set(res.likedSchematics);
                 this.likedUsers.set(res.likedUsers);
                 this.loadingContent.set(false);
@@ -411,7 +551,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
             next: (res) => {
                 this.quickProfile.set(res);
                 this.ogMeta.setUser({ username: res.username ?? null, biographie: (res as any).biographie ?? null, filePath: (res as any).filePath ?? null });
-                this.schematics.set(res.schematics ?? []);
                 this.likedSchematics.set(res.likedSchematics ?? []);
                 this.likedUsers.set(res.likedUsers ?? []);
                 this.loadingContent.set(false);
@@ -1031,6 +1170,7 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         this.clearEmailSpamHint();
         this.clearResetSpamHint();
         this.ogMeta.clear();
+        this.gridResizeObserver?.disconnect();
     }
 
     private scheduleEmailSpamHint(): void {

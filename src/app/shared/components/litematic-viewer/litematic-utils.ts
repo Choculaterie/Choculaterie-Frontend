@@ -17,13 +17,18 @@ export interface Litematic {
 
 /**
  * Parse a .litematic file from raw bytes into a Litematic object.
+ *
+ * <p>Async/chunked because {@link processNBTRegionData} below does real work (bit-unpacking) for
+ * every cell in the region's *entire bounding box*, not just its non-air blocks - a file with a
+ * large bounding box (e.g. one pushed before the mod's zone-capture size cap existed) freezes
+ * the tab here otherwise, before any of the size guards further down the pipeline ever run.
  */
-export function parseLitematic(data: Uint8Array): Litematic {
+export async function parseLitematic(data: Uint8Array): Promise<Litematic> {
     const nbtData = readNbt(data);
     return readLitematicFromNBTData(nbtData);
 }
 
-function readLitematicFromNBTData(nbtData: { value: NbtValues['compound'] }): Litematic {
+async function readLitematicFromNBTData(nbtData: { value: NbtValues['compound'] }): Promise<Litematic> {
     const litematic: Litematic = { regions: [] };
     const regionsTag = nbtData.value['Regions'];
     if (!regionsTag || regionsTag.type !== 'compound') return litematic;
@@ -55,7 +60,7 @@ function readLitematicFromNBTData(nbtData: { value: NbtValues['compound'] }): Li
         if (!blockStatesTag || blockStatesTag.type !== 'longArray') continue;
         const blockData = blockStatesTag.value;
 
-        const blocks = processNBTRegionData(blockData, nbits, absWidth, absHeight, absDepth);
+        const blocks = await processNBTRegionData(blockData, nbits, absWidth, absHeight, absDepth);
 
         litematic.regions.push({ width, height, depth, absWidth, absHeight, absDepth, blocks, blockPalette });
     }
@@ -63,13 +68,13 @@ function readLitematicFromNBTData(nbtData: { value: NbtValues['compound'] }): Li
     return litematic;
 }
 
-function processNBTRegionData(
+async function processNBTRegionData(
     regionData: [number, number][],
     nbits: number,
     absWidth: number,
     absHeight: number,
     absDepth: number,
-): Uint16Array {
+): Promise<Uint16Array> {
     const mask = (1 << nbits) - 1;
     const yShift = absWidth * absDepth;
     const zShift = absWidth;
@@ -77,6 +82,9 @@ function processNBTRegionData(
     const totalBlocks = absWidth * absHeight * absDepth;
     const blocks = new Uint16Array(totalBlocks);
     const hd = absHeight * absDepth;
+
+    const BATCH_SIZE = 50_000;
+    let processed = 0;
 
     for (let x = 0; x < absWidth; x++) {
         const xOff = x * hd;
@@ -111,6 +119,11 @@ function processNBTRegionData(
                         ((blockStart >>> startBitOffset) & mask) |
                         ((blockEnd << endOffset) & mask);
                 }
+
+                processed++;
+                if (processed % BATCH_SIZE === 0) {
+                    await new Promise<void>(r => setTimeout(r, 0));
+                }
             }
         }
     }
@@ -139,6 +152,45 @@ export function countNonAirBlocks(
         }
     }
     return count;
+}
+
+/** Tight bounding box (inclusive) of the non-air blocks within a Y range, in structure coordinates. */
+export interface NonAirBounds {
+    minX: number; maxX: number;
+    minY: number; maxY: number;
+    minZ: number; maxZ: number;
+}
+
+/**
+ * Tight bounding box of non-air blocks, ignoring any empty padding the capture region itself
+ * may contain (e.g. a zone selection larger than the build it surrounds). Used to frame preview
+ * renders around the actual content instead of the full region size.
+ */
+export function getNonAirBounds(litematic: Litematic, yMin = 0, yMax = -1): NonAirBounds | null {
+    const region = litematic.regions[0];
+    const { blocks, blockPalette, absWidth, absHeight, absDepth } = region;
+    const effectiveYMax = yMax === -1 ? absHeight : Math.min(yMax, absHeight);
+    const hd = absHeight * absDepth;
+    let minX = absWidth, maxX = -1, minY = absHeight, maxY = -1, minZ = absDepth, maxZ = -1;
+    for (let x = 0; x < absWidth; x++) {
+        const xOff = x * hd;
+        for (let y = yMin; y < effectiveYMax; y++) {
+            const yOff = y * absDepth;
+            for (let z = 0; z < absDepth; z++) {
+                const id = blocks[xOff + yOff + z];
+                if (id > 0 && id < blockPalette.length) {
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                    if (z < minZ) minZ = z;
+                    if (z > maxZ) maxZ = z;
+                }
+            }
+        }
+    }
+    if (maxX < minX) return null;
+    return { minX, maxX, minY, maxY, minZ, maxZ };
 }
 
 /**
@@ -225,6 +277,133 @@ export function structureFromLitematic(
     }
 
     return structure;
+}
+
+// --- Commit diffing ---
+
+export interface DiffBlock {
+    pos: [number, number, number];
+    name: string;
+    properties?: Record<string, string>;
+}
+
+/** GitHub-style diff tint colours, as straight (non-premultiplied) RGBA in the 0-1 range. */
+const ADDED_TINT: [number, number, number, number] = [0.30, 0.85, 0.30, 0.55];
+const REMOVED_TINT: [number, number, number, number] = [0.95, 0.25, 0.20, 0.55];
+
+export interface LitematicDiffResult {
+    /** Merged block list: the new file's blocks, plus a "ghost" entry for each removed block. */
+    blocks: DiffBlock[];
+    /** Position key `"x,y,z"` -> RGBA tint for added/changed (green) and removed (red) blocks. */
+    tints: Map<string, [number, number, number, number]>;
+    width: number;
+    height: number;
+    depth: number;
+    addedCount: number;
+    removedCount: number;
+    changedCount: number;
+    /** True if the combined bounding box exceeded {@link MAX_DIFF_VOLUME}; other fields are empty/zero. */
+    tooLarge: boolean;
+}
+
+/**
+ * Generous headroom above the mod's 80,000-block capture cap. A diff's bounding box is the max
+ * of both commits' regions, so an old commit pushed before that cap existed (the original
+ * manual-file-path push flow had no size limit) could otherwise blow this up arbitrarily.
+ */
+const MAX_DIFF_VOLUME = 4_000_000;
+
+type PaletteEntry = { Name: string; Properties?: Record<string, string> };
+
+function blockAt(region: LitematicRegion, x: number, y: number, z: number): PaletteEntry | null {
+    if (x < 0 || y < 0 || z < 0 || x >= region.absWidth || y >= region.absHeight || z >= region.absDepth) {
+        return null;
+    }
+    // region.blocks is stored X-major (see structureFromLitematic/countNonAirBlocks above) -
+    // NOT in the y/z/x bit-packing decode order. Using the wrong formula here silently scrambles
+    // which world position each palette entry maps to.
+    const idx = x * (region.absHeight * region.absDepth) + y * region.absDepth + z;
+    const id = region.blocks[idx];
+    if (id <= 0 || id >= region.blockPalette.length) return null;
+    return region.blockPalette[id];
+}
+
+function sameBlock(a: PaletteEntry | null, b: PaletteEntry | null): boolean {
+    if (!a || !b) return a === b;
+    if (a.Name !== b.Name) return false;
+    const ap = a.Properties ?? {};
+    const bp = b.Properties ?? {};
+    const aKeys = Object.keys(ap);
+    const bKeys = Object.keys(bp);
+    if (aKeys.length !== bKeys.length) return false;
+    return aKeys.every(k => ap[k] === bp[k]);
+}
+
+/**
+ * Diffs two litematics block-by-block, GitHub-style: blocks present in {@code newLit} but not
+ * (or different from) {@code oldLit} are "added" (green); blocks present in {@code oldLit} but
+ * absent from {@code newLit} are "removed" (red, rendered as a ghost of the old block so you can
+ * see what it was). Passing {@code null} for {@code oldLit} (no parent commit) treats every block
+ * in {@code newLit} as added - matching how GitHub shows an initial commit's diff.
+ */
+export async function computeLitematicDiff(
+    oldLit: Litematic | null,
+    newLit: Litematic,
+    onProgress?: (fraction: number) => void,
+): Promise<LitematicDiffResult> {
+    const newRegion = newLit.regions[0];
+    const oldRegion = oldLit?.regions[0] ?? null;
+
+    const width = Math.max(newRegion.absWidth, oldRegion?.absWidth ?? 0);
+    const height = Math.max(newRegion.absHeight, oldRegion?.absHeight ?? 0);
+    const depth = Math.max(newRegion.absDepth, oldRegion?.absDepth ?? 0);
+
+    if (width * height * depth > MAX_DIFF_VOLUME) {
+        return { blocks: [], tints: new Map(), width, height, depth, addedCount: 0, removedCount: 0, changedCount: 0, tooLarge: true };
+    }
+
+    const blocks: DiffBlock[] = [];
+    const tints = new Map<string, [number, number, number, number]>();
+    let addedCount = 0, removedCount = 0, changedCount = 0;
+
+    // Yields every BATCH_SIZE cells, same technique as structureFromLitematicAsync above -
+    // this loop is otherwise synchronous and would freeze the tab on a large bounding box.
+    const BATCH_SIZE = 20_000;
+    let processed = 0;
+    const total = width * height * depth;
+
+    for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
+            for (let z = 0; z < depth; z++) {
+                const newBlock = blockAt(newRegion, x, y, z);
+                const oldBlock = oldRegion ? blockAt(oldRegion, x, y, z) : null;
+
+                if (newBlock) {
+                    blocks.push({ pos: [x, y, z], name: newBlock.Name, properties: newBlock.Properties });
+                    if (!oldBlock) {
+                        tints.set(`${x},${y},${z}`, ADDED_TINT);
+                        addedCount++;
+                    } else if (!sameBlock(oldBlock, newBlock)) {
+                        tints.set(`${x},${y},${z}`, ADDED_TINT);
+                        changedCount++;
+                    }
+                } else if (oldBlock) {
+                    blocks.push({ pos: [x, y, z], name: oldBlock.Name, properties: oldBlock.Properties });
+                    tints.set(`${x},${y},${z}`, REMOVED_TINT);
+                    removedCount++;
+                }
+
+                processed++;
+                if (processed % BATCH_SIZE === 0) {
+                    onProgress?.(processed / total);
+                    await new Promise<void>(r => setTimeout(r, 0));
+                }
+            }
+        }
+    }
+
+    onProgress?.(1);
+    return { blocks, tints, width, height, depth, addedCount, removedCount, changedCount, tooLarge: false };
 }
 
 /**

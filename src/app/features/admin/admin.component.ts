@@ -28,11 +28,12 @@ import { FaqService } from '../../api/faq';
 import { SessionService } from '../../core/services/session.service';
 import { ToastService } from '../../core/services/toast.service';
 import { RealtimeService } from '../../core/services/realtime.service';
-import type { AdminUserResponse, AdminSchematicResponse, AdminUserDetailResponse, AdminUserSchematicResponse, LiveMessageResponse, ModMessageResponse, StorageStatsResponse, UserStorageResponse, AllowedTagResponse, AllowedVersionResponse, TagSuggestionResponse, AdminNotificationResponse, FaqResponse, ContactTicketResponse } from '../../api/generated.schemas';
+import type { AdminUserResponse, AdminSchematicResponse, AdminUserDetailResponse, AdminUserSchematicResponse, LiveMessageResponse, ModMessageResponse, StorageStatsResponse, UserStorageResponse, AllowedTagResponse, AllowedVersionResponse, TagSuggestionResponse, AdminNotificationResponse, FaqResponse, ContactTicketResponse, SchematicListItemResponse } from '../../api/generated.schemas';
 import type { GetApiAdminTicketsParams, GetApiAdminServerLogsParams } from '../../api/generated.schemas';
 import { AdminLogsService } from './services/admin-logs.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
+import { SchematicCardComponent } from '../../shared/components/schematic-card/schematic-card.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { UserLinkComponent } from '../../shared/components/user-link/user-link.component';
 import { UserImgPipe, TicketImgPipe } from '../../shared/pipes/image-url.pipe';
@@ -78,6 +79,7 @@ export interface ServerLogEntryResponse {
         MatAutocompleteModule,
         MatExpansionModule,
         LoadingSpinnerComponent,
+        SchematicCardComponent,
         EmptyStateComponent,
         UserLinkComponent,
         UserImgPipe,
@@ -380,6 +382,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             case 4: this.storagePage.set(0); this.loadedTabs.delete(4); break;
             case 8: this.ticketsPage.set(0); this.loadedTabs.delete(8); break;
             case 9: this.serverLogsPage.set(0); this.loadedTabs.delete(9); break;
+            case 10: this.modulesPage.set(0); this.modulesSearch = ''; this.loadedTabs.delete(10); break;
         }
         this.loadTabData(idx);
 
@@ -408,6 +411,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             case 7: this.loadAdminFaqs(); break;
             case 8: this.loadTickets(); break;
             case 9: this.loadServerLogs(); break;
+            case 10: this.loadModules(); break;
         }
     }
 
@@ -1385,6 +1389,70 @@ export class AdminComponent implements OnInit, OnDestroy {
             },
             error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
         });
+    }
+
+    // ── Modules ──
+    readonly modules = signal<SchematicListItemResponse[]>([]);
+    readonly loadingModules = signal(true);
+    readonly modulesTotalCount = signal(0);
+    readonly modulesPage = signal(0);
+    readonly modulesPageSize = signal(24);
+    modulesSearch = '';
+
+
+
+    loadModules(): void {
+        this.loadingModules.set(true);
+        this.schematicsApi.getApiSchematics({
+            page: this.modulesPage() + 1,
+            pageSize: this.modulesPageSize(),
+            isModule: true,
+            search: this.modulesSearch || undefined,
+            sort: 'name',
+            direction: 'asc',
+        }).subscribe({
+            next: (r) => {
+                this.modules.set((r.items ?? []).filter(m => m.isModule));
+                this.modulesTotalCount.set(Number(r.totalCount ?? 0));
+                this.loadingModules.set(false);
+            },
+            error: () => this.loadingModules.set(false),
+        });
+    }
+
+    searchModules(): void {
+        this.modulesPage.set(0);
+        this.loadedTabs.delete(10);
+        this.loadModules();
+    }
+
+    deleteModule(module: SchematicListItemResponse): void {
+        const ref = this.dialog.open(ConfirmDialogComponent, {
+            data: { title: 'Delete Module', message: `Delete "${module.name}"? This cannot be undone.`, confirmText: COMMON.delete, warn: true } as ConfirmDialogData,
+        });
+        ref.afterClosed().subscribe((ok) => {
+            if (ok) {
+                this.adminApi.deleteApiAdminModulesId(module.id!).subscribe({
+                    next: () => {
+                        this.modules.update(list => list.filter(m => m.id !== module.id));
+                        this.modulesTotalCount.update(c => Math.max(0, c - 1));
+                        this.toast.success('Module deleted.');
+                    },
+                    error: (err) => this.toast.error(err.error?.message ?? ADMIN.failed),
+                });
+            }
+        });
+    }
+
+    onModulesPageChange(event: PageEvent): void {
+        if (event.pageSize !== this.modulesPageSize()) {
+            this.modulesPageSize.set(event.pageSize);
+            this.modulesPage.set(0);
+        } else {
+            this.modulesPage.set(event.pageIndex);
+        }
+        this.loadedTabs.delete(10);
+        this.loadModules();
     }
 
 }

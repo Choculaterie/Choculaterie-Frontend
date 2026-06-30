@@ -25,9 +25,7 @@ import {
 } from 'rxjs';
 
 import type {
-  GetFilesSignParams,
-  GetImagesSchematicsPathParams,
-  GetImagesTicketsPathParams
+  GetFilesSignParams
 } from './generated.schemas';
 
 
@@ -203,76 +201,140 @@ export class FilesService {
       }
     );
   }
- getImagesSchematicsPath<TData = void>(path: string,
-    params?: GetImagesSchematicsPathParams, options?: HttpClientBodyOptions): Observable<TData>;
- getImagesSchematicsPath<TData = void>(path: string,
-    params?: GetImagesSchematicsPathParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- getImagesSchematicsPath<TData = void>(path: string,
-    params?: GetImagesSchematicsPathParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+ getImagesSchematicsPath<TData = void>(path: string, options?: HttpClientBodyOptions): Observable<TData>;
+ getImagesSchematicsPath<TData = void>(path: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ getImagesSchematicsPath<TData = void>(path: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
   getImagesSchematicsPath<TData = void>(
-    path: string,
-    params?: GetImagesSchematicsPathParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
+    path: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     if (options?.observe === 'events') {
       return this.http.get<TData>(
       `/images/schematics/${path}`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
-        params: filteredParams,}
+      }
     );
     }
 
     if (options?.observe === 'response') {
       return this.http.get<TData>(
       `/images/schematics/${path}`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
-        params: filteredParams,}
+      }
     );
     }
 
     return this.http.get<TData>(
       `/images/schematics/${path}`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
-        params: filteredParams,}
+      }
     );
   }
- getImagesTicketsPath<TData = void>(path: string,
-    params?: GetImagesTicketsPathParams, options?: HttpClientBodyOptions): Observable<TData>;
- getImagesTicketsPath<TData = void>(path: string,
-    params?: GetImagesTicketsPathParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- getImagesTicketsPath<TData = void>(path: string,
-    params?: GetImagesTicketsPathParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  getImagesTicketsPath<TData = void>(
-    path: string,
-    params?: GetImagesTicketsPathParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+ getImagesSchematicsSignedSigExpPath<TData = void>(sig: string,
+    exp: number,
+    path: string, options?: HttpClientBodyOptions): Observable<TData>;
+ getImagesSchematicsSignedSigExpPath<TData = void>(sig: string,
+    exp: number,
+    path: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ getImagesSchematicsSignedSigExpPath<TData = void>(sig: string,
+    exp: number,
+    path: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  getImagesSchematicsSignedSigExpPath<TData = void>(
+    sig: string,
+    exp: number,
+    path: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/images/schematics/signed/${sig}/${exp}/${path}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
 
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/images/schematics/signed/${sig}/${exp}/${path}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/images/schematics/signed/${sig}/${exp}/${path}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ getImagesTicketsPath<TData = void>(path: string, options?: HttpClientBodyOptions): Observable<TData>;
+ getImagesTicketsPath<TData = void>(path: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ getImagesTicketsPath<TData = void>(path: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  getImagesTicketsPath<TData = void>(
+    path: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     if (options?.observe === 'events') {
       return this.http.get<TData>(
       `/images/tickets/${path}`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
-        params: filteredParams,}
+      }
     );
     }
 
     if (options?.observe === 'response') {
       return this.http.get<TData>(
       `/images/tickets/${path}`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
-        params: filteredParams,}
+      }
     );
     }
 
     return this.http.get<TData>(
       `/images/tickets/${path}`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
-        params: filteredParams,}
+      }
+    );
+  }
+ getImagesTicketsSignedSigExpPath<TData = void>(sig: string,
+    exp: number,
+    path: string, options?: HttpClientBodyOptions): Observable<TData>;
+ getImagesTicketsSignedSigExpPath<TData = void>(sig: string,
+    exp: number,
+    path: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ getImagesTicketsSignedSigExpPath<TData = void>(sig: string,
+    exp: number,
+    path: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  getImagesTicketsSignedSigExpPath<TData = void>(
+    sig: string,
+    exp: number,
+    path: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/images/tickets/signed/${sig}/${exp}/${path}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/images/tickets/signed/${sig}/${exp}/${path}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/images/tickets/signed/${sig}/${exp}/${path}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
     );
   }
  getModsPath<TData = void>(path: string, options?: HttpClientBodyOptions): Observable<TData>;

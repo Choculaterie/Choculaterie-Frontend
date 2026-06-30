@@ -33,6 +33,7 @@ import type {
   GetApiSchematicsSearchNamesParams,
   GetApiSchematicsSearchTagsParams,
   GetApiSchematicsSearchUsersParams,
+  GetApiSchematicsUserUsernameSchematicsParams,
   LikeResponse,
   PostApiSchematicsBody,
   PutApiSchematicsIdBody,
@@ -224,6 +225,9 @@ if(postApiSchematicsBody.SchematicType !== undefined) {
  }
 if(postApiSchematicsBody.Visibility !== undefined) {
  formData.append(`Visibility`, postApiSchematicsBody.Visibility);
+ }
+if(postApiSchematicsBody.IsModule !== undefined) {
+ formData.append(`IsModule`, postApiSchematicsBody.IsModule.toString())
  }
 
     if (options?.observe === 'events') {
@@ -713,6 +717,42 @@ if(putApiSchematicsIdBody.Visibility !== undefined) {
 
     return this.http.get<TData>(
       `/api/Schematics/search/authors`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+ getApiSchematicsUserUsernameSchematics<TData = SchematicListResponse>(username: string,
+    params?: GetApiSchematicsUserUsernameSchematicsParams, options?: HttpClientBodyOptions): Observable<TData>;
+ getApiSchematicsUserUsernameSchematics<TData = SchematicListResponse>(username: string,
+    params?: GetApiSchematicsUserUsernameSchematicsParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ getApiSchematicsUserUsernameSchematics<TData = SchematicListResponse>(username: string,
+    params?: GetApiSchematicsUserUsernameSchematicsParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  getApiSchematicsUserUsernameSchematics<TData = SchematicListResponse>(
+    username: string,
+    params?: GetApiSchematicsUserUsernameSchematicsParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/Schematics/user/${username}/schematics`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/Schematics/user/${username}/schematics`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/Schematics/user/${username}/schematics`,{
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
         params: filteredParams,}

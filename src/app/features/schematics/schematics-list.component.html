@@ -18,7 +18,7 @@
         <img src="/icons/ui/warning.svg" alt="" aria-hidden="true" class="mc-icon" />
         <span i18n>Your Minecraft account is not linked. Schematics from unverified accounts are hidden by
             default.</span>
-        <a [routerLink]="ownProfilePath()" [queryParams]="{tab: 3, section: 'minecraft'}" i18n>Link your account</a>
+        <a [routerLink]="ownProfilePath()" [queryParams]="{tab: 4, section: 'minecraft'}" i18n>Link your account</a>
     </div>
     }
 
@@ -219,6 +219,12 @@
                 }
 
                 <div class="form-actions">
+                    @if (session.isAdminOrMod()) {
+                    <mat-slide-toggle [checked]="isModuleUpload()" (change)="isModuleUpload.set($event.checked)">
+                        Module
+                    </mat-slide-toggle>
+                    }
+                    <span class="spacer"></span>
                     <button mat-stroked-button type="button" (click)="showCreate.set(false)" i18n>Cancel</button>
                     <button mat-flat-button type="submit" [disabled]="createForm.invalid || creating()">
                         @if (creating()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
@@ -330,12 +336,18 @@
                     aria-hidden="true" class="mc-icon" />
                 <span i18n style="transform: translateY(1px); display: inline-block;">Unverified</span>
             </button>
+            <button mat-stroked-button class="unverified-toggle" (click)="toggleIncludeModules()"
+                matTooltip="Include GitLite modules in results">
+                <img [src]="includeModules ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'" alt=""
+                    aria-hidden="true" class="mc-icon" />
+                <span style="transform: translateY(1px); display: inline-block;">Modules</span>
+            </button>
         </div>
     </div>
 
     <!-- Results -->
     @if (loading()) {
-    <div class="schematic-grid">
+    <div class="skeleton-grid">
         @for (n of [1,2,3,4,5,6]; track n) {
         <div class="skeleton-card">
             <div class="skeleton-card-img"></div>
@@ -369,8 +381,12 @@
     </app-empty-state>
     } @else {
     <div class="schematic-grid" #schematicGrid>
-        @for (s of schematics(); track s.id; let i = $index) {
-        <app-schematic-card [schematic]="s" [priority]="i < 6 ? 'high' : 'low'" />
+        @for (col of schematicColumns(); track $index) {
+        <div class="schematic-column">
+            @for (entry of col; track entry.item.id) {
+            <app-schematic-card [schematic]="entry.item" [priority]="entry.index < 6 ? 'high' : 'low'" />
+            }
+        </div>
         }
     </div>
 

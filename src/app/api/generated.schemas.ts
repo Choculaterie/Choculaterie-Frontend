@@ -17,6 +17,39 @@ export interface AdminLoginAsRequest {
   userId: string;
 }
 
+export interface AdminModuleResponse {
+  id: string;
+  name: string;
+  authorName: string;
+  /** @nullable */
+  description: string | null;
+  visibility: string;
+  status: string;
+  publishDate: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  downloadCount: number | string;
+  /** @nullable */
+  thumbnailPath: string | null;
+}
+
+export interface AdminModuleListResponse {
+  modules: AdminModuleResponse[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalCount: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  page: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pageSize: number | string;
+}
+
+export interface AdminModuleUpdateRequest {
+  name: string;
+  /** @nullable */
+  description: string | null;
+  authorName: string;
+  visibility: string;
+}
+
 export interface AdminNotificationResponse {
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   id: number | string;
@@ -396,6 +429,105 @@ export interface FaqUpdateRequest {
   order: number | string | null;
 }
 
+export interface GitBranchResponse {
+  name: string;
+  /** @nullable */
+  headCommitId: string | null;
+  updatedDate: string;
+}
+
+export interface GitCommitResponse {
+  id: string;
+  /** @nullable */
+  parentCommitId: string | null;
+  branchName: string;
+  message: string;
+  authorUsername: string;
+  committedDate: string;
+  fileName: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  fileSizeBytes: number | string;
+}
+
+export interface GitCommitListResponse {
+  commits: GitCommitResponse[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  page: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pageSize: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalCount: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalPages: number | string;
+}
+
+export interface GitReleaseResponse {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  id: number | string;
+  tagName: string;
+  schematicId: string;
+  schematicName: string;
+  /** @nullable */
+  thumbnailUrl: string | null;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  downloadCount: number | string;
+  commitId: string;
+  commitMessage: string;
+  createdDate: string;
+}
+
+export interface GitReleaseListResponse {
+  items: GitReleaseResponse[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  page: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pageSize: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalCount: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalPages: number | string;
+}
+
+export interface GitRepoDetailResponse {
+  id: string;
+  name: string;
+  /** @nullable */
+  description: string | null;
+  ownerUsername: string;
+  defaultBranchName: string;
+  visibility: string;
+  createdDate: string;
+  updatedDate: string;
+  branches: GitBranchResponse[];
+}
+
+export interface GitRepoSummaryResponse {
+  id: string;
+  name: string;
+  /** @nullable */
+  description: string | null;
+  ownerUsername: string;
+  defaultBranchName: string;
+  visibility: string;
+  updatedDate: string;
+  /** @nullable */
+  thumbnailUrl: string | null;
+  /** @nullable */
+  latestCommitId: string | null;
+}
+
+export interface GitRepoListResponse {
+  items: GitRepoSummaryResponse[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  page: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pageSize: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalCount: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalPages: number | string;
+}
+
 export type IFormFile = Blob;
 
 export type IFormFileCollection = IFormFile[];
@@ -541,6 +673,7 @@ export interface SchematicListItemResponse {
   publishDate: string;
   tags: string[];
   versions: string[];
+  isModule?: boolean;
 }
 
 export interface PublicUserListItemResponse {
@@ -575,7 +708,6 @@ export interface PublicProfileResponse {
   /** @nullable */
   biographie: string | null;
   socialLinks: SocialLinkResponse[];
-  schematics: SchematicListItemResponse[];
   likedSchematics: SchematicListItemResponse[];
   likedUsers: PublicUserListItemResponse[];
 }
@@ -699,6 +831,7 @@ export interface SchematicDetailResponse {
   files: SchematicFileResponse[];
   tags: string[];
   versions: string[];
+  isModule?: boolean;
 }
 
 export interface SchematicListResponse {
@@ -808,7 +941,6 @@ export interface UpdateProfileRequest {
 }
 
 export interface UserContentResponse {
-  schematics: SchematicListItemResponse[];
   likedSchematics: SchematicListItemResponse[];
   likedUsers: PublicUserListItemResponse[];
 }
@@ -925,6 +1057,26 @@ sort?: string;
 direction?: string;
 };
 
+export type GetApiAdminModulesParams = {
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
+search?: string;
+};
+
+export type PostApiAdminModulesBody = {
+  Name?: string;
+  Description?: string;
+  AuthorName?: string;
+  LitematicFile?: IFormFile;
+  ThumbnailFile?: IFormFile;
+};
+
 export type GetApiAdminTicketsParams = {
 /**
  * @pattern ^-?(?:0|[1-9]\d*)$
@@ -962,20 +1114,50 @@ export type GetFilesSignParams = {
 path?: string;
 };
 
-export type GetImagesSchematicsPathParams = {
-sig?: string;
+export type GetApiGitReposUserUsernameParams = {
 /**
  * @pattern ^-?(?:0|[1-9]\d*)$
  */
-exp?: number | string;
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
 };
 
-export type GetImagesTicketsPathParams = {
-sig?: string;
+export type PutApiGitReposRepoIdThumbnailBody = {
+  CommitId?: string;
+  File?: IFormFile;
+};
+
+export type GetApiGitReposRepoIdBranchesBranchNameCommitsParams = {
 /**
  * @pattern ^-?(?:0|[1-9]\d*)$
  */
-exp?: number | string;
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
+};
+
+export type GetApiGitReposRepoIdReleasesParams = {
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
+};
+
+export type PostApiGitReposRepoIdReleasesBody = {
+  CommitId?: string;
+  TagName?: string;
+  Name?: string;
+  Description?: string;
+  Thumbnail?: IFormFile;
 };
 
 export type PostApiModsBody = {
@@ -1023,6 +1205,8 @@ sort?: string;
 direction?: string;
 userId?: string;
 includeUnverified?: boolean;
+includeModules?: boolean;
+isModule?: boolean;
 };
 
 export type PostApiSchematicsBody = {
@@ -1039,6 +1223,7 @@ export type PostApiSchematicsBody = {
   CoverImageIndex?: number | string;
   SchematicType?: string;
   Visibility?: string;
+  IsModule?: boolean;
 };
 
 export type PutApiSchematicsIdBody = {
@@ -1075,6 +1260,17 @@ q?: string;
 
 export type GetApiSchematicsSearchAuthorsParams = {
 q?: string;
+};
+
+export type GetApiSchematicsUserUsernameSchematicsParams = {
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
 };
 
 export type PostApiSecurityKeysRegisterParams = {
