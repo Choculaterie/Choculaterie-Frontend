@@ -45,6 +45,29 @@
     }
 }
 
+.region-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0 0.5rem 0.5rem;
+    flex-shrink: 0;
+}
+
+.region-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60vw;
+}
+
+.region-count {
+    opacity: 0.6;
+    font-weight: 400;
+}
+
 .viewer-body {
     flex: 1;
     position: relative;

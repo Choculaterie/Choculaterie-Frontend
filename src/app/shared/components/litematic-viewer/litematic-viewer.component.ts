@@ -6,6 +6,7 @@ import {
     OnDestroy,
     Inject,
     signal,
+    computed,
     NgZone,
 } from '@angular/core';
 import { HttpClient, HttpEventType } from '@angular/common/http';
@@ -72,6 +73,12 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
     readonly blockCountInfo = signal('');
     readonly isDiffMode = signal(false);
     readonly diffSummary = signal<{ added: number; removed: number } | null>(null);
+
+    // Region navigation - .litematic files can contain multiple named regions (Litematica's
+    // multi-area capture mode); only one is shown at a time, switched via arrows in the header.
+    readonly regionCount = signal(1);
+    readonly regionIndex = signal(0);
+    readonly currentRegionName = computed(() => this.litematic?.regions[this.regionIndex()]?.name ?? '');
 
     // Y-layer sliders
     minY = 0;
@@ -243,45 +250,21 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
                             }
                         }
 
-                        // Set up Y sliders
-                        const region = this.litematic.regions[0];
-                        this.minY = 0;
-                        this.maxY = diffResult ? diffResult.height : region.absHeight;
-                        this.currentMinY = 0;
-                        this.currentMaxY = this.maxY;
-
-                        if (diffResult) {
-                            this.blockCountInfo.set(`${diffResult.blocks.length.toLocaleString()} blocks total`);
-                        } else {
-                            // Check total block count - auto-limit Y range for very large structures
-                            const totalBlocks = countNonAirBlocks(this.litematic);
-                            if (totalBlocks > LitematicViewerComponent.MAX_BLOCKS) {
-                                // Binary-search for how many Y layers we can afford
-                                let lo = 1, hi = region.absHeight;
-                                while (lo < hi) {
-                                    const mid = Math.ceil((lo + hi) / 2);
-                                    const c = countNonAirBlocks(this.litematic, 0, mid);
-                                    if (c <= LitematicViewerComponent.MAX_BLOCKS) lo = mid; else hi = mid - 1;
-                                }
-                                this.currentMaxY = lo;
-                                this.blockCountInfo.set(
-                                    `Showing Y 0\u2013${lo} of ${region.absHeight} (${totalBlocks.toLocaleString()} blocks total, limited for performance)`,
-                                );
-                            } else {
-                                this.blockCountInfo.set(`${totalBlocks.toLocaleString()} blocks`);
-                            }
-                        }
-
-                        this.loadingProgress.set(87);
-                        this.loadingStatus.set('Building 3D structure…');
-
                         this.setupCanvas();
                         this.setupControls();
                         this.initOverlayProgram();
 
-                        let structure: Structure | null;
                         if (diffResult) {
-                            structure = new Structure([diffResult.width, diffResult.height, diffResult.depth]);
+                            this.regionCount.set(1);
+                            this.regionIndex.set(0);
+                            this.minY = 0;
+                            this.maxY = diffResult.height;
+                            this.currentMinY = 0;
+                            this.currentMaxY = this.maxY;
+                            this.blockCountInfo.set(`${diffResult.blocks.length.toLocaleString()} blocks total`);
+                            this.loadingProgress.set(87);
+                            this.loadingStatus.set('Building 3D structure\u2026');
+                            const structure = new Structure([diffResult.width, diffResult.height, diffResult.depth]);
                             // Chunked, same as structureFromLitematicAsync below - addBlock() does real
                             // work per call (model/state resolution), so a tight synchronous loop over a
                             // large diff is exactly the kind of thing that freezes the tab.
@@ -297,30 +280,27 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
                                 }
                             }
                             this.diffTints = diffResult.tints;
+
+                            if (this.destroyed) return;
+
+                            this.loadingProgress.set(96);
+                            this.loadingStatus.set('Generating mesh\u2026');
+                            await new Promise<void>(r => setTimeout(r, 0));
+                            if (this.destroyed) return;
+
+                            this.setStructure(structure, true);
+                            this.structure = structure;
+                            this.allBlocks = (structure as any).blocks.slice();
+                            this.prevMinY = this.currentMinY;
+                            this.prevMaxY = this.currentMaxY;
+                            await this.buildOverlayBuffers();
+                            if (this.destroyed) return;
                         } else {
-                            structure = await structureFromLitematicAsync(
-                                this.litematic, this.currentMinY, this.currentMaxY,
-                                (frac) => this.loadingProgress.set(87 + Math.round(frac * 8)),
-                            );
-                            this.diffTints = new Map();
+                            this.regionCount.set(this.litematic.regions.length);
+                            this.regionIndex.set(0);
+                            await this.loadRegion(0, true);
+                            if (this.destroyed) return;
                         }
-
-                        if (!structure || this.destroyed) return;
-
-                        this.loadingProgress.set(96);
-                        this.loadingStatus.set('Generating mesh\u2026');
-                        await new Promise<void>(r => setTimeout(r, 0));
-                        if (this.destroyed) return;
-
-                        this.setStructure(structure, true);
-
-                        // Cache the full blocks array for fast Y-range filtering later
-                        this.structure = structure;
-                        this.allBlocks = (structure as any).blocks.slice();
-                        this.prevMinY = this.currentMinY;
-                        this.prevMaxY = this.currentMaxY;
-                        await this.buildOverlayBuffers();
-                        if (this.destroyed) return;
 
                         this.loadingProgress.set(100);
                         this.loading.set(false);
@@ -341,6 +321,81 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
                 this.loading.set(false);
             },
         });
+    }
+
+    /** Switch to the previous/next region (wraps around). No-op during diff mode or mid-load. */
+    async switchRegion(delta: number): Promise<void> {
+        const count = this.regionCount();
+        if (count <= 1 || this.loading()) return;
+        const next = (this.regionIndex() + delta + count) % count;
+        this.regionIndex.set(next);
+
+        this.loading.set(true);
+        this.loadingProgress.set(0);
+        this.loadingStatus.set('Building 3D structure…');
+        try {
+            await this.loadRegion(next, true);
+        } catch (e) {
+            console.error('Litematic region switch error:', e);
+            this.error.set('Failed to load region.');
+        }
+        if (this.destroyed) return;
+        this.loadingProgress.set(100);
+        this.loading.set(false);
+    }
+
+    /** Builds and displays the Structure for a single region of the parsed litematic. */
+    private async loadRegion(idx: number, resetView: boolean): Promise<void> {
+        const region = this.litematic.regions[idx];
+        const single: Litematic = { regions: [region] };
+
+        this.minY = 0;
+        this.maxY = region.absHeight;
+        this.currentMinY = 0;
+        this.currentMaxY = this.maxY;
+
+        const totalBlocks = countNonAirBlocks(single);
+        if (totalBlocks > LitematicViewerComponent.MAX_BLOCKS) {
+            // Binary-search for how many Y layers we can afford
+            let lo = 1, hi = region.absHeight;
+            while (lo < hi) {
+                const mid = Math.ceil((lo + hi) / 2);
+                const c = countNonAirBlocks(single, 0, mid);
+                if (c <= LitematicViewerComponent.MAX_BLOCKS) lo = mid; else hi = mid - 1;
+            }
+            this.currentMaxY = lo;
+            this.blockCountInfo.set(
+                `Showing Y 0–${lo} of ${region.absHeight} (${totalBlocks.toLocaleString()} blocks total, limited for performance)`,
+            );
+        } else {
+            this.blockCountInfo.set(`${totalBlocks.toLocaleString()} blocks`);
+        }
+
+        this.loadingProgress.set(87);
+        this.loadingStatus.set('Building 3D structure…');
+        await new Promise<void>(r => setTimeout(r, 0));
+        if (this.destroyed) return;
+
+        const structure = await structureFromLitematicAsync(
+            single, this.currentMinY, this.currentMaxY,
+            (frac) => this.loadingProgress.set(87 + Math.round(frac * 8)),
+        );
+        if (!structure || this.destroyed) return;
+
+        this.loadingProgress.set(96);
+        this.loadingStatus.set('Generating mesh…');
+        await new Promise<void>(r => setTimeout(r, 0));
+        if (this.destroyed) return;
+
+        this.diffTints = new Map();
+        this.setStructure(structure, resetView);
+
+        // Cache the full blocks array for fast Y-range filtering later
+        this.structure = structure;
+        this.allBlocks = (structure as any).blocks.slice();
+        this.prevMinY = this.currentMinY;
+        this.prevMaxY = this.currentMaxY;
+        await this.buildOverlayBuffers();
     }
 
     private buildResources(

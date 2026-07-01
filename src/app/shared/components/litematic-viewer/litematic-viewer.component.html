@@ -15,6 +15,21 @@
         </button>
     </div>
 
+    @if (!error() && regionCount() > 1) {
+    <div class="region-nav">
+        <button mat-icon-button (click)="switchRegion(-1)" [disabled]="loading()" i18n-matTooltip matTooltip="Previous region">
+            <img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" class="mc-icon" />
+        </button>
+        <span class="region-label">
+            {{ currentRegionName() }}
+            <span class="region-count">({{ regionIndex() + 1 }} / {{ regionCount() }})</span>
+        </span>
+        <button mat-icon-button (click)="switchRegion(1)" [disabled]="loading()" i18n-matTooltip matTooltip="Next region">
+            <img src="/icons/arrows/arrow_right.svg" alt="" aria-hidden="true" class="mc-icon" />
+        </button>
+    </div>
+    }
+
     <div class="viewer-body">
         @if (loading()) {
         <div class="loading-overlay">

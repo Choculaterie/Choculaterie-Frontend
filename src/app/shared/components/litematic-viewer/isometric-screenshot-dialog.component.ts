@@ -32,6 +32,7 @@ import {
     parseLitematic,
     structureFromLitematicAsync,
     countNonAirBlocks,
+    maxRegionHeight,
 } from './litematic-utils';
 import { OPAQUE_BLOCKS, TRANSPARENT_BLOCKS, NON_SELF_CULLING } from './opaque-blocks';
 
@@ -431,12 +432,12 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
                             return;
                         }
 
-                        const region = litematic.regions[0];
-                        let maxY = region.absHeight;
+                        const regionHeight = maxRegionHeight(litematic);
+                        let maxY = regionHeight;
 
                         const totalBlocks = countNonAirBlocks(litematic);
                         if (totalBlocks > IsometricScreenshotDialogComponent.MAX_BLOCKS) {
-                            let lo = 1, hi = region.absHeight;
+                            let lo = 1, hi = regionHeight;
                             while (lo < hi) {
                                 const mid = Math.ceil((lo + hi) / 2);
                                 if (countNonAirBlocks(litematic, 0, mid) <= IsometricScreenshotDialogComponent.MAX_BLOCKS) {

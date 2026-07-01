@@ -23,6 +23,7 @@ import {
     structureFromLitematicAsync,
     countNonAirBlocks,
     getNonAirBounds,
+    maxRegionHeight,
     type NonAirBounds,
 } from './litematic-utils';
 import { OPAQUE_BLOCKS, TRANSPARENT_BLOCKS, NON_SELF_CULLING } from './opaque-blocks';
@@ -77,10 +78,10 @@ export async function renderLitematicHeadless(
     if (!litematic.regions.length) throw new Error('No regions found in litematic');
 
     // 5. Clamp maxY if structure is very large
-    const region = litematic.regions[0];
-    let maxY = region.absHeight;
+    const regionHeight = maxRegionHeight(litematic);
+    let maxY = regionHeight;
     if (countNonAirBlocks(litematic) > MAX_BLOCKS) {
-        let lo = 1, hi = region.absHeight;
+        let lo = 1, hi = regionHeight;
         while (lo < hi) {
             const mid = Math.ceil((lo + hi) / 2);
             if (countNonAirBlocks(litematic, 0, mid) <= MAX_BLOCKS) lo = mid;

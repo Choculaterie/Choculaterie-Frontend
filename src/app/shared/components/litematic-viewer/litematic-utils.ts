@@ -1,6 +1,7 @@
 import { readNbt, Structure, type NbtTag, type NbtValues } from 'deepslate';
 
 export interface LitematicRegion {
+    name: string;
     width: number;
     height: number;
     depth: number;
@@ -62,7 +63,7 @@ async function readLitematicFromNBTData(nbtData: { value: NbtValues['compound'] 
 
         const blocks = await processNBTRegionData(blockData, nbits, absWidth, absHeight, absDepth);
 
-        litematic.regions.push({ width, height, depth, absWidth, absHeight, absDepth, blocks, blockPalette });
+        litematic.regions.push({ name: regionName, width, height, depth, absWidth, absHeight, absDepth, blocks, blockPalette });
     }
 
     return litematic;
@@ -131,23 +132,43 @@ async function processNBTRegionData(
 }
 
 /**
- * Count non-air blocks in a Y range (fast - no Structure allocation).
+ * Litematic files can contain multiple named regions (Litematica's multi-area selection mode) -
+ * a "cannon" build with dozens of small sub-selections is a normal file, not an edge case. They're
+ * laid out side by side along X, spaced by {@link REGION_GAP} blocks, so every region renders
+ * fully visible instead of overlapping (their real in-world Position tags routinely overlap/
+ * interleave, since regions are just independent zone selections, not tiles of a single grid).
+ */
+const REGION_GAP = 3;
+
+function layoutRegions(regions: LitematicRegion[]): { x: number; y: number; z: number }[] {
+    const offsets: { x: number; y: number; z: number }[] = [];
+    let cursorX = 0;
+    for (const region of regions) {
+        offsets.push({ x: cursorX, y: 0, z: 0 });
+        cursorX += region.absWidth + REGION_GAP;
+    }
+    return offsets;
+}
+
+/**
+ * Count non-air blocks in a Y range across all regions (fast - no Structure allocation).
  */
 export function countNonAirBlocks(
     litematic: Litematic, yMin = 0, yMax = -1,
 ): number {
-    const region = litematic.regions[0];
-    const { blocks, blockPalette, absWidth, absHeight, absDepth } = region;
-    const effectiveYMax = yMax === -1 ? absHeight : Math.min(yMax, absHeight);
-    const hd = absHeight * absDepth;
     let count = 0;
-    for (let x = 0; x < absWidth; x++) {
-        const xOff = x * hd;
-        for (let y = yMin; y < effectiveYMax; y++) {
-            const yOff = y * absDepth;
-            for (let z = 0; z < absDepth; z++) {
-                const id = blocks[xOff + yOff + z];
-                if (id > 0 && id < blockPalette.length) count++;
+    for (const region of litematic.regions) {
+        const { blocks, blockPalette, absWidth, absHeight, absDepth } = region;
+        const effectiveYMax = yMax === -1 ? absHeight : Math.min(yMax, absHeight);
+        const hd = absHeight * absDepth;
+        for (let x = 0; x < absWidth; x++) {
+            const xOff = x * hd;
+            for (let y = yMin; y < effectiveYMax; y++) {
+                const yOff = y * absDepth;
+                for (let z = 0; z < absDepth; z++) {
+                    const id = blocks[xOff + yOff + z];
+                    if (id > 0 && id < blockPalette.length) count++;
+                }
             }
         }
     }
@@ -162,40 +183,50 @@ export interface NonAirBounds {
 }
 
 /**
- * Tight bounding box of non-air blocks, ignoring any empty padding the capture region itself
- * may contain (e.g. a zone selection larger than the build it surrounds). Used to frame preview
- * renders around the actual content instead of the full region size.
+ * Tight bounding box of non-air blocks across all (gap-spaced) regions, ignoring any empty
+ * padding the capture regions themselves may contain. Used to frame preview renders around the
+ * actual content instead of the full region size.
  */
 export function getNonAirBounds(litematic: Litematic, yMin = 0, yMax = -1): NonAirBounds | null {
-    const region = litematic.regions[0];
-    const { blocks, blockPalette, absWidth, absHeight, absDepth } = region;
-    const effectiveYMax = yMax === -1 ? absHeight : Math.min(yMax, absHeight);
-    const hd = absHeight * absDepth;
-    let minX = absWidth, maxX = -1, minY = absHeight, maxY = -1, minZ = absDepth, maxZ = -1;
-    for (let x = 0; x < absWidth; x++) {
-        const xOff = x * hd;
-        for (let y = yMin; y < effectiveYMax; y++) {
-            const yOff = y * absDepth;
-            for (let z = 0; z < absDepth; z++) {
-                const id = blocks[xOff + yOff + z];
-                if (id > 0 && id < blockPalette.length) {
-                    if (x < minX) minX = x;
-                    if (x > maxX) maxX = x;
-                    if (y < minY) minY = y;
-                    if (y > maxY) maxY = y;
-                    if (z < minZ) minZ = z;
-                    if (z > maxZ) maxZ = z;
+    const offsets = layoutRegions(litematic.regions);
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity, minZ = Infinity, maxZ = -Infinity;
+    litematic.regions.forEach((region, i) => {
+        const { blocks, blockPalette, absWidth, absHeight, absDepth } = region;
+        const effectiveYMax = yMax === -1 ? absHeight : Math.min(yMax, absHeight);
+        const hd = absHeight * absDepth;
+        const off = offsets[i];
+        for (let x = 0; x < absWidth; x++) {
+            const xOff = x * hd;
+            for (let y = yMin; y < effectiveYMax; y++) {
+                const yOff = y * absDepth;
+                for (let z = 0; z < absDepth; z++) {
+                    const id = blocks[xOff + yOff + z];
+                    if (id > 0 && id < blockPalette.length) {
+                        const wx = x + off.x, wy = y + off.y, wz = z + off.z;
+                        if (wx < minX) minX = wx;
+                        if (wx > maxX) maxX = wx;
+                        if (wy < minY) minY = wy;
+                        if (wy > maxY) maxY = wy;
+                        if (wz < minZ) minZ = wz;
+                        if (wz > maxZ) maxZ = wz;
+                    }
                 }
             }
         }
-    }
+    });
     if (maxX < minX) return null;
     return { minX, maxX, minY, maxY, minZ, maxZ };
 }
 
+/** Tallest region's absHeight - used as the Y-slider/binary-search upper bound. */
+export function maxRegionHeight(litematic: Litematic): number {
+    return litematic.regions.reduce((m, r) => Math.max(m, r.absHeight), 0);
+}
+
 /**
- * Convert a parsed Litematic into a deepslate Structure.
- * Async version that yields to the UI thread every batch to prevent browser freezing.
+ * Convert a parsed Litematic into a deepslate Structure, laying out multiple regions side by
+ * side (see {@link layoutRegions}). Async version that yields to the UI thread every batch to
+ * prevent browser freezing.
  */
 export async function structureFromLitematicAsync(
     litematic: Litematic,
@@ -204,78 +235,57 @@ export async function structureFromLitematicAsync(
     onProgress?: (fraction: number) => void,
     abortSignal?: { aborted: boolean },
 ): Promise<Structure | null> {
-    const region = litematic.regions[0];
-    const { blocks, blockPalette, absWidth, absHeight, absDepth } = region;
+    const offsets = layoutRegions(litematic.regions);
+    const lastIdx = litematic.regions.length - 1;
+    const totalWidth = lastIdx >= 0 ? offsets[lastIdx].x + litematic.regions[lastIdx].absWidth : 0;
+    const maxHeight = maxRegionHeight(litematic);
+    const maxDepth = litematic.regions.reduce((m, r) => Math.max(m, r.absDepth), 0);
 
-    const effectiveYMax = yMax === -1 ? absHeight : Math.min(yMax, absHeight);
-    const structure = new Structure([absWidth, absHeight, absDepth]);
-    const hd = absHeight * absDepth;
+    const structure = new Structure([totalWidth, maxHeight, maxDepth]);
 
     const BATCH_SIZE = 20_000;
     let processed = 0;
-    const total = absWidth * (effectiveYMax - yMin) * absDepth;
+    let total = 0;
+    for (const region of litematic.regions) {
+        const effectiveYMax = yMax === -1 ? region.absHeight : Math.min(yMax, region.absHeight);
+        total += region.absWidth * Math.max(0, effectiveYMax - yMin) * region.absDepth;
+    }
 
-    for (let x = 0; x < absWidth; x++) {
-        const xOff = x * hd;
-        for (let y = yMin; y < effectiveYMax; y++) {
-            const yOff = y * absDepth;
-            for (let z = 0; z < absDepth; z++) {
-                const blockID = blocks[xOff + yOff + z];
-                if (blockID > 0 && blockID < blockPalette.length) {
-                    const blockInfo = blockPalette[blockID];
-                    if (blockInfo.Properties) {
-                        structure.addBlock([x, y, z], blockInfo.Name, blockInfo.Properties);
-                    } else {
-                        structure.addBlock([x, y, z], blockInfo.Name);
+    for (let i = 0; i < litematic.regions.length; i++) {
+        const region = litematic.regions[i];
+        const off = offsets[i];
+        const { blocks, blockPalette, absWidth, absHeight, absDepth } = region;
+
+        const effectiveYMax = yMax === -1 ? absHeight : Math.min(yMax, absHeight);
+        const hd = absHeight * absDepth;
+
+        for (let x = 0; x < absWidth; x++) {
+            const xOff = x * hd;
+            for (let y = yMin; y < effectiveYMax; y++) {
+                const yOff = y * absDepth;
+                for (let z = 0; z < absDepth; z++) {
+                    const blockID = blocks[xOff + yOff + z];
+                    if (blockID > 0 && blockID < blockPalette.length) {
+                        const blockInfo = blockPalette[blockID];
+                        const pos: [number, number, number] = [x + off.x, y + off.y, z + off.z];
+                        if (blockInfo.Properties) {
+                            structure.addBlock(pos, blockInfo.Name, blockInfo.Properties);
+                        } else {
+                            structure.addBlock(pos, blockInfo.Name);
+                        }
                     }
-                }
-                processed++;
-                if (processed % BATCH_SIZE === 0) {
-                    onProgress?.(processed / total);
-                    await new Promise<void>(r => setTimeout(r, 0));
-                    if (abortSignal?.aborted) return null;
+                    processed++;
+                    if (processed % BATCH_SIZE === 0) {
+                        onProgress?.(processed / total);
+                        await new Promise<void>(r => setTimeout(r, 0));
+                        if (abortSignal?.aborted) return null;
+                    }
                 }
             }
         }
     }
 
     onProgress?.(1);
-    return structure;
-}
-
-/**
- * Synchronous version - for smaller structures or when yielding is not needed.
- */
-export function structureFromLitematic(
-    litematic: Litematic,
-    yMin = 0,
-    yMax = -1,
-): Structure {
-    const region = litematic.regions[0];
-    const { blocks, blockPalette, absWidth, absHeight, absDepth } = region;
-
-    const effectiveYMax = yMax === -1 ? absHeight : Math.min(yMax, absHeight);
-    const structure = new Structure([absWidth, absHeight, absDepth]);
-    const hd = absHeight * absDepth;
-
-    for (let x = 0; x < absWidth; x++) {
-        const xOff = x * hd;
-        for (let y = yMin; y < effectiveYMax; y++) {
-            const yOff = y * absDepth;
-            for (let z = 0; z < absDepth; z++) {
-                const blockID = blocks[xOff + yOff + z];
-                if (blockID > 0 && blockID < blockPalette.length) {
-                    const blockInfo = blockPalette[blockID];
-                    if (blockInfo.Properties) {
-                        structure.addBlock([x, y, z], blockInfo.Name, blockInfo.Properties);
-                    } else {
-                        structure.addBlock([x, y, z], blockInfo.Name);
-                    }
-                }
-            }
-        }
-    }
-
     return structure;
 }
 
