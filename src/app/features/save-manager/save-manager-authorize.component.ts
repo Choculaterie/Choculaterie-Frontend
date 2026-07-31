@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -39,6 +39,7 @@ export class SaveManagerAuthorizeComponent implements OnInit {
     private flowApi = inject(SaveManagerFlowService);
     private session = inject(SessionService);
     private toast = inject(ToastService);
+    private el = inject(ElementRef);
 
     readonly state = signal<PageState>('loading');
     readonly flow = signal<SaveManagerFlowInfo | null>(null);
@@ -47,6 +48,8 @@ export class SaveManagerAuthorizeComponent implements OnInit {
     readonly actionLoading = signal(false);
     readonly copiedKey = signal(false);
     readonly copiedCode = signal(false);
+    readonly showManualKey = signal(false);
+    private keyPositionLocked = false;
 
     private flowId!: string;
 
@@ -102,6 +105,18 @@ export class SaveManagerAuthorizeComponent implements OnInit {
                 this.actionLoading.set(false);
             },
         });
+    }
+
+    toggleManualKey(): void {
+        if (!this.keyPositionLocked && !this.showManualKey()) {
+            const page = this.el.nativeElement.querySelector('.authorize-page') as HTMLElement;
+            if (page) {
+                page.style.marginTop = getComputedStyle(page).marginTop;
+                page.style.marginBottom = '2rem';
+            }
+            this.keyPositionLocked = true;
+        }
+        this.showManualKey.update(v => !v);
     }
 
     copyKey(): void {

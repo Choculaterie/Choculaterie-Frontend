@@ -201,50 +201,6 @@
             </div>
         </mat-tab>
 
-        <mat-tab i18n-label label="Repos">
-            <div class="tab-content">
-                @if (loadingRepos()) {
-                <app-loading-spinner [diameter]="36" />
-                } @else if (repos().length === 0) {
-                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title
-                    [title]="isOwnProfile() ? 'No repos yet' : 'No repos'" i18n-subtitle
-                    [subtitle]="isOwnProfile() ? 'Push a commit from GitLite to see your repo here.' : 'This user hasn\'t published any repos yet'" />
-                } @else {
-                <div class="repo-grid">
-                    @for (r of repos(); track r.id) {
-                    <a class="card-link" [routerLink]="['/repos', r.id]">
-                        <mat-card class="repo-card" appearance="outlined">
-                            @if (repoThumbnails().get(r.id) ?? r.thumbnailUrl; as thumb) {
-                            <app-skeleton-img [src]="thumb" [alt]="r.name" height="160px" objectFit="contain" class="card-img" />
-                            } @else {
-                            <div class="card-img-placeholder">
-                                <mat-icon>deployed_code</mat-icon>
-                            </div>
-                            }
-                            <mat-card-content>
-                                <div class="card-title-row">
-                                    <span class="card-title">{{ r.name }}</span>
-                                    <span class="repo-visibility-chip" [class.private]="r.visibility !== 'Public'">{{ r.visibility }}</span>
-                                </div>
-                                @if (r.description) {
-                                <p class="card-desc">{{ r.description }}</p>
-                                }
-                                <div class="card-footer">
-                                    <span>{{ r.defaultBranchName }}</span>
-                                    <span class="card-date">Updated {{ r.updatedDate | date:'mediumDate' }}</span>
-                                </div>
-                            </mat-card-content>
-                        </mat-card>
-                    </a>
-                    }
-                </div>
-                <mat-paginator [length]="reposTotalCount()" [pageIndex]="reposPage()"
-                    [pageSize]="reposPageSize()" [pageSizeOptions]="[10, 20, 50]"
-                    (page)="onReposPageChange($event)" />
-                }
-            </div>
-        </mat-tab>
-
         <mat-tab i18n-label label="Starred Schematics">
             <div class="tab-content">
                 @if (likedSchematics().length === 0) {
@@ -822,9 +778,11 @@
                         <ng-container matColumnDef="actions">
                             <th mat-header-cell *matHeaderCellDef></th>
                             <td mat-cell *matCellDef="let s">
-                                <button mat-icon-button (click)="downloadSave(s)" i18n-matTooltip
-                                    matTooltip="Download"><img src="/icons/arrows/arrow_down.svg" alt=""
-                                        aria-hidden="true" class="mc-icon" /></button>
+                                <button mat-icon-button (click)="downloadSave(s)" [disabled]="downloadingIds().has(s.id)" i18n-matTooltip
+                                    matTooltip="Download">
+                                    @if (downloadingIds().has(s.id)) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
+                                    <img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" /> }
+                                </button>
                                 <button mat-icon-button color="warn" (click)="deleteSave(s)" i18n-matTooltip
                                     matTooltip="Delete"><img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true"
                                         class="mc-icon" /></button>

@@ -11,7 +11,7 @@
     @if (state() === 'expired') {
     <mat-card class="auth-card auth-card--warn">
         <mat-card-content>
-            <mat-icon class="state-icon state-icon--warn">schedule</mat-icon>
+            <img src="/icons/misc/clock.svg" alt="" aria-hidden="true" class="mc-icon state-icon state-icon--warn" />
             <h2 i18n>Request expired</h2>
             <p i18n>
                 This Save Manager authorization request has expired or no longer exists.
@@ -94,6 +94,23 @@
             <img src="/icons/ui/check.svg" alt="" aria-hidden="true" class="mc-icon state-icon state-icon--success" />
             <h2 i18n>Access approved</h2>
             <p i18n>Switch back to the mod; it will receive the key automatically within a few seconds.</p>
+            @if (approveResult()?.saveKey) {
+            <div class="key-block">
+                <button class="key-toggle" (click)="toggleManualKey()">
+                    <span i18n>Save Key (manual fallback)</span>
+                    <img src="/icons/arrows/tild_full_down_2.svg" alt="" aria-hidden="true" class="mc-icon key-toggle-arrow" [class.open]="showManualKey()" />
+                </button>
+                @if (showManualKey()) {
+                <div class="key-row">
+                    <span class="key-value mc-font">{{ approveResult()!.saveKey }}</span>
+                    <button mat-icon-button (click)="copyKey()" [matTooltip]="copiedKey() ? 'Copied!' : 'Copy'">
+                        <img [src]="copiedKey() ? '/icons/ui/check.svg' : '/icons/shapes/form_1.svg'" alt="" aria-hidden="true" class="mc-icon" />
+                    </button>
+                </div>
+                <p class="key-note" i18n>Only needed if the mod didn't receive the key automatically.</p>
+                }
+            </div>
+            }
         </mat-card-content>
     </mat-card>
     }

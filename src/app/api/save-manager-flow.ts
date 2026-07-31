@@ -10,6 +10,7 @@ export interface SaveManagerFlowInfo {
 
 export interface SaveManagerApproveResponse {
     saveKey: string;
+    apiKey?: string;
     isMinecraftLinked: boolean;
     /** Only present when Minecraft is not yet linked at approval time */
     linkCode?: string | null;

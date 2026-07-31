@@ -22,7 +22,6 @@ import { switchMap, map, catchError } from 'rxjs/operators';
 import { UserBrowseService } from '../../api/user-browse';
 import { UsersService } from '../../api/users';
 import { SchematicsService } from '../../api/schematics';
-import { GitReposService } from '../../api/git-repos';
 import { ReportsService } from '../../api/reports';
 import { SecurityKeysService } from '../../api/security-keys';
 import { SaveManagerService } from '../../api/save-manager';
@@ -32,7 +31,6 @@ import type {
     OwnProfileResponse, PublicProfileResponse, UserProfileResponse,
     SchematicListItemResponse, PublicUserListItemResponse,
     SecurityKeyResponse, SaveListItemResponse, SaveQuotaResponse,
-    GitRepoSummaryResponse,
 } from '../../api/generated.schemas';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { SchematicCardComponent } from '../../shared/components/schematic-card/schematic-card.component';
@@ -110,7 +108,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     private usersApi = inject(UsersService);
     private userBrowseApi = inject(UserBrowseService);
     private schematicsApi = inject(SchematicsService);
-    private gitReposApi = inject(GitReposService);
     private http = inject(HttpClient);
     private reportsApi = inject(ReportsService);
     private securityKeysApi = inject(SecurityKeysService);
@@ -217,64 +214,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         if (username) this.loadSchematics(username);
     }
 
-    // Repos tab
-    readonly repos = signal<GitRepoSummaryResponse[]>([]);
-    readonly loadingRepos = signal(true);
-    readonly reposPage = signal(0);
-    readonly reposPageSize = signal(20);
-    readonly reposTotalCount = signal(0);
-    /** repoId -> locally-rendered blob URL, shown immediately while the upload lands server-side. */
-    readonly repoThumbnails = signal<Map<string, string>>(new Map());
-
-    private loadRepos(username: string): void {
-        this.loadingRepos.set(true);
-        this.gitReposApi.getApiGitReposUserUsername(username, {
-            page: this.reposPage() + 1,
-            pageSize: this.reposPageSize(),
-        }).subscribe({
-            next: (res) => {
-                this.repos.set(res.items);
-                this.reposTotalCount.set(res.totalCount as any);
-                this.loadingRepos.set(false);
-                this.generateMissingRepoThumbnails(res.items);
-            },
-            error: () => this.loadingRepos.set(false),
-        });
-    }
-
-    /**
-     * Lazily renders a thumbnail for any repo with commits but no release/cached thumbnail yet,
-     * same headless-render-then-cache mechanism as Quick Share: render offscreen in the browser,
-     * upload once, the backend serves the cached copy on every later visit.
-     */
-    private generateMissingRepoThumbnails(items: GitRepoSummaryResponse[]): void {
-        for (const r of items) {
-            if (r.thumbnailUrl || !r.latestCommitId) continue;
-            const commitId = r.latestCommitId;
-
-            this.gitReposApi.getApiGitReposCommitsCommitIdDownload<Blob>(commitId, { responseType: 'blob' } as any).subscribe({
-                next: (blob) => {
-                    (blob as Blob).arrayBuffer().then(async (buffer) => {
-                        try {
-                            const file = await renderLitematicHeadless(buffer, this.http);
-                            this.repoThumbnails.update(map => new Map(map).set(r.id, URL.createObjectURL(file)));
-                            this.gitReposApi.putApiGitReposRepoIdThumbnail(r.id, { CommitId: commitId, File: file } as any).subscribe();
-                        } catch {
-                            // Render failed (e.g. unsupported block) - leave the placeholder icon, silently.
-                        }
-                    });
-                },
-                error: () => { /* commit fetch failed - silently ignore, placeholder stays */ },
-            });
-        }
-    }
-
-    onReposPageChange(event: PageEvent): void {
-        if (event.pageSize !== this.reposPageSize()) this.reposPageSize.set(event.pageSize);
-        this.reposPage.set(event.pageIndex);
-        const username = this.route.snapshot.paramMap.get('username');
-        if (username) this.loadRepos(username);
-    }
 
     private reorderForRowFirst(items: SchematicListItemResponse[], numCols: number): SchematicListItemResponse[] {
         const n = items.length;
@@ -352,6 +291,7 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     readonly saves = signal<SaveListItemResponse[]>([]);
     readonly saveQuota = signal<SaveQuotaResponse | null>(null);
     readonly loadingSaves = signal(true);
+    readonly downloadingIds = signal(new Set<string>());
     readonly saveVerified = signal(false);
     readonly verifyingSave = signal(false);
     saveColumns = ['worldName', 'fileSizeBytes', 'createdAt', 'updatedAt', 'actions'];
@@ -493,8 +433,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         this.selectedTab.set(0);
         this.schematicsPage.set(0);
         this.schematicsTotalCount.set(0);
-        this.reposPage.set(0);
-        this.repos.set([]);
     }
 
     private loadOwnProfile(username: string): void {
@@ -768,13 +706,18 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     }
 
     downloadSave(save: SaveListItemResponse): void {
-        this.saveManagerApi.getApiSaveManagerIdDownload<Blob>(save.id).subscribe({
+        this.downloadingIds.update(s => new Set(s).add(save.id));
+        this.http.get(`/api/SaveManager/${save.id}/download`, { responseType: 'blob' }).subscribe({
             next: (blob) => {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a'); a.href = url; a.download = `${save.worldName}.zip`; a.click();
                 URL.revokeObjectURL(url); this.toast.success(PROFILE.downloadStarted);
+                this.downloadingIds.update(s => { const n = new Set(s); n.delete(save.id); return n; });
             },
-            error: (err) => this.toast.error(err.error?.detail ?? PROFILE.downloadFailed),
+            error: (err) => {
+                this.toast.error(err.error?.detail ?? PROFILE.downloadFailed);
+                this.downloadingIds.update(s => { const n = new Set(s); n.delete(save.id); return n; });
+            },
         });
     }
 

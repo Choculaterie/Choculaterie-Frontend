@@ -1,14 +1,14 @@
 :host {
     flex: 1;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
     padding: 2rem 1rem;
 }
 
 .authorize-page {
     max-width: 480px;
     width: 100%;
+    margin: auto;
 }
 
 .state-center {
@@ -50,6 +50,8 @@
     height: 3rem;
     align-self: center;
     color: var(--mat-sys-on-surface-variant);
+    // for <img> MC icons used as state icons
+    &.mc-icon { display: block; }
 
     &--success {
         color: var(--mat-sys-primary);
@@ -163,6 +165,30 @@ p {
 
 // ── Key display ──
 
+.key-toggle {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font: var(--mat-sys-label-large);
+    color: var(--mat-sys-on-surface-variant);
+    width: 100%;
+}
+
+.key-toggle-arrow {
+    width: 10px;
+    height: 10px;
+    transition: transform 0.2s;
+    transform-origin: center 43.75%;
+    image-rendering: pixelated;
+    &.open { transform: rotate(180deg) translateY(1px); }
+}
+
+.mc-font {
+    font-family: 'Minecraft', monospace !important;
+}
+
 .key-block,
 .link-block {
     display: flex;
@@ -176,6 +202,7 @@ p {
     }
 }
 
+
 .key-row {
     display: flex;
     align-items: center;
@@ -187,7 +214,7 @@ p {
 
 .key-value {
     flex: 1;
-    font-family: monospace;
+    font-family: 'Minecraft', monospace;
     font-size: 0.85rem;
     word-break: break-all;
     color: var(--mat-sys-on-surface);
@@ -207,3 +234,4 @@ p {
 mat-divider {
     margin: 0.25rem 0;
 }
+
