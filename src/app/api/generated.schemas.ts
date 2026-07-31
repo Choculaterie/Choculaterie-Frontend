@@ -387,6 +387,29 @@ export interface ContactTicketResponse {
   username: string | null;
   isRead: boolean;
   createdAt: string;
+  /** @nullable */
+  adminReply?: string | null;
+  /** @nullable */
+  adminRepliedAt?: string | null;
+  /** @nullable */
+  adminRepliedBy?: string | null;
+  /** @nullable */
+  userFilePath?: string | null;
+}
+
+export interface TicketReplyRequest {
+  reply: string;
+}
+
+export interface UserNotificationResponse {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  id: number | string;
+  type: string;
+  message: string;
+  /** @nullable */
+  data: string | null;
+  isRead: boolean;
+  createdAt: string;
 }
 
 export interface CreateShortUrlRequest {

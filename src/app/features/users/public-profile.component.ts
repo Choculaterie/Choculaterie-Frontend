@@ -416,7 +416,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
                 this.loadPublicProfile(username);
             }
             this.loadSchematics(username);
-            this.loadRepos(username);
         });
     }
 

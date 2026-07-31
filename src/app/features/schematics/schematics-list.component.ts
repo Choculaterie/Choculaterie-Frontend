@@ -12,7 +12,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDialog } from '@angular/material/dialog';
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle, moveItemInArray } from '@angular/cdk/drag-drop';
 import { debounceTime, Subject, switchMap, of, forkJoin, map } from 'rxjs';
@@ -46,7 +45,6 @@ import { DropZoneDirective } from '../../shared/directives/drop-zone.directive';
         MatChipsModule,
         MatAutocompleteModule,
         MatTooltipModule,
-        MatSlideToggleModule,
         RouterLink,
         CdkDrag,
         CdkDropList,
@@ -119,7 +117,6 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     sort = 'date';
     direction = 'desc';
     includeUnverified = false;
-    includeModules = false;
 
     readonly showAdvancedFilters = signal(false);
     readonly filtersHeight = signal('0px');
@@ -164,7 +161,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     // Create form
     readonly showCreate = signal(false);
     readonly creating = signal(false);
-    readonly isModuleUpload = signal(false);
+
     pictureFiles: File[] = [];
     litematicFiles: File[] = [];
     readonly picturePreviews = signal<string[]>([]);
@@ -232,7 +229,6 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
             this.sort = params['sort'] ?? 'date';
             this.direction = params['direction'] ?? 'desc';
             this.includeUnverified = params['includeUnverified'] === 'true';
-            this.includeModules = params['includeModules'] === 'true';
             const parsedPageSize = Number.parseInt(params['pageSize'], 10);
             this.pageSize.set(this.normalizePageSize(Number.isNaN(parsedPageSize) ? null : parsedPageSize));
             // Auto-expand advanced filters when any advanced filter is active (no animation)
@@ -341,7 +337,6 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
                 sort: this.sort !== 'date' ? this.sort : null,
                 direction: this.direction !== 'desc' ? this.direction : null,
                 includeUnverified: this.includeUnverified ? 'true' : null,
-                includeModules: this.includeModules ? 'true' : null,
                 pageSize: this.pageSize() !== this.defaultPageSize ? this.pageSize() : null,
                 page: page > 1 ? page : null,
             },
@@ -364,7 +359,6 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
             sort: this.sort || undefined,
             direction: this.direction || undefined,
             includeUnverified: this.includeUnverified || undefined,
-            includeModules: this.includeModules || undefined,
         }).subscribe({
             next: (res) => {
                 this.rawSchematics.set(res.items);
@@ -417,17 +411,11 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         this.sort = 'date';
         this.direction = 'desc';
         this.includeUnverified = false;
-        this.includeModules = false;
         this.loadPage(1);
     }
 
     toggleIncludeUnverified(): void {
         this.includeUnverified = !this.includeUnverified;
-        this.loadPage(1);
-    }
-
-    toggleIncludeModules(): void {
-        this.includeModules = !this.includeModules;
         this.loadPage(1);
     }
 
@@ -601,12 +589,10 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
             CoverImageIndex: ordered.length > 1 ? 0 : undefined,
             SchematicType: v.schematicType,
             Visibility: v.visibility,
-            IsModule: this.isModuleUpload() || undefined,
         }).subscribe({
             next: (created: any) => {
                 this.creating.set(false);
                 this.showCreate.set(false);
-                this.isModuleUpload.set(false);
                 this.selectedAuthorId.set(null);
                 this.createTagList.set([]);
                 this.createVersionList.set([]);

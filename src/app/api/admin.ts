@@ -48,6 +48,7 @@ import type {
   FaqCreateRequest,
   FaqResponse,
   FaqUpdateRequest,
+  TicketReplyRequest,
   GetApiAdminModulesParams,
   GetApiAdminSchematicsParams,
   GetApiAdminServerLogsParams,
@@ -1717,6 +1718,39 @@ if(postApiAdminModulesBody.ThumbnailFile !== undefined) {
       }
     );
   }
+ postApiAdminTicketsIdReply<TData = ContactTicketResponse>(id: number, ticketReplyRequest: TicketReplyRequest, options?: HttpClientBodyOptions): Observable<TData>;
+ postApiAdminTicketsIdReply<TData = ContactTicketResponse>(id: number, ticketReplyRequest: TicketReplyRequest, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ postApiAdminTicketsIdReply<TData = ContactTicketResponse>(id: number, ticketReplyRequest: TicketReplyRequest, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  postApiAdminTicketsIdReply<TData = ContactTicketResponse>(
+    id: number, ticketReplyRequest: TicketReplyRequest, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/Admin/tickets/${id}/reply`,
+      ticketReplyRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/Admin/tickets/${id}/reply`,
+      ticketReplyRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/Admin/tickets/${id}/reply`,
+      ticketReplyRequest,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
  postApiAdminTicketsIdRead<TData = unknown>(id: number, options?: HttpClientBodyOptions): Observable<TData>;
  postApiAdminTicketsIdRead<TData = unknown>(id: number, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
  postApiAdminTicketsIdRead<TData = unknown>(id: number, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
@@ -1892,6 +1926,7 @@ export type GetApiAdminTicketsClientResult = NonNullable<unknown>
 export type GetApiAdminTicketsIdClientResult = NonNullable<ContactTicketResponse>
 export type DeleteApiAdminTicketsIdClientResult = NonNullable<unknown>
 export type PostApiAdminTicketsIdReadClientResult = NonNullable<unknown>
+export type PostApiAdminTicketsIdReplyClientResult = NonNullable<ContactTicketResponse>
 export type GetApiAdminServerLogsClientResult = NonNullable<unknown>
 export type DeleteApiAdminServerLogsClientResult = NonNullable<unknown>
 export type DeleteApiAdminServerLogsIdClientResult = NonNullable<unknown>

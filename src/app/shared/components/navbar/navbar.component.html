@@ -20,17 +20,15 @@
     </button>
 
     @if (session.isAuthenticated()) {
-    <!-- ── Admin Inbox ── -->
-    @if (session.isAdminOrMod()) {
+    <!-- ── Inbox (personal + admin when applicable) ── -->
     <div class="inbox-wrap">
-        <button mat-icon-button class="inbox-btn" (click)="openInbox($event)" matTooltip="Admin inbox" i18n-matTooltip>
+        <button mat-icon-button class="inbox-btn" (click)="openInbox($event)" matTooltip="Inbox" i18n-matTooltip>
             <img src="/icons/communication/mail.svg" alt="" aria-hidden="true" class="mc-icon" />
             @if (unreadNotifCount()) {
             <span class="inbox-badge"></span>
             }
         </button>
     </div>
-    }
 
     <button mat-button [matMenuTriggerFor]="profileMenu" class="profile-btn">
         <span class="username">{{ session.user()?.username }}</span>

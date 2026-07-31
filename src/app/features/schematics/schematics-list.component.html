@@ -219,11 +219,6 @@
                 }
 
                 <div class="form-actions">
-                    @if (session.isAdminOrMod()) {
-                    <mat-slide-toggle [checked]="isModuleUpload()" (change)="isModuleUpload.set($event.checked)">
-                        Module
-                    </mat-slide-toggle>
-                    }
                     <span class="spacer"></span>
                     <button mat-stroked-button type="button" (click)="showCreate.set(false)" i18n>Cancel</button>
                     <button mat-flat-button type="submit" [disabled]="createForm.invalid || creating()">
@@ -334,12 +329,6 @@
                 <img [src]="includeUnverified ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'" alt=""
                     aria-hidden="true" class="mc-icon" />
                 <span i18n style="transform: translateY(1px); display: inline-block;">Unverified</span>
-            </button>
-            <button mat-stroked-button class="unverified-toggle" (click)="toggleIncludeModules()"
-                matTooltip="Include GitLite modules in results">
-                <img [src]="includeModules ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'" alt=""
-                    aria-hidden="true" class="mc-icon" />
-                <span style="transform: translateY(1px); display: inline-block;">Modules</span>
             </button>
         </div>
     </div>

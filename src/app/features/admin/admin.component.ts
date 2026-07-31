@@ -28,12 +28,11 @@ import { FaqService } from '../../api/faq';
 import { SessionService } from '../../core/services/session.service';
 import { ToastService } from '../../core/services/toast.service';
 import { RealtimeService } from '../../core/services/realtime.service';
-import type { AdminUserResponse, AdminSchematicResponse, AdminUserDetailResponse, AdminUserSchematicResponse, LiveMessageResponse, ModMessageResponse, StorageStatsResponse, UserStorageResponse, AllowedTagResponse, AllowedVersionResponse, TagSuggestionResponse, AdminNotificationResponse, FaqResponse, ContactTicketResponse, SchematicListItemResponse } from '../../api/generated.schemas';
+import type { AdminUserResponse, AdminSchematicResponse, AdminUserDetailResponse, AdminUserSchematicResponse, LiveMessageResponse, ModMessageResponse, StorageStatsResponse, UserStorageResponse, AllowedTagResponse, AllowedVersionResponse, TagSuggestionResponse, AdminNotificationResponse, FaqResponse, ContactTicketResponse } from '../../api/generated.schemas';
 import type { GetApiAdminTicketsParams, GetApiAdminServerLogsParams } from '../../api/generated.schemas';
 import { AdminLogsService } from './services/admin-logs.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
-import { SchematicCardComponent } from '../../shared/components/schematic-card/schematic-card.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { UserLinkComponent } from '../../shared/components/user-link/user-link.component';
 import { UserImgPipe, TicketImgPipe } from '../../shared/pipes/image-url.pipe';
@@ -79,7 +78,6 @@ export interface ServerLogEntryResponse {
         MatAutocompleteModule,
         MatExpansionModule,
         LoadingSpinnerComponent,
-        SchematicCardComponent,
         EmptyStateComponent,
         UserLinkComponent,
         UserImgPipe,
@@ -116,6 +114,8 @@ export class AdminComponent implements OnInit, OnDestroy {
 
     // Tab persistence via query params
     readonly selectedTab = signal(0);
+    /** Avoid re-opening the same ticket dialog from repeated queryParam emissions. */
+    private openedTicketId: number | string | null = null;
 
     // ── Users (server-side) ──
     readonly users = signal<AdminUserResponse[]>([]);
@@ -281,32 +281,48 @@ export class AdminComponent implements OnInit, OnDestroy {
     private loadedTabs = new Set<number>();
 
     ngOnInit(): void {
-        const tabParam = parseInt(this.route.snapshot.queryParams['tab'], 10);
-        if (!isNaN(tabParam) && tabParam >= 0) this.selectedTab.set(tabParam);
-        const tab = this.selectedTab();
+        // React to tab / ticketId / userId query changes (including inbox navigation while already on /admin)
+        this.autoSubs.push(
+            this.route.queryParams.subscribe(params => {
+                const tabParam = parseInt(params['tab'], 10);
+                const tab = !isNaN(tabParam) && tabParam >= 0 ? tabParam : 0;
+                const prevTab = this.selectedTab();
 
-        const pageParam = parseInt(this.route.snapshot.queryParams['page'], 10);
-        if (!isNaN(pageParam) && pageParam > 1) {
-            const zeroIdx = pageParam - 1;
-            switch (tab) {
-                case 0: this.usersPage.set(zeroIdx); break;
-                case 1: this.schematicsPage.set(zeroIdx); break;
-                case 4: this.storagePage.set(zeroIdx); break;
-                case 8: this.ticketsPage.set(zeroIdx); break;
-                case 9: this.serverLogsPage.set(zeroIdx); break;
-            }
-        }
+                if (tab !== prevTab) {
+                    this.applyTabFromRoute(tab, prevTab);
+                } else {
+                    // Ensure data for the current tab is loaded even on first emit
+                    this.loadTabData(tab);
+                }
 
-        this.loadTabData(tab);
+                const pageParam = parseInt(params['page'], 10);
+                if (!isNaN(pageParam) && pageParam > 1) {
+                    const zeroIdx = pageParam - 1;
+                    switch (tab) {
+                        case 0: this.usersPage.set(zeroIdx); break;
+                        case 1: this.schematicsPage.set(zeroIdx); break;
+                        case 4: this.storagePage.set(zeroIdx); break;
+                        case 8: this.ticketsPage.set(zeroIdx); break;
+                        case 9: this.serverLogsPage.set(zeroIdx); break;
+                    }
+                }
 
-        // Live tail only connects while the Server Logs tab is visible
-        if (tab === 9) this.adminLogsService.connect();
+                const userId = params['userId'];
+                if (userId && tab === 0) {
+                    this.autoOpenUserDetail(userId);
+                }
 
-        // Auto-open user detail if userId query param is present
-        const userId = this.route.snapshot.queryParams['userId'];
-        if (userId && tab === 0) {
-            this.autoOpenUserDetail(userId);
-        }
+                const ticketId = params['ticketId'];
+                if (ticketId != null && ticketId !== '' && tab === 8) {
+                    if (this.openedTicketId !== ticketId) {
+                        this.openedTicketId = ticketId;
+                        this.openTicketById(ticketId);
+                    }
+                } else {
+                    this.openedTicketId = null;
+                }
+            }),
+        );
 
         // User search autocomplete
         this.autoSubs.push(
@@ -372,28 +388,82 @@ export class AdminComponent implements OnInit, OnDestroy {
         const params = new URLSearchParams(window.location.search);
         if (idx) params.set('tab', String(idx)); else params.delete('tab');
         params.delete('page');
+        // Drop ticketId when leaving tickets tab via manual click
+        if (idx !== 8) params.delete('ticketId');
         const qs = params.toString();
         this.location.replaceState(window.location.pathname + (qs ? '?' + qs : ''));
 
-        // Reset paginated tabs to page 1 and force a fresh load
+        this.resetTabPaging(idx);
+        this.loadTabData(idx);
+        this.syncLiveLogs(idx, prevIdx);
+        this.scrollActiveTabIntoView();
+    }
+
+    /** Switch tab when the URL query changes (e.g. inbox click while already on /admin). */
+    private applyTabFromRoute(idx: number, prevIdx: number): void {
+        this.selectedTab.set(idx);
+        this.resetTabPaging(idx);
+        this.loadTabData(idx);
+        this.syncLiveLogs(idx, prevIdx);
+        this.scrollActiveTabIntoView();
+    }
+
+    private resetTabPaging(idx: number): void {
         switch (idx) {
             case 0: this.usersPage.set(0); this.loadedTabs.delete(0); break;
             case 1: this.schematicsPage.set(0); this.loadedTabs.delete(1); break;
             case 4: this.storagePage.set(0); this.loadedTabs.delete(4); break;
             case 8: this.ticketsPage.set(0); this.loadedTabs.delete(8); break;
             case 9: this.serverLogsPage.set(0); this.loadedTabs.delete(9); break;
-            case 10: this.modulesPage.set(0); this.modulesSearch = ''; this.loadedTabs.delete(10); break;
         }
-        this.loadTabData(idx);
+    }
 
-        // Live tail only connects while the Server Logs tab is visible
+    private syncLiveLogs(idx: number, prevIdx: number): void {
         if (idx === 9) this.adminLogsService.connect();
         else if (prevIdx === 9) this.adminLogsService.disconnect();
+    }
 
-        // Scroll the active tab label into view (disablePagination disables Angular's auto-scroll)
+    private scrollActiveTabIntoView(): void {
         setTimeout(() => {
             const active = document.querySelector('.mat-mdc-tab.mdc-tab--active');
             active?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+        });
+    }
+
+    private openTicketById(id: number | string): void {
+        const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+        if (typeof numericId === 'number' && isNaN(numericId)) return;
+
+        this.adminApi.getApiAdminTicketsId(numericId as number).subscribe({
+            next: (full) => {
+                if (!full.isRead) this.markTicketRead(full);
+                this.markNotificationsByType('contact_ticket');
+                // Keep list in sync if already loaded
+                this.tickets.update(list => {
+                    const exists = list.some(x => x.id === full.id);
+                    return exists ? list.map(x => x.id === full.id ? full : x) : list;
+                });
+                const ref = this.dialog.open(AdminTicketDialogComponent, {
+                    data: { ticket: full } as AdminTicketDialogData,
+                    width: '620px',
+                    maxWidth: '95vw',
+                    maxHeight: '90vh',
+                });
+                ref.afterClosed().subscribe((result: AdminTicketDialogResult | undefined) => {
+                    this.openedTicketId = null;
+                    this.router.navigate([], { queryParams: { ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
+                    if (result?.deleted) {
+                        this.tickets.update(list => list.filter(x => x.id !== full.id));
+                    } else if (result?.updated) {
+                        this.tickets.update(list => list.map(x => x.id === full.id ? result.updated! : x));
+                    }
+                });
+            },
+            error: (err) => {
+                this.openedTicketId = null;
+                this.toast.error(err.error?.detail ?? ADMIN.failed);
+                this.router.navigate([], { queryParams: { ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
+            },
         });
     }
 
@@ -411,7 +481,6 @@ export class AdminComponent implements OnInit, OnDestroy {
             case 7: this.loadAdminFaqs(); break;
             case 8: this.loadTickets(); break;
             case 9: this.loadServerLogs(); break;
-            case 10: this.loadModules(); break;
         }
     }
 
@@ -1270,27 +1339,15 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     viewTicket(t: ContactTicketResponse): void {
+        // Route through query params so openTicketById handles the dialog (and inbox deep-links share the path)
+        const current = this.route.snapshot.queryParams['ticketId'];
+        if (current != null && String(current) === String(t.id)) {
+            this.openedTicketId = t.id;
+            this.openTicketById(t.id);
+            return;
+        }
+        this.openedTicketId = null;
         this.router.navigate([], { queryParams: { ticketId: t.id }, queryParamsHandling: 'merge', replaceUrl: true });
-        this.adminApi.getApiAdminTicketsId(t.id as number).subscribe({
-            next: (full) => {
-                // mark read locally and via API before opening
-                if (!full.isRead) this.markTicketRead(full);
-                this.markNotificationsByType('contact_ticket');
-                const ref = this.dialog.open(AdminTicketDialogComponent, {
-                    data: { ticket: full } as AdminTicketDialogData,
-                    width: '620px',
-                    maxWidth: '95vw',
-                    maxHeight: '90vh',
-                });
-                ref.afterClosed().subscribe((result: AdminTicketDialogResult | undefined) => {
-                    this.router.navigate([], { queryParams: { ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
-                    if (result?.deleted) {
-                        this.tickets.update(list => list.filter(x => x.id !== t.id));
-                    }
-                });
-            },
-            error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
-        });
     }
 
     closeTicket(): void { this.selectedTicket.set(null); }
@@ -1389,70 +1446,6 @@ export class AdminComponent implements OnInit, OnDestroy {
             },
             error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
         });
-    }
-
-    // ── Modules ──
-    readonly modules = signal<SchematicListItemResponse[]>([]);
-    readonly loadingModules = signal(true);
-    readonly modulesTotalCount = signal(0);
-    readonly modulesPage = signal(0);
-    readonly modulesPageSize = signal(24);
-    modulesSearch = '';
-
-
-
-    loadModules(): void {
-        this.loadingModules.set(true);
-        this.schematicsApi.getApiSchematics({
-            page: this.modulesPage() + 1,
-            pageSize: this.modulesPageSize(),
-            isModule: true,
-            search: this.modulesSearch || undefined,
-            sort: 'name',
-            direction: 'asc',
-        }).subscribe({
-            next: (r) => {
-                this.modules.set((r.items ?? []).filter(m => m.isModule));
-                this.modulesTotalCount.set(Number(r.totalCount ?? 0));
-                this.loadingModules.set(false);
-            },
-            error: () => this.loadingModules.set(false),
-        });
-    }
-
-    searchModules(): void {
-        this.modulesPage.set(0);
-        this.loadedTabs.delete(10);
-        this.loadModules();
-    }
-
-    deleteModule(module: SchematicListItemResponse): void {
-        const ref = this.dialog.open(ConfirmDialogComponent, {
-            data: { title: 'Delete Module', message: `Delete "${module.name}"? This cannot be undone.`, confirmText: COMMON.delete, warn: true } as ConfirmDialogData,
-        });
-        ref.afterClosed().subscribe((ok) => {
-            if (ok) {
-                this.adminApi.deleteApiAdminModulesId(module.id!).subscribe({
-                    next: () => {
-                        this.modules.update(list => list.filter(m => m.id !== module.id));
-                        this.modulesTotalCount.update(c => Math.max(0, c - 1));
-                        this.toast.success('Module deleted.');
-                    },
-                    error: (err) => this.toast.error(err.error?.message ?? ADMIN.failed),
-                });
-            }
-        });
-    }
-
-    onModulesPageChange(event: PageEvent): void {
-        if (event.pageSize !== this.modulesPageSize()) {
-            this.modulesPageSize.set(event.pageSize);
-            this.modulesPage.set(0);
-        } else {
-            this.modulesPage.set(event.pageIndex);
-        }
-        this.loadedTabs.delete(10);
-        this.loadModules();
     }
 
 }

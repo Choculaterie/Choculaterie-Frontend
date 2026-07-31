@@ -44,9 +44,7 @@ export class NavbarComponent implements OnInit {
     private authApi = inject(ApiAuthService);
     private dialog = inject(MatDialog);
 
-    readonly unreadNotifCount = computed(() =>
-        this.realtime.adminNotifications().filter(n => !n.isRead).length
-    );
+    readonly unreadNotifCount = computed(() => this.realtime.unreadInboxCount());
 
     get returnUrl(): string | null {
         const url = this.router.url;
@@ -67,11 +65,19 @@ export class NavbarComponent implements OnInit {
                 });
             }
         });
+
+        // Seed / refresh inbox when auth state becomes true (login or page load)
+        effect(() => {
+            if (this.session.isAuthenticated()) {
+                this.realtime.seedInbox();
+            } else {
+                this.realtime.clearUserNotifications();
+            }
+        });
     }
 
     ngOnInit(): void {
-        // Seed existing admin notifications from REST API on page load
-        this.realtime.seedAdminNotifications();
+        // Inbox seeding handled by auth effect above
     }
 
     logout(): void {
@@ -81,6 +87,7 @@ export class NavbarComponent implements OnInit {
                 error: () => { /* ignore revocation errors */ },
             });
         }
+        this.realtime.clearUserNotifications();
         this.session.clear();
     }
 

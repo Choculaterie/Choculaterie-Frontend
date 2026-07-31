@@ -82,9 +82,6 @@
                 <img src="/icons/weapons/trident.svg" alt="" aria-hidden="true" class="mc-icon" />
             </button>
             }
-            @if (s.isModule) {
-            <mat-chip class="module-badge" matTooltip="This is a GitLite module">Module</mat-chip>
-            }
         </div>
         <p class="author"><span i18n>by</span>&nbsp;<app-user-link [username]="s.username" /> &middot; {{
             s.publishDate |
