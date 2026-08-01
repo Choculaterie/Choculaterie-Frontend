@@ -132,7 +132,8 @@ export class ModDetailComponent implements OnInit {
                 const url = URL.createObjectURL(blob as Blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = mod.title || 'mod-download';
+                const name = (mod.title || 'mod-download').trim() || 'mod-download';
+                a.download = name.toLowerCase().endsWith('.jar') ? name : `${name}.jar`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
