@@ -257,11 +257,13 @@ const server = http.createServer(async (req, res) => {
     // Strip query string
     const urlPath = req.url.split('?')[0];
 
-    // Try to serve as a static file first
+    // Try to serve as a static file first.
+    // Only treat known asset extensions as files — usernames like "beanie._.boi"
+    // produce a fake extension (".boi") and must fall through to the SPA.
     const filePath = path.join(STATIC_DIR, urlPath);
     const ext = path.extname(filePath).toLowerCase();
 
-    if (ext && ext !== '.html') {
+    if (ext && MIME[ext] && ext !== '.html') {
         // Static asset - serve directly
         fs.readFile(filePath, (err, data) => {
             if (err) {
