@@ -32,6 +32,7 @@ const MIME = {
     '.woff2': 'font/woff2',
     '.woff': 'font/woff',
     '.ttf': 'font/ttf',
+    '.otf': 'font/otf',
     '.webp': 'image/webp',
 };
 
@@ -290,7 +291,11 @@ const server = http.createServer(async (req, res) => {
         const title = resolved?.title ?? DEFAULT_TITLE;
         const metaBlock = resolved?.metaBlock ?? buildMeta(DEFAULT_TITLE, DEFAULT_DESC, FALLBACK_IMAGE);
         html = injectMeta(html, title, metaBlock);
-        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        // Never let the CDN cache SPA HTML under asset-like URLs for long
+        res.writeHead(200, {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Cache-Control': 'no-cache',
+        });
         res.end(html);
     } catch (err) {
         console.error('Error serving', urlPath, err);
