@@ -613,6 +613,8 @@ export interface ModListItemResponse {
   filePath: string | null;
   /** @nullable */
   imagePath: string | null;
+  /** @nullable */
+  dependencies: string | null;
 }
 
 export interface ModMessageRequest {
@@ -1189,6 +1191,7 @@ export type PostApiModsBody = {
   ReleaseType?: string;
   GameVersion?: string;
   Platform?: string;
+  Dependencies?: string;
   File?: IFormFile;
   Image?: IFormFile;
 };
@@ -1199,6 +1202,7 @@ export type PutApiModsIdBody = {
   ReleaseType?: string;
   GameVersion?: string;
   Platform?: string;
+  Dependencies?: string;
   File?: IFormFile;
   Image?: IFormFile;
 };

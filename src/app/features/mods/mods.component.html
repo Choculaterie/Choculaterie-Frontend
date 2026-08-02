@@ -59,9 +59,18 @@
                     <mat-label i18n>Platform</mat-label>
                     <mat-select [(ngModel)]="formPlatform">
                         <mat-option value="Fabric">Fabric</mat-option>
+                        <mat-option value="Quilt">Quilt</mat-option>
                         <mat-option value="Forge">Forge</mat-option>
                         <mat-option value="NeoForge">NeoForge</mat-option>
                         <mat-option value="Bukkit">Bukkit</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label i18n>Dependencies</mat-label>
+                    <mat-select [(ngModel)]="formDependencies" multiple panelClass="game-versions-panel">
+                        @for (title of availableDependencyTitles(); track title) {
+                        <mat-option [value]="title">{{ title }}</mat-option>
+                        }
                     </mat-select>
                 </mat-form-field>
             </div>
@@ -180,6 +189,7 @@
                             {{ mod.platform }}
                         </span>
                     </div>
+
                 </mat-card-content>
             </mat-card>
         </a>

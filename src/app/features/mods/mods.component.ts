@@ -24,6 +24,7 @@ import { DropZoneDirective } from '../../shared/directives/drop-zone.directive';
 import { environment } from '../../environments/environment';
 import { MODS } from '../../i18n/labels';
 import { compareVersions, sortVersionsDesc } from '../../shared/utils/version-sort';
+import { parseModJar } from '../../shared/utils/parse-mod-jar';
 
 interface ModSummary {
     name: string;
@@ -79,9 +80,17 @@ export class ModsComponent implements OnInit {
     formRelease = 'Stable';
     formVersions: string[] = [];
     formPlatform = 'Fabric';
+    formDependencies: string[] = [];
     formFile: File | null = null;
     formImage: File | null = null;
     readonly imagePreview = signal<string | null>(null);
+    availableDependencyTitles(): string[] {
+        const titles = new Set(this.mods().map(m => m.title));
+        const current = this.formTitle.trim();
+        if (current) titles.delete(current);
+        for (const d of this.formDependencies) titles.add(d);
+        return [...titles].sort((a, b) => a.localeCompare(b));
+    }
 
     isAdmin(): boolean {
         return this.session.isAdminOrMod();
@@ -154,6 +163,7 @@ export class ModsComponent implements OnInit {
         this.formRelease = 'Stable';
         this.formVersions = [];
         this.formPlatform = 'Fabric';
+        this.formDependencies = [];
         this.formFile = null;
         this.formImage = null;
         this.imagePreview.set(null);
@@ -166,6 +176,7 @@ export class ModsComponent implements OnInit {
         this.modsApi.postApiMods({
             Title: title, Description: this.formDesc,
             ReleaseType: this.formRelease, GameVersion: this.formVersions.join(', '), Platform: this.formPlatform,
+            Dependencies: this.formDependencies.join(', '),
             File: this.formFile as any, Image: this.formImage as any,
         }).subscribe({
             next: () => {
@@ -184,9 +195,37 @@ export class ModsComponent implements OnInit {
     onFileSelected(event: Event): void {
         const scrollY = window.scrollY;
         const input = event.target as HTMLInputElement;
-        this.formFile = input.files?.[0] ?? null;
+        const file = input.files?.[0] ?? null;
+        this.formFile = file;
         input.value = '';
+        if (file) void this.applyJarMetadata(file);
         setTimeout(() => window.scrollTo({ top: scrollY, behavior: 'instant' as ScrollBehavior }), 0);
+    }
+
+    private async applyJarMetadata(file: File): Promise<void> {
+        const parsed = await parseModJar(file, {
+            allowedGameVersions: this.allowedVersions().map(v => v.name),
+            siteModTitles: this.mods().map(m => m.title).filter(t => t !== this.formTitle.trim()),
+        });
+        if (!parsed) return;
+
+        if (parsed.gameVersions.length) {
+            this.formVersions = [...parsed.gameVersions];
+        }
+        if (parsed.platform) {
+            this.formPlatform = parsed.platform;
+        }
+        this.formDependencies = [...parsed.dependencyTitles, ...parsed.unresolvedDependencies];
+        if (parsed.name && !this.formTitle.trim()) {
+            this.formTitle = parsed.name;
+        }
+        if (parsed.description && !this.formDesc.trim()) {
+            this.formDesc = parsed.description;
+        }
+        if (parsed.iconFile && !this.formImage) {
+            this.formImage = parsed.iconFile;
+            this.imagePreview.set(URL.createObjectURL(parsed.iconFile));
+        }
     }
 
     onImageSelected(event: Event): void {
@@ -203,9 +242,11 @@ export class ModsComponent implements OnInit {
     }
 
     onFilesDropped(files: File[]): void {
+        let jar: File | null = null;
         for (const file of files) {
             if (file.name.endsWith('.jar')) {
                 this.formFile = file;
+                jar = file;
             } else if (file.type.startsWith('image/')) {
                 this.formImage = file;
                 this.imagePreview.set(URL.createObjectURL(file));
@@ -214,5 +255,6 @@ export class ModsComponent implements OnInit {
         if (!this.showCreateForm()) {
             this.showCreateForm.set(true);
         }
+        if (jar) void this.applyJarMetadata(jar);
     }
 }

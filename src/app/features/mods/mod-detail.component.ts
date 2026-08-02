@@ -25,6 +25,7 @@ import { SkeletonImgComponent } from '../../shared/components/skeleton-img/skele
 import { DropZoneDirective } from '../../shared/directives/drop-zone.directive';
 import { MODS, DIALOGS, COMMON } from '../../i18n/labels';
 import { sortVersionsDesc } from '../../shared/utils/version-sort';
+import { parseModJar } from '../../shared/utils/parse-mod-jar';
 
 @Component({
     selector: 'app-mod-detail',
@@ -62,6 +63,7 @@ export class ModDetailComponent implements OnInit {
 
     modName = '';
     readonly versions = signal<ModListItemResponse[]>([]);
+    readonly allMods = signal<ModListItemResponse[]>([]);
     readonly modImage = signal<string | null>(null);
     readonly loading = signal(true);
     readonly showForm = signal(false);
@@ -75,10 +77,53 @@ export class ModDetailComponent implements OnInit {
     formRelease = 'Stable';
     formVersions: string[] = [];
     formPlatform = 'Fabric';
+    formDependencies: string[] = [];
     formFile: File | null = null;
     formImage: File | null = null;
     readonly imagePreview = signal<string | null>(null);
     readonly allowedVersions = signal<AllowedVersionResponse[]>([]);
+    availableDependencyTitles(): string[] {
+        const titles = new Set(this.allMods().map(m => m.title));
+        titles.delete(this.modName);
+        for (const d of this.formDependencies) titles.add(d);
+        return [...titles].sort((a, b) => a.localeCompare(b));
+    }
+
+    private parseDependencies(raw: string | null | undefined): string[] {
+        if (!raw?.trim()) return [];
+        return raw.split(',').map(s => s.trim()).filter(Boolean);
+    }
+
+    private gameVersionsOf(mod: ModListItemResponse): string[] {
+        return mod.gameVersion.split(',').map(s => s.trim()).filter(Boolean);
+    }
+
+    private resolveDependencyMods(mod: ModListItemResponse): ModListItemResponse[] {
+        const titles = this.parseDependencies(mod.dependencies);
+        if (!titles.length) return [];
+        const wanted = new Set(this.gameVersionsOf(mod));
+        const out: ModListItemResponse[] = [];
+        for (const title of titles) {
+            const candidates = this.allMods().filter(
+                m => m.title.localeCompare(title, undefined, { sensitivity: 'accent' }) === 0
+                    || m.title.toLowerCase() === title.toLowerCase(),
+            );
+            if (!candidates.length) continue;
+            const score = (c: ModListItemResponse): number => {
+                const versions = this.gameVersionsOf(c);
+                const versionHit = versions.some(v => wanted.has(v)) ? 2 : 0;
+                const platformHit = c.platform === mod.platform ? 1 : 0;
+                return versionHit + platformHit;
+            };
+            candidates.sort((a, b) => {
+                const ds = score(b) - score(a);
+                if (ds !== 0) return ds;
+                return Number(b.id) - Number(a.id);
+            });
+            out.push(candidates[0]);
+        }
+        return out;
+    }
 
     isAdmin(): boolean {
         return this.session.isAdminOrMod();
@@ -104,6 +149,7 @@ export class ModDetailComponent implements OnInit {
         this.loading.set(true);
         this.modsApi.getApiMods().subscribe({
             next: (all) => {
+                this.allMods.set(all);
                 const filtered = all.filter(m => m.title === this.modName);
                 this.versions.set(filtered);
                 const img = filtered.find(v => v.imagePath)?.imagePath ?? null;
@@ -119,29 +165,62 @@ export class ModDetailComponent implements OnInit {
             this.resetForm();
         } else {
             this.formTitle = this.modName;
+            this.formDependencies = [];
             this.showForm.set(true);
             this.scrollToForm();
         }
     }
 
     downloadMod(mod: ModListItemResponse): void {
-        this.modsApi.getApiModsIdDownload<Blob>(mod.id as any, {
-            responseType: 'blob',
-        } as any).subscribe({
-            next: (blob) => {
-                const url = URL.createObjectURL(blob as Blob);
-                const a = document.createElement('a');
-                a.href = url;
-                const name = (mod.title || 'mod-download').trim() || 'mod-download';
-                a.download = name.toLowerCase().endsWith('.jar') ? name : `${name}.jar`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                this.toast.success(MODS.downloadStarted);
-            },
-            error: (err) => this.toast.error(err.error?.detail ?? err.error?.message ?? MODS.downloadFailed),
+        const depMods = this.resolveDependencyMods(mod);
+        if (!depMods.length) {
+            this.startDownloads([mod]);
+            return;
+        }
+        const names = depMods.map(d => d.title).join(', ');
+        this.dialog.open(ConfirmDialogComponent, {
+            data: {
+                title: MODS.downloadDepsTitle,
+                message: MODS.downloadDepsMsg(names),
+                confirmText: MODS.downloadWithDeps,
+                cancelText: MODS.downloadOnlyThis,
+            } as ConfirmDialogData,
+        }).afterClosed().subscribe((includeDeps) => {
+            if (includeDeps === true) this.startDownloads([mod, ...depMods]);
+            else if (includeDeps === false) this.startDownloads([mod]);
         });
+    }
+
+    private startDownloads(mods: ModListItemResponse[]): void {
+        let remaining = mods.length;
+        let failed = 0;
+        for (const mod of mods) {
+            this.modsApi.getApiModsIdDownload<Blob>(mod.id as any, {
+                responseType: 'blob',
+            } as any).subscribe({
+                next: (blob) => {
+                    const url = URL.createObjectURL(blob as Blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const name = (mod.title || 'mod-download').trim() || 'mod-download';
+                    a.download = name.toLowerCase().endsWith('.jar') ? name : `${name}.jar`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    remaining--;
+                    if (remaining === 0) {
+                        if (failed) this.toast.error(MODS.downloadFailed);
+                        else this.toast.success(MODS.downloadStarted);
+                    }
+                },
+                error: () => {
+                    failed++;
+                    remaining--;
+                    if (remaining === 0) this.toast.error(MODS.downloadFailed);
+                },
+            });
+        }
     }
 
     editMod(mod: ModListItemResponse): void {
@@ -158,6 +237,7 @@ export class ModDetailComponent implements OnInit {
         this.formRelease = mod.releaseType;
         this.formVersions = mod.gameVersion.split(',').map(v => v.trim()).filter(Boolean);
         this.formPlatform = mod.platform;
+        this.formDependencies = this.parseDependencies(mod.dependencies);
         this.showForm.set(true);
         this.scrollToForm();
     }
@@ -167,6 +247,7 @@ export class ModDetailComponent implements OnInit {
         this.modsApi.postApiMods({
             Title: this.formTitle || this.modName, Description: this.formDesc,
             ReleaseType: this.formRelease, GameVersion: this.formVersions.join(', '), Platform: this.formPlatform,
+            Dependencies: this.formDependencies.join(', '),
             File: this.formFile as any, Image: this.formImage as any,
         }).subscribe({
             next: () => { this.toast.success(MODS.versionCreated); this.resetForm(); this.loadVersions(); },
@@ -182,6 +263,7 @@ export class ModDetailComponent implements OnInit {
             {
                 Title: this.formTitle || this.modName, Description: this.formDesc,
                 ReleaseType: this.formRelease, GameVersion: this.formVersions.join(', '), Platform: this.formPlatform,
+                Dependencies: this.formDependencies.join(', '),
                 File: this.formFile as any, Image: this.formImage as any,
             },
         ).subscribe({
@@ -217,6 +299,7 @@ export class ModDetailComponent implements OnInit {
         this.formRelease = 'Stable';
         this.formVersions = [];
         this.formPlatform = 'Fabric';
+        this.formDependencies = [];
         this.formFile = null;
         this.formImage = null;
         this.imagePreview.set(null);
@@ -225,9 +308,39 @@ export class ModDetailComponent implements OnInit {
     onFileSelected(event: Event): void {
         const scrollY = window.scrollY;
         const input = event.target as HTMLInputElement;
-        this.formFile = input.files?.[0] ?? null;
+        const file = input.files?.[0] ?? null;
+        this.formFile = file;
         input.value = '';
+        if (file) void this.applyJarMetadata(file);
         setTimeout(() => window.scrollTo({ top: scrollY, behavior: 'instant' as ScrollBehavior }), 0);
+    }
+
+    private async applyJarMetadata(file: File): Promise<void> {
+        const parsed = await parseModJar(file, {
+            allowedGameVersions: this.allowedVersions().map(v => v.name),
+            siteModTitles: this.allMods().map(m => m.title).filter(t => t !== this.modName),
+        });
+        if (!parsed) return;
+
+        if (parsed.gameVersions.length) {
+            this.formVersions = [...parsed.gameVersions];
+        }
+        if (parsed.platform) {
+            this.formPlatform = parsed.platform;
+        }
+        this.formDependencies = [...parsed.dependencyTitles, ...parsed.unresolvedDependencies];
+        if (!this.editingMod()) {
+            if (parsed.name && (!this.formTitle || this.formTitle === this.modName)) {
+                this.formTitle = parsed.name;
+            }
+            if (parsed.description && !this.formDesc.trim()) {
+                this.formDesc = parsed.description;
+            }
+        }
+        if (parsed.iconFile && !this.formImage) {
+            this.formImage = parsed.iconFile;
+            this.imagePreview.set(URL.createObjectURL(parsed.iconFile));
+        }
     }
 
     onImageSelected(event: Event): void {
@@ -244,9 +357,11 @@ export class ModDetailComponent implements OnInit {
     }
 
     onFilesDropped(files: File[]): void {
+        let jar: File | null = null;
         for (const file of files) {
             if (file.name.endsWith('.jar')) {
                 this.formFile = file;
+                jar = file;
             } else if (file.type.startsWith('image/')) {
                 this.formImage = file;
                 this.imagePreview.set(URL.createObjectURL(file));
@@ -256,5 +371,6 @@ export class ModDetailComponent implements OnInit {
             this.showForm.set(true);
             this.formTitle = this.formTitle || this.modName;
         }
+        if (jar) void this.applyJarMetadata(jar);
     }
 }

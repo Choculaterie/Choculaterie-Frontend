@@ -129,6 +129,9 @@ if(postApiModsBody.GameVersion !== undefined) {
 if(postApiModsBody.Platform !== undefined) {
  formData.append(`Platform`, postApiModsBody.Platform);
  }
+if(postApiModsBody.Dependencies !== undefined) {
+ formData.append(`Dependencies`, postApiModsBody.Dependencies);
+ }
 if(postApiModsBody.File !== undefined) {
  formData.append(`File`, postApiModsBody.File);
  }
@@ -217,6 +220,9 @@ if(putApiModsIdBody.GameVersion !== undefined) {
  }
 if(putApiModsIdBody.Platform !== undefined) {
  formData.append(`Platform`, putApiModsIdBody.Platform);
+ }
+if(putApiModsIdBody.Dependencies !== undefined) {
+ formData.append(`Dependencies`, putApiModsIdBody.Dependencies);
  }
 if(putApiModsIdBody.File !== undefined) {
  formData.append(`File`, putApiModsIdBody.File);
