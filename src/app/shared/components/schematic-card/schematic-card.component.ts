@@ -46,7 +46,7 @@ export class SchematicCardComponent {
         }
         return filePath.startsWith('http')
             ? filePath
-            : `${environment.apiBasePath}/images/schematics/${filePath}`;
+            : `${environment.apiBasePath}/images/schematics/${filePath.split('/').map(encodeURIComponent).join('/')}`;
     });
     readonly imageFit = signal<'cover' | 'contain' | null>(null);
 

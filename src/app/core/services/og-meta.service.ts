@@ -20,7 +20,7 @@ export class OgMetaService {
 
         const rawPath = s.pictures[0]?.filePath;
         const imageUrl = rawPath
-            ? (rawPath.startsWith('http') ? rawPath : `${environment.apiBasePath}/images/schematics/${rawPath}`)
+            ? (rawPath.startsWith('http') ? rawPath : `${environment.apiBasePath}/images/schematics/${rawPath.split('/').map(encodeURIComponent).join('/')}`)
             : null;
 
         const pageTitle = s.name;

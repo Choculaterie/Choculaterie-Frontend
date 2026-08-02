@@ -195,7 +195,7 @@ export class SchematicDetailComponent implements OnInit {
             if (!filePath) return;
             const url = filePath.startsWith('http')
                 ? filePath
-                : `${environment.apiBasePath}/images/schematics/${filePath}`;
+                : `${environment.apiBasePath}/images/schematics/${filePath.split('/').map(encodeURIComponent).join('/')}`;
             this.checkImageTransparency(url).then(transparent => {
                 this.imageFit.set(transparent ? 'contain' : 'cover');
             });
