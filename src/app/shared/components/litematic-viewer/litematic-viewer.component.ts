@@ -257,12 +257,15 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
     }
 
     private updateClipPlanes(): void {
-        this.minYClipPlane.constant = -(this.currentMinY() + this.clipYOffset);
-        this.maxYClipPlane.constant = this.currentMaxY() + this.clipYOffset;
+        if (this.currentMinY() <= this.minY && this.currentMaxY() >= this.maxY) {
+            this.disableClipPlanes();
+            return;
+        }
+        this.minYClipPlane.constant = -(this.currentMinY() - 0.5 + this.clipYOffset);
+        this.maxYClipPlane.constant = this.currentMaxY() + 0.5 + this.clipYOffset;
         this.schemRenderer?.invalidate();
     }
 
-    /** Makes both clip planes pass everything; called once the real rebuild has committed. */
     private disableClipPlanes(): void {
         this.minYClipPlane.constant = 1e6;
         this.maxYClipPlane.constant = 1e6;
