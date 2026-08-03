@@ -10,31 +10,23 @@
             <span class="diff-removed">-{{ diffSummary()!.removed }}</span>
         </span>
         }
+        @if (!loading() && !error() && !isDiffMode()) {
+        <button mat-stroked-button class="fly-toggle" (click)="toggleFlyMode()" i18n-matTooltip
+            matTooltip="Move around with WASD instead of dragging to rotate">
+            <img [src]="flyMode() ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
+                alt="" aria-hidden="true" class="mc-icon" />
+            <span i18n>Fly mode</span>
+        </button>
+        }
         <button mat-icon-button mat-dialog-close>
             <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
         </button>
     </div>
 
-    @if (!error() && regionCount() > 1) {
-    <div class="region-nav">
-        <button mat-icon-button (click)="switchRegion(-1)" [disabled]="loading()" i18n-matTooltip matTooltip="Previous region">
-            <img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" class="mc-icon" />
-        </button>
-        <span class="region-label">
-            {{ currentRegionName() }}
-            <span class="region-count">({{ regionIndex() + 1 }} / {{ regionCount() }})</span>
-        </span>
-        <button mat-icon-button (click)="switchRegion(1)" [disabled]="loading()" i18n-matTooltip matTooltip="Next region">
-            <img src="/icons/arrows/arrow_right.svg" alt="" aria-hidden="true" class="mc-icon" />
-        </button>
-    </div>
-    }
-
     <div class="viewer-body">
         @if (loading()) {
         <div class="loading-overlay">
-            <mat-progress-bar [mode]="loadingProgress() > 0 ? 'determinate' : 'indeterminate'"
-                [value]="loadingProgress()" />
+            <mat-progress-bar mode="indeterminate" />
             <p>{{ loadingStatus() }}</p>
         </div>
         }
@@ -47,30 +39,44 @@
         }
 
         <canvas #viewerCanvas class="render-canvas" [class.hidden]="loading() || error()"></canvas>
+
+        @if (flyMode() && !flyLocked()) {
+        <div class="fly-enter-overlay" (click)="enterFlyMode()">
+            <span i18n>Click to enter fly mode</span>
+        </div>
+        }
+
+        @if (!loading() && !error()) {
+        <div class="viewer-hint">
+            @if (flyMode()) {
+            <span i18n>WASD to move · Space/C for up/down · Shift to sprint · Esc to exit</span>
+            } @else {
+            <span i18n>Drag to rotate · Right-click drag to pan · Scroll to zoom</span>
+            }
+        </div>
+        <a class="renderer-credit" href="https://github.com/Schem-at/schematic-renderer" target="_blank"
+            rel="noopener noreferrer" i18n>Based on: schematic-renderer</a>
+        }
     </div>
 
-    @if (!loading() && !error() && maxY > 1) {
+    @if (!loading() && !error() && !isDiffMode() && maxY > 1) {
     <div class="viewer-controls">
         <div class="slider-group">
-            <label i18n>Min Y: {{ currentMinY }}</label>
-            <mat-slider [min]="minY" [max]="maxY" [step]="1" discrete>
-                <input matSliderThumb [(ngModel)]="currentMinY" (valueChange)="onYRangeChange()" />
-            </mat-slider>
+            <label i18n>Min Y: {{ currentMinY() }}</label>
+            <div #minYTrack class="slider-track-wrap">
+                <mat-slider [min]="minY" [max]="maxY" [step]="1" discrete>
+                    <input matSliderThumb [value]="currentMinY()" (valueChange)="onMinYChange($event)" />
+                </mat-slider>
+            </div>
         </div>
         <div class="slider-group">
-            <label i18n>Max Y: {{ currentMaxY }}</label>
-            <mat-slider [min]="minY" [max]="maxY" [step]="1" discrete>
-                <input matSliderThumb [(ngModel)]="currentMaxY" (valueChange)="onYRangeChange()" />
-            </mat-slider>
+            <label i18n>Max Y: {{ currentMaxY() }}</label>
+            <div #maxYTrack class="slider-track-wrap">
+                <mat-slider [min]="minY" [max]="maxY" [step]="1" discrete>
+                    <input matSliderThumb [value]="currentMaxY()" (valueChange)="onMaxYChange($event)" />
+                </mat-slider>
+            </div>
         </div>
     </div>
     }
-
-    <div class="viewer-hint">
-        @if (blockCountInfo()) {
-        <span class="block-count-info">{{ blockCountInfo() }}</span>
-        <span class="hint-sep"> · </span>
-        }
-        <span i18n>Drag to rotate · Middle-click drag to pan · Scroll to zoom · WASD to move</span>
-    </div>
 </div>

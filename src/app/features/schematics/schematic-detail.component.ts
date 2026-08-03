@@ -96,9 +96,8 @@ export class SchematicDetailComponent implements OnInit {
     readonly imageFit = signal<'cover' | 'contain'>('cover');
     readonly editing = signal(false);
     readonly noDescriptionText = $localize`No description provided.`;
-    /** Map of block name (e.g. "spruce_slab") → [x, y, w, h] atlas pixel rect */
-    readonly blockTextureMap = signal<Map<string, [number, number, number, number]>>(new Map());
-    readonly atlasUrl = this.blockTextures.atlasUrl;
+    /** Map of block name (e.g. "spruce_slab") → icon object URL */
+    readonly blockTextureMap = signal<Map<string, string>>(new Map());
     readonly hasLitematicFiles: Signal<boolean> = computed(() => {
         const s = this.schematic();
         return !!s && s.files.some(f => f.name.endsWith('.litematic'));
@@ -801,8 +800,8 @@ export class SchematicDetailComponent implements OnInit {
         this.blockTextures.resolveAll([...allNames]).subscribe(m => this.blockTextureMap.set(m));
     }
 
-    /** Get atlas rect for a block name (display name with spaces) */
-    getBlockRect(displayName: string): [number, number, number, number] | undefined {
+    /** Get icon object URL for a block name (display name with spaces) */
+    getBlockIconUrl(displayName: string): string | undefined {
         const key = displayName.toLowerCase().replace(/ /g, '_');
         return this.blockTextureMap().get(key);
     }

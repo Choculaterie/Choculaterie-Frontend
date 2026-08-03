@@ -75,6 +75,16 @@ export const routes: Routes = [
             import('./features/redirect/short-url-redirect.component').then((m) => m.ShortUrlRedirectComponent),
     },
     {
+        path: 'internal/icon-batch',
+        loadComponent: () =>
+            import('./features/internal/icon-batch-render.component').then((m) => m.IconBatchRenderComponent),
+    },
+    {
+        path: 'internal/qs-render',
+        loadComponent: () =>
+            import('./features/internal/qs-render.component').then((m) => m.QsRenderComponent),
+    },
+    {
         path: '**',
         redirectTo: 'not-found',
     },

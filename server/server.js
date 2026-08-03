@@ -17,6 +17,12 @@ const DEFAULT_TITLE = `${SITE_NAME} - Minecraft Schematics`;
 const DEFAULT_DESC = 'Browse, download and share Minecraft schematics on Choculaterie.';
 const FALLBACK_IMAGE = `${SITE_URL}/server_logo.png`;
 
+// Crawlers fetch HTML once and never run JS, so they need correct OG tags up front.
+const CRAWLER_UA_RE = /bot|facebookexternalhit|whatsapp|telegram|slack|discord|embedly|quora link preview|showyoubot|outbrain|pinterest|vkshare|redditbot|w3c_validator/i;
+function isCrawlerUA(ua) {
+    return !!ua && CRAWLER_UA_RE.test(ua);
+}
+
 // ── MIME types ────────────────────────────────────────────────────────────────
 const MIME = {
     '.html': 'text/html; charset=utf-8',
@@ -34,6 +40,8 @@ const MIME = {
     '.ttf': 'font/ttf',
     '.otf': 'font/otf',
     '.webp': 'image/webp',
+    '.wasm': 'application/wasm',
+    '.zip': 'application/zip',
 };
 
 // ── Internal API fetch (no auth, public endpoints) ───────────────────────────
@@ -52,6 +60,52 @@ function apiGet(path) {
         });
         req.on('error', () => resolve(null));
         req.setTimeout(3000, () => { req.destroy(); resolve(null); });
+    });
+}
+
+// Same as apiGet, but for a raw binary body (the litematic file itself) rather than JSON.
+function apiGetBuffer(path) {
+    return new Promise((resolve) => {
+        const url = `${API_BASE}${path}`;
+        const mod = url.startsWith('https') ? https : http;
+        const req = mod.get(url, (res) => {
+            if (res.statusCode !== 200) { res.resume(); return resolve(null); }
+            const chunks = [];
+            res.on('data', (c) => chunks.push(c));
+            res.on('end', () => resolve(Buffer.concat(chunks)));
+        });
+        req.on('error', () => resolve(null));
+        req.setTimeout(10000, () => { req.destroy(); resolve(null); });
+    });
+}
+
+// Uploads a file as multipart/form-data; hand-rolled, not worth a form-data library for this.
+function apiPutFile(path, fieldName, filename, buffer, contentType) {
+    return new Promise((resolve) => {
+        const boundary = `----choculaterieBoundary${Date.now()}${Math.random().toString(16).slice(2)}`;
+        const head = Buffer.from(
+            `--${boundary}\r\n` +
+            `Content-Disposition: form-data; name="${fieldName}"; filename="${filename}"\r\n` +
+            `Content-Type: ${contentType}\r\n\r\n`,
+        );
+        const tail = Buffer.from(`\r\n--${boundary}--\r\n`);
+        const body = Buffer.concat([head, buffer, tail]);
+
+        const url = `${API_BASE}${path}`;
+        const mod = url.startsWith('https') ? https : http;
+        const req = mod.request(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': `multipart/form-data; boundary=${boundary}`,
+                'Content-Length': body.length,
+            },
+        }, (res) => {
+            res.resume();
+            resolve(res.statusCode >= 200 && res.statusCode < 300);
+        });
+        req.on('error', () => resolve(false));
+        req.setTimeout(15000, () => { req.destroy(); resolve(false); });
+        req.end(body);
     });
 }
 
@@ -84,7 +138,7 @@ const ROUTE_TITLES = {
 };
 
 // ── Fetch meta for a given URL path ───────────────────────────────────────────
-async function resolveMeta(urlPath) {
+async function resolveMeta(urlPath, isCrawler) {
     // /schematics/:id
     const schematicMatch = urlPath.match(/^\/schematics\/([0-9a-f-]{36})\/?$/i);
     if (schematicMatch) {
@@ -124,9 +178,14 @@ async function resolveMeta(urlPath) {
         const id = qsMatch[1];
         let data = await apiGet(`/qs/${id}/info`);
 
-        // If no screenshot yet, trigger headless browser to generate one (non-blocking)
+        // Crawlers block until ready; real visitors get it fire-and-forget (client uploads it too).
         if (data && !data.screenshotPath) {
-            generateQsScreenshot(id); // fire-and-forget - next crawl will pick up the image
+            if (isCrawler) {
+                await generateQsScreenshot(id);
+                data = await apiGet(`/qs/${id}/info`) ?? data;
+            } else {
+                generateQsScreenshot(id);
+            }
         }
 
         if (data) {
@@ -151,74 +210,86 @@ async function resolveMeta(urlPath) {
 }
 
 // ── Puppeteer-based screenshot generation for quick shares ───────────────────
-// Launches a headless browser to visit the QS page, which triggers Angular's
-// headless renderer that generates and uploads the screenshot to the backend.
+// One persistent hidden page renders every share via window.__renderQuickShare(base64).
 let puppeteerBrowser = null;
-const QS_GENERATE_TIMEOUT = 30_000; // max wait for screenshot to appear (ms)
-const qsGenerating = new Set();      // lock: IDs currently being rendered
+let qsRenderPage = null;
+const QS_RENDER_TIMEOUT = 60_000; // max wait for a single render call (ms)
+const qsGenerating = new Set();   // lock: IDs currently being rendered
+
+async function getPuppeteerBrowser() {
+    if (puppeteerBrowser) return puppeteerBrowser;
+    const puppeteer = require('puppeteer');
+    const os = require('os');
+    // Find the full Chrome binary in puppeteer's cache (not chrome-headless-shell, which lacks WebGL)
+    const chromeCacheDir = path.join(os.homedir(), '.cache', 'puppeteer', 'chrome');
+    const versions = fs.readdirSync(chromeCacheDir);
+    const browserPath = path.join(chromeCacheDir, versions[0], 'chrome-linux64', 'chrome');
+    console.log(`Using Chrome at: ${browserPath}`);
+    puppeteerBrowser = await puppeteer.launch({
+        headless: 'new',
+        executablePath: browserPath,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--enable-webgl',
+            '--ignore-gpu-blocklist',
+            '--enable-unsafe-swiftshader',
+            '--use-gl=angle',
+            '--use-angle=swiftshader-webgl',
+            '--disable-web-security',
+            '--disable-features=IsolateOrigins',
+        ],
+    });
+    return puppeteerBrowser;
+}
+
+async function getQsRenderPage() {
+    if (qsRenderPage) return qsRenderPage;
+    const browser = await getPuppeteerBrowser();
+    const page = await browser.newPage();
+    page.on('console', (msg) => console.log(`  [qs-render browser] ${msg.type()}: ${msg.text()}`));
+    page.on('pageerror', (err) => console.error('  [qs-render browser error]', err.message));
+    await page.goto(`http://localhost:${PORT}/internal/qs-render`, {
+        waitUntil: 'networkidle0',
+        timeout: QS_RENDER_TIMEOUT,
+    });
+    await page.waitForFunction('window.__qsRendererReady === true', { timeout: QS_RENDER_TIMEOUT });
+    qsRenderPage = page;
+    return page;
+}
+
+function dataUrlToBuffer(dataUrl) {
+    const base64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
+    return Buffer.from(base64, 'base64');
+}
 
 async function generateQsScreenshot(id) {
-    // Prevent infinite recursion: when puppeteer visits /qs/:id, the server
-    // handles it, calls resolveMeta → sees no screenshot → would trigger again.
+    // Prevent duplicate concurrent renders of the same id.
     if (qsGenerating.has(id)) return;
     qsGenerating.add(id);
 
     try {
-        if (!puppeteerBrowser) {
-            const puppeteer = require('puppeteer');
-            const os = require('os');
-            // Find the full Chrome binary in puppeteer's cache (not chrome-headless-shell, which lacks WebGL)
-            const chromeCacheDir = path.join(os.homedir(), '.cache', 'puppeteer', 'chrome');
-            const versions = fs.readdirSync(chromeCacheDir);
-            const browserPath = path.join(chromeCacheDir, versions[0], 'chrome-linux64', 'chrome');
-            console.log(`Using Chrome at: ${browserPath}`);
-            puppeteerBrowser = await puppeteer.launch({
-                headless: 'new',
-                executablePath: browserPath,
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--enable-webgl',
-                    '--ignore-gpu-blocklist',
-                    '--enable-unsafe-swiftshader',
-                    '--use-gl=angle',
-                    '--use-angle=swiftshader-webgl',
-                    '--disable-web-security',
-                    '--disable-features=IsolateOrigins',
-                ],
-            });
+        console.log(`Generating screenshot for qs/${id}...`);
+        const fileBuffer = await apiGetBuffer(`/qs/${id}/litematic`);
+        if (!fileBuffer) {
+            console.error(`Screenshot for qs/${id}: failed to fetch litematic file`);
+            return;
         }
 
-        const page = await puppeteerBrowser.newPage();
+        const page = await getQsRenderPage();
+        const dataUrl = await Promise.race([
+            page.evaluate((b64) => window.__renderQuickShare(b64), fileBuffer.toString('base64')),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('render timed out')), QS_RENDER_TIMEOUT)),
+        ]);
 
-        // Capture browser console + errors for diagnostics
-        page.on('console', (msg) => console.log(`  [qs/${id} browser] ${msg.type()}: ${msg.text()}`));
-        page.on('pageerror', (err) => console.error(`  [qs/${id} browser error]`, err.message));
-        page.on('requestfailed', (req) => console.error(`  [qs/${id} req failed] ${req.url()} ${req.failure()?.errorText}`));
-
-        try {
-            console.log(`Generating screenshot for qs/${id}...`);
-            // Visit the quick share page on ourselves - Angular boots, renders, uploads
-            await page.goto(`http://localhost:${PORT}/qs/${id}`, {
-                waitUntil: 'networkidle0',
-                timeout: QS_GENERATE_TIMEOUT,
-            });
-
-            // Poll the backend until screenshotPath appears (max ~15s)
-            const deadline = Date.now() + 15_000;
-            let found = false;
-            while (Date.now() < deadline) {
-                await new Promise(r => setTimeout(r, 2000));
-                const info = await apiGet(`/qs/${id}/info`);
-                if (info?.screenshotPath) { found = true; break; }
-            }
-            console.log(`Screenshot for qs/${id}: ${found ? 'success' : 'timed out waiting for backend'}`);
-        } finally {
-            await page.close();
-        }
+        const pngBuffer = dataUrlToBuffer(dataUrl);
+        const uploaded = await apiPutFile(`/qs/${id}/screenshot`, 'file', 'preview.png', pngBuffer, 'image/png');
+        console.log(`Screenshot for qs/${id}: ${uploaded ? 'success' : 'upload failed'}`);
     } catch (err) {
         console.error(`Failed to generate screenshot for qs/${id}:`, err.message);
+        // Page may be in a bad state; drop it so the next request gets a fresh one.
+        if (qsRenderPage) { await qsRenderPage.close().catch(() => { }); qsRenderPage = null; }
     } finally {
         qsGenerating.delete(id);
     }
@@ -285,7 +356,7 @@ const server = http.createServer(async (req, res) => {
 
     // SPA route - serve index.html with injected meta
     try {
-        const resolved = await resolveMeta(urlPath);
+        const resolved = await resolveMeta(urlPath, isCrawlerUA(req.headers['user-agent']));
         let html = getIndexHtml();
         // Always inject OG meta - use resolved data or fall back to site defaults
         const title = resolved?.title ?? DEFAULT_TITLE;

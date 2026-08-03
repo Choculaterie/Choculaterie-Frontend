@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, ViewChild, ViewContainerRef, Injector } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, effect, ViewChild, ViewContainerRef, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -78,26 +78,18 @@ export class ShortUrlRedirectComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         const id = this.route.snapshot.paramMap.get('id')!;
 
-        // Try the litematic endpoint first.
-        // baseUrlInterceptor expands /qs/… to api.choculaterie.com/qs/…
-        // authInterceptor may add Authorization - api.choculaterie.com handles CORS for choculaterie.com.
         this.http.get(`/qs/${id}/litematic`, { responseType: 'arraybuffer' }).subscribe({
             next: (buffer) => {
                 const fileName = `${id}.litematic`;
                 this.pendingData = { fileData: buffer, fileName };
                 this.ogMeta.setQuickShare(fileName);
                 this.state.set('viewing');
-                // viewerHost renders after state change - wait one tick
                 setTimeout(() => {
-                    this.mountViewer();
-                    // Generate OG preview in background (fire-and-forget)
-                    this.generateAndUploadPreview(buffer, id);
+                    const viewer = this.mountViewer();
+                    this.generateAndUploadPreview(buffer, id, viewer);
                 });
             },
-            error: () => {
-                // Endpoint not found or not a litematic quick-share - fall back to normal redirect
-                this.doRedirect(id);
-            },
+            error: () => this.doRedirect(id),
         });
     }
 
@@ -123,8 +115,8 @@ export class ShortUrlRedirectComponent implements OnInit, OnDestroy {
         });
     }
 
-    private mountViewer(): void {
-        if (!this.viewerHost || !this.pendingData) return;
+    private mountViewer(): LitematicViewerComponent | null {
+        if (!this.viewerHost || !this.pendingData) return null;
 
         const data = this.pendingData;
         const customInjector = Injector.create({
@@ -135,7 +127,7 @@ export class ShortUrlRedirectComponent implements OnInit, OnDestroy {
             ],
         });
 
-        this.viewerHost.createComponent(LitematicViewerComponent, { injector: customInjector });
+        return this.viewerHost.createComponent(LitematicViewerComponent, { injector: customInjector }).instance;
     }
 
     ngOnDestroy(): void {
@@ -143,15 +135,30 @@ export class ShortUrlRedirectComponent implements OnInit, OnDestroy {
         this.ogMeta.clear();
     }
 
-    private generateAndUploadPreview(buffer: ArrayBuffer, id: string): void {
-        // Render headlessly then PUT to backend - completely silent, never blocks the viewer.
-        // Backend should store the PNG and return screenshotPath in GET /qs/{id}/info.
-        renderLitematicHeadless(buffer, this.http)
-            .then((file) => {
-                this.shortUrlApi.putQsIdScreenshot(id, { file }).subscribe({
-                    error: () => { /* silently ignore */ },
-                });
-            })
-            .catch(() => { /* render failed - silently ignore */ });
+    private async generateAndUploadPreview(buffer: ArrayBuffer, id: string, viewer: LitematicViewerComponent | null): Promise<void> {
+        try {
+            // schematic-renderer's material cache is a page-wide singleton shared with the
+            // interactive viewer, so wait for it to finish loading first.
+            if (viewer) await this.waitUntilNotLoading(viewer);
+
+            const file = await renderLitematicHeadless(buffer);
+            this.shortUrlApi.putQsIdScreenshot(id, { file }).subscribe({ error: () => { } });
+        } catch {
+            // silently ignore
+        }
+    }
+
+    private waitUntilNotLoading(viewer: LitematicViewerComponent, timeoutMs = 20000): Promise<void> {
+        if (!viewer.loading()) return Promise.resolve();
+        return new Promise(resolve => {
+            const timeoutId = setTimeout(() => { ref.destroy(); resolve(); }, timeoutMs);
+            const ref = effect(() => {
+                if (!viewer.loading()) {
+                    clearTimeout(timeoutId);
+                    ref.destroy();
+                    resolve();
+                }
+            }, { injector: this.injector });
+        });
     }
 }
