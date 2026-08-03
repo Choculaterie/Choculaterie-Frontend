@@ -477,6 +477,25 @@ $shimmer: linear-gradient(90deg,
     margin: 0.75rem 0 0.5rem;
 }
 
+.gallery-generate {
+    scroll-margin-top: 72px;
+}
+
+.gallery-generate-inner {
+    height: auto;
+    min-height: 0;
+    cursor: default;
+    padding: 0;
+    background: transparent;
+    overflow: visible;
+    border-radius: 0;
+}
+
+.gallery-generate-inner app-isometric-screenshot-dialog {
+    display: block;
+    width: 100%;
+}
+
 .preview-grid {
     display: flex;
     gap: 0.75rem;

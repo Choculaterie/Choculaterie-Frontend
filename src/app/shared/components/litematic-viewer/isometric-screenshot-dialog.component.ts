@@ -1,6 +1,9 @@
 import {
     Component,
     Inject,
+    Optional,
+    input,
+    output,
     signal,
     computed,
     OnDestroy,
@@ -15,14 +18,12 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSliderModule } from '@angular/material/slider';
 import { SchematicRenderer } from 'schematic-renderer';
+import * as THREE from 'three';
 import { RESOURCE_PACK_URL } from './resource-pack';
-
-// ── Public interface ──
 
 export interface IsometricScreenshotData {
     fileData: ArrayBuffer;
     fileName: string;
-    /** 'edit' shows "Use" button, 'download' shows "Download" (default: 'edit') */
     mode?: 'edit' | 'download';
 }
 
@@ -38,13 +39,22 @@ export interface IsometricScreenshotData {
         MatSliderModule,
     ],
     template: `
-    <div class="screenshot-dialog">
+    <div class="screenshot-dialog" [class.embed]="isEmbed()">
+        @if (!isEmbed()) {
         <div class="screenshot-header">
             <h2>Generate Picture</h2>
-            <button mat-icon-button mat-dialog-close>
+            <button mat-icon-button type="button" (click)="cancel()">
                 <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
             </button>
         </div>
+        } @else {
+        <div class="screenshot-header embed-header">
+            <h2 i18n>Generate picture</h2>
+            <button mat-icon-button type="button" (click)="cancel()" i18n-matTooltip matTooltip="Cancel">
+                <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+            </button>
+        </div>
+        }
 
         <div class="screenshot-body">
             @if (loading()) {
@@ -61,10 +71,12 @@ export interface IsometricScreenshotData {
             }
             <canvas #previewCanvas class="render-canvas"
                 [class.hidden]="loading() || error()"
-                [style.transform]="previewTransform()"
                 (pointerdown)="startViewerDrag($event)"></canvas>
+            @if (freezeUrl(); as freeze) {
+            <img class="freeze-overlay" [src]="freeze" alt="" />
+            }
 
-            @if (!loading() && !error()) {
+            @if (!loading() && !error() && !isEmbed() && !freezeUrl()) {
             <a class="renderer-credit" href="https://github.com/Schem-at/schematic-renderer" target="_blank"
                 rel="noopener noreferrer" i18n>Based on: schematic-renderer</a>
             }
@@ -73,7 +85,7 @@ export interface IsometricScreenshotData {
         @if (!loading() && !error()) {
         <div class="screenshot-controls">
             <div class="slider-group">
-                <label>Yaw: {{ yaw() }}°</label>
+                <label>Yaw: {{ yawRounded() }}°</label>
                 <div #yawTrack class="slider-track-wrap">
                     <mat-slider [min]="-180" [max]="180" [step]="1" discrete>
                         <input matSliderThumb [value]="yaw()" (valueChange)="onYawChange($event)" />
@@ -81,7 +93,7 @@ export interface IsometricScreenshotData {
                 </div>
             </div>
             <div class="slider-group">
-                <label>Pitch: {{ pitch() }}°</label>
+                <label>Pitch: {{ pitchRounded() }}°</label>
                 <div #pitchTrack class="slider-track-wrap">
                     <mat-slider [min]="-90" [max]="90" [step]="1" discrete>
                         <input matSliderThumb [value]="pitch()" (valueChange)="onPitchChange($event)" />
@@ -92,43 +104,33 @@ export interface IsometricScreenshotData {
 
         <div class="screenshot-actions">
             <div class="controls-row">
-                <button mat-icon-button (click)="rotateLeft()" matTooltip="Rotate left 90°">
+                <button mat-icon-button type="button" (click)="rotateLeft()" matTooltip="Rotate left 90°">
                     <img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" class="mc-icon" style="transform: translateY(1px)" />
                 </button>
-                <button mat-icon-button (click)="rotateRight()" matTooltip="Rotate right 90°">
+                <button mat-icon-button type="button" (click)="rotateRight()" matTooltip="Rotate right 90°">
                     <img src="/icons/arrows/arrow_right.svg" alt="" aria-hidden="true" class="mc-icon" style="transform: translateY(1px)" />
                 </button>
                 <div class="preset-buttons">
-                    <button mat-stroked-button (click)="applyPreset('front')" matTooltip="Front view">
-                        Front
-                    </button>
-                    <button mat-stroked-button (click)="applyPreset('back')" matTooltip="Back view">
-                        Back
-                    </button>
-                    <button mat-stroked-button (click)="applyPreset('top')" matTooltip="Top-down view">
-                        Top
-                    </button>
-                    <button mat-stroked-button (click)="applyPreset('bottom')" matTooltip="Bottom-up view">
-                        Bottom
-                    </button>
-                    <button mat-stroked-button (click)="applyPreset('iso')" matTooltip="Isometric view">
-                        Isometric
-                    </button>
+                    <button mat-stroked-button type="button" (click)="applyPreset('front')" matTooltip="Front view">Front</button>
+                    <button mat-stroked-button type="button" (click)="applyPreset('back')" matTooltip="Back view">Back</button>
+                    <button mat-stroked-button type="button" (click)="applyPreset('top')" matTooltip="Top-down view">Top</button>
+                    <button mat-stroked-button type="button" (click)="applyPreset('bottom')" matTooltip="Bottom-up view">Bottom</button>
+                    <button mat-stroked-button type="button" (click)="applyPreset('iso')" matTooltip="Isometric view">Isometric</button>
                 </div>
                 <span class="spacer"></span>
-                <button mat-icon-button (click)="flipH()" matTooltip="Flip horizontal">
+                <button mat-icon-button type="button" (click)="flipH()" matTooltip="Flip horizontal">
                     <img src="/icons/arrows/arrow_double_ways.svg" alt="" aria-hidden="true" class="mc-icon" style="transform: translateY(1px)" />
                 </button>
-                <button mat-icon-button (click)="flipV()" matTooltip="Flip vertical">
+                <button mat-icon-button type="button" (click)="flipV()" matTooltip="Flip vertical">
                     <img src="/icons/arrows/arrow_up_down.svg" alt="" aria-hidden="true" class="mc-icon" style="transform: translateY(1px)" />
                 </button>
             </div>
             <div class="confirm-row">
                 <span class="spacer"></span>
-                <button mat-stroked-button mat-dialog-close>Cancel</button>
-                <button mat-flat-button (click)="confirm()">
-                    <img [src]="data.mode === 'download' ? '/icons/arrows/arrow_down.svg' : '/icons/ui/check.svg'" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
-                    {{ data.mode === 'download' ? 'Download' : 'Use' }}
+                <button mat-stroked-button type="button" (click)="cancel()" i18n>Cancel</button>
+                <button mat-flat-button type="button" (click)="confirm()">
+                    <img [src]="resolvedMode() === 'download' ? '/icons/arrows/arrow_down.svg' : '/icons/ui/check.svg'" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
+                    {{ resolvedMode() === 'download' ? 'Download' : 'Use' }}
                 </button>
             </div>
         </div>
@@ -147,6 +149,11 @@ export interface IsometricScreenshotData {
                 height: auto;
                 overflow-y: auto;
             }
+
+            &.embed {
+                height: auto;
+                overflow: visible;
+            }
         }
 
         .screenshot-header {
@@ -156,6 +163,10 @@ export interface IsometricScreenshotData {
             padding: 0.5rem 1rem;
             flex-shrink: 0;
             h2 { margin: 0; font-size: 1.1rem; }
+        }
+
+        .embed-header {
+            padding: 0 0 0.5rem;
         }
 
         .screenshot-body {
@@ -177,6 +188,22 @@ export interface IsometricScreenshotData {
             }
         }
 
+        .embed .screenshot-body {
+            flex: none;
+            width: 100%;
+            height: 500px;
+            margin: 0;
+            border-radius: 12px;
+            background: var(--mat-sys-surface-container);
+            border: 1px solid var(--mat-sys-outline-variant);
+            box-sizing: border-box;
+
+            @media (max-width: 600px) {
+                height: 220px;
+                min-height: 0;
+            }
+        }
+
         .loading-overlay,
         .error-overlay {
             position: absolute;
@@ -193,14 +220,29 @@ export interface IsometricScreenshotData {
         }
         .error-overlay mat-icon { font-size: 48px; width: 48px; height: 48px; color: #ef5350; }
 
+        .embed .loading-overlay,
+        .embed .error-overlay {
+            color: var(--mat-sys-on-surface);
+        }
+
         .render-canvas {
             width: 100%;
             height: 100%;
             display: block;
-            transition: transform 0.15s;
             cursor: grab;
             touch-action: none;
             &.hidden { visibility: hidden; }
+        }
+
+        .freeze-overlay {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            z-index: 5;
+            pointer-events: none;
+            border-radius: inherit;
         }
 
         .renderer-credit {
@@ -246,12 +288,20 @@ export interface IsometricScreenshotData {
             }
         }
 
+        .embed .screenshot-controls {
+            padding: 0.75rem 0 0;
+        }
+
         .screenshot-actions {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
             padding: 0.5rem 1rem 0.75rem;
             flex-shrink: 0;
+        }
+
+        .embed .screenshot-actions {
+            padding: 0.5rem 0 0;
         }
 
         .controls-row, .confirm-row {
@@ -272,44 +322,66 @@ export interface IsometricScreenshotData {
     `],
 })
 export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDestroy {
+    private static readonly CAPTURE_H = 1000;
+    private static readonly CAPTURE_W = Math.round(1000 * (960 / 500));
+
+    readonly layout = input<'dialog' | 'embed'>('dialog');
+    readonly fileData = input<ArrayBuffer | null>(null);
+    readonly fileName = input('screenshot.litematic');
+    readonly actionMode = input<'edit' | 'download'>('edit');
+
+    readonly used = output<File>();
+    readonly cancelled = output<void>();
+
     @ViewChild('previewCanvas', { static: false }) previewCanvasRef!: ElementRef<HTMLCanvasElement>;
     @ViewChild('yawTrack') yawTrackRef?: ElementRef<HTMLElement>;
     @ViewChild('pitchTrack') pitchTrackRef?: ElementRef<HTMLElement>;
 
-    // Signals, not fields: this app is zoneless and both rAF animation and manual drag run
-    // outside any Angular-triggered callback.
-    readonly yaw = signal(45);     // degrees, horizontal rotation
-    readonly pitch = signal(35);   // degrees, vertical angle (90 = straight down, -90 = up)
-
+    readonly yaw = signal(45);
+    readonly pitch = signal(35);
+    readonly yawRounded = computed(() => Math.round(this.yaw()));
+    readonly pitchRounded = computed(() => Math.round(this.pitch()));
     readonly loading = signal(true);
     readonly loadingStatus = signal('Loading resource pack…');
     readonly error = signal('');
     readonly isFlippedH = signal(false);
     readonly isFlippedV = signal(false);
-    readonly previewTransform = computed(() => {
-        const sx = this.isFlippedH() ? -1 : 1;
-        const sy = this.isFlippedV() ? -1 : 1;
-        return `scale(${sx}, ${sy})`;
-    });
+    readonly freezeUrl = signal<string | null>(null);
 
     private schemRenderer?: SchematicRenderer;
     private readonly schematicId = 'main';
     private destroyed = false;
     private animFrame: number | null = null;
-    // Angle a button press is animating towards; yaw/pitch reflect the mid-animation value.
     private targetYaw = 45;
     private targetPitch = 35;
-
-    // Manual drag tracking: mat-slider only commits a value on pointer-up.
     private dragSetter: ((value: number) => void) | null = null;
     private dragEl: HTMLElement | null = null;
     private dragMin = 0;
     private dragMax = 0;
+    private viewerDragging = false;
+    private viewerDragLastX = 0;
+    private viewerDragLastY = 0;
+    private static readonly DRAG_SENSITIVITY = 0.4;
 
     constructor(
-        @Inject(MAT_DIALOG_DATA) public data: IsometricScreenshotData,
-        private dialogRef: MatDialogRef<IsometricScreenshotDialogComponent>,
+        @Optional() @Inject(MAT_DIALOG_DATA) private dialogData: IsometricScreenshotData | null,
+        @Optional() private dialogRef: MatDialogRef<IsometricScreenshotDialogComponent> | null,
     ) { }
+
+    isEmbed(): boolean {
+        return this.layout() === 'embed';
+    }
+
+    resolvedMode(): 'edit' | 'download' {
+        return this.dialogData?.mode ?? this.actionMode();
+    }
+
+    private resolveSource(): IsometricScreenshotData | null {
+        if (this.dialogData?.fileData) return this.dialogData;
+        const buf = this.fileData();
+        if (!buf) return null;
+        return { fileData: buf, fileName: this.fileName(), mode: this.actionMode() };
+    }
 
     ngAfterViewInit(): void {
         this.init();
@@ -323,7 +395,11 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
         this.schemRenderer?.dispose();
     }
 
-    // Arrow fields so they stay bound to `this` when passed as bare callbacks.
+    cancel(): void {
+        if (this.dialogRef) this.dialogRef.close(null);
+        else this.cancelled.emit();
+    }
+
     onYawChange = (value: number): void => {
         this.cancelAnimation();
         this.yaw.set(value);
@@ -338,8 +414,6 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
         this.applyCameraDirection();
     };
 
-    // `(pointerdown.capture)` isn't real Angular syntax; a real addEventListener with
-    // {capture:true} is needed to run before mat-slider's own bubble-phase handler.
     private attachDragListeners(): void {
         const yawEl = this.yawTrackRef?.nativeElement;
         const pitchEl = this.pitchTrackRef?.nativeElement;
@@ -390,14 +464,8 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
         this.dragSetter(Math.round(this.dragMin + pct * (this.dragMax - this.dragMin)));
     }
 
-    // Drag-to-orbit on the preview: enableInteraction is off, so this maps mouse movement
-    // directly onto yaw/pitch instead, keeping the sliders as the single source of truth.
-    private viewerDragging = false;
-    private viewerDragLastX = 0;
-    private viewerDragLastY = 0;
-    private static readonly DRAG_SENSITIVITY = 0.4; // degrees per pixel
-
     startViewerDrag(event: PointerEvent): void {
+        // Left = orbit yaw/pitch (ours). Right = pan (orbit controls). Don't steal right-click.
         if (event.button !== 0) return;
         event.preventDefault();
         this.cancelAnimation();
@@ -433,30 +501,80 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
         document.removeEventListener('pointerup', this.onViewerPointerUp);
     };
 
-    /** snapToDirection takes a raw vector with no pitch clamp, unlike the isometric angle setter. */
-    private applyCameraDirection(): void {
+    private getOrbitControls(): { target?: THREE.Vector3; update?: () => void } | undefined {
+        const cm = this.schemRenderer?.cameraManager as any;
+        return cm?.controls?.get?.(cm.activeControlKey);
+    }
+
+    private getSchematicCenter(): THREE.Vector3 {
+        const sch = this.schemRenderer?.schematicManager?.getSchematic(this.schematicId) as
+            { group?: THREE.Object3D } | undefined;
+        if (sch?.group) {
+            return new THREE.Box3().setFromObject(sch.group).getCenter(new THREE.Vector3());
+        }
+        return new THREE.Vector3();
+    }
+
+    private applyCameraDirection(lookTarget?: THREE.Vector3): void {
+        const cm = this.schemRenderer?.cameraManager as any;
+        const cam = cm?.activeCamera?.camera as THREE.Camera | undefined;
+        if (!cm || !cam) return;
+
         const yawRad = (this.yaw() * Math.PI) / 180;
         const pitchRad = (this.pitch() * Math.PI) / 180;
-        const direction: [number, number, number] = [
+        const dir = new THREE.Vector3(
             Math.cos(pitchRad) * Math.sin(yawRad),
             Math.sin(pitchRad),
             Math.cos(pitchRad) * Math.cos(yawRad),
-        ];
-        this.schemRenderer?.cameraManager.snapToDirection(direction, false);
+        ).normalize();
+
+        const controls = this.getOrbitControls();
+        const target = lookTarget?.clone()
+            ?? controls?.target?.clone()
+            ?? (typeof cm.getControlsTarget === 'function' ? cm.getControlsTarget() : null)
+            ?? new THREE.Vector3();
+
+        if (controls?.target && lookTarget) {
+            controls.target.copy(lookTarget);
+        }
+
+        let dist = cam.position.distanceTo(target);
+        if (!Number.isFinite(dist) || dist < 0.5) dist = 20;
+
+        cam.position.copy(target).addScaledVector(dir, dist);
+        cam.lookAt(target);
+        controls?.update?.();
         this.schemRenderer?.invalidate();
     }
 
-    /** Smoothly animates yaw/pitch to a target; only used for button-driven jumps. */
+    private configureOrbitForPanOnly(): void {
+        const cm = this.schemRenderer?.cameraManager as any;
+        const controls = cm?.controls?.get?.(cm.activeControlKey) as any;
+        if (!controls) return;
+        // Left-drag is owned by our yaw/pitch handler; right-drag pans without resetting.
+        controls.enableRotate = false;
+        controls.enablePan = true;
+        controls.enableZoom = true;
+        if (controls.mouseButtons && THREE.MOUSE) {
+            controls.mouseButtons.LEFT = null;
+            controls.mouseButtons.MIDDLE = THREE.MOUSE.DOLLY;
+            controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
+        }
+    }
+
     private animateTo(targetYaw: number, targetPitch: number, duration = 400): void {
         this.cancelAnimation();
         this.targetYaw = targetYaw;
         this.targetPitch = targetPitch;
         const startYaw = this.yaw();
         const startPitch = this.pitch();
-        // Shortest-path delta so e.g. 170° → -170° turns 20° the short way, not 340° the long way.
         const deltaYaw = ((targetYaw - startYaw + 540) % 360) - 180;
         const deltaPitch = targetPitch - startPitch;
-        const ease = (t: number) => t * t * (3 - 2 * t); // smoothstep
+
+        const controls = this.getOrbitControls();
+        const startPan = controls?.target?.clone() ?? this.getSchematicCenter();
+        const endPan = this.getSchematicCenter();
+        const ease = (t: number) => t * t * (3 - 2 * t);
         const startTime = performance.now();
 
         const step = (now: number) => {
@@ -464,13 +582,14 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
             const e = ease(t);
             this.yaw.set(startYaw + deltaYaw * e);
             this.pitch.set(startPitch + deltaPitch * e);
-            this.applyCameraDirection();
+            const pan = startPan.clone().lerp(endPan, e);
+            this.applyCameraDirection(pan);
             if (t < 1) {
                 this.animFrame = requestAnimationFrame(step);
             } else {
                 this.yaw.set(targetYaw);
                 this.pitch.set(targetPitch);
-                this.applyCameraDirection();
+                this.applyCameraDirection(endPan);
                 this.animFrame = null;
             }
         };
@@ -500,49 +619,218 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
         this.animateTo(targetYaw, targetPitch);
     }
 
-    flipH(): void { this.isFlippedH.update(v => !v); }
-    flipV(): void { this.isFlippedV.update(v => !v); }
+    flipH(): void {
+        this.isFlippedH.update(v => !v);
+        this.applySceneFlips();
+        this.animateTo(this.targetYaw, this.targetPitch);
+    }
+
+    flipV(): void {
+        this.isFlippedV.update(v => !v);
+        this.applySceneFlips();
+        this.animateTo(this.targetYaw, this.targetPitch);
+    }
+
+    private applySceneFlips(): void {
+        const sch = this.schemRenderer?.schematicManager?.getSchematic(this.schematicId) as
+            { group?: THREE.Object3D } | undefined;
+        if (!sch?.group || !this.schemRenderer) return;
+
+        const group = sch.group;
+        const before = new THREE.Box3().setFromObject(group).getCenter(new THREE.Vector3());
+
+        group.scale.set(
+            this.isFlippedH() ? -1 : 1,
+            this.isFlippedV() ? -1 : 1,
+            1,
+        );
+        group.updateMatrixWorld(true);
+
+        const after = new THREE.Box3().setFromObject(group).getCenter(new THREE.Vector3());
+        group.position.x += before.x - after.x;
+        group.position.y += before.y - after.y;
+        group.position.z += before.z - after.z;
+        group.updateMatrixWorld(true);
+
+        this.schemRenderer.invalidate();
+    }
 
     async confirm(): Promise<void> {
         if (!this.schemRenderer) return;
+        const source = this.resolveSource();
+        if (!source) return;
 
-        // Jump straight to the target in case a rotation animation is still in flight.
         this.cancelAnimation();
         this.yaw.set(this.targetYaw);
         this.pitch.set(this.targetPitch);
         this.applyCameraDirection();
+        this.applySceneFlips();
 
-        // Grid and opaque background are live-preview aids only; turn off for the capture.
-        this.schemRenderer.setGridVisible(false);
-        await this.schemRenderer.renderManager?.setBackgroundMode('transparent');
+        const embed = this.isEmbed();
+        const camState = this.snapshotCamera();
+        await this.showFreezeOverlay();
+
         try {
-            const blob = await this.schemRenderer.takeScreenshot({ format: 'image/png', transparent: true });
-            const flipped = await this.applyFlips(blob);
-            const fileName = (this.data.fileName.replace(/\.litematic$/i, '') || 'screenshot') + '.png';
-            const file = new File([flipped], fileName, { type: 'image/png' });
-            this.dialogRef.close(file);
-        } finally {
-            this.schemRenderer.setGridVisible(true);
-            await this.schemRenderer.renderManager?.setBackgroundMode('solid', { color: '#1a1a2e' });
+            this.schemRenderer.setGridVisible(false);
+            await this.schemRenderer.renderManager?.setBackgroundMode('transparent');
+
+            let blob = await this.schemRenderer.takeScreenshot({
+                format: 'image/png',
+                transparent: true,
+                width: IsometricScreenshotDialogComponent.CAPTURE_W,
+                height: IsometricScreenshotDialogComponent.CAPTURE_H,
+            });
+            blob = await this.normalizeGeckoOrientation(blob);
+
+            // Restore live view fully before unfreezing (takeScreenshot resizes the canvas).
+            if (!embed) {
+                this.schemRenderer.setGridVisible(true);
+                await this.schemRenderer.renderManager?.setBackgroundMode('solid', { color: '#1a1a2e' });
+            } else {
+                this.schemRenderer.setGridVisible(false);
+                await this.schemRenderer.renderManager?.setBackgroundMode('transparent');
+            }
+            this.restoreCamera(camState);
+            window.dispatchEvent(new Event('resize'));
+            this.restoreCamera(camState);
+            this.schemRenderer.invalidate();
+            await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+            this.hideFreezeOverlay();
+
+            const name = (source.fileName.replace(/\.litematic$/i, '') || 'screenshot') + '.png';
+            const file = new File([blob], name, { type: 'image/png' });
+
+            if (this.resolvedMode() === 'download') {
+                const url = URL.createObjectURL(file);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name;
+                a.click();
+                URL.revokeObjectURL(url);
+                return;
+            }
+            if (this.dialogRef) this.dialogRef.close(file);
+            else this.used.emit(file);
+        } catch (e) {
+            if (!embed) {
+                this.schemRenderer.setGridVisible(true);
+                await this.schemRenderer.renderManager?.setBackgroundMode('solid', { color: '#1a1a2e' });
+            } else {
+                this.schemRenderer.setGridVisible(false);
+                await this.schemRenderer.renderManager?.setBackgroundMode('transparent');
+            }
+            this.restoreCamera(camState);
+            this.schemRenderer.invalidate();
+            this.hideFreezeOverlay();
+            throw e;
         }
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // Loading pipeline
-    // ═══════════════════════════════════════════════════════════
+    private snapshotCamera(): {
+        position: THREE.Vector3;
+        quaternion: THREE.Quaternion;
+        aspect: number;
+        target: THREE.Vector3 | null;
+        distance: number;
+    } | null {
+        const cm = this.schemRenderer?.cameraManager as any;
+        const cam = cm?.activeCamera?.camera as THREE.PerspectiveCamera | undefined;
+        if (!cam) return null;
+        const controls = cm.controls?.get?.(cm.activeControlKey) as { target?: THREE.Vector3 } | undefined;
+        const target = controls?.target?.clone() ?? null;
+        const distance = target ? cam.position.distanceTo(target) : cam.position.length();
+        return {
+            position: cam.position.clone(),
+            quaternion: cam.quaternion.clone(),
+            aspect: cam.aspect,
+            target,
+            distance,
+        };
+    }
+
+    private restoreCamera(state: {
+        position: THREE.Vector3;
+        quaternion: THREE.Quaternion;
+        aspect: number;
+        target: THREE.Vector3 | null;
+        distance: number;
+    } | null): void {
+        if (!state) return;
+        const cm = this.schemRenderer?.cameraManager as any;
+        const cam = cm?.activeCamera?.camera as THREE.PerspectiveCamera | undefined;
+        if (!cam) return;
+        const controls = cm.controls?.get?.(cm.activeControlKey) as
+            { target?: THREE.Vector3; update?: () => void } | undefined;
+
+        if (state.target && controls?.target) {
+            controls.target.copy(state.target);
+        }
+        cam.position.copy(state.position);
+        cam.quaternion.copy(state.quaternion);
+        if ('aspect' in cam) {
+            cam.aspect = state.aspect;
+            cam.updateProjectionMatrix();
+        }
+        // Re-apply orbit distance from saved yaw/pitch so resize cannot leave a zoomed framing.
+        this.applyCameraDirection();
+        if (state.target && controls?.target) {
+            const dir = cam.position.clone().sub(controls.target).normalize();
+            cam.position.copy(controls.target).addScaledVector(dir, state.distance);
+            cam.lookAt(controls.target);
+        }
+        controls?.update?.();
+    }
+
+    private async showFreezeOverlay(): Promise<void> {
+        const src = this.previewCanvasRef?.nativeElement;
+        if (!src) return;
+        this.schemRenderer?.invalidate();
+        await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+
+        const w = Math.max(1, src.width || Math.floor(src.clientWidth * (window.devicePixelRatio || 1)));
+        const h = Math.max(1, src.height || Math.floor(src.clientHeight * (window.devicePixelRatio || 1)));
+        const freeze = document.createElement('canvas');
+        freeze.width = w;
+        freeze.height = h;
+        const ctx = freeze.getContext('2d')!;
+        const body = src.parentElement;
+        const bg = body ? getComputedStyle(body).backgroundColor : '#1a1a2e';
+        const solid = bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent' ? bg : '#1a1a2e';
+        ctx.fillStyle = solid;
+        ctx.fillRect(0, 0, w, h);
+        try {
+            ctx.drawImage(src, 0, 0, w, h);
+        } catch { /* ignore */ }
+        this.freezeUrl.set(freeze.toDataURL('image/png'));
+        // Wait until the overlay is actually painted before mutating the WebGL canvas.
+        await new Promise<void>(r => setTimeout(r, 32));
+        await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+    }
+
+    private hideFreezeOverlay(): void {
+        this.freezeUrl.set(null);
+    }
 
     private async init(): Promise<void> {
         try {
+            const source = this.resolveSource();
+            if (!source) {
+                this.error.set('No schematic file.');
+                this.loading.set(false);
+                return;
+            }
+
             const canvas = this.previewCanvasRef.nativeElement;
             this.loadingStatus.set('Loading resource pack…');
+            const embed = this.isEmbed();
 
             let onReady!: () => void;
             const ready = new Promise<void>(resolve => { onReady = resolve; });
             const renderer = new SchematicRenderer(canvas, {}, {
                 vanilla: () => fetch(RESOURCE_PACK_URL).then(r => r.blob()),
             }, {
-                showGrid: true,
-                backgroundColor: '#1a1a2e',
+                showGrid: !embed,
+                backgroundColor: embed ? '#00000000' : '#1a1a2e',
                 enableDragAndDrop: false,
                 enableGizmos: false,
                 enableInteraction: false,
@@ -557,15 +845,20 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
             await ready;
             if (this.destroyed) return;
 
+            if (embed) {
+                await renderer.renderManager?.setBackgroundMode('transparent');
+            }
+
             this.loadingStatus.set('Building 3D structure…');
-            await renderer.schematicManager!.loadSchematic(this.schematicId, this.data.fileData);
+            await renderer.schematicManager!.loadSchematic(this.schematicId, source.fileData);
             if (this.destroyed) return;
 
-            await renderer.cameraManager.focusOnSchematics();
-            this.applyCameraDirection();
-
             this.loading.set(false);
-            // Sliders are behind @if (!loading()); wait a tick for the ViewChild refs to exist.
+            await new Promise<void>(r => requestAnimationFrame(() => r()));
+            window.dispatchEvent(new Event('resize'));
+            await renderer.cameraManager.focusOnSchematics();
+            this.configureOrbitForPanOnly();
+            this.applyCameraDirection();
             setTimeout(() => this.attachDragListeners());
         } catch (e) {
             console.error('Screenshot init error:', e);
@@ -574,14 +867,12 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
         }
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // Export helpers
-    // ═══════════════════════════════════════════════════════════
+    private isGecko(): boolean {
+        return /Firefox|LibreWolf/i.test(navigator.userAgent);
+    }
 
-    private applyFlips(src: Blob): Promise<Blob> {
-        const fh = this.isFlippedH(), fv = this.isFlippedV();
-        if (!fh && !fv) return Promise.resolve(src);
-
+    private normalizeGeckoOrientation(src: Blob): Promise<Blob> {
+        if (!this.isGecko()) return Promise.resolve(src);
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.onload = () => {
@@ -589,13 +880,13 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
                 out.width = img.width;
                 out.height = img.height;
                 const ctx = out.getContext('2d')!;
-                ctx.translate(fh ? img.width : 0, fv ? img.height : 0);
-                ctx.scale(fh ? -1 : 1, fv ? -1 : 1);
+                ctx.translate(0, img.height);
+                ctx.scale(1, -1);
                 ctx.drawImage(img, 0, 0);
                 URL.revokeObjectURL(img.src);
                 out.toBlob(b => b ? resolve(b) : reject(new Error('toBlob returned null')), 'image/png');
             };
-            img.onerror = () => reject(new Error('Failed to load screenshot for flipping'));
+            img.onerror = () => reject(new Error('Failed to load screenshot for transform'));
             img.src = URL.createObjectURL(src);
         });
     }

@@ -70,6 +70,7 @@ import { environment } from '../../environments/environment';
         NumberFormatPipe,
         DropZoneDirective,
         SkeletonImgComponent,
+        IsometricScreenshotDialogComponent,
     ],
     templateUrl: './schematic-detail.component.html',
     styleUrl: './schematic-detail.component.scss',
@@ -95,6 +96,7 @@ export class SchematicDetailComponent implements OnInit {
     readonly selectedImage = signal(0);
     readonly imageFit = signal<'cover' | 'contain'>('cover');
     readonly editing = signal(false);
+    readonly generateEmbed = signal<{ fileData: ArrayBuffer; fileName: string } | null>(null);
     readonly noDescriptionText = $localize`No description provided.`;
     /** Map of block name (e.g. "spruce_slab") → icon object URL */
     readonly blockTextureMap = signal<Map<string, string>>(new Map());
@@ -857,6 +859,7 @@ export class SchematicDetailComponent implements OnInit {
         });
     }
 
+    /** Files section / non-edit: always download. */
     generatePicture(file: SchematicFileResponse): void {
         const s = this.schematic()!;
         this.schematicsApi.getApiSchematicsIdDownloadFileId<Blob>(s.id, Number(file.id), {
@@ -864,21 +867,7 @@ export class SchematicDetailComponent implements OnInit {
         } as any).subscribe({
             next: (blob) => {
                 (blob as Blob).arrayBuffer().then(buffer => {
-                    const dialogRef = this.dialog.open(IsometricScreenshotDialogComponent, {
-                        data: {
-                            fileData: buffer,
-                            fileName: file.name,
-                            mode: this.editing() ? 'edit' : 'download',
-                        } as IsometricScreenshotData,
-                        width: '90vw',
-                        maxWidth: '1200px',
-                        panelClass: 'litematic-viewer-dialog',
-                    });
-                    dialogRef.afterClosed().subscribe((result: File | null) => {
-                        if (result instanceof File) {
-                            this.addScreenshotToPictures(result);
-                        }
-                    });
+                    this.openGenerateDownload(buffer, file.name);
                 });
             },
             error: (err) => this.toast.error(err.error?.detail ?? 'Failed to load file.'),
@@ -886,28 +875,52 @@ export class SchematicDetailComponent implements OnInit {
     }
 
     generatePictureLocal(file: File): void {
-        file.arrayBuffer().then(buffer => {
-            const dialogRef = this.dialog.open(IsometricScreenshotDialogComponent, {
-                data: {
-                    fileData: buffer,
-                    fileName: file.name,
-                    mode: 'edit',
-                } as IsometricScreenshotData,
-                width: '90vw',
-                maxWidth: '1200px',
-                panelClass: 'litematic-viewer-dialog',
+        file.arrayBuffer().then(buffer => this.openGenerateDownload(buffer, file.name));
+    }
+
+    /** Edit-form litematic rows: Use as picture, preview replaces top gallery. */
+    generatePictureForItem(item: { type: 'existing'; file: SchematicFileResponse } | { type: 'new'; file: File }): void {
+        if (item.type === 'existing') {
+            const s = this.schematic()!;
+            this.schematicsApi.getApiSchematicsIdDownloadFileId<Blob>(s.id, Number(item.file.id), {
+                responseType: 'blob',
+            } as any).subscribe({
+                next: (blob) => {
+                    (blob as Blob).arrayBuffer().then(buffer => {
+                        this.openGenerateEmbed(buffer, item.file.name);
+                    });
+                },
+                error: (err) => this.toast.error(err.error?.detail ?? 'Failed to load file.'),
             });
-            dialogRef.afterClosed().subscribe((result: File | null) => {
-                if (result instanceof File) {
-                    this.addScreenshotToPictures(result);
-                }
-            });
+        } else {
+            item.file.arrayBuffer().then(buffer => this.openGenerateEmbed(buffer, item.file.name));
+        }
+    }
+
+    private openGenerateDownload(fileData: ArrayBuffer, fileName: string): void {
+        this.dialog.open(IsometricScreenshotDialogComponent, {
+            data: { fileData, fileName, mode: 'download' } as IsometricScreenshotData,
+            width: '90vw',
+            maxWidth: '1200px',
+            panelClass: 'litematic-viewer-dialog',
         });
     }
 
-    generatePictureForItem(item: { type: 'existing'; file: SchematicFileResponse } | { type: 'new'; file: File }): void {
-        if (item.type === 'existing') this.generatePicture(item.file);
-        else this.generatePictureLocal(item.file);
+    private openGenerateEmbed(fileData: ArrayBuffer, fileName: string): void {
+        this.generateEmbed.set({ fileData, fileName });
+        setTimeout(() => {
+            document.querySelector('.gallery-generate')
+                ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+    }
+
+    onGenerateUsed(file: File): void {
+        this.addScreenshotToPictures(file);
+        this.generateEmbed.set(null);
+    }
+
+    onGenerateCancelled(): void {
+        this.generateEmbed.set(null);
     }
 
     viewIn3DForItem(item: { type: 'existing'; file: SchematicFileResponse } | { type: 'new'; file: File }): void {

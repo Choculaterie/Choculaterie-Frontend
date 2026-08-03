@@ -35,8 +35,22 @@
     } @else if (schematic()) {
     @let s = schematic()!;
 
-    <!-- Image gallery -->
-    @if (s.pictures.length || getYouTubeId(s.youtubeLink)) {
+    <!-- Image gallery (or inline generate preview when editing) -->
+    @if (generateEmbed(); as gen) {
+    <div class="gallery gallery-generate">
+        <div class="gallery-main">
+            <div class="gallery-main-inner gallery-generate-inner">
+                <app-isometric-screenshot-dialog
+                    layout="embed"
+                    [fileData]="gen.fileData"
+                    [fileName]="gen.fileName"
+                    actionMode="edit"
+                    (used)="onGenerateUsed($event)"
+                    (cancelled)="onGenerateCancelled()" />
+            </div>
+        </div>
+    </div>
+    } @else if (s.pictures.length || getYouTubeId(s.youtubeLink)) {
     @let videoIdx = s.pictures.length;
     @let hasVideo = !!getYouTubeId(s.youtubeLink);
     @let totalItems = s.pictures.length + (hasVideo ? 1 : 0);

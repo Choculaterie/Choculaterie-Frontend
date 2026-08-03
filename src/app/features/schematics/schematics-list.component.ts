@@ -633,16 +633,11 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
 
     generatePictureLocal(file: File): void {
         file.arrayBuffer().then(buffer => {
-            const dialogRef = this.dialog.open(IsometricScreenshotDialogComponent, {
-                data: { fileData: buffer, fileName: file.name, mode: 'edit' } as IsometricScreenshotData,
+            this.dialog.open(IsometricScreenshotDialogComponent, {
+                data: { fileData: buffer, fileName: file.name, mode: 'download' } as IsometricScreenshotData,
                 width: '90vw',
                 maxWidth: '1200px',
                 panelClass: 'litematic-viewer-dialog',
-            });
-            dialogRef.afterClosed().subscribe((result: File | null) => {
-                if (result instanceof File) {
-                    this.addScreenshotToPictures(result);
-                }
             });
         });
     }
