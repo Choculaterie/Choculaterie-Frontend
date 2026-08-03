@@ -1,0 +1,8 @@
+{
+  "name": "choculaterie-server",
+  "private": true,
+  "description": "SSR meta-injection server. nucleation is used to render quick-share previews headlessly.",
+  "dependencies": {
+    "nucleation": "^0.2.18"
+  }
+}

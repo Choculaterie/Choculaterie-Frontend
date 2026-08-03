@@ -178,7 +178,8 @@ async function resolveMeta(urlPath, isCrawler) {
         const id = qsMatch[1];
         let data = await apiGet(`/qs/${id}/info`);
 
-        // Crawlers block until ready; real visitors get it fire-and-forget (client uploads it too).
+        // Rendering takes ~1s, so crawlers can block on it; visitors get it
+        // fire-and-forget.
         if (data && !data.screenshotPath) {
             if (isCrawler) {
                 await generateQsScreenshot(id);
@@ -209,59 +210,17 @@ async function resolveMeta(urlPath, isCrawler) {
     return null;
 }
 
-// ── Puppeteer-based screenshot generation for quick shares ───────────────────
-// One persistent hidden page renders every share via window.__renderQuickShare(base64).
-let puppeteerBrowser = null;
-let qsRenderPage = null;
-const QS_RENDER_TIMEOUT = 60_000; // max wait for a single render call (ms)
-const qsGenerating = new Set();   // lock: IDs currently being rendered
+// ── Quick-share screenshot generation ────────────────────────────────────────
+// qs-render meshes with nucleation, the same WASM the browser viewer uses, then
+// rasterizes on the CPU. No browser; ~1s even at 100k blocks.
+const QS_PACK_PATH = path.join(STATIC_DIR, 'assets', 'litematic-viewer', 'pack.zip');
+const qsGenerating = new Set(); // lock: IDs currently being rendered
+let qsRenderer = null;
 
-async function getPuppeteerBrowser() {
-    if (puppeteerBrowser) return puppeteerBrowser;
-    const puppeteer = require('puppeteer');
-    const os = require('os');
-    // Find the full Chrome binary in puppeteer's cache (not chrome-headless-shell, which lacks WebGL)
-    const chromeCacheDir = path.join(os.homedir(), '.cache', 'puppeteer', 'chrome');
-    const versions = fs.readdirSync(chromeCacheDir);
-    const browserPath = path.join(chromeCacheDir, versions[0], 'chrome-linux64', 'chrome');
-    console.log(`Using Chrome at: ${browserPath}`);
-    puppeteerBrowser = await puppeteer.launch({
-        headless: 'new',
-        executablePath: browserPath,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--enable-webgl',
-            '--ignore-gpu-blocklist',
-            '--enable-unsafe-swiftshader',
-            '--use-gl=angle',
-            '--use-angle=swiftshader-webgl',
-            '--disable-web-security',
-            '--disable-features=IsolateOrigins',
-        ],
-    });
-    return puppeteerBrowser;
-}
-
-async function getQsRenderPage() {
-    if (qsRenderPage) return qsRenderPage;
-    const browser = await getPuppeteerBrowser();
-    const page = await browser.newPage();
-    page.on('console', (msg) => console.log(`  [qs-render browser] ${msg.type()}: ${msg.text()}`));
-    page.on('pageerror', (err) => console.error('  [qs-render browser error]', err.message));
-    await page.goto(`http://localhost:${PORT}/internal/qs-render`, {
-        waitUntil: 'networkidle0',
-        timeout: QS_RENDER_TIMEOUT,
-    });
-    await page.waitForFunction('window.__qsRendererReady === true', { timeout: QS_RENDER_TIMEOUT });
-    qsRenderPage = page;
-    return page;
-}
-
-function dataUrlToBuffer(dataUrl) {
-    const base64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
-    return Buffer.from(base64, 'base64');
+// Dynamic import because nucleation ships ESM only and this file is CommonJS.
+function getQsRenderer() {
+    qsRenderer ??= import('./qs-render.mjs');
+    return qsRenderer;
 }
 
 async function generateQsScreenshot(id) {
@@ -270,26 +229,20 @@ async function generateQsScreenshot(id) {
     qsGenerating.add(id);
 
     try {
-        console.log(`Generating screenshot for qs/${id}...`);
+        const started = Date.now();
         const fileBuffer = await apiGetBuffer(`/qs/${id}/litematic`);
         if (!fileBuffer) {
             console.error(`Screenshot for qs/${id}: failed to fetch litematic file`);
             return;
         }
 
-        const page = await getQsRenderPage();
-        const dataUrl = await Promise.race([
-            page.evaluate((b64) => window.__renderQuickShare(b64), fileBuffer.toString('base64')),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('render timed out')), QS_RENDER_TIMEOUT)),
-        ]);
+        const { renderLitematic } = await getQsRenderer();
+        const pngBuffer = await renderLitematic(fileBuffer, { packPath: QS_PACK_PATH, size: 1024 });
 
-        const pngBuffer = dataUrlToBuffer(dataUrl);
         const uploaded = await apiPutFile(`/qs/${id}/screenshot`, 'file', 'preview.png', pngBuffer, 'image/png');
-        console.log(`Screenshot for qs/${id}: ${uploaded ? 'success' : 'upload failed'}`);
+        console.log(`Screenshot for qs/${id}: ${uploaded ? 'success' : 'upload failed'} in ${Date.now() - started}ms`);
     } catch (err) {
         console.error(`Failed to generate screenshot for qs/${id}:`, err.message);
-        // Page may be in a bad state; drop it so the next request gets a fresh one.
-        if (qsRenderPage) { await qsRenderPage.close().catch(() => { }); qsRenderPage = null; }
     } finally {
         qsGenerating.delete(id);
     }
@@ -327,7 +280,8 @@ function injectMeta(html, title, metaBlock) {
 // ── HTTP server ───────────────────────────────────────────────────────────────
 const server = http.createServer(async (req, res) => {
     // Strip query string
-    const urlPath = req.url.split('?')[0];
+    const urlPath = (req.url || '/').split('?')[0];
+
 
     // Try to serve as a static file first.
     // Only treat known asset extensions as files — usernames like "beanie._.boi"
@@ -381,14 +335,9 @@ server.listen(PORT, () => {
     console.log(`  API:    ${API_BASE}`);
 });
 
-// ── Graceful shutdown - close puppeteer so systemd can stop cleanly ──────────
-async function shutdown() {
+function shutdown() {
     console.log('Shutting down...');
     server.close();
-    if (puppeteerBrowser) {
-        try { await puppeteerBrowser.close(); } catch { /* ignore */ }
-        puppeteerBrowser = null;
-    }
     process.exit(0);
 }
 process.on('SIGTERM', shutdown);

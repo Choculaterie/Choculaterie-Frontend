@@ -34,7 +34,6 @@ import type {
 } from '../../api/generated.schemas';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { SchematicCardComponent } from '../../shared/components/schematic-card/schematic-card.component';
-import { renderLitematicHeadless } from '../../shared/components/litematic-viewer/litematic-headless-render';
 import { UserCardComponent } from '../../shared/components/user-card/user-card.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { ReportDialogComponent, ReportDialogData, ReportDialogResult } from '../../shared/components/report-dialog/report-dialog.component';

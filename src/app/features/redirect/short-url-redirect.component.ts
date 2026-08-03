@@ -4,10 +4,10 @@ import { HttpClient } from '@angular/common/http';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { firstValueFrom } from 'rxjs';
 import { ShortUrlService } from '../../api/short-url';
 import { OgMetaService } from '../../core/services/og-meta.service';
 import { LitematicViewerComponent, type LitematicViewerData } from '../../shared/components/litematic-viewer/litematic-viewer.component';
-import { renderLitematicHeadless } from '../../shared/components/litematic-viewer/litematic-headless-render';
 
 @Component({
     selector: 'app-short-url-redirect',
@@ -86,7 +86,9 @@ export class ShortUrlRedirectComponent implements OnInit, OnDestroy {
                 this.state.set('viewing');
                 setTimeout(() => {
                     const viewer = this.mountViewer();
-                    this.generateAndUploadPreview(buffer, id, viewer);
+                    // Only capture if the server still has no preview (eager upload usually
+                    // finished already). Avoids a second full mesh build + Puppeteer race.
+                    this.maybeCaptureAndUploadPreview(id, viewer);
                 });
             },
             error: () => this.doRedirect(id),
@@ -135,20 +137,37 @@ export class ShortUrlRedirectComponent implements OnInit, OnDestroy {
         this.ogMeta.clear();
     }
 
-    private async generateAndUploadPreview(buffer: ArrayBuffer, id: string, viewer: LitematicViewerComponent | null): Promise<void> {
+    /**
+     * If the server already has a preview (eager Puppeteer from upload), skip.
+     * Otherwise capture from the interactive viewer mesh once it finishes loading
+     * (one pack + one mesh only; no second headless load).
+     */
+    private async maybeCaptureAndUploadPreview(id: string, viewer: LitematicViewerComponent | null): Promise<void> {
         try {
-            // schematic-renderer's material cache is a page-wide singleton shared with the
-            // interactive viewer, so wait for it to finish loading first.
-            if (viewer) await this.waitUntilNotLoading(viewer);
+            if (!viewer) return;
+            const info = await firstValueFrom(
+                this.http.get<{ screenshotPath?: string }>(`/qs/${id}/info`),
+            ).catch(() => null);
+            if (info?.screenshotPath) return;
 
-            const file = await renderLitematicHeadless(buffer);
+            await this.waitUntilNotLoading(viewer);
+            if (viewer.error()) return;
+
+            // Re-check: eager gen may have finished while the viewer was loading.
+            const again = await firstValueFrom(
+                this.http.get<{ screenshotPath?: string }>(`/qs/${id}/info`),
+            ).catch(() => null);
+            if (again?.screenshotPath) return;
+
+            const file = await viewer.capturePreviewPng(768, 768);
+            if (!file) return;
             this.shortUrlApi.putQsIdScreenshot(id, { file }).subscribe({ error: () => { } });
         } catch {
-            // silently ignore
+            // silently ignore preview upload failures
         }
     }
 
-    private waitUntilNotLoading(viewer: LitematicViewerComponent, timeoutMs = 20000): Promise<void> {
+    private waitUntilNotLoading(viewer: LitematicViewerComponent, timeoutMs = 60000): Promise<void> {
         if (!viewer.loading()) return Promise.resolve();
         return new Promise(resolve => {
             const timeoutId = setTimeout(() => { ref.destroy(); resolve(); }, timeoutMs);

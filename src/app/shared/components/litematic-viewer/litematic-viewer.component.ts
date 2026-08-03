@@ -122,6 +122,52 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
         URL.revokeObjectURL(url);
     }
 
+    /**
+     * Captures a transparent isometric PNG from the already-loaded viewer mesh
+     * (same quality as the interactive view; no second schematic load).
+     */
+    async capturePreviewPng(width = 1024, height = 1024): Promise<File | null> {
+        const renderer = this.schemRenderer;
+        if (!renderer || this.loading() || this.error()) return null;
+
+        const cm = renderer.cameraManager as any;
+        const prevMode = cm?.cameraMode;
+        const prevBg = (renderer.renderManager as any)?.backgroundMode;
+
+        try {
+            renderer.setGridVisible(false);
+            renderer.setCameraMode('isometric');
+            renderer.setIsometricAngles(35, 45, false);
+            await renderer.cameraManager.focusOnSchematics();
+            await renderer.renderManager?.setBackgroundMode('transparent');
+
+            const blob = await renderer.takeScreenshot({
+                width,
+                height,
+                format: 'image/png',
+                transparent: true,
+            });
+            return new File([blob], 'preview.png', { type: 'image/png' });
+        } catch (e) {
+            console.error('capturePreviewPng failed:', e);
+            return null;
+        } finally {
+            try {
+                // Restore live view; takeScreenshot resizes the canvas.
+                renderer.setGridVisible(true);
+                if (prevMode && prevMode !== 'isometric') {
+                    renderer.setCameraMode(prevMode);
+                } else {
+                    // Stay isometric but put the solid BG/grid back for interactive use.
+                    renderer.setCameraMode('isometric');
+                }
+                await renderer.renderManager?.setBackgroundMode('solid', { color: '#1a1a2e' });
+                window.dispatchEvent(new Event('resize'));
+                renderer.invalidate();
+            } catch { /* restore best-effort */ }
+        }
+    }
+
     private async initViewer(): Promise<void> {
         const canvas = this.canvasRef.nativeElement;
         const hasDiff = this.data.parentFileData !== undefined;
