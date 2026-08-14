@@ -605,7 +605,6 @@ export class TranslationsComponent implements OnInit {
     readonly mods = signal<{ id: string; name: string }[]>([]);
     readonly locales = signal<LocaleProgress[]>([]);
     readonly barsIn = signal(false);
-    private barsGrown = false;
     readonly addingLocale = signal(false);
     readonly suggestions = signal<{ code: string; label: string }[]>([]);
     search = '';
@@ -872,8 +871,6 @@ export class TranslationsComponent implements OnInit {
     }
 
     private growBars(): void {
-        if (this.barsGrown) { this.barsIn.set(true); return; }
-        this.barsGrown = true;
         this.barsIn.set(false);
         setTimeout(() => this.barsIn.set(true), 40);
     }
