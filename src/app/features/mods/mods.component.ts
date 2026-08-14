@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { TPipe } from '../../core/i18n/t.pipe';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -39,7 +40,7 @@ interface ModSummary {
 @Component({
     selector: 'app-mods',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         FormsModule,
         RouterLink,
         MatCardModule,

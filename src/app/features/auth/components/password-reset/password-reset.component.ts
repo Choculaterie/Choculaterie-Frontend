@@ -1,4 +1,5 @@
 import { Component, OnDestroy, inject, signal } from '@angular/core';
+import { TPipe } from '../../../../core/i18n/t.pipe';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -14,7 +15,7 @@ import { AUTH } from '../../../../i18n/labels';
 @Component({
     selector: 'app-password-reset',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         ReactiveFormsModule,
         RouterLink,
         MatCardModule,

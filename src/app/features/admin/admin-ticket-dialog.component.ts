@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { TPipe } from '../../core/i18n/t.pipe';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -29,7 +30,7 @@ export interface AdminTicketDialogResult {
 @Component({
     selector: 'app-admin-ticket-dialog',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         DatePipe,
         FormsModule,
         MatDialogModule,
@@ -68,17 +69,17 @@ export interface AdminTicketDialogResult {
         <span class="meta-chip unread-chip"><mat-icon>mark_email_unread</mat-icon> Unread</span>
         }
         @if (ticket().adminReply) {
-        <span class="meta-chip meta-chip-text muted" i18n>Replied</span>
+        <span class="meta-chip meta-chip-text muted">{{ 'Replied' | t }}</span>
         }
     </div>
 
     <div class="msg-block">
         <div class="msg-header">
-            <span i18n>Ticket</span>
+            <span>{{ 'Ticket' | t }}</span>
             @if (ticket().username) {
             <span class="msg-meta">{{ ticket().username }}</span>
             } @else {
-            <span class="msg-meta" i18n>Anonymous</span>
+            <span class="msg-meta">{{ 'Anonymous' | t }}</span>
             }
             <span class="msg-meta">{{ ticket().createdAt | date:'medium' }}</span>
         </div>
@@ -103,7 +104,7 @@ export interface AdminTicketDialogResult {
     @if (ticket().adminReply) {
     <div class="msg-block">
         <div class="msg-header">
-            <span i18n>Your reply</span>
+            <span>{{ 'Your reply' | t }}</span>
             @if (ticket().adminRepliedBy) {
             <span class="msg-meta">{{ ticket().adminRepliedBy }}</span>
             }
@@ -116,14 +117,14 @@ export interface AdminTicketDialogResult {
     }
 
     <div class="reply-form">
-        <h4 class="reply-heading" i18n>Send reply</h4>
+        <h4 class="reply-heading">{{ 'Send reply' | t }}</h4>
         @if (!ticket().userId) {
-        <p class="reply-hint muted" i18n>Anonymous ticket. Reply is saved but the submitter has no inbox.</p>
+        <p class="reply-hint muted">{{ 'Anonymous ticket. Reply is saved but the submitter has no inbox.' | t }}</p>
         } @else {
-        <p class="reply-hint" i18n>The user will get this in their inbox.</p>
+        <p class="reply-hint">{{ 'The user will get this in their inbox.' | t }}</p>
         }
         <mat-form-field appearance="outline" class="full-width">
-            <mat-label i18n>Reply</mat-label>
+            <mat-label>{{ 'Reply' | t }}</mat-label>
             <textarea matInput rows="4" maxlength="2000" [(ngModel)]="replyText" [disabled]="sending()"></textarea>
         </mat-form-field>
         <div class="form-actions">
@@ -132,9 +133,9 @@ export interface AdminTicketDialogResult {
                 <img [src]="sending() || !replyText.trim()
                     ? '/icons/fantasy/potion_throw_disabled.svg'
                     : '/icons/fantasy/potion_throw.svg'" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
-                @if (sending()) { <span i18n>Sending...</span> }
-                @else if (ticket().adminReply) { <span i18n>Update reply</span> }
-                @else { <span i18n>Send reply</span> }
+                @if (sending()) { <span>{{ 'Sending...' | t }}</span> }
+                @else if (ticket().adminReply) { <span>{{ 'Update reply' | t }}</span> }
+                @else { <span>{{ 'Send reply' | t }}</span> }
             </button>
         </div>
     </div>

@@ -22,13 +22,13 @@
         <div class="split-half split-left" (dragover)="$event.preventDefault()" (drop)="onSplitDrop($event, 'avatar')">
             <div class="split-frame">
                 <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" class="mc-icon split-icon" />
-                <span i18n>Profile Picture</span>
+                <span>{{ 'Profile Picture' | t }}</span>
             </div>
         </div>
         <div class="split-half split-right" (dragover)="$event.preventDefault()" (drop)="onSplitDrop($event, 'cover')">
             <div class="split-frame">
                 <img src="/icons/ui/house.svg" alt="" aria-hidden="true" class="mc-icon split-icon" />
-                <span i18n>Banner Picture</span>
+                <span>{{ 'Banner Picture' | t }}</span>
             </div>
         </div>
     </div>
@@ -45,14 +45,14 @@
         }
         @if (isOwnProfile()) {
         <div class="cover-actions">
-            <button class="cover-edit-btn" i18n-matTooltip
-                [matTooltip]="p.coverImagePath ? 'Change cover (5:1 ratio recommended)' : 'Add cover image (5:1 ratio recommended)'"
+            <button class="cover-edit-btn"
+                [matTooltip]="(p.coverImagePath ? 'Change cover (5:1 ratio recommended)' : 'Add cover image (5:1 ratio recommended)') | t"
                 (click)="coverInput.click()" [disabled]="coverUploading()">
                 <img [src]="p.coverImagePath ? '/icons/weapons/pen_white.svg' : '/icons/ui/add_image.svg'" alt=""
                     aria-hidden="true" class="mc-icon" [class.mc-icon--fixed-white]="p.coverImagePath" />
             </button>
             @if (p.coverImagePath) {
-            <button class="cover-delete-btn" i18n-matTooltip matTooltip="Remove cover" (click)="deleteCoverImage()"
+            <button class="cover-delete-btn" [matTooltip]="'Remove cover' | t" (click)="deleteCoverImage()"
                 [disabled]="coverUploading()">
                 <img src="/icons/letters/X_white.svg" alt="" aria-hidden="true" class="mc-icon mc-icon--fixed-white" />
             </button>
@@ -82,7 +82,7 @@
             </svg>
             }
             @if (isOwnProfile()) {
-            <button class="avatar-edit-btn" i18n-matTooltip matTooltip="Change picture" (click)="picInput.click()"
+            <button class="avatar-edit-btn" [matTooltip]="'Change picture' | t" (click)="picInput.click()"
                 [disabled]="picUploading()">
                 <img src="/icons/weather/snow.svg" alt="" aria-hidden="true" class="mc-icon" />
             </button>
@@ -99,7 +99,12 @@
                     memberYears(p)
                     }}</span>
                 }
-                @if (p.badge != null) {
+                @if (p.badges?.length) {
+                @for (b of p.badges; track $index) {
+                <mat-icon class="badge-icon" [style.color]="badgeColor(b.badge)"
+                    [matTooltip]="badgeTooltip(b)">{{ badgeIcon(b.badge) }}</mat-icon>
+                }
+                } @else if (p.badge != null) {
                 <mat-icon class="badge-icon" [style.color]="badgeColor(p.badge)" [matTooltip]="badgeLabel(p.badge)">{{
                     badgeIcon(p.badge) }}</mat-icon>
                 }
@@ -115,20 +120,20 @@
         @if (p.minecraftUsername || p.isMinecraftLinked) {
         <div class="meta-item" [class.meta-item--mc]="p.minecraftUsername"
             (click)="p.minecraftUsername && openSkinViewer(p.minecraftUsername)">
-            <ng-icon name="matfMinecraftColored" size="18" /> <strong i18n>Minecraft:</strong>
+            <ng-icon name="matfMinecraftColored" size="18" /> <strong>{{ 'Minecraft:' | t }}</strong>
             @if (p.minecraftUsername) {
             <span class="mc-name">{{ p.minecraftUsername }}</span>
             }
         </div>
         }
         @if (p.discordUsername || p.isDiscordLinked) {
-        <div class="meta-item"><ng-icon name="simpleDiscord" size="18" /> <strong i18n>Discord:</strong> {{
+        <div class="meta-item"><ng-icon name="simpleDiscord" size="18" /> <strong>{{ 'Discord:' | t }}</strong> {{
             p.discordUsername
             }}</div>
         }
         @if (isOwnProfile() && ownProfile()?.hasSecurityKeys) {
         <div class="meta-item"><img src="/icons/weather/lightning.svg" alt="" aria-hidden="true" class="mc-icon" />
-            <span i18n>Security keys active</span>
+            <span>{{ 'Security keys active' | t }}</span>
         </div>
         }
         @if (p.socialLinks?.length) {
@@ -149,7 +154,7 @@
             <button mat-flat-button (click)="toggleLike()">
                 <img [src]="enrichedProfile()!.isLiked ? '/icons/ui/star_thick.svg' : '/icons/ui/start_thick_empty.svg'"
                     alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
-                @if (enrichedProfile()!.isLiked) { <span i18n>Starred</span> } @else { <span i18n>Star</span> }
+                @if (enrichedProfile()!.isLiked) { <span>{{ 'Starred' | t }}</span> } @else { <span>{{ 'Star' | t }}</span> }
             </button>
             <button mat-stroked-button (click)="reportUser()">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
@@ -158,7 +163,7 @@
                         d="M2,4h10v1h-10zM20,4h7v1h-7zM2,5h10v1h-10zM20,5h7v1h-7zM2,6h10v1h-10zM20,6h7v1h-7zM2,7h3v1h-3zM12,7h8v1h-8zM23,7h4v1h-4zM2,8h3v1h-3zM12,8h8v1h-8zM23,8h4v1h-4zM2,9h3v1h-3zM12,9h8v1h-8zM23,9h4v1h-4zM2,10h3v1h-3zM23,10h4v1h-4zM2,11h3v1h-3zM23,11h4v1h-4zM2,12h3v1h-3zM23,12h4v1h-4zM2,13h3v1h-3zM23,13h4v1h-4zM2,14h3v1h-3zM23,14h4v1h-4zM2,15h3v1h-3zM23,15h4v1h-4zM2,16h10v1h-10zM20,16h7v1h-7zM2,17h10v1h-10zM20,17h7v1h-7zM2,18h10v1h-10zM20,18h7v1h-7zM2,19h3v1h-3zM12,19h8v1h-8zM2,20h3v1h-3zM12,20h8v1h-8zM2,21h3v1h-3zM12,21h8v1h-8zM2,22h3v1h-3zM2,23h3v1h-3zM2,24h3v1h-3zM2,25h3v1h-3zM2,26h3v1h-3zM2,27h3v1h-3z" />
                     <path fill="var(--mc-icon-shadow)"
                         d="M5,7h7v1h-7zM27,7h3v1h-3zM5,8h7v1h-7zM27,8h3v1h-3zM5,9h7v1h-7zM27,9h3v1h-3zM5,10h4v1h-4zM16,10h7v1h-7zM27,10h3v1h-3zM5,11h4v1h-4zM16,11h7v1h-7zM27,11h3v1h-3zM5,12h4v1h-4zM16,12h7v1h-7zM27,12h3v1h-3zM5,13h4v1h-4zM27,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM27,16h3v1h-3zM27,17h3v1h-3zM27,18h3v1h-3zM5,19h7v1h-7zM23,19h7v1h-7zM5,20h7v1h-7zM23,20h7v1h-7zM5,21h7v1h-7zM23,21h7v1h-7zM5,22h4v1h-4zM16,22h7v1h-7zM5,23h4v1h-4zM16,23h7v1h-7zM5,24h4v1h-4zM16,24h7v1h-7zM5,25h4v1h-4zM5,26h4v1h-4zM5,27h4v1h-4zM5,28h4v1h-4zM5,29h4v1h-4zM5,30h4v1h-4z" />
-                </svg> <span i18n>Report</span>
+                </svg> <span>{{ 'Report' | t }}</span>
             </button>
             @if (isAdmin()) {
             <a mat-stroked-button routerLink="/admin" [queryParams]="{ tab: 0, userId: enrichedProfile()!.id }"
@@ -169,7 +174,7 @@
                         d="M12,2h4v1h-4zM12,3h4v1h-4zM12,4h4v1h-4zM5,5h7v1h-7zM16,5h7v1h-7zM5,6h7v1h-7zM16,6h7v1h-7zM5,7h7v1h-7zM16,7h7v1h-7zM2,8h3v1h-3zM23,8h4v1h-4zM2,9h3v1h-3zM23,9h4v1h-4zM2,10h3v1h-3zM23,10h4v1h-4zM2,11h3v1h-3zM23,11h4v1h-4zM2,12h3v1h-3zM23,12h4v1h-4zM2,13h3v1h-3zM23,13h4v1h-4zM5,14h4v1h-4zM20,14h3v1h-3zM5,15h4v1h-4zM20,15h3v1h-3zM5,16h4v1h-4zM20,16h3v1h-3zM5,17h4v1h-4zM20,17h3v1h-3zM5,18h4v1h-4zM20,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM9,21h3v1h-3zM16,21h4v1h-4zM9,22h3v1h-3zM16,22h4v1h-4zM9,23h3v1h-3zM16,23h4v1h-4zM12,24h4v1h-4zM12,25h4v1h-4zM12,26h4v1h-4z" />
                     <path fill="var(--mc-icon-shadow)"
                         d="M9,8h7v1h-7zM20,8h3v1h-3zM9,9h7v1h-7zM20,9h3v1h-3zM9,10h7v1h-7zM20,10h3v1h-3zM5,11h4v1h-4zM27,11h3v1h-3zM5,12h4v1h-4zM27,12h3v1h-3zM5,13h4v1h-4zM27,13h3v1h-3zM27,14h3v1h-3zM27,15h3v1h-3zM27,16h3v1h-3zM27,17h3v1h-3zM9,18h3v1h-3zM23,18h4v1h-4zM9,19h3v1h-3zM23,19h4v1h-4zM9,20h3v1h-3zM23,20h4v1h-4zM23,21h4v1h-4zM23,22h4v1h-4zM23,23h4v1h-4zM20,24h3v1h-3zM20,25h3v1h-3zM20,26h3v1h-3zM16,27h4v1h-4zM16,28h4v1h-4zM16,29h4v1h-4z" />
-                </svg> <span i18n>Manage User</span>
+                </svg> <span>{{ 'Manage User' | t }}</span>
             </a>
             }
             }
@@ -180,14 +185,14 @@
     <mat-tab-group dynamicHeight disablePagination [selectedIndex]="selectedTab()"
         (selectedTabChange)="onTabChange($event.index)">
 
-        <mat-tab i18n-label label="Schematics">
+        <mat-tab [label]="'Schematics' | t">
             <div class="tab-content">
                 @if (loadingSchematics()) {
                 <app-loading-spinner [diameter]="36" />
                 } @else if (schematics().length === 0) {
-                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title
-                    [title]="isOwnProfile() ? 'No schematics yet' : 'No schematics'" i18n-subtitle
-                    [subtitle]="isOwnProfile() ? 'Upload your first schematic to see it here.' : 'This user hasn\'t published any schematics yet'" />
+                <app-empty-state icon="/icons/ui/question_mark!.svg"
+                    [title]="(isOwnProfile() ? 'No schematics yet' : 'No schematics') | t"
+                    [subtitle]="(isOwnProfile() ? 'Upload your first schematic to see it here.' : 'This user hasn\'t published any schematics yet') | t" />
                 } @else {
                 <div class="schematic-grid" #schematicGrid>
                     @for (s of pagedSchematics(); track s.id) {
@@ -201,11 +206,11 @@
             </div>
         </mat-tab>
 
-        <mat-tab i18n-label label="Starred Schematics">
+        <mat-tab [label]="'Starred Schematics' | t">
             <div class="tab-content">
                 @if (likedSchematics().length === 0) {
-                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No starred schematics"
-                    i18n-subtitle [subtitle]="isOwnProfile() ? 'Star schematics to save them here.' : ''" />
+                <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No starred schematics' | t"
+                    [subtitle]="(isOwnProfile() ? 'Star schematics to save them here.' : '') | t" />
                 } @else {
                 <div class="schematic-grid">
                     @for (s of likedSchematics(); track s.id) {
@@ -216,10 +221,10 @@
             </div>
         </mat-tab>
 
-        <mat-tab i18n-label label="Starred Users">
+        <mat-tab [label]="'Starred Users' | t">
             <div class="tab-content">
                 @if (likedUsers().length === 0) {
-                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No starred users" i18n-subtitle
+                <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No starred users' | t"
                     [subtitle]="isOwnProfile() ? 'Star other users to see them here.' : ''" />
                 } @else {
                 <div class="user-grid">
@@ -234,7 +239,7 @@
         @if (isOwnProfile()) {
 
         <!-- Account -->
-        <mat-tab i18n-label label="Account">
+        <mat-tab [label]="'Account' | t">
             <div class="tab-content">
                 @let op = ownProfile()!;
 
@@ -245,28 +250,28 @@
                             d="M5,4h18v1h-18zM5,5h18v1h-18zM5,6h18v1h-18zM2,7h7v1h-7zM12,7h4v1h-4zM20,7h7v1h-7zM2,8h7v1h-7zM12,8h4v1h-4zM20,8h7v1h-7zM2,9h7v1h-7zM12,9h4v1h-4zM20,9h7v1h-7zM2,10h7v1h-7zM12,10h4v1h-4zM20,10h7v1h-7zM2,11h7v1h-7zM12,11h4v1h-4zM20,11h7v1h-7zM2,12h7v1h-7zM12,12h4v1h-4zM20,12h7v1h-7zM2,13h25v1h-25zM2,14h25v1h-25zM2,15h25v1h-25zM2,16h3v1h-3zM9,16h11v1h-11zM23,16h4v1h-4zM2,17h3v1h-3zM9,17h11v1h-11zM23,17h4v1h-4zM2,18h3v1h-3zM9,18h11v1h-11zM23,18h4v1h-4zM2,19h7v1h-7zM20,19h7v1h-7zM2,20h7v1h-7zM20,20h7v1h-7zM2,21h7v1h-7zM20,21h7v1h-7zM5,22h18v1h-18zM5,23h18v1h-18zM5,24h18v1h-18z" />
                         <path fill="var(--mc-icon-shadow)"
                             d="M9,7h3v1h-3zM16,7h4v1h-4zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM27,10h3v1h-3zM9,11h3v1h-3zM16,11h4v1h-4zM27,11h3v1h-3zM9,12h3v1h-3zM16,12h4v1h-4zM27,12h3v1h-3zM27,13h3v1h-3zM27,14h3v1h-3zM27,15h3v1h-3zM5,16h4v1h-4zM20,16h3v1h-3zM27,16h3v1h-3zM5,17h4v1h-4zM20,17h3v1h-3zM27,17h3v1h-3zM5,18h4v1h-4zM20,18h3v1h-3zM27,18h3v1h-3zM12,19h8v1h-8zM27,19h3v1h-3zM12,20h8v1h-8zM27,20h3v1h-3zM12,21h8v1h-8zM27,21h3v1h-3zM23,22h7v1h-7zM23,23h7v1h-7zM23,24h7v1h-7zM9,25h18v1h-18zM9,26h18v1h-18zM9,27h18v1h-18z" />
-                    </svg> <span i18n>Profile</span></h3>
+                    </svg> <span>{{ 'Profile' | t }}</span></h3>
                 <form [formGroup]="profileForm" (ngSubmit)="submitProfile()">
                     <mat-form-field class="full-width" appearance="outline">
-                        <mat-label i18n>Username</mat-label>
+                        <mat-label>{{ 'Username' | t }}</mat-label>
                         <input matInput formControlName="username" maxlength="15" />
                         <img matPrefix src="/icons/ui/smile.svg" alt="" aria-hidden="true" class="mc-icon" />
                         @if (usernameChecking()) { <img src="loading.gif" alt="" matSuffix class="btn-loading-gif" /> }
                         <mat-error>
-                            @if (profileForm.get('username')?.hasError('required')) { <span i18n>Username is
-                                required</span> }
-                            @else if (profileForm.get('username')?.hasError('minlength')) { <span i18n>Minimum 3
-                                characters</span> }
-                            @else if (profileForm.get('username')?.hasError('pattern')) { <span i18n>Only letters,
+                            @if (profileForm.get('username')?.hasError('required')) { <span>{{ 'Username is
+                                required' | t }}</span> }
+                            @else if (profileForm.get('username')?.hasError('minlength')) { <span>{{ 'Minimum 3
+                                characters' | t }}</span> }
+                            @else if (profileForm.get('username')?.hasError('pattern')) { <span>{{ 'Only letters,
                                 numbers,
-                                hyphens, underscores</span> }
-                            @else if (profileForm.get('username')?.hasError('usernameTaken')) { <span i18n>Username is
+                                hyphens, underscores' | t }}</span> }
+                            @else if (profileForm.get('username')?.hasError('usernameTaken')) { <span>{{ 'Username is
                                 already
-                                taken</span> }
+                                taken' | t }}</span> }
                         </mat-error>
                     </mat-form-field>
                     <mat-form-field class="full-width profile-bio-field" appearance="outline">
-                        <mat-label i18n>Bio</mat-label>
+                        <mat-label>{{ 'Bio' | t }}</mat-label>
                         <textarea matInput formControlName="bio" rows="3" maxlength="500"></textarea>
                         <img matPrefix src="/icons/ui/info.svg" alt="" aria-hidden="true" class="mc-icon" />
                         <mat-hint>{{ profileForm.get('bio')?.value?.length || 0 }} / 500</mat-hint>
@@ -275,8 +280,8 @@
                         <button mat-flat-button type="submit"
                             [disabled]="profileForm.invalid || profileForm.pending || profileSaving()">
                             @if (profileSaving()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
-                            <span i18n>Save
-                                profile</span> }
+                            <span>{{ 'Save
+                                profile' | t }}</span> }
                         </button>
                     </div>
                 </form>
@@ -290,12 +295,12 @@
                             d="M12,2h4v1h-4zM12,3h4v1h-4zM12,4h4v1h-4zM9,5h3v1h-3zM16,5h4v1h-4zM9,6h3v1h-3zM16,6h4v1h-4zM9,7h3v1h-3zM16,7h4v1h-4zM12,8h4v1h-4zM12,9h4v1h-4zM12,10h4v1h-4zM9,11h11v1h-11zM9,12h11v1h-11zM9,13h11v1h-11zM2,14h3v1h-3zM12,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM12,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM12,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM12,17h4v1h-4zM23,17h4v1h-4zM2,18h3v1h-3zM12,18h4v1h-4zM23,18h4v1h-4zM2,19h3v1h-3zM12,19h4v1h-4zM23,19h4v1h-4zM2,20h3v1h-3zM12,20h4v1h-4zM23,20h4v1h-4zM5,21h4v1h-4zM12,21h4v1h-4zM20,21h3v1h-3zM5,22h4v1h-4zM12,22h4v1h-4zM20,22h3v1h-3zM5,23h4v1h-4zM12,23h4v1h-4zM20,23h3v1h-3zM9,24h11v1h-11zM9,25h11v1h-11zM9,26h11v1h-11z" />
                         <path fill="var(--mc-icon-shadow)"
                             d="M20,8h3v1h-3zM20,9h3v1h-3zM20,10h3v1h-3zM16,14h7v1h-7zM16,15h7v1h-7zM16,16h7v1h-7zM16,17h7v1h-7zM5,18h4v1h-4zM16,18h4v1h-4zM27,18h3v1h-3zM5,19h4v1h-4zM16,19h4v1h-4zM27,19h3v1h-3zM5,20h4v1h-4zM16,20h4v1h-4zM27,20h3v1h-3zM16,21h4v1h-4zM27,21h3v1h-3zM16,22h4v1h-4zM27,22h3v1h-3zM16,23h4v1h-4zM27,23h3v1h-3zM23,24h4v1h-4zM23,25h4v1h-4zM23,26h4v1h-4zM12,27h11v1h-11zM12,28h11v1h-11zM12,29h11v1h-11z" />
-                    </svg> <span i18n>Social Links</span></h3>
+                    </svg> <span>{{ 'Social Links' | t }}</span></h3>
                 <div class="social-links-list" cdkDropList (cdkDropListDropped)="dropSocialLink($event)">
                     @for (link of editSocialLinks(); track $index) {
                     <div class="social-link-row" cdkDrag>
                         <mat-form-field appearance="outline" class="social-platform-field">
-                            <mat-label i18n>Platform</mat-label>
+                            <mat-label>{{ 'Platform' | t }}</mat-label>
                             <mat-select [value]="link.platform"
                                 (selectionChange)="updateSocialLink($index, 'platform', $event.value)">
                                 <mat-select-trigger>
@@ -328,19 +333,18 @@
                             </mat-select>
                         </mat-form-field>
                         <mat-form-field appearance="outline" class="social-url-field">
-                            <mat-label i18n>URL</mat-label>
+                            <mat-label>{{ 'URL' | t }}</mat-label>
                             <input matInput [value]="link.url" required
                                 (input)="updateSocialLink($index, 'url', $any($event.target).value)"
                                 placeholder="https://..." maxlength="500" />
                             @if (!link.url.trim()) {
-                            <mat-error i18n>URL is required</mat-error>
+                            <mat-error>{{ 'URL is required' | t }}</mat-error>
                             }
                         </mat-form-field>
-                        <button mat-icon-button (click)="removeSocialLink($index)" i18n-matTooltip matTooltip="Remove">
+                        <button mat-icon-button (click)="removeSocialLink($index)" [matTooltip]="'Remove' | t">
                             <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
                         </button>
-                        <button mat-icon-button type="button" class="drag-handle" cdkDragHandle i18n-matTooltip
-                            matTooltip="Drag">
+                        <button mat-icon-button type="button" class="drag-handle" cdkDragHandle [matTooltip]="'Drag' | t">
                             <img src="/icons/letters/side.svg" alt="" aria-hidden="true" class="mc-icon" />
                         </button>
                     </div>
@@ -348,13 +352,13 @@
                 </div>
                 @if (editSocialLinks().length < 10) { <button mat-stroked-button (click)="addSocialLink()">
                     <img src="/icons/math/plus.svg" alt="" aria-hidden="true" matButtonIcon class="mc-icon" /> <span
-                        i18n>Add link</span></button>
+                       >{{ 'Add link' | t }}</span></button>
                     }
                     <div class="form-actions">
                         <button mat-flat-button (click)="saveSocialLinks()"
                             [disabled]="socialSaving() || hasEmptyUrls()">
                             @if (socialSaving()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
-                            <span i18n>Save links</span>
+                            <span>{{ 'Save links' | t }}</span>
                             }
                         </button>
                     </div>
@@ -368,31 +372,31 @@
                                 d="M2,7h25v1h-25zM2,8h25v1h-25zM2,9h25v1h-25zM2,10h7v1h-7zM20,10h7v1h-7zM2,11h7v1h-7zM20,11h7v1h-7zM2,12h7v1h-7zM20,12h7v1h-7zM2,13h3v1h-3zM9,13h3v1h-3zM16,13h4v1h-4zM23,13h4v1h-4zM2,14h3v1h-3zM9,14h3v1h-3zM16,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM9,15h3v1h-3zM16,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM12,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM12,17h4v1h-4zM23,17h4v1h-4zM2,18h3v1h-3zM12,18h4v1h-4zM23,18h4v1h-4zM2,19h3v1h-3zM23,19h4v1h-4zM2,20h3v1h-3zM23,20h4v1h-4zM2,21h3v1h-3zM23,21h4v1h-4zM2,22h25v1h-25zM2,23h25v1h-25zM2,24h25v1h-25z" />
                             <path fill="var(--mc-icon-shadow)"
                                 d="M9,10h11v1h-11zM27,10h3v1h-3zM9,11h11v1h-11zM27,11h3v1h-3zM9,12h11v1h-11zM27,12h3v1h-3zM5,13h4v1h-4zM27,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM20,16h3v1h-3zM27,16h3v1h-3zM5,17h4v1h-4zM20,17h3v1h-3zM27,17h3v1h-3zM5,18h4v1h-4zM20,18h3v1h-3zM27,18h3v1h-3zM5,19h4v1h-4zM16,19h4v1h-4zM27,19h3v1h-3zM5,20h4v1h-4zM16,20h4v1h-4zM27,20h3v1h-3zM5,21h4v1h-4zM16,21h4v1h-4zM27,21h3v1h-3zM27,22h3v1h-3zM27,23h3v1h-3zM27,24h3v1h-3zM5,25h25v1h-25zM5,26h25v1h-25zM5,27h25v1h-25z" />
-                        </svg> <span i18n>Email</span></h3>
+                        </svg> <span>{{ 'Email' | t }}</span></h3>
                     @if (editStep() === 'form') {
                     <form [formGroup]="emailForm" (ngSubmit)="submitEmail()">
                         <mat-form-field class="full-width" appearance="outline">
-                            <mat-label i18n>Email</mat-label>
+                            <mat-label>{{ 'Email' | t }}</mat-label>
                             <input matInput type="email" formControlName="email" />
                             <img matPrefix src="/icons/communication/mail.svg" alt="" aria-hidden="true"
                                 class="mc-icon" />
                             @if (emailChecking()) { <img src="loading.gif" alt="" matSuffix class="btn-loading-gif" /> }
-                            <mat-hint i18n>Changing email requires a verification code</mat-hint>
+                            <mat-hint>{{ 'Changing email requires a verification code' | t }}</mat-hint>
                             <mat-error>
-                                @if (emailForm.get('email')?.hasError('required')) { <span i18n>Email is required</span>
+                                @if (emailForm.get('email')?.hasError('required')) { <span>{{ 'Email is required' | t }}</span>
                                 }
-                                @else if (emailForm.get('email')?.hasError('email')) { <span i18n>Enter a valid
-                                    email</span> }
-                                @else if (emailForm.get('email')?.hasError('emailTaken')) { <span i18n>Email is already
-                                    in use</span> }
+                                @else if (emailForm.get('email')?.hasError('email')) { <span>{{ 'Enter a valid
+                                    email' | t }}</span> }
+                                @else if (emailForm.get('email')?.hasError('emailTaken')) { <span>{{ 'Email is already
+                                    in use' | t }}</span> }
                             </mat-error>
                         </mat-form-field>
                         <div class="form-actions">
                             <button mat-flat-button type="submit"
                                 [disabled]="emailForm.invalid || emailForm.pending || editLoading()">
                                 @if (editLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
-                                <span i18n>Update
-                                    email</span> }
+                                <span>{{ 'Update
+                                    email' | t }}</span> }
                             </button>
                         </div>
                     </form>
@@ -400,24 +404,23 @@
                     @if (editStep() === 'confirm') {
                     <div class="info-banner">
                         <img src="/icons/communication/mail.svg" alt="" aria-hidden="true" class="mc-icon" />
-                        <span i18n>A verification code was sent to <strong>{{ pendingEmail() }}</strong>. Enter it below
-                            to
-                            confirm.</span>
+                        <span>{{ 'A verification code was sent to' | t }} <strong>{{ pendingEmail() }}</strong>.
+                            {{ 'Enter it below to confirm.' | t }}</span>
                     </div>
                     <form [formGroup]="confirmForm" (ngSubmit)="submitConfirm()">
                         <mat-form-field class="full-width" appearance="outline">
-                            <mat-label i18n>Verification code</mat-label>
+                            <mat-label>{{ 'Verification code' | t }}</mat-label>
                             <input matInput formControlName="code" autocomplete="one-time-code" maxlength="10" />
                             <img matPrefix src="/icons/ui/hashtag.svg" alt="" aria-hidden="true" class="mc-icon" />
-                            <mat-error>@if (confirmForm.get('code')?.hasError('required')) { <span i18n>Code is
-                                    required</span>
+                            <mat-error>@if (confirmForm.get('code')?.hasError('required')) { <span>{{ 'Code is
+                                    required' | t }}</span>
                                 }</mat-error>
                         </mat-form-field>
                         <div class="form-actions">
-                            <button mat-stroked-button type="button" (click)="cancelConfirm()" i18n>Cancel</button>
+                            <button mat-stroked-button type="button" (click)="cancelConfirm()">{{ 'Cancel' | t }}</button>
                             <button mat-flat-button type="submit" [disabled]="confirmForm.invalid || editLoading()">
                                 @if (editLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
-                                <span i18n>Confirm</span>
+                                <span>{{ 'Confirm' | t }}</span>
                                 }
                             </button>
                         </div>
@@ -433,42 +436,41 @@
                                 d="M2,2h3v1h-3zM23,2h4v1h-4zM2,3h3v1h-3zM23,3h4v1h-4zM2,4h3v1h-3zM23,4h4v1h-4zM5,5h4v1h-4zM20,5h3v1h-3zM5,6h4v1h-4zM20,6h3v1h-3zM5,7h4v1h-4zM20,7h3v1h-3zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM12,11h4v1h-4zM12,12h4v1h-4zM12,13h4v1h-4zM2,14h3v1h-3zM9,14h3v1h-3zM16,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM9,15h3v1h-3zM16,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM9,16h3v1h-3zM16,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM9,17h3v1h-3zM16,17h4v1h-4zM23,17h4v1h-4zM5,18h4v1h-4zM20,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM2,21h3v1h-3zM9,21h3v1h-3zM16,21h4v1h-4zM23,21h4v1h-4zM2,22h3v1h-3zM9,22h3v1h-3zM16,22h4v1h-4zM23,22h4v1h-4zM2,23h3v1h-3zM9,23h3v1h-3zM16,23h4v1h-4zM23,23h4v1h-4z" />
                             <path fill="var(--mc-icon-shadow)"
                                 d="M27,5h3v1h-3zM27,6h3v1h-3zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM12,18h4v1h-4zM27,18h3v1h-3zM12,19h4v1h-4zM27,19h3v1h-3zM12,20h4v1h-4zM27,20h3v1h-3zM5,24h4v1h-4zM12,24h4v1h-4zM20,24h3v1h-3zM27,24h3v1h-3zM5,25h4v1h-4zM12,25h4v1h-4zM20,25h3v1h-3zM27,25h3v1h-3zM5,26h4v1h-4zM12,26h4v1h-4zM20,26h3v1h-3zM27,26h3v1h-3z" />
-                        </svg> <span i18n>Password</span></h3>
+                        </svg> <span>{{ 'Password' | t }}</span></h3>
                     @if (resetStep() === 'request') {
-                    <p i18n>Request a password reset code to change your password.</p>
+                    <p>{{ 'Request a password reset code to change your password.' | t }}</p>
                     <div class="form-actions">
                         <button mat-flat-button (click)="requestPasswordReset()" [disabled]="resetLoading()">
                             @if (resetLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
-                            <span i18n>Send reset
-                                code</span> }
+                            <span>{{ 'Send reset
+                                code' | t }}</span> }
                         </button>
                     </div>
                     }
                     @if (resetStep() === 'confirm') {
                     <div class="info-banner"><img src="/icons/communication/mail.svg" alt="" aria-hidden="true"
-                            class="mc-icon" /> <span i18n>A reset code was sent to
-                            <strong>{{
-                                op.email }}</strong>.</span></div>
+                            class="mc-icon" /> <span>{{ 'A reset code was sent to' | t }}
+                            <strong>{{ op.email }}</strong>.</span></div>
                     <form [formGroup]="resetForm" (ngSubmit)="confirmPasswordReset()">
                         <mat-form-field class="full-width" appearance="outline">
-                            <mat-label i18n>Reset code</mat-label>
+                            <mat-label>{{ 'Reset code' | t }}</mat-label>
                             <input matInput formControlName="code" autocomplete="one-time-code" maxlength="10" />
                             <img matPrefix src="/icons/ui/hashtag.svg" alt="" aria-hidden="true" class="mc-icon" />
                         </mat-form-field>
                         <mat-form-field class="full-width" appearance="outline">
-                            <mat-label i18n>New password</mat-label>
+                            <mat-label>{{ 'New password' | t }}</mat-label>
                             <input matInput [type]="hideResetPassword() ? 'password' : 'text'"
                                 formControlName="newPassword" autocomplete="new-password" />
                             <img matPrefix src="/icons/weapons/swords.svg" alt="" aria-hidden="true" class="mc-icon"
                                 style="transform: translate(1px, 1px);" />
                             <button mat-icon-button matSuffix type="button"
                                 (click)="hideResetPassword.set(!hideResetPassword())"
-                                [matTooltip]="hideResetPassword() ? 'Show password' : 'Hide password'" i18n-matTooltip>
+                                [matTooltip]="(hideResetPassword() ? 'Show password' : 'Hide password') | t">
                                 <img [src]="hideResetPassword() ? '/icons/ui/forbidden_circle.svg' : '/icons/circled/circle_empty_2.svg'"
                                     alt="" aria-hidden="true" class="mc-icon" />
                             </button>
-                            <mat-error>@if (resetForm.get('newPassword')?.hasError('required')) { <span i18n>Password is
-                                    required</span>
+                            <mat-error>@if (resetForm.get('newPassword')?.hasError('required')) { <span>{{ 'Password is
+                                    required' | t }}</span>
                                 }</mat-error>
                         </mat-form-field>
 
@@ -477,50 +479,50 @@
                             <li [class.met]="resetForm.get('newPassword')!.value!.length >= 6">
                                 <img [src]="resetForm.get('newPassword')!.value!.length >= 6 ? '/icons/ui/check.svg' : '/icons/letters/X_diagonal.svg'"
                                     alt="" aria-hidden="true" class="mc-icon" />
-                                <span i18n>Min 6 characters</span>
+                                <span>{{ 'Min 6 characters' | t }}</span>
                             </li>
                             <li [class.met]="pwHasUppercase()">
                                 <img [src]="pwHasUppercase() ? '/icons/ui/check.svg' : '/icons/letters/X_diagonal.svg'"
                                     alt="" aria-hidden="true" class="mc-icon" />
-                                <span i18n>At least one uppercase letter</span>
+                                <span>{{ 'At least one uppercase letter' | t }}</span>
                             </li>
                             <li [class.met]="pwHasLowercase()">
                                 <img [src]="pwHasLowercase() ? '/icons/ui/check.svg' : '/icons/letters/X_diagonal.svg'"
                                     alt="" aria-hidden="true" class="mc-icon" />
-                                <span i18n>At least one lowercase letter</span>
+                                <span>{{ 'At least one lowercase letter' | t }}</span>
                             </li>
                             <li [class.met]="pwHasDigit()">
                                 <img [src]="pwHasDigit() ? '/icons/ui/check.svg' : '/icons/letters/X_diagonal.svg'"
                                     alt="" aria-hidden="true" class="mc-icon" />
-                                <span i18n>At least one digit</span>
+                                <span>{{ 'At least one digit' | t }}</span>
                             </li>
                             <li [class.met]="pwHasSpecial()">
                                 <img [src]="pwHasSpecial() ? '/icons/ui/check.svg' : '/icons/letters/X_diagonal.svg'"
                                     alt="" aria-hidden="true" class="mc-icon" />
-                                <span i18n>At least one special character</span>
+                                <span>{{ 'At least one special character' | t }}</span>
                             </li>
                         </ul>
                         }
 
                         <mat-form-field class="full-width" appearance="outline">
-                            <mat-label i18n>Confirm password</mat-label>
+                            <mat-label>{{ 'Confirm password' | t }}</mat-label>
                             <input matInput [type]="hideResetPassword() ? 'password' : 'text'"
                                 formControlName="confirmPassword" autocomplete="new-password" />
                             <img matPrefix src="/icons/weapons/swords.svg" alt="" aria-hidden="true" class="mc-icon"
                                 style="transform: translate(1px, 1px);" />
                             <mat-error>
-                                @if (resetForm.get('confirmPassword')?.hasError('required')) { <span i18n>Please confirm
+                                @if (resetForm.get('confirmPassword')?.hasError('required')) { <span>{{ 'Please confirm
                                     your
-                                    password</span> }
-                                @else if (resetForm.hasError('mismatch')) { <span i18n>Passwords do not match</span> }
+                                    password' | t }}</span> }
+                                @else if (resetForm.hasError('mismatch')) { <span>{{ 'Passwords do not match' | t }}</span> }
                             </mat-error>
                         </mat-form-field>
 
                         <div class="form-actions">
                             <button mat-flat-button type="submit" [disabled]="resetForm.invalid || resetLoading()">
                                 @if (resetLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else
-                                { <span i18n>Change
-                                    password</span> }
+                                { <span>{{ 'Change
+                                    password' | t }}</span> }
                             </button>
                         </div>
                     </form>
@@ -530,57 +532,54 @@
 
                     <h3 id="minecraft-section" class="section-heading"
                         [class.section-highlight]="highlightSection() === 'minecraft'">
-                        <ng-icon name="matfMinecraftColored" size="20" /> <span i18n>Minecraft</span>
+                        <ng-icon name="matfMinecraftColored" size="20" /> <span>{{ 'Minecraft' | t }}</span>
                     </h3>
                     @if (op.isMinecraftLinked) {
                     <div class="link-status linked">
                         <img src="/icons/ui/check.svg" alt="" aria-hidden="true" class="mc-icon" />
-                        <span i18n>Linked to <strong>{{ op.minecraftUsername }}</strong></span>
+                        <span>{{ 'Linked to' | t }} <strong>{{ op.minecraftUsername }}</strong></span>
                         <span class="spacer"></span>
                         <button mat-stroked-button color="warn" (click)="unlinkMc()" [disabled]="mcLoading()">
                             @if (mcLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
-                                i18n>Unlink</span> }
+                               >{{ 'Unlink' | t }}</span> }
                         </button>
                     </div>
                     } @else {
                     <div class="link-status"><img src="/icons/ui/forbidden_circle.svg" alt="" aria-hidden="true"
-                            class="mc-icon" /> <span i18n>Not linked</span></div>
+                            class="mc-icon" /> <span>{{ 'Not linked' | t }}</span></div>
                     @if (mcLinkData(); as mc) {
                     <div class="link-code-box">
                         <div class="link-instructions">
-                            <p i18n>{{ mc.instructions ?? 'Enter this code in the Minecraft server:' }}</p>
+                            <p>{{ mc.instructions ?? ('Enter this code in the Minecraft server:' | t) }}</p>
                         </div>
                         <div class="code-row">
                             <code class="code-value" style="font-family: 'Minecraft'">/link {{ mc.code }}</code>
-                            <button mat-icon-button (click)="copyLinkCode(mc.code)" i18n-matTooltip
-                                matTooltip="Copy command">
+                            <button mat-icon-button (click)="copyLinkCode(mc.code)" [matTooltip]="'Copy command' | t">
                                 <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
                             </button>
                         </div>
                         @if (mc.serverAddress) {
                         <div class="link-detail">
                             <img src="/icons/ui/house.svg" alt="" aria-hidden="true" class="mc-icon" />
-                            <span i18n>Server: <strong>{{ mc.serverAddress }}</strong></span>
-                            <button mat-icon-button (click)="copyText(mc.serverAddress)" i18n-matTooltip
-                                matTooltip="Copy address">
+                            <span>{{ 'Server:' | t }} <strong>{{ mc.serverAddress }}</strong></span>
+                            <button mat-icon-button (click)="copyText(mc.serverAddress)" [matTooltip]="'Copy address' | t">
                                 <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
                             </button>
                         </div>
                         }
                         <div class="link-detail"><img src="/icons/misc/clock.svg" alt="" aria-hidden="true"
                                 class="mc-icon" />
-                            @if (mcTimerSeconds() > 0) { <span i18n>Expires in {{ formatTimer(mcTimerSeconds())
-                                }}</span> }
-                            @else { <span i18n>Code expired</span> }
+                            @if (mcTimerSeconds() > 0) { <span>{{ 'Expires in' | t }} {{ formatTimer(mcTimerSeconds()) }}</span> }
+                            @else { <span>{{ 'Code expired' | t }}</span> }
                         </div>
                         <div class="form-actions">
                             <button mat-stroked-button (click)="checkMcStatus()" [disabled]="mcLoading()">@if
                                 (mcLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
-                                    i18n>Check status</span>
+                                   >{{ 'Check status' | t }}</span>
                                 }</button>
                             <button mat-stroked-button (click)="generateMcCode()"
                                 [disabled]="mcLoading() || mcTimerSeconds() > 0">
-                                <span i18n>Regenerate code</span> @if (mcTimerSeconds() > 0) { ({{
+                                <span>{{ 'Regenerate code' | t }}</span> @if (mcTimerSeconds() > 0) { ({{
                                 formatTimer(mcTimerSeconds()) }}) }
                             </button>
                         </div>
@@ -589,8 +588,8 @@
                     <div class="form-actions">
                         <button mat-flat-button (click)="generateMcCode()" [disabled]="mcLoading()">
                             @if (mcLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
-                                i18n>Generate linking
-                                code</span> }
+                               >{{ 'Generate linking
+                                code' | t }}</span> }
                         </button>
                     </div>
                     }
@@ -598,30 +597,29 @@
 
                     <mat-divider class="section-divider" />
 
-                    <h3 class="section-heading"><ng-icon name="simpleDiscord" size="20" /> <span i18n>Discord</span>
+                    <h3 class="section-heading"><ng-icon name="simpleDiscord" size="20" /> <span>{{ 'Discord' | t }}</span>
                     </h3>
                     @if (op.isDiscordLinked) {
                     <div class="link-status linked">
                         <img src="/icons/ui/check.svg" alt="" aria-hidden="true" class="mc-icon" />
-                        <span i18n>Linked to <strong>{{ op.discordUsername }}</strong></span>
+                        <span>{{ 'Linked to' | t }} <strong>{{ op.discordUsername }}</strong></span>
                         <span class="spacer"></span>
                         <button mat-stroked-button color="warn" (click)="unlinkDc()" [disabled]="dcLoading()">
                             @if (dcLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
-                                i18n>Unlink</span> }
+                               >{{ 'Unlink' | t }}</span> }
                         </button>
                     </div>
                     } @else {
                     <div class="link-status"><img src="/icons/ui/forbidden_circle.svg" alt="" aria-hidden="true"
-                            class="mc-icon" /> <span i18n>Not linked</span></div>
+                            class="mc-icon" /> <span>{{ 'Not linked' | t }}</span></div>
                     @if (dcLinkData(); as dc) {
                     <div class="link-code-box">
                         <div class="link-instructions">
-                            <p i18n>{{ dc.instructions ?? 'Use this code with the Discord bot:' }}</p>
+                            <p>{{ dc.instructions ?? ('Use this code with the Discord bot:' | t) }}</p>
                         </div>
                         <div class="code-row">
                             <code class="code-value" style="font-family: 'Minecraft'">/link {{ dc.code }}</code>
-                            <button mat-icon-button (click)="copyLinkCode(dc.code)" i18n-matTooltip
-                                matTooltip="Copy command">
+                            <button mat-icon-button (click)="copyLinkCode(dc.code)" [matTooltip]="'Copy command' | t">
                                 <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
                             </button>
                         </div>
@@ -630,26 +628,24 @@
                             <img src="/icons/weather/meteor.svg" alt="" aria-hidden="true" class="mc-icon" />
                             <a [href]="dc.discordUrl" target="_blank" rel="noopener" style="font-family: 'Minecraft'">{{
                                 dc.discordUrl }}</a>
-                            <button mat-icon-button (click)="copyText(dc.discordUrl)" i18n-matTooltip
-                                matTooltip="Copy URL">
+                            <button mat-icon-button (click)="copyText(dc.discordUrl)" [matTooltip]="'Copy URL' | t">
                                 <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
                             </button>
                         </div>
                         }
                         <div class="link-detail"><img src="/icons/misc/clock.svg" alt="" aria-hidden="true"
                                 class="mc-icon" />
-                            @if (dcTimerSeconds() > 0) { <span i18n>Expires in {{ formatTimer(dcTimerSeconds())
-                                }}</span> }
-                            @else { <span i18n>Code expired</span> }
+                            @if (dcTimerSeconds() > 0) { <span>{{ 'Expires in' | t }} {{ formatTimer(dcTimerSeconds()) }}</span> }
+                            @else { <span>{{ 'Code expired' | t }}</span> }
                         </div>
                         <div class="form-actions">
                             <button mat-stroked-button (click)="checkDcStatus()" [disabled]="dcLoading()">@if
                                 (dcLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
-                                    i18n>Check status</span>
+                                   >{{ 'Check status' | t }}</span>
                                 }</button>
                             <button mat-stroked-button (click)="generateDcCode()"
                                 [disabled]="dcLoading() || dcTimerSeconds() > 0">
-                                <span i18n>Regenerate code</span> @if (dcTimerSeconds() > 0) { ({{
+                                <span>{{ 'Regenerate code' | t }}</span> @if (dcTimerSeconds() > 0) { ({{
                                 formatTimer(dcTimerSeconds()) }}) }
                             </button>
                         </div>
@@ -658,8 +654,8 @@
                     <div class="form-actions">
                         <button mat-flat-button (click)="generateDcCode()" [disabled]="dcLoading()">
                             @if (dcLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
-                                i18n>Generate linking
-                                code</span> }
+                               >{{ 'Generate linking
+                                code' | t }}</span> }
                         </button>
                     </div>
                     }
@@ -669,38 +665,37 @@
         </mat-tab>
 
         <!-- Security Keys -->
-        <mat-tab i18n-label label="Security Keys">
+        <mat-tab [label]="'Security Keys' | t">
             <div class="tab-content">
                 @if (loadingKeys()) {
-                <app-loading-spinner i18n-message message="Loading security keys…" />
+                <app-loading-spinner [message]="'Loading security keys…' | t" />
                 } @else if (securityKeys().length === 0) {
-                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No security keys" i18n-subtitle
-                    subtitle="Add a security key for extra account protection." />
+                <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No security keys' | t" [subtitle]="'Add a security key for extra account protection.' | t" />
                 } @else {
                 <div class="table-scroll">
                     <table mat-table [dataSource]="securityKeys()" class="full-width keys-table">
                         <ng-container matColumnDef="keyName">
-                            <th mat-header-cell *matHeaderCellDef i18n>Name</th>
+                            <th mat-header-cell *matHeaderCellDef>{{ 'Name' | t }}</th>
                             <td mat-cell *matCellDef="let key">{{ key.keyName }}</td>
                         </ng-container>
                         <ng-container matColumnDef="dateAdded">
-                            <th mat-header-cell *matHeaderCellDef i18n>Added</th>
+                            <th mat-header-cell *matHeaderCellDef>{{ 'Added' | t }}</th>
                             <td mat-cell *matCellDef="let key">{{ key.dateAdded | date:'mediumDate' }}</td>
                         </ng-container>
                         <ng-container matColumnDef="lastUsed">
-                            <th mat-header-cell *matHeaderCellDef i18n>Last used</th>
+                            <th mat-header-cell *matHeaderCellDef>{{ 'Last used' | t }}</th>
                             <td mat-cell *matCellDef="let key">@if (key.lastUsed) { {{ key.lastUsed | date:'medium' }} }
-                                @else { <span i18n>Never</span> }
+                                @else { <span>{{ 'Never' | t }}</span> }
                             </td>
                         </ng-container>
                         <ng-container matColumnDef="useCount">
-                            <th mat-header-cell *matHeaderCellDef i18n>Uses</th>
+                            <th mat-header-cell *matHeaderCellDef>{{ 'Uses' | t }}</th>
                             <td mat-cell *matCellDef="let key">{{ key.useCount }}</td>
                         </ng-container>
                         <ng-container matColumnDef="actions">
                             <th mat-header-cell *matHeaderCellDef></th>
                             <td mat-cell *matCellDef="let key"><button mat-icon-button color="warn"
-                                    (click)="deleteKey(key)" i18n-matTooltip matTooltip="Delete key"><img
+                                    (click)="deleteKey(key)" [matTooltip]="'Delete key' | t"><img
                                         src="/icons/fantasy/skull.svg" alt="" aria-hidden="true"
                                         class="mc-icon" /></button></td>
                         </ng-container>
@@ -713,8 +708,8 @@
                 <mat-divider class="section-divider" />
                 <div class="key-actions">
                     <mat-form-field appearance="outline" class="key-name-field">
-                        <mat-label i18n>Key name</mat-label>
-                        <input matInput [(ngModel)]="newKeyName" i18n-placeholder placeholder="e.g. YubiKey 5"
+                        <mat-label>{{ 'Key name' | t }}</mat-label>
+                        <input matInput [(ngModel)]="newKeyName" [placeholder]="'e.g. YubiKey 5' | t"
                             maxlength="100" />
                         <img matPrefix src="/icons/weather/lightning.svg" alt="" aria-hidden="true" class="mc-icon"
                             style="transform: translate(1px, 1px);" />
@@ -722,28 +717,28 @@
                     <button mat-flat-button (click)="registerSecurityKey()"
                         [disabled]="!newKeyName || registeringKey()">
                         @if (registeringKey()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
-                        <ng-container><span i18n>Register Key</span></ng-container> }
+                        <ng-container><span>{{ 'Register Key' | t }}</span></ng-container> }
                     </button>
                 </div>
             </div>
         </mat-tab>
 
         <!-- Save Manager -->
-        <mat-tab i18n-label label="Save Manager">
+        <mat-tab [label]="'Save Manager' | t">
             <div class="tab-content">
                 @if (saveQuota(); as q) {
                 <mat-card appearance="outlined" class="quota-card">
                     <mat-card-content>
                         <div class="quota-stats">
-                            <div class="quota-item"><span class="quota-label" i18n>Used</span> <span
+                            <div class="quota-item"><span class="quota-label">{{ 'Used' | t }}</span> <span
                                     class="quota-value">{{
                                     q.usedSpaceBytes | fileSize }}</span></div>
-                            <div class="quota-item"><span class="quota-label" i18n>Total</span> <span
+                            <div class="quota-item"><span class="quota-label">{{ 'Total' | t }}</span> <span
                                     class="quota-value">{{
                                     q.totalSpaceBytes | fileSize }}</span></div>
-                            <div class="quota-item"><span class="quota-label" i18n>Remaining</span> <span
+                            <div class="quota-item"><span class="quota-label">{{ 'Remaining' | t }}</span> <span
                                     class="quota-value">{{ q.remainingSpaceBytes | fileSize }}</span></div>
-                            <div class="quota-item"><span class="quota-label" i18n>Saves</span> <span
+                            <div class="quota-item"><span class="quota-label">{{ 'Saves' | t }}</span> <span
                                     class="quota-value">{{
                                     q.saveCount }}</span></div>
                         </div>
@@ -752,39 +747,36 @@
                 }
 
                 @if (loadingSaves()) {
-                <app-loading-spinner i18n-message message="Loading saves…" />
+                <app-loading-spinner [message]="'Loading saves…' | t" />
                 } @else if (saves().length === 0) {
-                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No saves" i18n-subtitle
-                    subtitle="Your Minecraft world saves will appear here." />
+                <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No saves' | t" [subtitle]="'Your Minecraft world saves will appear here.' | t" />
                 } @else {
                 <div class="table-scroll">
                     <table mat-table [dataSource]="saves()" class="full-width saves-table">
                         <ng-container matColumnDef="worldName">
-                            <th mat-header-cell *matHeaderCellDef i18n>World</th>
+                            <th mat-header-cell *matHeaderCellDef>{{ 'World' | t }}</th>
                             <td mat-cell *matCellDef="let s">{{ s.worldName }}</td>
                         </ng-container>
                         <ng-container matColumnDef="fileSizeBytes">
-                            <th mat-header-cell *matHeaderCellDef i18n>Size</th>
+                            <th mat-header-cell *matHeaderCellDef>{{ 'Size' | t }}</th>
                             <td mat-cell *matCellDef="let s">{{ s.fileSizeBytes | fileSize }}</td>
                         </ng-container>
                         <ng-container matColumnDef="createdAt">
-                            <th mat-header-cell *matHeaderCellDef i18n>Created</th>
+                            <th mat-header-cell *matHeaderCellDef>{{ 'Created' | t }}</th>
                             <td mat-cell *matCellDef="let s">{{ s.createdAt | date:'medium' }}</td>
                         </ng-container>
                         <ng-container matColumnDef="updatedAt">
-                            <th mat-header-cell *matHeaderCellDef i18n>Updated</th>
+                            <th mat-header-cell *matHeaderCellDef>{{ 'Updated' | t }}</th>
                             <td mat-cell *matCellDef="let s">{{ s.updatedAt | date:'medium' }}</td>
                         </ng-container>
                         <ng-container matColumnDef="actions">
                             <th mat-header-cell *matHeaderCellDef></th>
                             <td mat-cell *matCellDef="let s">
-                                <button mat-icon-button (click)="downloadSave(s)" [disabled]="downloadingIds().has(s.id)" i18n-matTooltip
-                                    matTooltip="Download">
+                                <button mat-icon-button (click)="downloadSave(s)" [disabled]="downloadingIds().has(s.id)" [matTooltip]="'Download' | t">
                                     @if (downloadingIds().has(s.id)) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
                                     <img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" /> }
                                 </button>
-                                <button mat-icon-button color="warn" (click)="deleteSave(s)" i18n-matTooltip
-                                    matTooltip="Delete"><img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true"
+                                <button mat-icon-button color="warn" (click)="deleteSave(s)" [matTooltip]="'Delete' | t"><img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true"
                                         class="mc-icon" /></button>
                             </td>
                         </ng-container>
@@ -797,8 +789,7 @@
                 <mat-divider class="section-divider" />
                 <div class="form-actions save-key-actions">
                     @if (saveVerified()) {
-                    <button mat-stroked-button (click)="regenerateKey()" i18n-matTooltip
-                        matTooltip="Regenerate save key">
+                    <button mat-stroked-button (click)="regenerateKey()" [matTooltip]="'Regenerate save key' | t">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
                             width="18" height="18" matButtonIcon class="mc-icon"
                             style="transform: translate(1px, 1px);">
@@ -806,7 +797,7 @@
                                 d="M2,4h25v1h-25zM2,5h25v1h-25zM2,6h25v1h-25zM2,7h3v1h-3zM9,7h11v1h-11zM23,7h4v1h-4zM2,8h3v1h-3zM9,8h11v1h-11zM23,8h4v1h-4zM2,9h3v1h-3zM9,9h11v1h-11zM23,9h4v1h-4zM2,10h25v1h-25zM2,11h25v1h-25zM2,12h25v1h-25zM2,13h10v1h-10zM16,13h11v1h-11zM2,14h10v1h-10zM16,14h11v1h-11zM2,15h10v1h-10zM16,15h11v1h-11zM2,16h25v1h-25zM2,17h25v1h-25zM2,18h25v1h-25zM2,19h3v1h-3zM9,19h11v1h-11zM23,19h4v1h-4zM2,20h3v1h-3zM9,20h11v1h-11zM23,20h4v1h-4zM2,21h3v1h-3zM9,21h11v1h-11zM23,21h4v1h-4zM2,22h25v1h-25zM2,23h25v1h-25zM2,24h25v1h-25z" />
                             <path fill="var(--mc-icon-shadow)"
                                 d="M5,7h4v1h-4zM20,7h3v1h-3zM27,7h3v1h-3zM5,8h4v1h-4zM20,8h3v1h-3zM27,8h3v1h-3zM5,9h4v1h-4zM20,9h3v1h-3zM27,9h3v1h-3zM27,10h3v1h-3zM27,11h3v1h-3zM27,12h3v1h-3zM12,13h4v1h-4zM27,13h3v1h-3zM12,14h4v1h-4zM27,14h3v1h-3zM12,15h4v1h-4zM27,15h3v1h-3zM27,16h3v1h-3zM27,17h3v1h-3zM27,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM27,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM27,20h3v1h-3zM5,21h4v1h-4zM20,21h3v1h-3zM27,21h3v1h-3zM27,22h3v1h-3zM27,23h3v1h-3zM27,24h3v1h-3zM5,25h25v1h-25zM5,26h25v1h-25zM5,27h25v1h-25z" />
-                        </svg> <span i18n>Regenerate save key</span>
+                        </svg> <span>{{ 'Regenerate save key' | t }}</span>
                     </button>
                     } @else {
                     <button mat-stroked-button (click)="unlockSaveKey()" [disabled]="verifyingSave()">
@@ -818,7 +809,7 @@
                                     d="M2,2h3v1h-3zM23,2h4v1h-4zM2,3h3v1h-3zM23,3h4v1h-4zM2,4h3v1h-3zM23,4h4v1h-4zM5,5h4v1h-4zM20,5h3v1h-3zM5,6h4v1h-4zM20,6h3v1h-3zM5,7h4v1h-4zM20,7h3v1h-3zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM12,11h4v1h-4zM12,12h4v1h-4zM12,13h4v1h-4zM2,14h3v1h-3zM9,14h3v1h-3zM16,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM9,15h3v1h-3zM16,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM9,16h3v1h-3zM16,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM9,17h3v1h-3zM16,17h4v1h-4zM23,17h4v1h-4zM5,18h4v1h-4zM20,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM2,21h3v1h-3zM9,21h3v1h-3zM16,21h4v1h-4zM23,21h4v1h-4zM2,22h3v1h-3zM9,22h3v1h-3zM16,22h4v1h-4zM23,22h4v1h-4zM2,23h3v1h-3zM9,23h3v1h-3zM16,23h4v1h-4zM23,23h4v1h-4z" />
                                 <path fill="var(--mc-icon-shadow)"
                                     d="M27,5h3v1h-3zM27,6h3v1h-3zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM12,18h4v1h-4zM27,18h3v1h-3zM12,19h4v1h-4zM27,19h3v1h-3zM12,20h4v1h-4zM27,20h3v1h-3zM5,24h4v1h-4zM12,24h4v1h-4zM20,24h3v1h-3zM27,24h3v1h-3zM5,25h4v1h-4zM12,25h4v1h-4zM20,25h3v1h-3zM27,25h3v1h-3zM5,26h4v1h-4zM12,26h4v1h-4zM20,26h3v1h-3zM27,26h3v1h-3z" />
-                            </svg> <span i18n>Unlock save key</span></ng-container> }
+                            </svg> <span>{{ 'Unlock save key' | t }}</span></ng-container> }
                     </button>
                     }
                 </div>

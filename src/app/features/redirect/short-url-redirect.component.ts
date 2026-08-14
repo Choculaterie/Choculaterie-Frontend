@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal, effect, ViewChild, ViewContainerRef, Injector } from '@angular/core';
+import { TPipe } from '../../core/i18n/t.pipe';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -12,7 +13,7 @@ import { LitematicViewerComponent, type LitematicViewerData } from '../../shared
 @Component({
     selector: 'app-short-url-redirect',
     standalone: true,
-    imports: [MatProgressBarModule, MatIconModule],
+    imports: [TPipe, MatProgressBarModule, MatIconModule],
     styles: [`
         :host {
             display: flex;
@@ -47,7 +48,7 @@ import { LitematicViewerComponent, type LitematicViewerData } from '../../shared
         @if (state() === 'loading') {
             <div class="state-overlay">
                 <mat-progress-bar mode="indeterminate" style="width:240px" />
-                <span i18n>Loading…</span>
+                <span>{{ 'Loading…' | t }}</span>
             </div>
         } @else if (state() === 'error') {
             <div class="state-overlay">

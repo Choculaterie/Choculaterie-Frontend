@@ -1,7 +1,7 @@
 <div class="page-container">
     <div class="page-header">
         <div class="header-left">
-            <button mat-icon-button routerLink="/mods" i18n-matTooltip matTooltip="Back to mods">
+            <button mat-icon-button routerLink="/mods" [matTooltip]="'Back to mods' | t">
                 <img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" class="mc-icon" />
             </button>
             <h1 class="page-title">
@@ -18,7 +18,7 @@
         <button mat-flat-button (click)="toggleForm()">
             <img [src]="showForm() ? '/icons/letters/X.svg' : '/icons/arrows/arrow_up.svg'" alt="" aria-hidden="true"
                 matButtonIcon class="mc-icon" />
-            <span i18n>{{ showForm() ? 'Cancel' : 'Add Version' }}</span>
+            <span>{{ (showForm() ? 'Cancel' : 'Add Version') | t }}</span>
         </button>
         }
     </div>
@@ -28,31 +28,31 @@
     <mat-card appearance="outlined" class="form-card" #formCard appDropZone [fullPage]="true" accept="image/*,.jar"
         (filesDrop)="onFilesDropped($event)">
         <mat-card-header>
-            <mat-card-title>@if (editingMod()) { <span i18n>Edit Version</span> } @else { <span i18n>New Version</span>
+            <mat-card-title>@if (editingMod()) { <span>{{ 'Edit Version' | t }}</span> } @else { <span>{{ 'New Version' | t }}</span>
                 }</mat-card-title>
         </mat-card-header>
         <mat-card-content>
             <div class="form-grid">
                 <mat-form-field appearance="outline" class="form-span">
-                    <mat-label i18n>Title</mat-label>
+                    <mat-label>{{ 'Title' | t }}</mat-label>
                     <input matInput [(ngModel)]="formTitle" [placeholder]="modName" maxlength="100" />
                 </mat-form-field>
                 <mat-form-field appearance="outline" class="form-span">
-                    <mat-label i18n>Description</mat-label>
+                    <mat-label>{{ 'Description' | t }}</mat-label>
                     <textarea matInput [(ngModel)]="formDesc" rows="2" maxlength="5000"></textarea>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>Release Type</mat-label>
+                    <mat-label>{{ 'Release Type' | t }}</mat-label>
                     <mat-select [(ngModel)]="formRelease">
-                        <mat-option value="Stable" i18n>Stable</mat-option>
-                        <mat-option value="Beta" i18n>Beta</mat-option>
-                        <mat-option value="Alpha" i18n>Alpha</mat-option>
-                        <mat-option value="Experimental" i18n>Experimental</mat-option>
-                        <mat-option value="Broken" i18n>Broken</mat-option>
+                        <mat-option value="Stable">{{ 'Stable' | t }}</mat-option>
+                        <mat-option value="Beta">{{ 'Beta' | t }}</mat-option>
+                        <mat-option value="Alpha">{{ 'Alpha' | t }}</mat-option>
+                        <mat-option value="Experimental">{{ 'Experimental' | t }}</mat-option>
+                        <mat-option value="Broken">{{ 'Broken' | t }}</mat-option>
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>Game Versions</mat-label>
+                    <mat-label>{{ 'Game Versions' | t }}</mat-label>
                     <mat-select [(ngModel)]="formVersions" multiple panelClass="game-versions-panel">
                         @for (v of allowedVersions(); track v.id) {
                         <mat-option [value]="v.name">{{ v.name }}</mat-option>
@@ -60,7 +60,7 @@
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>Platform</mat-label>
+                    <mat-label>{{ 'Platform' | t }}</mat-label>
                     <mat-select [(ngModel)]="formPlatform">
                         <mat-option value="Fabric">Fabric</mat-option>
                         <mat-option value="Quilt">Quilt</mat-option>
@@ -70,7 +70,7 @@
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>Dependencies</mat-label>
+                    <mat-label>{{ 'Dependencies' | t }}</mat-label>
                     <mat-select [(ngModel)]="formDependencies" multiple panelClass="game-versions-panel">
                         @for (title of availableDependencyTitles(); track title) {
                         <mat-option [value]="title">{{ title }}</mat-option>
@@ -88,7 +88,7 @@
                             d="M21,10h9v1h-9zM21,11h9v1h-9zM21,12h9v1h-9zM11,13h5v1h-5zM11,14h5v1h-5zM11,15h5v1h-5zM21,16h9v1h-9zM21,17h9v1h-9zM21,18h9v1h-9zM11,19h5v1h-5zM21,19h4v1h-4zM11,20h5v1h-5zM21,20h4v1h-4zM11,21h5v1h-5zM21,21h4v1h-4zM11,22h5v1h-5zM21,22h4v1h-4zM11,23h5v1h-5zM21,23h4v1h-4zM11,24h5v1h-5zM21,24h4v1h-4zM11,25h5v1h-5zM11,26h5v1h-5zM11,27h5v1h-5z" />
                     </svg>
                     <span class="file-name-text">
-                        @if (formFile) { {{ formFile.name }} } @else { <span i18n>Select Mod File (.jar)</span> }
+                        @if (formFile) { {{ formFile.name }} } @else { <span>{{ 'Select Mod File (.jar)' | t }}</span> }
                     </span>
                 </button>
                 <input #fileInput type="file" accept=".jar" hidden (change)="onFileSelected($event)" />
@@ -101,7 +101,7 @@
                             d="M16,5h4v1h-4zM27,5h3v1h-3zM16,6h4v1h-4zM27,6h3v1h-3zM16,7h4v1h-4zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM27,17h3v1h-3zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM9,21h3v1h-3zM9,22h3v1h-3zM9,23h3v1h-3zM5,24h4v1h-4zM16,24h4v1h-4zM27,24h3v1h-3zM5,25h4v1h-4zM16,25h4v1h-4zM27,25h3v1h-3zM5,26h4v1h-4zM16,26h4v1h-4zM27,26h3v1h-3z" />
                     </svg>
                     <span class="file-name-text">
-                        @if (formImage) { {{ formImage.name }} } @else { <span i18n>Select Image</span> }
+                        @if (formImage) { {{ formImage.name }} } @else { <span>{{ 'Select Image' | t }}</span> }
                     </span>
                 </button>
                 <input #imageInput type="file" accept="image/*" hidden (change)="onImageSelected($event)" />
@@ -112,7 +112,7 @@
                     <img [src]="imagePreview()" alt="Image preview" style="cursor:pointer" />
                     <div class="preview-actions">
                         <button mat-icon-button type="button" (click)="formImage = null; imagePreview.set(null)"
-                            i18n-matTooltip matTooltip="Remove">
+                            [matTooltip]="'Remove' | t">
                             <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
                         </button>
                     </div>
@@ -121,10 +121,10 @@
             </div>
             }
             <div class="form-actions">
-                <button mat-stroked-button (click)="resetForm()" i18n>Cancel</button>
+                <button mat-stroked-button (click)="resetForm()">{{ 'Cancel' | t }}</button>
                 <button mat-flat-button (click)="editingMod() ? updateMod() : createMod()"
                     [disabled]="formLoading() || !formVersions.length">
-                    @if (editingMod()) { <span i18n>Update</span> } @else { <span i18n>Create</span> }
+                    @if (editingMod()) { <span>{{ 'Update' | t }}</span> } @else { <span>{{ 'Create' | t }}</span> }
                 </button>
             </div>
         </mat-card-content>
@@ -135,11 +135,11 @@
     <div class="table-scroll">
         <div class="skeleton-table">
             <div class="skeleton-table-row skeleton-table-header">
-                <span i18n>Description</span>
-                <span i18n>Release</span>
-                <span i18n>Game Version</span>
-                <span i18n>Platform</span>
-                <span i18n>Downloads</span>
+                <span>{{ 'Description' | t }}</span>
+                <span>{{ 'Release' | t }}</span>
+                <span>{{ 'Game Version' | t }}</span>
+                <span>{{ 'Platform' | t }}</span>
+                <span>{{ 'Downloads' | t }}</span>
                 <span></span>
             </div>
             @for (n of [1,2,3,4,5]; track n) {
@@ -161,44 +161,43 @@
         </div>
     </div>
     } @else if (versions().length === 0) {
-    <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No versions" i18n-subtitle
-        subtitle="This mod has no versions yet." />
+    <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No versions' | t" [subtitle]="'This mod has no versions yet.' | t" />
     } @else {
     <div class="table-scroll">
         <table mat-table [dataSource]="versions()" class="mod-table">
             <ng-container matColumnDef="description">
-                <th mat-header-cell *matHeaderCellDef i18n>Description</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'Description' | t }}</th>
                 <td mat-cell *matCellDef="let mod">{{ mod.description }}</td>
             </ng-container>
             <ng-container matColumnDef="releaseType">
-                <th mat-header-cell *matHeaderCellDef i18n>Release</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'Release' | t }}</th>
                 <td mat-cell *matCellDef="let mod">
                     <mat-chip [class]="'release-' + mod.releaseType">{{ mod.releaseType }}</mat-chip>
                 </td>
             </ng-container>
             <ng-container matColumnDef="gameVersion">
-                <th mat-header-cell *matHeaderCellDef i18n>Game Version</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'Game Version' | t }}</th>
                 <td mat-cell *matCellDef="let mod">{{ mod.gameVersion }}</td>
             </ng-container>
             <ng-container matColumnDef="platform">
-                <th mat-header-cell *matHeaderCellDef i18n>Platform</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'Platform' | t }}</th>
                 <td mat-cell *matCellDef="let mod">{{ mod.platform }}</td>
             </ng-container>
             <ng-container matColumnDef="downloads">
-                <th mat-header-cell *matHeaderCellDef i18n>Downloads</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'Downloads' | t }}</th>
                 <td mat-cell *matCellDef="let mod">{{ mod.downloadCount | numFmt }}</td>
             </ng-container>
             <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef></th>
                 <td mat-cell *matCellDef="let mod">
-                    <button mat-icon-button (click)="downloadMod(mod)" i18n-matTooltip matTooltip="Download">
+                    <button mat-icon-button (click)="downloadMod(mod)" [matTooltip]="'Download' | t">
                         <img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" />
                     </button>
                     @if (isAdmin()) {
-                    <button mat-icon-button (click)="editMod(mod)" i18n-matTooltip matTooltip="Edit">
+                    <button mat-icon-button (click)="editMod(mod)" [matTooltip]="'Edit' | t">
                         <img src="/icons/weapons/pen.svg" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
                     </button>
-                    <button mat-icon-button (click)="deleteMod(mod)" i18n-matTooltip matTooltip="Delete">
+                    <button mat-icon-button (click)="deleteMod(mod)" [matTooltip]="'Delete' | t">
                         <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
                     </button>
                     }

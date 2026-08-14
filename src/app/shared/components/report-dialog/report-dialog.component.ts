@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { TPipe } from '../../../core/i18n/t.pipe';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,17 +17,17 @@ export interface ReportDialogResult {
 @Component({
     selector: 'app-report-dialog',
     standalone: true,
-    imports: [MatDialogModule, MatButtonModule, MatIconModule],
+    imports: [TPipe, MatDialogModule, MatButtonModule, MatIconModule],
     template: `
         <h2 mat-dialog-title>
-            <mat-icon>flag</mat-icon> Report {{ data.type === 'schematic' ? 'Schematic' : 'User' }}
+            <mat-icon>flag</mat-icon> <span>{{ 'Report' | t }}</span> {{ data.type === 'schematic' ? schematicLabel : userLabel }}
         </h2>
         <mat-dialog-content>
-            <p>Are you sure you want to report <strong>{{ data.targetName }}</strong>?</p>
+            <p>{{ 'Are you sure you want to report' | t }} <strong>{{ data.targetName }}</strong>?</p>
         </mat-dialog-content>
         <mat-dialog-actions align="end">
-            <button mat-stroked-button mat-dialog-close>Cancel</button>
-            <button mat-flat-button color="warn" (click)="submit()">Report</button>
+            <button mat-stroked-button mat-dialog-close>{{ 'Cancel' | t }}</button>
+            <button mat-flat-button color="warn" (click)="submit()">{{ 'Report' | t }}</button>
         </mat-dialog-actions>
     `,
     styles: [`
@@ -36,6 +37,9 @@ export interface ReportDialogResult {
 export class ReportDialogComponent {
     private dialogRef = inject(MatDialogRef<ReportDialogComponent>);
     data = inject<ReportDialogData>(MAT_DIALOG_DATA);
+
+    readonly schematicLabel = $localize`Schematic`;
+    readonly userLabel = $localize`User`;
 
     submit(): void {
         this.dialogRef.close({ confirmed: true } as ReportDialogResult);

@@ -131,6 +131,7 @@ const ROUTE_TITLES = {
     'mods': 'Mods',
     'users': 'Users',
     'faq': 'Faq',
+    'translations': 'Translations',
     'admin': 'Admin',
     'viewer': 'Viewer',
     'save-manager': 'Save manager',

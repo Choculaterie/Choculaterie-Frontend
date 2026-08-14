@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect, viewChild, ElementRef } from '@angular/core';
+import { TPipe } from '../../core/i18n/t.pipe';
 import { DatePipe, Location } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -55,7 +56,7 @@ export interface ServerLogEntryResponse {
 @Component({
     selector: 'app-admin',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         FormsModule,
         ReactiveFormsModule,
         RouterLink,

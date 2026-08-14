@@ -7,3 +7,4 @@ export { ReportDialogComponent, type ReportDialogData, type ReportDialogResult }
 export { ConfirmDialogComponent, type ConfirmDialogData } from './confirm-dialog/confirm-dialog.component';
 export { NavbarComponent } from './navbar/navbar.component';
 export { NotFoundComponent } from './not-found/not-found.component';
+export { SearchFieldComponent } from './search-field/search-field.component';

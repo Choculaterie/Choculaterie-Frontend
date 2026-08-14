@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { TPipe } from '../../../core/i18n/t.pipe';
 import { MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,7 +15,7 @@ export interface DownloadPickerData {
 @Component({
     selector: 'app-download-picker',
     standalone: true,
-    imports: [MatDialogModule, MatButtonModule, MatIconModule, MatListModule, MatDividerModule],
+    imports: [TPipe, MatDialogModule, MatButtonModule, MatIconModule, MatListModule, MatDividerModule],
     template: `
         <h2 mat-dialog-title>{{ data.title }}</h2>
         <mat-dialog-content>
@@ -29,13 +30,13 @@ export interface DownloadPickerData {
                 <mat-divider />
                 <a mat-list-item [mat-dialog-close]="{ type: 'zip' }">
                     <img src="/icons/arrows/tild_full_right.svg" alt="" aria-hidden="true" matListItemIcon class="mc-icon" />
-                    <span matListItemTitle>Download all as .zip</span>
+                    <span matListItemTitle>{{ 'Download all as .zip' | t }}</span>
                 </a>
                 }
             </mat-nav-list>
         </mat-dialog-content>
         <mat-dialog-actions align="end">
-            <button mat-stroked-button [mat-dialog-close]="null">Cancel</button>
+            <button mat-stroked-button [mat-dialog-close]="null">{{ 'Cancel' | t }}</button>
         </mat-dialog-actions>
     `,
     styles: [`

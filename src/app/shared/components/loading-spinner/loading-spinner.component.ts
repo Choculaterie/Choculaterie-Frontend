@@ -1,12 +1,13 @@
 import { Component, input } from '@angular/core';
+import { TPipe } from '../../../core/i18n/t.pipe';
 
 @Component({
     selector: 'app-loading-spinner',
     standalone: true,
-    imports: [],
+    imports: [TPipe, ],
     template: `
         <div class="loading-container">
-            <img src="loading.gif" alt="Loading…" class="loading-gif"
+            <img src="loading.gif" [alt]="'Loading…' | t" class="loading-gif"
                  [style.width.px]="diameter()" [style.height.px]="diameter()" />
             @if (message()) {
                 <p class="loading-msg">{{ message() }}</p>

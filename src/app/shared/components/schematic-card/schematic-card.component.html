@@ -13,26 +13,26 @@
         </div>
         }
         @if (schematic().forked) {
-        <button class="fork-badge" i18n-matTooltip matTooltip="View original" (click)="onViewOriginal($event)">
+        <button class="fork-badge" [matTooltip]="'View original' | t" (click)="onViewOriginal($event)">
             <img src="/icons/weapons/trident.svg" alt="" aria-hidden="true" class="mc-icon" />
         </button>
         }
         <mat-card-content>
             <span class="card-title">{{ schematic().name }}</span>
-            <p class="card-author"><span i18n>by</span>&nbsp;<app-user-link [username]="schematic().username" /></p>
+            <p class="card-author"><span>{{ 'by' | t }}</span>&nbsp;<app-user-link [username]="schematic().username" /></p>
             @if (schematic().description) {
             <p class="card-desc">{{ schematic().description }}</p>
             }
             <div class="card-meta">
-                <span i18n-matTooltip matTooltip="Downloads"><img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" /> {{ schematic().downloadCount
+                <span [matTooltip]="'Downloads' | t"><img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" /> {{ schematic().downloadCount
                     | numFmt }}</span>
-                <span i18n-matTooltip matTooltip="Views"><img src="/icons/math/infinite.svg" alt="" aria-hidden="true" class="mc-icon" /> {{ schematic().viewCount |
+                <span [matTooltip]="'Views' | t"><img src="/icons/math/infinite.svg" alt="" aria-hidden="true" class="mc-icon" /> {{ schematic().viewCount |
                     numFmt }}</span>
             </div>
             @if (schematic().tags.length) {
             <mat-chip-set class="card-tags">
                 @for (tag of visibleTags(); track tag) {
-                <mat-chip (click)="onTagClick($event, tag)" i18n-matTooltip matTooltip="Filter by tag">{{ tag
+                <mat-chip (click)="onTagClick($event, tag)" [matTooltip]="'Filter by tag' | t">{{ tag
                     }}</mat-chip>
                 }
                 @if (hasOverflowTags()) {
@@ -41,7 +41,7 @@
             </mat-chip-set>
             }
             <div class="card-footer">
-                <span class="card-type" (click)="onTypeClick($event)" i18n-matTooltip matTooltip="Filter by type">{{
+                <span class="card-type" (click)="onTypeClick($event)" [matTooltip]="'Filter by type' | t">{{
                     schematic().schematicType }}</span>
                 <span class="card-date">{{ schematic().publishDate | date:'mediumDate' }}</span>
             </div>

@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal, computed } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { DatePipe } from '@angular/common';
@@ -158,15 +159,30 @@ export type AdminUserDialogResult = 'deleted' | null;
     <h4 class="section-title">Actions</h4>
     <div class="detail-actions">
         <mat-form-field appearance="outline" class="compact-select">
-            <mat-label>Badge</mat-label>
-            <mat-select [value]="editBadge()" (selectionChange)="editBadge.set($event.value)">
-                <mat-option value="">None</mat-option>
+            <mat-label>Badges</mat-label>
+            <mat-select multiple [value]="editBadges()"
+                (selectionChange)="editBadges.set($event.value)">
                 @for (b of badges; track b[1]) {
-                <mat-option [value]="b[0]">{{ badgeLabels[b[1]] }}</mat-option>
+                <mat-option [value]="b[1]">{{ badgeLabels[b[1]] }}</mat-option>
                 }
             </mat-select>
             <mat-icon matPrefix><img src="/icons/ui/start.svg" alt="" aria-hidden="true" style="width: 100%; height: 100%;" /></mat-icon>
         </mat-form-field>
+
+        @if (editBadges().includes(translatorBadge)) {
+        <mat-form-field appearance="outline" class="compact-select">
+            <mat-label>Translator languages</mat-label>
+            <mat-select multiple [value]="editLocales()"
+                (selectionChange)="editLocales.set($event.value)">
+                @for (l of locales(); track l.code) {
+                <mat-option [value]="l.code">{{ l.label }}</mat-option>
+                }
+            </mat-select>
+            @if (!editLocales().length) {
+            <mat-error>Pick at least one language for the Translator badge.</mat-error>
+            }
+        </mat-form-field>
+        }
 
         <mat-form-field appearance="outline" class="compact-input">
             <mat-label>Quota (GB)</mat-label>
@@ -265,6 +281,10 @@ export type AdminUserDialogResult = 'deleted' | null;
     `],
 })
 export class AdminUserDialogComponent {
+    constructor() {
+        this.loadBadges();
+    }
+
     private adminApi = inject(AdminService);
     private toast = inject(ToastService);
     private confirmDlg = inject(MatDialog);
@@ -272,7 +292,11 @@ export class AdminUserDialogComponent {
     readonly u = inject<AdminUserDetailResponse>(MAT_DIALOG_DATA);
 
     readonly user = signal<AdminUserDetailResponse>({ ...this.u });
-    readonly editBadge = signal<string>(this.u.badge ?? '');
+    private http = inject(HttpClient);
+    readonly editBadges = signal<number[]>([]);
+    readonly editLocales = signal<string[]>([]);
+    readonly locales = signal<{ code: string; label: string }[]>([]);
+    readonly translatorBadge = Badge.Translator;
     readonly editQuota = signal<number>(Number(this.u.storageQuotaGb));
     readonly editNote = signal<string>(this.u.adminNote ?? '');
 
@@ -283,6 +307,21 @@ export class AdminUserDialogComponent {
     badgeIcon(b: unknown): string { const n = resolveBadge(b); return n != null ? BADGE_ICONS[n] : 'star'; }
     badgeColor(b: unknown): string { const n = resolveBadge(b); return n != null ? BADGE_COLORS[n] : '#888'; }
 
+    private loadBadges(): void {
+        this.http.get<{ badge: number; locale: string | null }[]>(
+            `/api/Translations/admin/user-badges/${this.u.id}`).subscribe({
+            next: (rows) => {
+                this.editBadges.set([...new Set((rows ?? []).map((r) => r.badge))]);
+                this.editLocales.set((rows ?? []).filter((r) => r.locale).map((r) => r.locale!));
+            },
+            error: () => { this.editBadges.set([]); this.editLocales.set([]); },
+        });
+        this.http.get<{ code: string; label: string }[]>('/api/Translations/locales').subscribe({
+            next: (r) => this.locales.set(r ?? []),
+            error: () => this.locales.set([]),
+        });
+    }
+
     copy(val: unknown): void {
         navigator.clipboard.writeText(String(val ?? '')).then(
             () => this.toast.success(ADMIN.copied),
@@ -290,18 +329,36 @@ export class AdminUserDialogComponent {
         );
     }
 
+    badgeError(): boolean {
+        return this.editBadges().includes(this.translatorBadge) && !this.editLocales().length;
+    }
+
     saveAll(): void {
-        const newBadge = this.editBadge() || null;
+        if (this.badgeError()) {
+            this.toast.error('Pick at least one language for the Translator badge.');
+            return;
+        }
         const newQuota = this.editQuota();
         const newNote = this.editNote().trim() || null;
 
+        // Translator is granted per language, so it expands into one row per locale.
+        const grants: { badge: number; locale: string | null }[] = [];
+        for (const b of this.editBadges()) {
+            if (b === this.translatorBadge) {
+                for (const loc of this.editLocales()) grants.push({ badge: b, locale: loc });
+            } else {
+                grants.push({ badge: b, locale: null });
+            }
+        }
+
         forkJoin([
-            this.adminApi.postApiAdminUsersIdBadge(this.u.id, { badge: newBadge }),
+            this.http.put(`/api/Translations/admin/user-badges/${this.u.id}`, { badges: grants }),
             this.adminApi.postApiAdminUsersIdQuota(this.u.id, { quotaGb: newQuota }),
             this.adminApi.postApiAdminUsersIdNote(this.u.id, { note: newNote }),
         ]).subscribe({
             next: () => {
-                this.user.update(prev => ({ ...prev, badge: newBadge, storageQuotaGb: newQuota, adminNote: newNote }));
+                const first = this.editBadges()[0];
+                this.user.update(prev => ({ ...prev, badge: first != null ? String(first) : null, storageQuotaGb: newQuota, adminNote: newNote }));
                 this.toast.success(ADMIN.changesSaved);
             },
             error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),

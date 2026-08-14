@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect, Injector, ElementRef, ViewChild, afterNextRender } from '@angular/core';
+import { TPipe } from '../../core/i18n/t.pipe';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { DatePipe, Location } from '@angular/common';
@@ -61,7 +62,7 @@ import { matfMinecraftColored } from '@ng-icons/material-file-icons/colored';
 @Component({
     selector: 'app-public-profile',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         DatePipe,
         RouterLink,
         FormsModule,
@@ -122,6 +123,12 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
 
     // ── Helpers ──
     badgeLabel(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_LABELS[n] : ''; }
+
+    /// Translator is per language, so its tooltip names the language it covers.
+    badgeTooltip(b: { badge: number; locale?: string | null }): string {
+        const label = this.badgeLabel(b.badge);
+        return b.locale ? `${label} (${b.locale.toUpperCase()})` : label;
+    }
     badgeIcon(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_ICONS[n] : 'star'; }
     badgeColor(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_COLORS[n] : '#888'; }
     roleLabel(role: unknown): string { return ROLE_LABELS[role as string] ?? String(role ?? ''); }

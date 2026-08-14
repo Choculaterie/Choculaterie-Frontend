@@ -1,5 +1,11 @@
-import { Component, OnInit, computed, effect, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { filter } from 'rxjs/operators';
+import { persistLocale, getLocale } from '../../../core/i18n/locale';
+import { TPipe } from '../../../core/i18n/t.pipe';
+import { TranslationStore } from '../../../core/i18n/translation.store';
+import { Badge } from '../../../core/enums';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -29,6 +35,7 @@ import { SkeletonImgComponent } from '../skeleton-img/skeleton-img.component';
         MatMenuModule,
         MatDividerModule,
         MatTooltipModule,
+        TPipe,
         UserImgPipe,
         SkeletonImgComponent,
     ],
@@ -36,10 +43,23 @@ import { SkeletonImgComponent } from '../skeleton-img/skeleton-img.component';
     styleUrl: './navbar.component.scss',
 })
 export class NavbarComponent implements OnInit {
+    private http = inject(HttpClient);
+    readonly locales = signal<{ code: string; label: string }[]>([]);
+
+    readonly currentCode = signal(getLocale().toUpperCase());
+
+    chooseLocale(code: string): void {
+        this.currentCode.set(code.toUpperCase());
+        persistLocale(code);
+        // Everything is on the t pipe now, so swapping the map re-renders in place.
+        this.translations.load(code);
+    }
+
     readonly session = inject(SessionService);
     readonly theme = inject(ThemeService);
     readonly realtime = inject(RealtimeService);
     private router = inject(Router);
+    private translations = inject(TranslationStore);
     private usersApi = inject(UsersService);
     private authApi = inject(ApiAuthService);
     private dialog = inject(MatDialog);
@@ -76,7 +96,43 @@ export class NavbarComponent implements OnInit {
         });
     }
 
+    // A half finished language reads worse than English, so only offer one once the
+    // website strings are at least half done. Mods are not in the catalog and so
+    // cannot count toward it.
+    /// Only people who can actually contribute see the entry point.
+    canTranslate(): boolean {
+        if (this.session.isAdminOrMod()) return true;
+        const badges = (this.session.profile() as { badges?: { badge: number }[] } | null)?.badges ?? [];
+        return badges.some((b) => b.badge === Badge.Translator || b.badge === Badge.Dev);
+    }
+
+    private loadLocales(): void {
+        this.http.get<{ locales: { code: string; label: string; total: number; translated: number }[] }>(
+            '/api/Translations/progress').subscribe({
+            next: (r) => {
+                const ready = (r?.locales ?? []).filter(
+                    (l) => l.total > 0 && l.translated / l.total >= 0.5);
+                this.locales.set([{ code: 'en', label: 'English' }, ...ready]);
+            },
+            error: () => this.locales.set([]),
+        });
+    }
+
     ngOnInit(): void {
+        this.loadLocales();
+
+        // Roles can change while a session is open, so re-read the profile on each
+        // navigation. Without it a newly granted badge stays invisible until logout.
+        this.router.events
+            .pipe(filter((e) => e instanceof NavigationEnd))
+            .subscribe(() => {
+                if (!this.session.isAuthenticated() || this.profileFetchPending) return;
+                this.profileFetchPending = true;
+                this.usersApi.getApiUsersMe().subscribe({
+                    next: (p) => { this.profileFetchPending = false; this.session.setProfile(p); },
+                    error: () => { this.profileFetchPending = false; },
+                });
+            });
         // Inbox seeding handled by auth effect above
     }
 

@@ -2,8 +2,8 @@
 
     <!-- ─── Hero ─── -->
     <section class="faq-hero">
-        <h1 i18n>Frequently Asked Questions</h1>
-        <p i18n>Can't find what you're looking for? Reach out below.</p>
+        <h1>{{ 'Frequently Asked Questions' | t }}</h1>
+        <p>{{ 'Can\'t find what you\'re looking for? Reach out below.' | t }}</p>
     </section>
 
     <!-- ─── FAQ Accordion ─── -->
@@ -15,7 +15,7 @@
             }
         </div>
         } @else if (faqs().length === 0) {
-        <p class="empty-msg" i18n>No questions yet, check back soon!</p>
+        <p class="empty-msg">{{ 'No questions yet, check back soon!' | t }}</p>
         } @else {
         <mat-accordion multi>
             @for (faq of faqs(); track faq.id) {
@@ -34,8 +34,8 @@
 
     <!-- ─── Contact ─── -->
     <section class="contact-section">
-        <h2 i18n>Still have questions?</h2>
-        <p i18n>Get in touch through any of the channels below, or fill out the form.</p>
+        <h2>{{ 'Still have questions?' | t }}</h2>
+        <p>{{ 'Get in touch through any of the channels below, or fill out the form.' | t }}</p>
 
         <div class="contact-channels">
             <div class="channel channel--copy" role="button" tabindex="0" (click)="copyContactHandle('@Choculat')"
@@ -43,7 +43,7 @@
                 (keydown.space)="$event.preventDefault(); copyContactHandle('@Choculat')">
                 <ng-icon name="simpleDiscord" size="16" />
                 <div>
-                    <strong i18n>Discord</strong>
+                    <strong>{{ 'Discord' | t }}</strong>
                     <span>&#64;Choculat</span>
                 </div>
             </div>
@@ -53,14 +53,14 @@
                 (keydown.space)="$event.preventDefault(); copyContactHandle('@choculat:24628528.xyz')">
                 <ng-icon name="simpleMatrix" size="16" />
                 <div>
-                    <strong i18n>Matrix</strong>
+                    <strong>{{ 'Matrix' | t }}</strong>
                     <span>&#64;choculat:24628528.xyz</span>
                 </div>
             </div>
             <div class="channel">
                 <img src="/icons/communication/mail.svg" alt="" aria-hidden="true" class="mc-icon" />
                 <div>
-                    <strong i18n>Email</strong>
+                    <strong>{{ 'Email' | t }}</strong>
                     <!-- Email assembled only on click - no mailto href in DOM -->
                     <span class="obf-email" role="link" tabindex="0" aria-label="support@choculaterie.com"
                         (click)="openEmail()" (keydown.enter)="openEmail()"></span>
@@ -73,26 +73,26 @@
         @if (submitted()) {
         <div class="success-state">
             <img src="/icons/ui/check.svg" alt="" aria-hidden="true" class="mc-icon success-icon" />
-            <h3 i18n>Message sent!</h3>
-            <p i18n>We'll get back to you as soon as possible.</p>
+            <h3>{{ 'Message sent!' | t }}</h3>
+            <p>{{ 'We\'ll get back to you as soon as possible.' | t }}</p>
         </div>
         } @else {
         <form [formGroup]="contactForm" (ngSubmit)="submit()" class="contact-form">
             <mat-form-field appearance="outline">
-                <mat-label i18n>Subject</mat-label>
+                <mat-label>{{ 'Subject' | t }}</mat-label>
                 <input matInput formControlName="title" maxlength="150" />
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-                <mat-label i18n>Message</mat-label>
+                <mat-label>{{ 'Message' | t }}</mat-label>
                 <textarea matInput formControlName="description" rows="5" maxlength="5000"></textarea>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-                <mat-label i18n>Your contact (optional)</mat-label>
-                <input matInput formControlName="contact" i18n-placeholder placeholder="email or Discord"
+                <mat-label>{{ 'Your contact (optional)' | t }}</mat-label>
+                <input matInput formControlName="contact" [placeholder]="'email or Discord' | t"
                     maxlength="200" />
-                <mat-hint i18n>So I can reply to you</mat-hint>
+                <mat-hint>{{ 'So I can reply to you' | t }}</mat-hint>
             </mat-form-field>
 
             <!-- Image attachments -->
@@ -105,7 +105,7 @@
                         <path fill="var(--mc-icon-shadow)"
                             d="M16,5h4v1h-4zM27,5h3v1h-3zM16,6h4v1h-4zM27,6h3v1h-3zM16,7h4v1h-4zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM27,17h3v1h-3zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM9,21h3v1h-3zM9,22h3v1h-3zM9,23h3v1h-3zM5,24h4v1h-4zM16,24h4v1h-4zM27,24h3v1h-3zM5,25h4v1h-4zM16,25h4v1h-4zM27,25h3v1h-3zM5,26h4v1h-4zM16,26h4v1h-4zM27,26h3v1h-3z" />
                     </svg>
-                    <span i18n>Attach images ({{ imageFiles.length }}/5)</span>
+                    <span>{{ 'Attach images' | t }} ({{ imageFiles.length }}/5)</span>
                 </button>
                 <input #imgInput type="file" accept="image/*" multiple hidden (change)="onImageChange($event)" />
                 @if (imagePreviews().length) {
@@ -114,8 +114,7 @@
                     <div class="preview-item" [class.cover]="true">
                         <img [src]="preview" [alt]="imageFiles[i]?.name" style="cursor:pointer" />
                         <div class="preview-actions">
-                            <button mat-icon-button type="button" (click)="removeImage(i)" i18n-matTooltip
-                                matTooltip="Remove">
+                            <button mat-icon-button type="button" (click)="removeImage(i)" [matTooltip]="'Remove' | t">
                                 <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
                             </button>
                         </div>
@@ -137,7 +136,7 @@
                     <img [src]="contactForm.invalid || submitting() || (!session.isAuthenticated() && !captchaData())
                         ? '/icons/fantasy/potion_throw_disabled.svg'
                         : '/icons/fantasy/potion_throw.svg'" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
-                    <span i18n>Send message</span>
+                    <span>{{ 'Send message' | t }}</span>
                 </button>
             </div>
         </form>

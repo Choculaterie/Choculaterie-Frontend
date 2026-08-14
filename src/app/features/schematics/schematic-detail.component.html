@@ -91,13 +91,13 @@
         <div class="title-row">
             <h1>{{ s.name }}</h1>
             @if (s.forked) {
-            <button mat-icon-button class="forked-badge" i18n-matTooltip matTooltip="View original"
+            <button mat-icon-button class="forked-badge" [matTooltip]="'View original' | t"
                 (click)="navigateToOriginal(s.forked)">
                 <img src="/icons/weapons/trident.svg" alt="" aria-hidden="true" class="mc-icon" />
             </button>
             }
         </div>
-        <p class="author"><span i18n>by</span>&nbsp;<app-user-link [username]="s.username" /> &middot; {{
+        <p class="author"><span>{{ 'by' | t }}</span>&nbsp;<app-user-link [username]="s.username" /> &middot; {{
             s.publishDate |
             date:'mediumDate'
             }}</p>
@@ -106,7 +106,7 @@
         <button mat-flat-button (click)="toggleLike()">
             <img [src]="s.isLiked ? '/icons/ui/star_thick.svg' : '/icons/ui/start_thick_empty.svg'" alt=""
                 aria-hidden="true" matButtonIcon class="mc-icon" />
-            @if (s.isLiked) { <span i18n>Starred</span> } @else { <span i18n>Star</span> }
+            @if (s.isLiked) { <span>{{ 'Starred' | t }}</span> } @else { <span>{{ 'Star' | t }}</span> }
         </button>
         @if (hasLitematicFiles()) {
         <button mat-stroked-button (click)="viewIn3DAction()">
@@ -116,7 +116,7 @@
                     d="M14,2h7v1h-7zM14,3h7v1h-7zM14,4h7v1h-7zM11,5h3v1h-3zM21,5h3v1h-3zM11,6h3v1h-3zM21,6h3v1h-3zM11,7h3v1h-3zM21,7h3v1h-3zM5,8h6v1h-6zM21,8h3v1h-3zM5,9h6v1h-6zM21,9h3v1h-3zM5,10h6v1h-6zM21,10h3v1h-3zM2,11h3v1h-3zM24,11h3v1h-3zM2,12h3v1h-3zM24,12h3v1h-3zM2,13h3v1h-3zM24,13h3v1h-3zM2,14h3v1h-3zM24,14h3v1h-3zM2,15h3v1h-3zM24,15h3v1h-3zM2,16h3v1h-3zM24,16h3v1h-3zM2,17h3v1h-3zM24,17h3v1h-3zM5,18h19v1h-19zM5,19h19v1h-19zM5,20h19v1h-19z" />
                 <path fill="var(--mc-icon-shadow)"
                     d="M18,5h3v1h-3zM18,6h3v1h-3zM18,7h3v1h-3zM14,8h4v1h-4zM24,8h3v1h-3zM14,9h4v1h-4zM24,9h3v1h-3zM14,10h4v1h-4zM24,10h3v1h-3zM8,11h6v1h-6zM8,12h6v1h-6zM8,13h6v1h-6zM5,14h3v1h-3zM27,14h3v1h-3zM5,15h3v1h-3zM27,15h3v1h-3zM5,16h3v1h-3zM27,16h3v1h-3zM5,17h3v1h-3zM27,17h3v1h-3zM27,18h3v1h-3zM27,19h3v1h-3zM27,20h3v1h-3zM8,21h19v1h-19zM8,22h19v1h-19zM8,23h19v1h-19z" />
-            </svg> <span i18n>View in 3D</span>
+            </svg> <span>{{ 'View in 3D' | t }}</span>
         </button>
         }
         <button mat-stroked-button (click)="download()">
@@ -126,7 +126,7 @@
                     d="M11,2h5v1h-5zM11,3h5v1h-5zM11,4h5v1h-5zM11,5h5v1h-5zM11,6h5v1h-5zM11,7h5v1h-5zM11,8h5v1h-5zM11,9h5v1h-5zM11,10h5v1h-5zM11,11h5v1h-5zM11,12h5v1h-5zM11,13h5v1h-5zM2,14h23v1h-23zM2,15h23v1h-23zM2,16h23v1h-23zM2,17h23v1h-23zM7,18h14v1h-14zM7,19h14v1h-14zM7,20h14v1h-14zM11,21h5v1h-5zM11,22h5v1h-5zM11,23h5v1h-5z" />
                 <path fill="var(--mc-icon-shadow)"
                     d="M16,5h5v1h-5zM16,6h5v1h-5zM16,7h5v1h-5zM16,8h5v1h-5zM16,9h5v1h-5zM16,10h5v1h-5zM16,11h5v1h-5zM16,12h5v1h-5zM16,13h5v1h-5zM21,18h9v1h-9zM21,19h9v1h-9zM21,20h9v1h-9zM16,21h9v1h-9zM16,22h9v1h-9zM16,23h9v1h-9zM16,24h5v1h-5zM16,25h5v1h-5zM16,26h5v1h-5z" />
-            </svg> <span i18n>Download ({{ s.downloadCount | numFmt }})</span>
+            </svg> <span>{{ 'Download' | t }} ({{ s.downloadCount | numFmt }})</span>
         </button>
         <button mat-icon-button [matMenuTriggerFor]="moreMenu">
             <img src="/icons/ui/power_2.svg" alt="" aria-hidden="true" class="mc-icon"
@@ -136,27 +136,27 @@
             <!-- @if (!s.forked) {
             <button mat-menu-item (click)="fork()">
                 <img src="/icons/weapons/trident.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" /> <span
-                    i18n>Fork</span>
+                   >{{ 'Fork' | t }}</span>
             </button>
             } -->
             <button mat-menu-item (click)="shareSchematic()">
                 <img src="/icons/misc/anchor.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" /> <span
-                    i18n>Share</span>
+                   >{{ 'Share' | t }}</span>
             </button>
             @if (!isOwner()) {
             <button mat-menu-item (click)="report()">
                 <img src="/icons/ui/flag.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" /> <span
-                    i18n>Report</span>
+                   >{{ 'Report' | t }}</span>
             </button>
             }
             @if (isOwner()) {
             <button mat-menu-item (click)="startEdit()">
                 <img src="/icons/weapons/pen.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" /> <span
-                    i18n>Edit</span>
+                   >{{ 'Edit' | t }}</span>
             </button>
             <button mat-menu-item (click)="deleteSchematic()" class="warn-item">
                 <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" /> <span
-                    i18n>Delete</span>
+                   >{{ 'Delete' | t }}</span>
             </button>
             }
         </mat-menu>
@@ -168,7 +168,7 @@
 <div class="tags-versions-grid">
     @if (s.tags.length) {
     <div class="tags-section">
-        <h3 i18n>Tags</h3>
+        <h3>{{ 'Tags' | t }}</h3>
         <mat-chip-set>
             @for (tag of s.tags; track tag) {
             <mat-chip [routerLink]="['/schematics']" [queryParams]="{tag: tag}">{{ tag }}</mat-chip>
@@ -178,7 +178,7 @@
     }
     @if (s.versions.length) {
     <div class="tags-section">
-        <h3 i18n>Versions</h3>
+        <h3>{{ 'Versions' | t }}</h3>
         <mat-chip-set>
             @for (ver of s.versions; track ver) {
             <mat-chip [routerLink]="['/schematics']" [queryParams]="{version: ver}">{{ ver }}</mat-chip>
@@ -192,7 +192,7 @@
 <div class="detail-grid">
     <!-- Description -->
     <mat-card appearance="outlined">
-        <mat-card-header><mat-card-title i18n>Description</mat-card-title></mat-card-header>
+        <mat-card-header><mat-card-title>{{ 'Description' | t }}</mat-card-title></mat-card-header>
         <mat-card-content>
             <div class="description markdown-content" [innerHTML]="(s.description || noDescriptionText) | markdown">
             </div>
@@ -201,7 +201,7 @@
 
     <!-- Details -->
     <mat-card appearance="outlined">
-        <mat-card-header><mat-card-title i18n>Details</mat-card-title></mat-card-header>
+        <mat-card-header><mat-card-title>{{ 'Details' | t }}</mat-card-title></mat-card-header>
         <mat-card-content>
             <ul class="detail-list">
                 <li><svg class="detail-icon" viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">
@@ -209,19 +209,19 @@
                             d="M7,1h15v1h-15zM7,2h15v1h-15zM7,3h15v1h-15zM4,4h3v1h-3zM22,4h3v1h-3zM4,5h3v1h-3zM22,5h3v1h-3zM4,6h3v1h-3zM22,6h3v1h-3zM1,7h3v1h-3zM10,7h9v1h-9zM25,7h3v1h-3zM1,8h3v1h-3zM10,8h9v1h-9zM25,8h3v1h-3zM1,9h3v1h-3zM10,9h9v1h-9zM25,9h3v1h-3zM1,10h3v1h-3zM7,10h3v1h-3zM19,10h3v1h-3zM25,10h3v1h-3zM1,11h3v1h-3zM7,11h3v1h-3zM19,11h3v1h-3zM25,11h3v1h-3zM1,12h3v1h-3zM7,12h3v1h-3zM19,12h3v1h-3zM25,12h3v1h-3zM1,13h3v1h-3zM7,13h3v1h-3zM13,13h3v1h-3zM19,13h3v1h-3zM25,13h3v1h-3zM1,14h3v1h-3zM7,14h3v1h-3zM13,14h3v1h-3zM19,14h3v1h-3zM25,14h3v1h-3zM1,15h3v1h-3zM7,15h3v1h-3zM13,15h3v1h-3zM19,15h3v1h-3zM25,15h3v1h-3zM1,16h3v1h-3zM7,16h3v1h-3zM19,16h3v1h-3zM25,16h3v1h-3zM1,17h3v1h-3zM7,17h3v1h-3zM19,17h3v1h-3zM25,17h3v1h-3zM1,18h3v1h-3zM7,18h3v1h-3zM19,18h3v1h-3zM25,18h3v1h-3zM1,19h3v1h-3zM10,19h9v1h-9zM25,19h3v1h-3zM1,20h3v1h-3zM10,20h9v1h-9zM25,20h3v1h-3zM1,21h3v1h-3zM10,21h9v1h-9zM25,21h3v1h-3zM4,22h3v1h-3zM22,22h3v1h-3zM4,23h3v1h-3zM22,23h3v1h-3zM4,24h3v1h-3zM22,24h3v1h-3zM7,25h15v1h-15zM7,26h15v1h-15zM7,27h15v1h-15z" />
                         <path fill="var(--mc-icon-shadow)"
                             d="M10,4h12v1h-12zM10,5h12v1h-12zM10,6h12v1h-12zM7,7h3v1h-3zM7,8h3v1h-3zM7,9h3v1h-3zM4,10h3v1h-3zM13,10h6v1h-6zM28,10h3v1h-3zM4,11h3v1h-3zM13,11h6v1h-6zM28,11h3v1h-3zM4,12h3v1h-3zM13,12h6v1h-6zM28,12h3v1h-3zM4,13h3v1h-3zM10,13h3v1h-3zM22,13h3v1h-3zM28,13h3v1h-3zM4,14h3v1h-3zM10,14h3v1h-3zM22,14h3v1h-3zM28,14h3v1h-3zM4,15h3v1h-3zM10,15h3v1h-3zM22,15h3v1h-3zM28,15h3v1h-3zM4,16h3v1h-3zM10,16h3v1h-3zM16,16h3v1h-3zM22,16h3v1h-3zM28,16h3v1h-3zM4,17h3v1h-3zM10,17h3v1h-3zM16,17h3v1h-3zM22,17h3v1h-3zM28,17h3v1h-3zM4,18h3v1h-3zM10,18h3v1h-3zM16,18h3v1h-3zM22,18h3v1h-3zM28,18h3v1h-3zM4,19h3v1h-3zM22,19h3v1h-3zM28,19h3v1h-3zM4,20h3v1h-3zM22,20h3v1h-3zM28,20h3v1h-3zM4,21h3v1h-3zM22,21h3v1h-3zM28,21h3v1h-3zM13,22h9v1h-9zM28,22h3v1h-3zM13,23h9v1h-9zM28,23h3v1h-3zM13,24h9v1h-9zM28,24h3v1h-3zM25,25h3v1h-3zM25,26h3v1h-3zM25,27h3v1h-3zM10,28h15v1h-15zM10,29h15v1h-15zM10,30h15v1h-15z" />
-                    </svg> <strong i18n>Type:</strong> {{ s.schematicType }}</li>
+                    </svg> <strong>{{ 'Type:' | t }}</strong> {{ s.schematicType }}</li>
                 <li><svg class="detail-icon" viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">
                         <path fill="currentColor"
                             d="M5,8h7v1h-7zM16,8h7v1h-7zM5,9h7v1h-7zM16,9h7v1h-7zM5,10h7v1h-7zM16,10h7v1h-7zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM2,14h3v1h-3zM12,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM12,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM12,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM12,17h4v1h-4zM23,17h4v1h-4zM5,18h7v1h-7zM16,18h7v1h-7zM5,19h7v1h-7zM16,19h7v1h-7zM5,20h7v1h-7zM16,20h7v1h-7z" />
                         <path fill="var(--mc-icon-shadow)"
                             d="M9,11h3v1h-3zM20,11h3v1h-3zM9,12h3v1h-3zM20,12h3v1h-3zM9,13h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM16,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM16,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM16,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM16,17h4v1h-4zM27,17h3v1h-3zM27,18h3v1h-3zM27,19h3v1h-3zM27,20h3v1h-3zM9,21h7v1h-7zM20,21h7v1h-7zM9,22h7v1h-7zM20,22h7v1h-7zM9,23h7v1h-7zM20,23h7v1h-7z" />
-                    </svg> <strong i18n>Visibility:</strong> {{ s.visibility }}</li>
+                    </svg> <strong>{{ 'Visibility:' | t }}</strong> {{ s.visibility }}</li>
                 <li><svg class="detail-icon" viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">
                         <path fill="currentColor"
                             d="M5,8h7v1h-7zM16,8h7v1h-7zM5,9h7v1h-7zM16,9h7v1h-7zM5,10h7v1h-7zM16,10h7v1h-7zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM2,14h3v1h-3zM12,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM12,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM12,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM12,17h4v1h-4zM23,17h4v1h-4zM5,18h7v1h-7zM16,18h7v1h-7zM5,19h7v1h-7zM16,19h7v1h-7zM5,20h7v1h-7zM16,20h7v1h-7z" />
                         <path fill="var(--mc-icon-shadow)"
                             d="M9,11h3v1h-3zM20,11h3v1h-3zM9,12h3v1h-3zM20,12h3v1h-3zM9,13h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM16,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM16,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM16,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM16,17h4v1h-4zM27,17h3v1h-3zM27,18h3v1h-3zM27,19h3v1h-3zM27,20h3v1h-3zM9,21h7v1h-7zM20,21h7v1h-7zM9,22h7v1h-7zM20,22h7v1h-7zM9,23h7v1h-7zM20,23h7v1h-7z" />
-                    </svg> <strong i18n>Views:</strong> {{ s.viewCount | numFmt }}</li>
+                    </svg> <strong>{{ 'Views:' | t }}</strong> {{ s.viewCount | numFmt }}</li>
                 @if (s.authorName) {
                 <li><svg class="detail-icon mc-icon" viewBox="0 0 32 32" shape-rendering="crispEdges"
                         aria-hidden="true">
@@ -229,7 +229,7 @@
                             d="M5,4h18v1h-18zM5,5h18v1h-18zM5,6h18v1h-18zM2,7h7v1h-7zM12,7h4v1h-4zM20,7h7v1h-7zM2,8h7v1h-7zM12,8h4v1h-4zM20,8h7v1h-7zM2,9h7v1h-7zM12,9h4v1h-4zM20,9h7v1h-7zM2,10h7v1h-7zM12,10h4v1h-4zM20,10h7v1h-7zM2,11h7v1h-7zM12,11h4v1h-4zM20,11h7v1h-7zM2,12h7v1h-7zM12,12h4v1h-4zM20,12h7v1h-7zM2,13h25v1h-25zM2,14h25v1h-25zM2,15h25v1h-25zM2,16h3v1h-3zM9,16h11v1h-11zM23,16h4v1h-4zM2,17h3v1h-3zM9,17h11v1h-11zM23,17h4v1h-4zM2,18h3v1h-3zM9,18h11v1h-11zM23,18h4v1h-4zM2,19h7v1h-7zM20,19h7v1h-7zM2,20h7v1h-7zM20,20h7v1h-7zM2,21h7v1h-7zM20,21h7v1h-7zM5,22h18v1h-18zM5,23h18v1h-18zM5,24h18v1h-18z" />
                         <path fill="var(--mc-icon-shadow)"
                             d="M9,7h3v1h-3zM16,7h4v1h-4zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM27,10h3v1h-3zM9,11h3v1h-3zM16,11h4v1h-4zM27,11h3v1h-3zM9,12h3v1h-3zM16,12h4v1h-4zM27,12h3v1h-3zM27,13h3v1h-3zM27,14h3v1h-3zM27,15h3v1h-3zM5,16h4v1h-4zM20,16h3v1h-3zM27,16h3v1h-3zM5,17h4v1h-4zM20,17h3v1h-3zM27,17h3v1h-3zM5,18h4v1h-4zM20,18h3v1h-3zM27,18h3v1h-3zM12,19h8v1h-8zM27,19h3v1h-3zM12,20h8v1h-8zM27,20h3v1h-3zM12,21h8v1h-8zM27,21h3v1h-3zM23,22h7v1h-7zM23,23h7v1h-7zM23,24h7v1h-7zM9,25h18v1h-18zM9,26h18v1h-18zM9,27h18v1h-18z" />
-                    </svg> <strong i18n>Author:</strong>
+                    </svg> <strong>{{ 'Author:' | t }}</strong>
                     @if (s.authorExist) {
                     <a [routerLink]="['/users', s.authorExist]">{{ s.authorExist }}</a>
                     } @else {
@@ -243,7 +243,7 @@
                             d="M18,2h3v1h-3zM24,2h3v1h-3zM18,3h3v1h-3zM24,3h3v1h-3zM18,4h3v1h-3zM24,4h3v1h-3zM14,5h4v1h-4zM21,5h3v1h-3zM14,6h4v1h-4zM21,6h3v1h-3zM14,7h4v1h-4zM21,7h3v1h-3zM14,8h7v1h-7zM24,8h3v1h-3zM14,9h7v1h-7zM24,9h3v1h-3zM14,10h7v1h-7zM24,10h3v1h-3zM14,11h10v1h-10zM14,12h10v1h-10zM14,13h10v1h-10zM11,14h3v1h-3zM11,15h3v1h-3zM11,16h3v1h-3zM11,17h3v1h-3zM8,18h3v1h-3zM8,19h3v1h-3zM8,20h3v1h-3zM5,21h3v1h-3zM5,22h3v1h-3zM5,23h3v1h-3zM2,24h3v1h-3zM2,25h3v1h-3zM2,26h3v1h-3z" />
                         <path fill="var(--mc-icon-shadow)"
                             d="M27,5h3v1h-3zM27,6h3v1h-3zM27,7h3v1h-3zM27,11h3v1h-3zM27,12h3v1h-3zM27,13h3v1h-3zM18,14h9v1h-9zM18,15h9v1h-9zM18,16h9v1h-9zM18,17h9v1h-9zM14,18h4v1h-4zM14,19h4v1h-4zM14,20h4v1h-4zM11,21h3v1h-3zM11,22h3v1h-3zM11,23h3v1h-3zM8,24h3v1h-3zM8,25h3v1h-3zM8,26h3v1h-3zM5,27h3v1h-3zM5,28h3v1h-3zM5,29h3v1h-3z" />
-                    </svg> <strong i18n>Forked from:</strong>
+                    </svg> <strong>{{ 'Forked from:' | t }}</strong>
                     <a [routerLink]="['/schematics', s.forked]">{{ s.forked }}</a>
                 </li>
                 }
@@ -253,13 +253,13 @@
                             d="M12,2h4v1h-4zM12,3h4v1h-4zM12,4h4v1h-4zM9,5h3v1h-3zM16,5h4v1h-4zM9,6h3v1h-3zM16,6h4v1h-4zM9,7h3v1h-3zM16,7h4v1h-4zM12,8h4v1h-4zM12,9h4v1h-4zM12,10h4v1h-4zM9,11h11v1h-11zM9,12h11v1h-11zM9,13h11v1h-11zM2,14h3v1h-3zM12,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM12,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM12,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM12,17h4v1h-4zM23,17h4v1h-4zM2,18h3v1h-3zM12,18h4v1h-4zM23,18h4v1h-4zM2,19h3v1h-3zM12,19h4v1h-4zM23,19h4v1h-4zM2,20h3v1h-3zM12,20h4v1h-4zM23,20h4v1h-4zM5,21h4v1h-4zM12,21h4v1h-4zM20,21h3v1h-3zM5,22h4v1h-4zM12,22h4v1h-4zM20,22h3v1h-3zM5,23h4v1h-4zM12,23h4v1h-4zM20,23h3v1h-3zM9,24h11v1h-11zM9,25h11v1h-11zM9,26h11v1h-11z" />
                         <path fill="var(--mc-icon-shadow)"
                             d="M20,8h3v1h-3zM20,9h3v1h-3zM20,10h3v1h-3zM16,14h7v1h-7zM16,15h7v1h-7zM16,16h7v1h-7zM16,17h7v1h-7zM5,18h4v1h-4zM16,18h4v1h-4zM27,18h3v1h-3zM5,19h4v1h-4zM16,19h4v1h-4zM27,19h3v1h-3zM5,20h4v1h-4zM16,20h4v1h-4zM27,20h3v1h-3zM16,21h4v1h-4zM27,21h3v1h-3zM16,22h4v1h-4zM27,22h3v1h-3zM16,23h4v1h-4zM27,23h3v1h-3zM23,24h4v1h-4zM23,25h4v1h-4zM23,26h4v1h-4zM12,27h11v1h-11zM12,28h11v1h-11zM12,29h11v1h-11z" />
-                    </svg> <strong i18n>External download:</strong>
-                    <a [href]="s.downloadLinkMediaFire" target="_blank" rel="noopener" i18n>Download link</a>
+                    </svg> <strong>{{ 'External download:' | t }}</strong>
+                    <a [href]="s.downloadLinkMediaFire" target="_blank" rel="noopener">{{ 'Download link' | t }}</a>
                 </li>
                 }
                 @if (s.youtubeLink) {
-                <li><mat-icon>smart_display</mat-icon> <strong i18n>External video:</strong>
-                    <a [href]="s.youtubeLink" target="_blank" rel="noopener" i18n>Watch video</a>
+                <li><mat-icon>smart_display</mat-icon> <strong>{{ 'External video:' | t }}</strong>
+                    <a [href]="s.youtubeLink" target="_blank" rel="noopener">{{ 'Watch video' | t }}</a>
                 </li>
                 }
             </ul>
@@ -271,27 +271,27 @@
 @if (editing()) {
 <mat-card appearance="outlined" class="edit-card" appDropZone [fullPage]="true" accept="image/*,.litematic"
     (filesDrop)="onEditFilesDropped($event)">
-    <mat-card-header><mat-card-title i18n>Edit Schematic</mat-card-title></mat-card-header>
+    <mat-card-header><mat-card-title>{{ 'Edit Schematic' | t }}</mat-card-title></mat-card-header>
     <mat-card-content>
         <form [formGroup]="editForm" (ngSubmit)="submitEdit()">
             <div class="edit-grid">
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>Name</mat-label>
+                    <mat-label>{{ 'Name' | t }}</mat-label>
                     <input matInput formControlName="name" maxlength="50" />
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>Type</mat-label>
+                    <mat-label>{{ 'Type' | t }}</mat-label>
                     <mat-select formControlName="schematicType">
-                        <mat-option value="Build" i18n>Build</mat-option>
-                        <mat-option value="Redstone" i18n>Redstone</mat-option>
+                        <mat-option value="Build">{{ 'Build' | t }}</mat-option>
+                        <mat-option value="Redstone">{{ 'Redstone' | t }}</mat-option>
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline" class="span-2">
-                    <mat-label i18n>Description</mat-label>
+                    <mat-label>{{ 'Description' | t }}</mat-label>
                     <textarea matInput formControlName="description" rows="3" maxlength="2000"></textarea>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>Tags</mat-label>
+                    <mat-label>{{ 'Tags' | t }}</mat-label>
                     <mat-chip-grid #editTagChipGrid>
                         @for (tag of editTagList(); track tag) {
                         <mat-chip-row (removed)="removeEditTag(tag)">
@@ -314,14 +314,14 @@
                             <span style="display:flex;align-items:center;gap:8px;">
                                 <img src="/icons/weapons/pen.svg" alt="" aria-hidden="true" class="mc-icon"
                                     style="transform: translate(-2px, -2px)" />
-                                <span i18n>Propose a new tag</span>
+                                <span>{{ 'Propose a new tag' | t }}</span>
                             </span>
                         </mat-option>
                         }
                     </mat-autocomplete>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>Versions</mat-label>
+                    <mat-label>{{ 'Versions' | t }}</mat-label>
                     <mat-chip-grid #editVersionChipGrid>
                         @for (ver of editVersionList(); track ver) {
                         <mat-chip-row (removed)="removeEditVersion(ver)">
@@ -342,7 +342,7 @@
                     </mat-autocomplete>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>Author Name</mat-label>
+                    <mat-label>{{ 'Author Name' | t }}</mat-label>
                     <input matInput formControlName="authorName" maxlength="100" [matAutocomplete]="editAuthorAuto"
                         (input)="onAuthorInput($any($event.target).value)" />
                     <mat-autocomplete #editAuthorAuto="matAutocomplete" [displayWith]="displayAuthor"
@@ -353,26 +353,26 @@
                     </mat-autocomplete>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>Visibility</mat-label>
+                    <mat-label>{{ 'Visibility' | t }}</mat-label>
                     <mat-select formControlName="visibility">
-                        <mat-option value="Public" i18n>Public</mat-option>
-                        <mat-option value="Unlisted" i18n>Unlisted</mat-option>
-                        <mat-option value="Private" i18n>Private</mat-option>
+                        <mat-option value="Public">{{ 'Public' | t }}</mat-option>
+                        <mat-option value="Unlisted">{{ 'Unlisted' | t }}</mat-option>
+                        <mat-option value="Private">{{ 'Private' | t }}</mat-option>
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>External download link</mat-label>
+                    <mat-label>{{ 'External download link' | t }}</mat-label>
                     <input matInput formControlName="downloadLinkMediaFire" maxlength="500" />
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>External video link</mat-label>
+                    <mat-label>{{ 'External video link' | t }}</mat-label>
                     <input matInput formControlName="youtubeLink" maxlength="500" />
                 </mat-form-field>
             </div>
 
             <!-- Pictures (unified list - supports cross-category drag & drop) -->
             <div class="file-previews">
-                <h4 i18n>Pictures ({{ editPictureItems().length }} / 10)</h4>
+                <h4>{{ 'Pictures' | t }} ({{ editPictureItems().length }} / 10)</h4>
                 <div class="preview-grid" cdkDropList cdkDropListOrientation="mixed"
                     (cdkDropListDropped)="dropPicture($event)">
                     @for (item of editPictureItems(); track $index; let i = $index) {
@@ -385,21 +385,19 @@
                             style="cursor:pointer" />
                         }
                         <div class="preview-actions">
-                            <button mat-icon-button type="button" (click)="removePicture(i)" i18n-matTooltip
-                                matTooltip="Remove">
+                            <button mat-icon-button type="button" (click)="removePicture(i)" [matTooltip]="'Remove' | t">
                                 <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
                             </button>
                             <span class="spacer"></span>
-                            <button mat-icon-button type="button" class="drag-handle" cdkDragHandle i18n-matTooltip
-                                matTooltip="Drag">
+                            <button mat-icon-button type="button" class="drag-handle" cdkDragHandle [matTooltip]="'Drag' | t">
                                 <img src="/icons/letters/side.svg" alt="" aria-hidden="true" class="mc-icon" />
                             </button>
                         </div>
                         @if (i === 0) {
-                        <span class="cover-badge" i18n>Cover</span>
+                        <span class="cover-badge">{{ 'Cover' | t }}</span>
                         }
                         @if (item.type === 'new') {
-                        <span class="new-badge" i18n>New</span>
+                        <span class="new-badge">{{ 'New' | t }}</span>
                         }
                     </div>
                     }
@@ -412,7 +410,7 @@
                                 d="M2,2h3v1h-3zM12,2h4v1h-4zM23,2h4v1h-4zM2,3h3v1h-3zM12,3h4v1h-4zM23,3h4v1h-4zM2,4h3v1h-3zM12,4h4v1h-4zM23,4h4v1h-4zM5,5h4v1h-4zM20,5h3v1h-3zM5,6h4v1h-4zM20,6h3v1h-3zM5,7h4v1h-4zM20,7h3v1h-3zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM9,14h3v1h-3zM16,14h4v1h-4zM9,15h3v1h-3zM16,15h4v1h-4zM9,16h3v1h-3zM16,16h4v1h-4zM9,17h3v1h-3zM16,17h4v1h-4zM5,18h4v1h-4zM20,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM2,21h3v1h-3zM12,21h4v1h-4zM23,21h4v1h-4zM2,22h3v1h-3zM12,22h4v1h-4zM23,22h4v1h-4zM2,23h3v1h-3zM12,23h4v1h-4zM23,23h4v1h-4z" />
                             <path fill="var(--mc-icon-shadow)"
                                 d="M16,5h4v1h-4zM27,5h3v1h-3zM16,6h4v1h-4zM27,6h3v1h-3zM16,7h4v1h-4zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM27,17h3v1h-3zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM9,21h3v1h-3zM9,22h3v1h-3zM9,23h3v1h-3zM5,24h4v1h-4zM16,24h4v1h-4zM27,24h3v1h-3zM5,25h4v1h-4zM16,25h4v1h-4zM27,25h3v1h-3zM5,26h4v1h-4zM16,26h4v1h-4zM27,26h3v1h-3z" />
-                        </svg> <span i18n>Add Pictures</span>
+                        </svg> <span>{{ 'Add Pictures' | t }}</span>
                     </button>
                     <input #editPictureInput type="file" accept="image/*" multiple hidden
                         (change)="onEditPicturesSelected($event)" />
@@ -422,7 +420,7 @@
 
             <!-- Litematic Files (unified list - supports cross-category drag & drop) -->
             <div class="file-previews">
-                <h4 i18n>Litematic Files ({{ editFileItems().length }} / 10)</h4>
+                <h4>{{ 'Litematic Files' | t }} ({{ editFileItems().length }} / 10)</h4>
                 <div class="file-list-preview" cdkDropList (cdkDropListDropped)="dropFile($event)">
                     @for (item of editFileItems(); track $index; let i = $index) {
                     <div class="file-item" [class.new-file]="item.type === 'new'" cdkDrag>
@@ -438,25 +436,21 @@
                             item.file.name }}</span>
                         <span class="spacer"></span>
                         @if (item.type === 'new') {
-                        <span class="new-badge-inline" i18n>New</span>
+                        <span class="new-badge-inline">{{ 'New' | t }}</span>
                         }
                         @if (item.file.name.endsWith('.litematic')) {
-                        <button mat-icon-button type="button" (click)="generatePictureForItem(item)" i18n-matTooltip
-                            matTooltip="Generate picture">
+                        <button mat-icon-button type="button" (click)="generatePictureForItem(item)" [matTooltip]="'Generate picture' | t">
                             <img src="/icons/ui/smile.svg" alt="" aria-hidden="true" class="mc-icon" />
                         </button>
-                        <button mat-icon-button type="button" (click)="viewIn3DForItem(item)" i18n-matTooltip
-                            matTooltip="View in 3D">
+                        <button mat-icon-button type="button" (click)="viewIn3DForItem(item)" [matTooltip]="'View in 3D' | t">
                             <img src="/icons/weather/cloud.svg" alt="" aria-hidden="true" class="mc-icon"
                                 style="transform: translateY(2px)" />
                         </button>
                         }
-                        <button mat-icon-button type="button" (click)="removeFile(i)" i18n-matTooltip
-                            matTooltip="Remove">
+                        <button mat-icon-button type="button" (click)="removeFile(i)" [matTooltip]="'Remove' | t">
                             <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
                         </button>
-                        <button mat-icon-button type="button" class="drag-handle" cdkDragHandle i18n-matTooltip
-                            matTooltip="Drag">
+                        <button mat-icon-button type="button" class="drag-handle" cdkDragHandle [matTooltip]="'Drag' | t">
                             <img src="/icons/letters/side.svg" alt="" aria-hidden="true" class="mc-icon" />
                         </button>
                     </div>
@@ -470,7 +464,7 @@
                                 d="M8,2h13v1h-13zM8,3h13v1h-13zM8,4h13v1h-13zM18,5h6v1h-6zM18,6h6v1h-6zM18,7h6v1h-6zM18,8h9v1h-9zM18,9h9v1h-9zM18,10h9v1h-9zM14,11h4v1h-4zM24,11h3v1h-3zM14,12h4v1h-4zM24,12h3v1h-3zM14,13h4v1h-4zM24,13h3v1h-3zM11,14h3v1h-3zM24,14h3v1h-3zM11,15h3v1h-3zM24,15h3v1h-3zM11,16h3v1h-3zM24,16h3v1h-3zM11,17h3v1h-3zM24,17h3v1h-3zM8,18h3v1h-3zM24,18h3v1h-3zM8,19h3v1h-3zM24,19h3v1h-3zM8,20h3v1h-3zM24,20h3v1h-3zM5,21h3v1h-3zM5,22h3v1h-3zM5,23h3v1h-3zM2,24h3v1h-3zM2,25h3v1h-3zM2,26h3v1h-3z" />
                             <path fill="var(--mc-icon-shadow)"
                                 d="M11,5h7v1h-7zM11,6h7v1h-7zM11,7h7v1h-7zM21,11h3v1h-3zM27,11h3v1h-3zM21,12h3v1h-3zM27,12h3v1h-3zM21,13h3v1h-3zM27,13h3v1h-3zM18,14h3v1h-3zM27,14h3v1h-3zM18,15h3v1h-3zM27,15h3v1h-3zM18,16h3v1h-3zM27,16h3v1h-3zM18,17h3v1h-3zM27,17h3v1h-3zM14,18h4v1h-4zM27,18h3v1h-3zM14,19h4v1h-4zM27,19h3v1h-3zM14,20h4v1h-4zM27,20h3v1h-3zM11,21h3v1h-3zM27,21h3v1h-3zM11,22h3v1h-3zM27,22h3v1h-3zM11,23h3v1h-3zM27,23h3v1h-3zM8,24h3v1h-3zM8,25h3v1h-3zM8,26h3v1h-3zM5,27h3v1h-3zM5,28h3v1h-3zM5,29h3v1h-3z" />
-                        </svg> <span i18n>Add Litematic Files</span>
+                        </svg> <span>{{ 'Add Litematic Files' | t }}</span>
                     </button>
                     <input #editLitematicInput type="file" accept=".litematic" multiple hidden
                         (change)="onEditLitematicsSelected($event)" />
@@ -484,10 +478,10 @@
             }
 
             <div class="edit-actions">
-                <button mat-stroked-button type="button" (click)="editing.set(false)" i18n>Cancel</button>
+                <button mat-stroked-button type="button" (click)="editing.set(false)">{{ 'Cancel' | t }}</button>
                 <button mat-flat-button type="submit" [disabled]="editForm.invalid || saving() || !isEditFileValid()">
-                    @if (saving()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span i18n>Save
-                        Changes</span> }
+                    @if (saving()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span>{{ 'Save
+                        Changes' | t }}</span> }
                 </button>
             </div>
         </form>
@@ -498,7 +492,7 @@
 <!-- Files -->
 @if (s.files.length) {
 <div class="files-section">
-    <h3><span i18n>Files</span></h3>
+    <h3><span>{{ 'Files' | t }}</span></h3>
     <div class="file-list">
         @for (f of s.files; track f.id) {
         <mat-card appearance="outlined" class="file-card">
@@ -509,15 +503,15 @@
                     <span class="file-name">{{ f.name.endsWith('.litematic') ? f.name.slice(0, -10) : f.name }}</span>
                     <span class="spacer"></span>
                     @if (f.name.endsWith('.litematic')) {
-                    <button mat-icon-button i18n-matTooltip matTooltip="Generate picture" (click)="generatePicture(f)">
+                    <button mat-icon-button [matTooltip]="'Generate picture' | t" (click)="generatePicture(f)">
                         <img src="/icons/ui/smile.svg" alt="" aria-hidden="true" class="mc-icon" />
                     </button>
-                    <button mat-icon-button i18n-matTooltip matTooltip="View in 3D" (click)="viewIn3D(f)">
+                    <button mat-icon-button [matTooltip]="'View in 3D' | t" (click)="viewIn3D(f)">
                         <img src="/icons/weather/cloud.svg" alt="" aria-hidden="true" class="mc-icon"
                             style="transform: translateY(2px)" />
                     </button>
                     }
-                    <button mat-icon-button i18n-matTooltip matTooltip="Download file" (click)="downloadSingleFile(f)">
+                    <button mat-icon-button [matTooltip]="'Download file' | t" (click)="downloadSingleFile(f)">
                         <img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" />
                     </button>
                 </div>

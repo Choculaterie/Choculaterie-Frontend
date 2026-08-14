@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal, ElementRef } from '@angular/core';
+import { TPipe } from '../../core/i18n/t.pipe';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -20,7 +21,7 @@ type PageState = 'loading' | 'pending' | 'approved' | 'cancelled' | 'expired' | 
 @Component({
     selector: 'app-save-manager-authorize',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         DatePipe,
         RouterLink,
         MatCardModule,

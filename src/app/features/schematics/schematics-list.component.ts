@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect, Injector, ElementRef, ViewChild, afterNextRender } from '@angular/core';
+import { TPipe } from '../../core/i18n/t.pipe';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -32,7 +33,7 @@ import { DropZoneDirective } from '../../shared/directives/drop-zone.directive';
 @Component({
     selector: 'app-schematics-list',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         FormsModule,
         ReactiveFormsModule,
         MatFormFieldModule,

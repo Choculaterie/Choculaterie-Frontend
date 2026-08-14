@@ -80,6 +80,36 @@ export const routes: Routes = [
             import('./features/internal/icon-batch-render.component').then((m) => m.IconBatchRenderComponent),
     },
     {
+        path: 'translations',
+        loadComponent: () =>
+            import('./features/translations/translations.component').then((m) => m.TranslationsComponent),
+    },
+    {
+        path: 'translations/:loc',
+        loadComponent: () =>
+            import('./features/translations/translations.component').then((m) => m.TranslationsComponent),
+    },
+    {
+        path: 'translations/:loc/:section',
+        loadComponent: () =>
+            import('./features/translations/translations.component').then((m) => m.TranslationsComponent),
+    },
+    {
+        path: 'translations/:loc/:section/:group',
+        loadComponent: () =>
+            import('./features/translations/translations.component').then((m) => m.TranslationsComponent),
+    },
+    {
+        path: 'translations/:loc/:section/:group/:index',
+        loadComponent: () =>
+            import('./features/translations/translations.component').then((m) => m.TranslationsComponent),
+    },
+    {
+        path: 'internal/i18n-harness',
+        loadComponent: () =>
+            import('./features/internal/i18n-harness.component').then((m) => m.I18nHarnessComponent),
+    },
+    {
         path: '**',
         redirectTo: 'not-found',
     },

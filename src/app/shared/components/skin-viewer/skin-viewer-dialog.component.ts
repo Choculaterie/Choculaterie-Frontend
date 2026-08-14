@@ -7,6 +7,7 @@ import {
     Inject,
     signal,
 } from '@angular/core';
+import { TPipe } from '../../../core/i18n/t.pipe';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,7 +22,7 @@ export interface SkinViewerDialogData {
 @Component({
     selector: 'app-skin-viewer-dialog',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         MatDialogModule,
         MatButtonModule,
         MatIconModule,

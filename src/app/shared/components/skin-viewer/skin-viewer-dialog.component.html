@@ -1,5 +1,5 @@
 <div class="skin-dialog">
-    <button mat-icon-button class="close-btn" mat-dialog-close i18n-matTooltip matTooltip="Close">
+    <button mat-icon-button class="close-btn" mat-dialog-close [matTooltip]="'Close' | t">
         <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
     </button>
 
@@ -23,7 +23,7 @@
             @if (playerName()) {
             <h2 class="player-name">{{ playerName() }}</h2>
             }
-            <p class="hint" i18n>Scroll to zoom · Drag to orbit</p>
+            <p class="hint">{{ 'Scroll to zoom · Drag to orbit' | t }}</p>
 
             <button mat-stroked-button (click)="toggleAnimation()" class="anim-btn" [disabled]="loading() || !!error()">
                 @if (animating()) {
@@ -43,11 +43,11 @@
                         d="M16,14h13v1h-13zM16,15h13v1h-13zM16,16h13v1h-13zM16,17h13v1h-13zM10,18h12v1h-12zM10,19h12v1h-12zM10,20h12v1h-12zM10,21h6v1h-6zM10,22h6v1h-6zM10,23h6v1h-6z" />
                 </svg>
                 }
-                @if (animating()) { <span i18n>Pause</span> } @else { <span i18n>Animate</span> }
+                @if (animating()) { <span>{{ 'Pause' | t }}</span> } @else { <span>{{ 'Animate' | t }}</span> }
             </button>
 
             <div class="screenshot-btns">
-                <button mat-stroked-button (click)="screenshotBody()" i18n-matTooltip matTooltip="Download 3D view"
+                <button mat-stroked-button (click)="screenshotBody()" [matTooltip]="'Download 3D view' | t"
                     [disabled]="loading() || !!error()" class="screenshot-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
                         height="18" class="mc-icon">
@@ -56,10 +56,10 @@
                         <path fill="var(--mc-icon-shadow)"
                             d="M10,4h12v1h-12zM10,5h12v1h-12zM10,6h12v1h-12zM7,7h3v1h-3zM7,8h3v1h-3zM7,9h3v1h-3zM4,10h3v1h-3zM13,10h6v1h-6zM28,10h3v1h-3zM4,11h3v1h-3zM13,11h6v1h-6zM28,11h3v1h-3zM4,12h3v1h-3zM13,12h6v1h-6zM28,12h3v1h-3zM4,13h3v1h-3zM10,13h3v1h-3zM22,13h3v1h-3zM28,13h3v1h-3zM4,14h3v1h-3zM10,14h3v1h-3zM22,14h3v1h-3zM28,14h3v1h-3zM4,15h3v1h-3zM10,15h3v1h-3zM22,15h3v1h-3zM28,15h3v1h-3zM4,16h3v1h-3zM10,16h3v1h-3zM16,16h3v1h-3zM22,16h3v1h-3zM28,16h3v1h-3zM4,17h3v1h-3zM10,17h3v1h-3zM16,17h3v1h-3zM22,17h3v1h-3zM28,17h3v1h-3zM4,18h3v1h-3zM10,18h3v1h-3zM16,18h3v1h-3zM22,18h3v1h-3zM28,18h3v1h-3zM4,19h3v1h-3zM22,19h3v1h-3zM28,19h3v1h-3zM4,20h3v1h-3zM22,20h3v1h-3zM28,20h3v1h-3zM4,21h3v1h-3zM22,21h3v1h-3zM28,21h3v1h-3zM13,22h9v1h-9zM28,22h3v1h-3zM13,23h9v1h-9zM28,23h3v1h-3zM13,24h9v1h-9zM28,24h3v1h-3zM25,25h3v1h-3zM25,26h3v1h-3zM25,27h3v1h-3zM10,28h15v1h-15zM10,29h15v1h-15zM10,30h15v1h-15z" />
                     </svg>
-                    <span i18n>Screenshot</span>
+                    <span>{{ 'Screenshot' | t }}</span>
                 </button>
                 <div class="screenshot-row">
-                    <button mat-stroked-button (click)="screenshotFace()" i18n-matTooltip matTooltip="Download face"
+                    <button mat-stroked-button (click)="screenshotFace()" [matTooltip]="'Download face' | t"
                         [disabled]="loading() || !!error()">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
                             width="18" height="18" class="mc-icon">
@@ -68,9 +68,9 @@
                             <path fill="var(--mc-icon-shadow)"
                                 d="M9,7h3v1h-3zM16,7h4v1h-4zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM27,10h3v1h-3zM9,11h3v1h-3zM16,11h4v1h-4zM27,11h3v1h-3zM9,12h3v1h-3zM16,12h4v1h-4zM27,12h3v1h-3zM27,13h3v1h-3zM27,14h3v1h-3zM27,15h3v1h-3zM5,16h4v1h-4zM20,16h3v1h-3zM27,16h3v1h-3zM5,17h4v1h-4zM20,17h3v1h-3zM27,17h3v1h-3zM5,18h4v1h-4zM20,18h3v1h-3zM27,18h3v1h-3zM12,19h8v1h-8zM27,19h3v1h-3zM12,20h8v1h-8zM27,20h3v1h-3zM12,21h8v1h-8zM27,21h3v1h-3zM23,22h7v1h-7zM23,23h7v1h-7zM23,24h7v1h-7zM9,25h18v1h-18zM9,26h18v1h-18zM9,27h18v1h-18z" />
                         </svg>
-                        <span i18n>Face</span>
+                        <span>{{ 'Face' | t }}</span>
                     </button>
-                    <button mat-stroked-button (click)="downloadSkin()" i18n-matTooltip matTooltip="Download skin file"
+                    <button mat-stroked-button (click)="downloadSkin()" [matTooltip]="'Download skin file' | t"
                         [disabled]="loading() || !!error()">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
                             width="18" height="18" matButtonIcon class="mc-icon">
@@ -79,7 +79,7 @@
                             <path fill="var(--mc-icon-shadow)"
                                 d="M16,5h5v1h-5zM16,6h5v1h-5zM16,7h5v1h-5zM16,8h5v1h-5zM16,9h5v1h-5zM16,10h5v1h-5zM16,11h5v1h-5zM16,12h5v1h-5zM16,13h5v1h-5zM21,18h9v1h-9zM21,19h9v1h-9zM21,20h9v1h-9zM16,21h9v1h-9zM16,22h9v1h-9zM16,23h9v1h-9zM16,24h5v1h-5zM16,25h5v1h-5zM16,26h5v1h-5z" />
                         </svg>
-                        <span i18n>Skin</span>
+                        <span>{{ 'Skin' | t }}</span>
                     </button>
                 </div>
             </div>

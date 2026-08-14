@@ -11,11 +11,10 @@
         </span>
         }
         @if (!loading() && !error() && !isDiffMode()) {
-        <button mat-stroked-button class="fly-toggle" (click)="toggleFlyMode()" i18n-matTooltip
-            matTooltip="Move around with WASD instead of dragging to rotate">
+        <button mat-stroked-button class="fly-toggle" (click)="toggleFlyMode()" [matTooltip]="'Move around with WASD instead of dragging to rotate' | t">
             <img [src]="flyMode() ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
                 alt="" aria-hidden="true" class="mc-icon" />
-            <span i18n>Fly mode</span>
+            <span>{{ 'Fly mode' | t }}</span>
         </button>
         }
         <button mat-icon-button mat-dialog-close>
@@ -42,27 +41,27 @@
 
         @if (flyMode() && !flyLocked()) {
         <div class="fly-enter-overlay" (click)="enterFlyMode()">
-            <span i18n>Click to enter fly mode</span>
+            <span>{{ 'Click to enter fly mode' | t }}</span>
         </div>
         }
 
         @if (!loading() && !error()) {
         <div class="viewer-hint">
             @if (flyMode()) {
-            <span i18n>WASD to move · Space/C for up/down · Shift to sprint · Esc to exit</span>
+            <span>{{ 'WASD to move · Space/C for up/down · Shift to sprint · Esc to exit' | t }}</span>
             } @else {
-            <span i18n>Drag to rotate · Right-click drag to pan · Scroll to zoom</span>
+            <span>{{ 'Drag to rotate · Right-click drag to pan · Scroll to zoom' | t }}</span>
             }
         </div>
         <a class="renderer-credit" href="https://github.com/Schem-at/schematic-renderer" target="_blank"
-            rel="noopener noreferrer" i18n>Based on: schematic-renderer</a>
+            rel="noopener noreferrer">{{ 'Based on: schematic-renderer' | t }}</a>
         }
     </div>
 
     @if (!loading() && !error() && !isDiffMode() && maxY > 1) {
     <div class="viewer-controls">
         <div class="slider-group">
-            <label i18n>Min Y: {{ currentMinY() }}</label>
+            <label>{{ 'Min Y:' | t }} {{ currentMinY() }}</label>
             <div #minYTrack class="slider-track-wrap">
                 <mat-slider [min]="minY" [max]="maxY" [step]="1" discrete>
                     <input matSliderThumb [value]="currentMinY()" (valueChange)="onMinYChange($event)" />
@@ -70,7 +69,7 @@
             </div>
         </div>
         <div class="slider-group">
-            <label i18n>Max Y: {{ currentMaxY() }}</label>
+            <label>{{ 'Max Y:' | t }} {{ currentMaxY() }}</label>
             <div #maxYTrack class="slider-track-wrap">
                 <mat-slider [min]="minY" [max]="maxY" [step]="1" discrete>
                     <input matSliderThumb [value]="currentMaxY()" (valueChange)="onMaxYChange($event)" />

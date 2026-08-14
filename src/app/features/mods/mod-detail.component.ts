@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal, Injector, afterNextRender } from '@angular/core';
+import { TPipe } from '../../core/i18n/t.pipe';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -30,7 +31,7 @@ import { parseModJar } from '../../shared/utils/parse-mod-jar';
 @Component({
     selector: 'app-mod-detail',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         FormsModule,
         RouterLink,
         MatCardModule,

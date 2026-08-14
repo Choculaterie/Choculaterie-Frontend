@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { TPipe } from '../../../core/i18n/t.pipe';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,7 +17,7 @@ export interface PasswordDialogData {
 @Component({
     selector: 'app-password-dialog',
     standalone: true,
-    imports: [MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatIconModule, FormsModule],
+    imports: [TPipe, MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatIconModule, FormsModule],
     styles: [
         '[matPrefix] { margin-right: 8px; }',
     ],
@@ -25,7 +26,7 @@ export interface PasswordDialogData {
         <mat-dialog-content>
             <p>{{ data.message }}</p>
             <mat-form-field appearance="outline" style="width: 100%; margin-top: 0.5rem;">
-                <mat-label>Password</mat-label>
+                <mat-label>{{ 'Password' | t }}</mat-label>
                 <input matInput type="password" [(ngModel)]="password" (keyup.enter)="submit()"
                     [disabled]="loading()" />
                 <img matPrefix src="/icons/weapons/swords.svg" alt="" aria-hidden="true" class="mc-icon"

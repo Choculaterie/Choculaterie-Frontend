@@ -1,9 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, TextOnlySnackBar } from '@angular/material/snack-bar';
+import { TranslationStore } from '../i18n/translation.store';
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
     private snackBar = inject(MatSnackBar);
+    private translations = inject(TranslationStore);
+
+    /// Labels arrive in English, so translate at the point of display.
+    private t(message: string): string {
+        return this.translations.translate(message);
+    }
     private _muteNextSuccess = false;
 
     /**
@@ -13,6 +20,7 @@ export class ToastService {
      * next success() call is silently suppressed to prevent a double-toast.
      */
     success(message: string, options?: { duration?: number; onUndo?: () => void }): MatSnackBarRef<TextOnlySnackBar> {
+        message = this.t(message);
         if (this._muteNextSuccess) {
             this._muteNextSuccess = false;
             return this.snackBar._openedSnackBarRef as unknown as MatSnackBarRef<TextOnlySnackBar>;
@@ -44,6 +52,7 @@ export class ToastService {
     }
 
     error(message: string, duration = 5000): MatSnackBarRef<TextOnlySnackBar> {
+        message = this.t(message);
         const ref = this.snackBar.open(message, 'Copy', {
             duration,
             panelClass: ['toast-error'],
@@ -57,6 +66,7 @@ export class ToastService {
     }
 
     info(message: string, duration = 3000): MatSnackBarRef<TextOnlySnackBar> {
+        message = this.t(message);
         const ref = this.snackBar.open(message, 'Dismiss', {
             duration,
             panelClass: ['toast-info'],

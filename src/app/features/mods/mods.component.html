@@ -1,7 +1,7 @@
 <div class="page-container">
     <div class="page-header">
         <h1 class="page-title"><img src="/icons/ui/hashtag.svg" alt="" aria-hidden="true" class="mc-icon"
-                style="transform: translateY(-2px);" /> <span i18n>Mods</span></h1>
+                style="transform: translateY(-2px);" /> <span>{{ 'Mods' | t }}</span></h1>
         <div class="header-actions">
             <a mat-stroked-button href="https://modrinth.com/user/Choculat" target="_blank" rel="noopener">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
@@ -10,13 +10,13 @@
                         d="M12,2h4v1h-4zM23,2h4v1h-4zM12,3h4v1h-4zM23,3h4v1h-4zM12,4h4v1h-4zM23,4h4v1h-4zM9,5h3v1h-3zM20,5h3v1h-3zM9,6h3v1h-3zM20,6h3v1h-3zM9,7h3v1h-3zM20,7h3v1h-3zM16,8h4v1h-4zM16,9h4v1h-4zM16,10h4v1h-4zM5,11h7v1h-7zM23,11h4v1h-4zM5,12h7v1h-7zM23,12h4v1h-4zM5,13h7v1h-7zM23,13h4v1h-4zM2,14h3v1h-3zM12,14h4v1h-4zM20,14h3v1h-3zM2,15h3v1h-3zM12,15h4v1h-4zM20,15h3v1h-3zM2,16h3v1h-3zM12,16h4v1h-4zM20,16h3v1h-3zM2,17h3v1h-3zM12,17h4v1h-4zM20,17h3v1h-3zM2,18h3v1h-3zM12,18h4v1h-4zM2,19h3v1h-3zM12,19h4v1h-4zM2,20h3v1h-3zM12,20h4v1h-4zM5,21h7v1h-7zM5,22h7v1h-7zM5,23h7v1h-7z" />
                     <path fill="var(--mc-icon-shadow)"
                         d="M16,5h4v1h-4zM27,5h3v1h-3zM16,6h4v1h-4zM27,6h3v1h-3zM16,7h4v1h-4zM27,7h3v1h-3zM12,8h4v1h-4zM23,8h4v1h-4zM12,9h4v1h-4zM23,9h4v1h-4zM12,10h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM9,14h3v1h-3zM27,14h3v1h-3zM9,15h3v1h-3zM27,15h3v1h-3zM9,16h3v1h-3zM27,16h3v1h-3zM9,17h3v1h-3zM27,17h3v1h-3zM5,18h4v1h-4zM16,18h4v1h-4zM23,18h4v1h-4zM5,19h4v1h-4zM16,19h4v1h-4zM23,19h4v1h-4zM5,20h4v1h-4zM16,20h4v1h-4zM23,20h4v1h-4zM16,21h4v1h-4zM16,22h4v1h-4zM16,23h4v1h-4zM9,24h7v1h-7zM9,25h7v1h-7zM9,26h7v1h-7z" />
-                </svg> <span i18n>Alternative Download (Modrinth)</span>
+                </svg> <span>{{ 'Alternative Download (Modrinth)' | t }}</span>
             </a>
             @if (isAdmin()) {
             <button mat-flat-button (click)="toggleCreate()">
                 <img [src]="showCreateForm() ? '/icons/letters/X.svg' : '/icons/arrows/arrow_up.svg'" alt=""
                     aria-hidden="true" matButtonIcon class="mc-icon" />
-                <span i18n>{{ showCreateForm() ? 'Cancel' : 'New Mod' }}</span>
+                <span>{{ (showCreateForm() ? 'Cancel' : 'New Mod') | t }}</span>
             </button>
             }
         </div>
@@ -26,29 +26,29 @@
     @if (showCreateForm() && isAdmin()) {
     <mat-card appearance="outlined" class="form-card" #formCard appDropZone [fullPage]="true" accept="image/*,.jar"
         (filesDrop)="onFilesDropped($event)">
-        <mat-card-header><mat-card-title i18n>Create New Mod</mat-card-title></mat-card-header>
+        <mat-card-header><mat-card-title>{{ 'Create New Mod' | t }}</mat-card-title></mat-card-header>
         <mat-card-content>
             <div class="form-grid">
                 <mat-form-field appearance="outline" class="full-width form-span">
-                    <mat-label i18n>Title</mat-label>
-                    <input matInput [(ngModel)]="formTitle" i18n-placeholder placeholder="My Awesome Mod" />
+                    <mat-label>{{ 'Title' | t }}</mat-label>
+                    <input matInput [(ngModel)]="formTitle" [placeholder]="'My Awesome Mod' | t" />
                 </mat-form-field>
                 <mat-form-field appearance="outline" class="full-width form-span">
-                    <mat-label i18n>Description</mat-label>
+                    <mat-label>{{ 'Description' | t }}</mat-label>
                     <textarea matInput [(ngModel)]="formDesc" rows="2"></textarea>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>Release Type</mat-label>
+                    <mat-label>{{ 'Release Type' | t }}</mat-label>
                     <mat-select [(ngModel)]="formRelease">
-                        <mat-option value="Stable" i18n>Stable</mat-option>
-                        <mat-option value="Beta" i18n>Beta</mat-option>
-                        <mat-option value="Alpha" i18n>Alpha</mat-option>
-                        <mat-option value="Experimental" i18n>Experimental</mat-option>
-                        <mat-option value="Broken" i18n>Broken</mat-option>
+                        <mat-option value="Stable">{{ 'Stable' | t }}</mat-option>
+                        <mat-option value="Beta">{{ 'Beta' | t }}</mat-option>
+                        <mat-option value="Alpha">{{ 'Alpha' | t }}</mat-option>
+                        <mat-option value="Experimental">{{ 'Experimental' | t }}</mat-option>
+                        <mat-option value="Broken">{{ 'Broken' | t }}</mat-option>
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>Game Versions</mat-label>
+                    <mat-label>{{ 'Game Versions' | t }}</mat-label>
                     <mat-select [(ngModel)]="formVersions" multiple panelClass="game-versions-panel">
                         @for (v of allowedVersions(); track v.id) {
                         <mat-option [value]="v.name">{{ v.name }}</mat-option>
@@ -56,7 +56,7 @@
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>Platform</mat-label>
+                    <mat-label>{{ 'Platform' | t }}</mat-label>
                     <mat-select [(ngModel)]="formPlatform">
                         <mat-option value="Fabric">Fabric</mat-option>
                         <mat-option value="Quilt">Quilt</mat-option>
@@ -66,7 +66,7 @@
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                    <mat-label i18n>Dependencies</mat-label>
+                    <mat-label>{{ 'Dependencies' | t }}</mat-label>
                     <mat-select [(ngModel)]="formDependencies" multiple panelClass="game-versions-panel">
                         @for (title of availableDependencyTitles(); track title) {
                         <mat-option [value]="title">{{ title }}</mat-option>
@@ -84,7 +84,7 @@
                             d="M21,10h9v1h-9zM21,11h9v1h-9zM21,12h9v1h-9zM11,13h5v1h-5zM11,14h5v1h-5zM11,15h5v1h-5zM21,16h9v1h-9zM21,17h9v1h-9zM21,18h9v1h-9zM11,19h5v1h-5zM21,19h4v1h-4zM11,20h5v1h-5zM21,20h4v1h-4zM11,21h5v1h-5zM21,21h4v1h-4zM11,22h5v1h-5zM21,22h4v1h-4zM11,23h5v1h-5zM21,23h4v1h-4zM11,24h5v1h-5zM21,24h4v1h-4zM11,25h5v1h-5zM11,26h5v1h-5zM11,27h5v1h-5z" />
                     </svg>
                     <span class="file-name-text">
-                        @if (formFile) { {{ formFile.name }} } @else { <span i18n>Select Mod File (.jar)</span> }
+                        @if (formFile) { {{ formFile.name }} } @else { <span>{{ 'Select Mod File (.jar)' | t }}</span> }
                     </span>
                 </button>
                 <input #fileInput type="file" accept=".jar" hidden (change)="onFileSelected($event)" />
@@ -97,7 +97,7 @@
                             d="M16,5h4v1h-4zM27,5h3v1h-3zM16,6h4v1h-4zM27,6h3v1h-3zM16,7h4v1h-4zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM27,17h3v1h-3zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM9,21h3v1h-3zM9,22h3v1h-3zM9,23h3v1h-3zM5,24h4v1h-4zM16,24h4v1h-4zM27,24h3v1h-3zM5,25h4v1h-4zM16,25h4v1h-4zM27,25h3v1h-3zM5,26h4v1h-4zM16,26h4v1h-4zM27,26h3v1h-3z" />
                     </svg>
                     <span class="file-name-text">
-                        @if (formImage) { {{ formImage.name }} } @else { <span i18n>Select Image</span> }
+                        @if (formImage) { {{ formImage.name }} } @else { <span>{{ 'Select Image' | t }}</span> }
                     </span>
                 </button>
                 <input #imageInput type="file" accept="image/*" hidden (change)="onImageSelected($event)" />
@@ -108,7 +108,7 @@
                     <img [src]="imagePreview()" alt="Image preview" style="cursor:pointer" />
                     <div class="preview-actions">
                         <button mat-icon-button type="button" (click)="formImage = null; imagePreview.set(null)"
-                            i18n-matTooltip matTooltip="Remove">
+                            [matTooltip]="'Remove' | t">
                             <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
                         </button>
                     </div>
@@ -117,11 +117,9 @@
             </div>
             }
             <div class="form-actions">
-                <button mat-stroked-button (click)="cancelCreate()" i18n>Cancel</button>
+                <button mat-stroked-button (click)="cancelCreate()">{{ 'Cancel' | t }}</button>
                 <button mat-flat-button (click)="createMod()"
-                    [disabled]="!formTitle.trim() || !formVersions.length || formLoading()" i18n>
-                    Create
-                </button>
+                    [disabled]="!formTitle.trim() || !formVersions.length || formLoading()">{{ 'Create' | t }}</button>
             </div>
         </mat-card-content>
     </mat-card>
@@ -149,8 +147,7 @@
         }
     </div>
     } @else if (modSummaries().length === 0) {
-    <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No mods available" i18n-subtitle
-        subtitle="Check back later for mod releases" />
+    <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No mods available' | t" [subtitle]="'Check back later for mod releases' | t" />
     } @else {
     <div class="mod-grid">
         @for (mod of modSummaries(); track mod.name) {
@@ -173,14 +170,14 @@
                         </div>
                     </div>
                     <div class="mod-card-meta">
-                        <mat-chip i18n-matTooltip matTooltip="Versions" i18n>{{ mod.versionCount }} version{{
+                        <mat-chip [matTooltip]="'Versions' | t">{{ mod.versionCount }} {{ 'version' | t }}{{
                             mod.versionCount > 1 ? 's' : '' }}</mat-chip>
-                        <span class="meta-stat" i18n-matTooltip matTooltip="Downloads"><img
+                        <span class="meta-stat" [matTooltip]="'Downloads' | t"><img
                                 src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" /> {{
                             mod.totalDownloads | numFmt }}</span>
-                        <span class="meta-stat" i18n-matTooltip matTooltip="Minecraft Version"><ng-icon
+                        <span class="meta-stat" [matTooltip]="'Minecraft Version' | t"><ng-icon
                                 name="matfMinecraftColored" size="16" /> {{ mod.versionRange }}</span>
-                        <span class="meta-stat" i18n-matTooltip matTooltip="Platform">
+                        <span class="meta-stat" [matTooltip]="'Platform' | t">
                             @if (mod.platform === 'Fabric') {
                             <ng-icon name="matfMinecraftFabricColored" size="16" />
                             } @else {

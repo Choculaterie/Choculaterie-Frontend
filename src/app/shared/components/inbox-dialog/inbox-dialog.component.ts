@@ -1,4 +1,5 @@
 import { Component, inject, computed } from '@angular/core';
+import { TPipe } from '../../../core/i18n/t.pipe';
 import { Router } from '@angular/router';
 import { MatDialogModule, MatDialogRef, MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,7 +14,7 @@ import { TicketReplyViewDialogComponent } from '../ticket-reply-view-dialog/tick
 @Component({
     selector: 'app-inbox-dialog',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         MatDialogModule,
         MatButtonModule,
         MatTooltipModule,
@@ -22,15 +23,15 @@ import { TicketReplyViewDialogComponent } from '../ticket-reply-view-dialog/tick
     template: `
 <div mat-dialog-title class="inbox-dlg-title">
     <div class="title-left">
-        <span i18n>Inbox</span>
+        <span>{{ 'Inbox' | t }}</span>
     </div>
     <div class="title-right">
         @if (hasAnyUnread()) {
-        <button mat-icon-button (click)="markAllRead()" matTooltip="Mark all read" i18n-matTooltip class="check-icon-btn check-gray" [style.filter]="theme.isDark() ? 'none' : 'invert(1)'">
+        <button mat-icon-button (click)="markAllRead()" [matTooltip]="'Mark all read' | t" class="check-icon-btn check-gray" [style.filter]="theme.isDark() ? 'none' : 'invert(1)'">
             <img src="/icons/ui/check.svg" alt="Mark all read">
         </button>
         } @else if (items().length > 0) {
-        <button mat-icon-button (click)="markAllUnread()" matTooltip="Mark all unread" i18n-matTooltip class="check-icon-btn" [style.filter]="theme.isDark() ? 'none' : 'invert(1)'">
+        <button mat-icon-button (click)="markAllUnread()" [matTooltip]="'Mark all unread' | t" class="check-icon-btn" [style.filter]="theme.isDark() ? 'none' : 'invert(1)'">
             <img src="/icons/ui/check.svg" alt="Mark all unread">
         </button>
         }
@@ -44,7 +45,7 @@ import { TicketReplyViewDialogComponent } from '../ticket-reply-view-dialog/tick
     @if (items().length === 0) {
     <div class="inbox-empty">
         <img src="/icons/communication/mail.svg" alt="No notifications" class="empty-icon">
-        <p i18n>No notifications</p>
+        <p>{{ 'No notifications' | t }}</p>
     </div>
     } @else {
     @for (n of items(); track trackItem(n)) {
@@ -59,7 +60,7 @@ import { TicketReplyViewDialogComponent } from '../ticket-reply-view-dialog/tick
             <img src="/icons/ui/check.svg" alt="">
         </button>
         <button mat-icon-button class="inbox-action-btn inbox-delete-btn" (click)="deleteNotification(n, $event)"
-            matTooltip="Delete" i18n-matTooltip>
+            [matTooltip]="'Delete' | t">
             <img src="/icons/fantasy/skull.svg" alt="Delete" style="width: 18px; height: 18px;">
         </button>
     </div>

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { TPipe } from '../../../core/i18n/t.pipe';
 import { MatDividerModule } from '@angular/material/divider';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { simpleGithub, simpleDiscord } from '@ng-icons/simple-icons';
@@ -6,12 +7,12 @@ import { simpleGithub, simpleDiscord } from '@ng-icons/simple-icons';
 @Component({
     selector: 'app-footer',
     standalone: true,
-    imports: [MatDividerModule, NgIconComponent],
+    imports: [TPipe, MatDividerModule, NgIconComponent],
     viewProviders: [provideIcons({ simpleGithub, simpleDiscord })],
     template: `
         <mat-divider />
         <footer class="footer">
-            <span class="disclaimer">Choculaterie is not affiliated with Mojang Studios or Microsoft.</span>
+            <span class="disclaimer">{{ 'Choculaterie is not affiliated with Mojang Studios or Microsoft.' | t }}</span>
             <div class="footer-links">
                 <a href="https://github.com/Choculaterie" target="_blank" rel="noopener" aria-label="GitHub">
                     <ng-icon name="simpleGithub" size="18" /> GitHub

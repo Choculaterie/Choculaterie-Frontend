@@ -2,6 +2,7 @@ import {
     Component, ElementRef, ViewChild,
     inject, signal, output,
 } from '@angular/core';
+import { TPipe } from '../../../core/i18n/t.pipe';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { CaptchaService } from '../../../api/captcha';
@@ -14,7 +15,7 @@ const SNAP_THRESHOLD = 20; // backend tolerance in px
 @Component({
     selector: 'app-captcha',
     standalone: true,
-    imports: [MatButtonModule, MatIconModule],
+    imports: [TPipe, MatButtonModule, MatIconModule],
     templateUrl: './captcha.component.html',
     styleUrl: './captcha.component.scss',
 })

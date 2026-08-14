@@ -1,4 +1,5 @@
 import { Component, OnDestroy, inject, signal, ViewChild } from '@angular/core';
+import { TPipe } from '../../../../core/i18n/t.pipe';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -17,7 +18,7 @@ import { AUTH } from '../../../../i18n/labels';
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [
+  imports: [TPipe, 
     ReactiveFormsModule,
     RouterLink,
     MatCardModule,

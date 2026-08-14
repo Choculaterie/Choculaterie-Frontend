@@ -1,4 +1,5 @@
 import { Component, OnInit, DestroyRef, inject, signal, computed, effect, type Signal } from '@angular/core';
+import { TPipe } from '../../core/i18n/t.pipe';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -46,7 +47,7 @@ import { environment } from '../../environments/environment';
 @Component({
     selector: 'app-schematic-detail',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         RouterLink,
         DatePipe,
         ReactiveFormsModule,

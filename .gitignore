@@ -44,3 +44,5 @@ __screenshots__/
 Thumbs.db
 deploy-frontend.sh
 .claude/settings.json
+public/assets/i18n-messages.json
+tools/.auth.json

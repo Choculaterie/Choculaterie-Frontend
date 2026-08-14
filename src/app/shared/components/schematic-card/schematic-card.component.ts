@@ -1,4 +1,5 @@
 import { Component, input, inject, computed, signal, effect } from '@angular/core';
+import { TPipe } from '../../../core/i18n/t.pipe';
 import { Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -16,7 +17,7 @@ import { environment } from '../../../environments/environment';
 @Component({
     selector: 'app-schematic-card',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         RouterLink,
         DatePipe,
         MatCardModule,

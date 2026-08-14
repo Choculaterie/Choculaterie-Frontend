@@ -1,11 +1,11 @@
 <div class="card-page">
   <mat-card class="auth-card" appearance="outlined">
     <mat-card-header>
-      <mat-card-title>@if (step() === 'register') { <span i18n>Create an account</span> } @else { <span i18n>Verify your
-          email</span> }</mat-card-title>
+      <mat-card-title>@if (step() === 'register') { <span>{{ 'Create an account' | t }}</span> } @else { <span>{{ 'Verify your
+          email' | t }}</span> }</mat-card-title>
       <mat-card-subtitle>
-        @if (step() === 'register') { <span i18n>Join the Choculaterie community</span> }
-        @else { <span i18n>A code was sent to your email</span> }
+        @if (step() === 'register') { <span>{{ 'Join the Choculaterie community' | t }}</span> }
+        @else { <span>{{ 'A code was sent to your email' | t }}</span> }
       </mat-card-subtitle>
     </mat-card-header>
 
@@ -20,36 +20,36 @@
       @if (step() === 'register') {
       <form [formGroup]="registerForm" (ngSubmit)="submitRegister()">
         <mat-form-field class="full-width" appearance="outline">
-          <mat-label i18n>Username</mat-label>
+          <mat-label>{{ 'Username' | t }}</mat-label>
           <input matInput formControlName="username" autocomplete="username" maxlength="15" />
           <img matPrefix src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" class="mc-icon" />
           <mat-error>
-            @if (registerForm.get('username')?.hasError('required')) { <span i18n>Username is required</span> }
+            @if (registerForm.get('username')?.hasError('required')) { <span>{{ 'Username is required' | t }}</span> }
           </mat-error>
         </mat-form-field>
 
         <mat-form-field class="full-width" appearance="outline">
-          <mat-label i18n>Email</mat-label>
+          <mat-label>{{ 'Email' | t }}</mat-label>
           <input matInput type="email" formControlName="email" autocomplete="email" />
           <img matPrefix src="/icons/communication/mail.svg" alt="" aria-hidden="true" class="mc-icon" />
           <mat-error>
-            @if (registerForm.get('email')?.hasError('required')) { <span i18n>Email is required</span> }
-            @else if (registerForm.get('email')?.hasError('email')) { <span i18n>Enter a valid email</span> }
+            @if (registerForm.get('email')?.hasError('required')) { <span>{{ 'Email is required' | t }}</span> }
+            @else if (registerForm.get('email')?.hasError('email')) { <span>{{ 'Enter a valid email' | t }}</span> }
           </mat-error>
         </mat-form-field>
 
         <mat-form-field class="full-width" appearance="outline">
-          <mat-label i18n>Password</mat-label>
+          <mat-label>{{ 'Password' | t }}</mat-label>
           <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password"
             autocomplete="new-password" />
           <img matPrefix src="/icons/weapons/swords.svg" alt="" aria-hidden="true" class="mc-icon" />
           <button mat-icon-button matSuffix type="button" (click)="hidePassword.set(!hidePassword())"
-            [matTooltip]="hidePassword() ? 'Show password' : 'Hide password'" i18n-matTooltip>
+            [matTooltip]="(hidePassword() ? 'Show password' : 'Hide password') | t">
             <img [src]="hidePassword() ? '/icons/ui/forbidden_circle.svg' : '/icons/circled/circle_empty_2.svg'" alt=""
               aria-hidden="true" class="mc-icon" />
           </button>
           <mat-error>
-            @if (registerForm.get('password')?.hasError('required')) { <span i18n>Password is required</span> }
+            @if (registerForm.get('password')?.hasError('required')) { <span>{{ 'Password is required' | t }}</span> }
           </mat-error>
         </mat-form-field>
 
@@ -59,40 +59,40 @@
             <img
               [src]="registerForm.get('password')!.value.length >= 6 ? '/icons/ui/check.svg' : '/icons/letters/X_diagonal.svg'"
               alt="" aria-hidden="true" class="mc-icon" />
-            <span i18n>Min 6 characters</span>
+            <span>{{ 'Min 6 characters' | t }}</span>
           </li>
           <li [class.met]="hasUppercase()">
             <img [src]="hasUppercase() ? '/icons/ui/check.svg' : '/icons/letters/X_diagonal.svg'" alt=""
               aria-hidden="true" class="mc-icon" />
-            <span i18n>At least one uppercase letter</span>
+            <span>{{ 'At least one uppercase letter' | t }}</span>
           </li>
           <li [class.met]="hasLowercase()">
             <img [src]="hasLowercase() ? '/icons/ui/check.svg' : '/icons/letters/X_diagonal.svg'" alt=""
               aria-hidden="true" class="mc-icon" />
-            <span i18n>At least one lowercase letter</span>
+            <span>{{ 'At least one lowercase letter' | t }}</span>
           </li>
           <li [class.met]="hasDigit()">
             <img [src]="hasDigit() ? '/icons/ui/check.svg' : '/icons/letters/X_diagonal.svg'" alt="" aria-hidden="true"
               class="mc-icon" />
-            <span i18n>At least one digit</span>
+            <span>{{ 'At least one digit' | t }}</span>
           </li>
           <li [class.met]="hasSpecial()">
             <img [src]="hasSpecial() ? '/icons/ui/check.svg' : '/icons/letters/X_diagonal.svg'" alt=""
               aria-hidden="true" class="mc-icon" />
-            <span i18n>At least one special character</span>
+            <span>{{ 'At least one special character' | t }}</span>
           </li>
         </ul>
         }
 
         <mat-form-field class="full-width" appearance="outline">
-          <mat-label i18n>Confirm Password</mat-label>
+          <mat-label>{{ 'Confirm Password' | t }}</mat-label>
           <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="passwordConfirm"
             autocomplete="new-password" />
           <img matPrefix src="/icons/weapons/swords.svg" alt="" aria-hidden="true" class="mc-icon" />
           <mat-error>
-            @if (registerForm.get('passwordConfirm')?.hasError('required')) { <span i18n>Please confirm your
-              password</span> }
-            @else if (registerForm.hasError('mismatch')) { <span i18n>Passwords do not match</span> }
+            @if (registerForm.get('passwordConfirm')?.hasError('required')) { <span>{{ 'Please confirm your
+              password' | t }}</span> }
+            @else if (registerForm.hasError('mismatch')) { <span>{{ 'Passwords do not match' | t }}</span> }
           </mat-error>
         </mat-form-field>
 
@@ -100,10 +100,10 @@
 
         <div class="form-actions">
           <a mat-button [routerLink]="['/auth/login']" [queryParams]="returnUrl ? {returnUrl: returnUrl} : {}"
-            i18n>Already have an account?</a>
+           >{{ 'Already have an account?' | t }}</a>
           <button mat-flat-button type="submit" [disabled]="registerForm.invalid || loading() || !captchaData()">
             @if (loading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
-              i18n>Register</span> }
+             >{{ 'Register' | t }}</span> }
           </button>
         </div>
       </form>
@@ -113,23 +113,23 @@
       <form [formGroup]="confirmForm" (ngSubmit)="submitConfirm()">
         <div class="info-banner">
           <img src="/icons/communication/mail.svg" alt="" aria-hidden="true" class="mc-icon" />
-          <span i18n>Check your email for the verification code.</span>
+          <span>{{ 'Check your email for the verification code.' | t }}</span>
         </div>
 
         <mat-form-field class="full-width" appearance="outline">
-          <mat-label i18n>Verification code</mat-label>
+          <mat-label>{{ 'Verification code' | t }}</mat-label>
           <input matInput formControlName="code" autocomplete="one-time-code" maxlength="10" />
           <img matPrefix src="/icons/ui/hashtag.svg" alt="" aria-hidden="true" class="mc-icon" />
           <mat-error>
-            @if (confirmForm.get('code')?.hasError('required')) { <span i18n>Code is required</span> }
+            @if (confirmForm.get('code')?.hasError('required')) { <span>{{ 'Code is required' | t }}</span> }
           </mat-error>
         </mat-form-field>
 
         <div class="form-actions">
-          <button mat-stroked-button type="button" (click)="cancelConfirm()" i18n>Back</button>
+          <button mat-stroked-button type="button" (click)="cancelConfirm()">{{ 'Back' | t }}</button>
           <button mat-flat-button type="submit" [disabled]="confirmForm.invalid || loading()">
-            @if (loading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span i18n>Verify &
-              create account</span> }
+            @if (loading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span>{{ 'Verify &
+              create account' | t }}</span> }
           </button>
         </div>
       </form>

@@ -1,6 +1,7 @@
 import {
     Component, OnInit, ViewChild, signal, inject,
 } from '@angular/core';
+import { TPipe } from '../../core/i18n/t.pipe';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,7 +23,7 @@ import { PROFILE } from '../../i18n/labels';
 @Component({
     selector: 'app-faq',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         ReactiveFormsModule,
         MatExpansionModule,
         MatButtonModule,

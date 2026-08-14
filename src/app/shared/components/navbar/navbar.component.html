@@ -6,15 +6,30 @@
 
     <div class="nav-links">
         <a mat-button routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}"
-            i18n>Home</a>
-        <a mat-button routerLink="/schematics" routerLinkActive="active-link" i18n>Schematics</a>
-        <a mat-button routerLink="/mods" routerLinkActive="active-link" i18n>Mods</a>
-        <a mat-button routerLink="/faq" routerLinkActive="active-link" i18n>FAQ</a>
+           >{{ 'Home' | t }}</a>
+        <a mat-button routerLink="/schematics" routerLinkActive="active-link">{{ 'Schematics' | t }}</a>
+        <a mat-button routerLink="/mods" routerLinkActive="active-link">{{ 'Mods' | t }}</a>
+        <a mat-button routerLink="/faq" routerLinkActive="active-link">{{ 'FAQ' | t }}</a>
+        @if (canTranslate()) {
+        <a mat-button routerLink="/translations" routerLinkActive="active-link">{{ 'Translations' | t }}</a>
+        }
     </div>
     <span class="spacer"></span>
 
+    @if (locales().length > 1) {
+    <button mat-button [matMenuTriggerFor]="langMenu" [matTooltip]="'Language' | t"
+        class="lang-code">{{ currentCode() }}</button>
+    <mat-menu #langMenu="matMenu">
+        @for (l of locales(); track l.code) {
+        <button mat-menu-item (click)="chooseLocale(l.code)">
+            <span>{{ l.label }}</span>
+        </button>
+        }
+    </mat-menu>
+    }
+
     <button mat-icon-button (click)="theme.toggle()"
-        [matTooltip]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'" i18n-matTooltip>
+        [matTooltip]="(theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode') | t">
         <img [src]="theme.isDark() ? '/icons/weather/sun.svg' : '/icons/weather/moon.svg'" alt="" aria-hidden="true"
             class="mc-icon" />
     </button>
@@ -22,7 +37,7 @@
     @if (session.isAuthenticated()) {
     <!-- ── Inbox (personal + admin when applicable) ── -->
     <div class="inbox-wrap">
-        <button mat-icon-button class="inbox-btn" (click)="openInbox($event)" matTooltip="Inbox" i18n-matTooltip>
+        <button mat-icon-button class="inbox-btn" (click)="openInbox($event)" [matTooltip]="'Inbox' | t">
             <img src="/icons/communication/mail.svg" alt="" aria-hidden="true" class="mc-icon" />
             @if (unreadNotifCount()) {
             <span class="inbox-badge"></span>
@@ -48,36 +63,42 @@
         <div class="mobile-nav-links">
             <a mat-menu-item routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">
                 <img src="/icons/ui/house.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
-                <span i18n>Home</span>
+                <span>{{ 'Home' | t }}</span>
             </a>
             <a mat-menu-item routerLink="/schematics" routerLinkActive="active-link">
                 <img src="/icons/weapons/pickaxe.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
-                <span i18n>Schematics</span>
+                <span>{{ 'Schematics' | t }}</span>
             </a>
             <a mat-menu-item routerLink="/mods" routerLinkActive="active-link">
                 <img src="/icons/ui/hashtag.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
-                <span i18n>Mods</span>
+                <span>{{ 'Mods' | t }}</span>
             </a>
             <a mat-menu-item routerLink="/faq" routerLinkActive="active-link">
                 <img src="/icons/ui/info.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
-                <span i18n>FAQ</span>
+                <span>{{ 'FAQ' | t }}</span>
             </a>
+            @if (canTranslate()) {
+            <a mat-menu-item routerLink="/translations" routerLinkActive="active-link">
+                <img src="/icons/ui/info.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+                <span>{{ 'Translations' | t }}</span>
+            </a>
+            }
             <mat-divider />
         </div>
         <a mat-menu-item [routerLink]="['/users', session.user()?.username]">
             <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
-            <span i18n>My Profile</span>
+            <span>{{ 'My Profile' | t }}</span>
         </a>
         @if (session.isAdminOrMod()) {
         <a mat-menu-item routerLink="/admin">
             <img src="/icons/ui/shield.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
-            <span i18n>Admin Panel</span>
+            <span>{{ 'Admin Panel' | t }}</span>
         </a>
         }
         <mat-divider />
         <button mat-menu-item (click)="logout()" class="logout-item">
             <img src="/icons/ui/power.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
-            <span i18n>Logout</span>
+            <span>{{ 'Logout' | t }}</span>
         </button>
     </mat-menu>
     } @else {
@@ -85,12 +106,12 @@
         <a mat-button [routerLink]="['/auth/register']" [queryParams]="returnUrl ? {returnUrl: returnUrl} : {}"
             routerLinkActive="active-link">
             <img src="/icons/ui/smile.svg" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
-            <span i18n>Register</span>
+            <span>{{ 'Register' | t }}</span>
         </a>
         <a mat-stroked-button [routerLink]="['/auth/login']" [queryParams]="returnUrl ? {returnUrl: returnUrl} : {}"
             routerLinkActive="active-link">
             <img src="/icons/arrows/arrow_right.svg" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
-            <span i18n>Login</span>
+            <span>{{ 'Login' | t }}</span>
         </a>
     </div>
 
@@ -100,30 +121,36 @@
     <mat-menu #mobileMenu="matMenu">
         <a mat-menu-item routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">
             <img src="/icons/ui/house.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
-            <span i18n>Home</span>
+            <span>{{ 'Home' | t }}</span>
         </a>
         <a mat-menu-item routerLink="/schematics" routerLinkActive="active-link">
             <img src="/icons/weapons/pickaxe.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
-            <span i18n>Schematics</span>
+            <span>{{ 'Schematics' | t }}</span>
         </a>
         <a mat-menu-item routerLink="/mods" routerLinkActive="active-link">
             <img src="/icons/ui/hashtag.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
-            <span i18n>Mods</span>
+            <span>{{ 'Mods' | t }}</span>
         </a>
         <a mat-menu-item routerLink="/faq" routerLinkActive="active-link">
             <img src="/icons/ui/info.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
-            <span i18n>FAQ</span>
+            <span>{{ 'FAQ' | t }}</span>
         </a>
+        @if (canTranslate()) {
+        <a mat-menu-item routerLink="/translations" routerLinkActive="active-link">
+            <img src="/icons/ui/info.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+            <span>{{ 'Translations' | t }}</span>
+        </a>
+        }
         <mat-divider />
         <a mat-menu-item [routerLink]="['/auth/register']" [queryParams]="returnUrl ? {returnUrl: returnUrl} : {}"
             routerLinkActive="active-link">
             <img src="/icons/ui/smile.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
-            <span i18n>Register</span>
+            <span>{{ 'Register' | t }}</span>
         </a>
         <a mat-menu-item [routerLink]="['/auth/login']" [queryParams]="returnUrl ? {returnUrl: returnUrl} : {}"
             routerLinkActive="active-link">
             <img src="/icons/arrows/arrow_right.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
-            <span i18n>Login</span>
+            <span>{{ 'Login' | t }}</span>
         </a>
     </mat-menu>
     }

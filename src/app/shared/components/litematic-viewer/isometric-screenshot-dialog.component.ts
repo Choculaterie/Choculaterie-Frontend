@@ -11,6 +11,7 @@ import {
     ElementRef,
     AfterViewInit,
 } from '@angular/core';
+import { TPipe } from '../../../core/i18n/t.pipe';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -30,7 +31,7 @@ export interface IsometricScreenshotData {
 @Component({
     selector: 'app-isometric-screenshot-dialog',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         MatDialogModule,
         MatButtonModule,
         MatIconModule,
@@ -49,8 +50,8 @@ export interface IsometricScreenshotData {
         </div>
         } @else {
         <div class="screenshot-header embed-header">
-            <h2 i18n>Generate picture</h2>
-            <button mat-icon-button type="button" (click)="cancel()" i18n-matTooltip matTooltip="Cancel">
+            <h2>{{ 'Generate picture' | t }}</h2>
+            <button mat-icon-button type="button" (click)="cancel()" [matTooltip]="'Cancel' | t">
                 <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
             </button>
         </div>
@@ -78,7 +79,7 @@ export interface IsometricScreenshotData {
 
             @if (!loading() && !error() && !isEmbed() && !freezeUrl()) {
             <a class="renderer-credit" href="https://github.com/Schem-at/schematic-renderer" target="_blank"
-                rel="noopener noreferrer" i18n>Based on: schematic-renderer</a>
+                rel="noopener noreferrer">{{ 'Based on: schematic-renderer' | t }}</a>
             }
         </div>
 
@@ -127,7 +128,7 @@ export interface IsometricScreenshotData {
             </div>
             <div class="confirm-row">
                 <span class="spacer"></span>
-                <button mat-stroked-button type="button" (click)="cancel()" i18n>Cancel</button>
+                <button mat-stroked-button type="button" (click)="cancel()">{{ 'Cancel' | t }}</button>
                 <button mat-flat-button type="button" (click)="confirm()">
                     <img [src]="resolvedMode() === 'download' ? '/icons/arrows/arrow_down.svg' : '/icons/ui/check.svg'" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
                     {{ resolvedMode() === 'download' ? 'Download' : 'Use' }}

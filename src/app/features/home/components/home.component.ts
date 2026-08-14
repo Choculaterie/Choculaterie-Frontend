@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect, Injector, ElementRef, ViewChild, afterNextRender } from '@angular/core';
+import { TPipe } from '../../../core/i18n/t.pipe';
 import { Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,7 +15,7 @@ import { SessionService } from '../../../core/services/session.service';
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         RouterLink,
         MatCardModule,
         MatButtonModule,

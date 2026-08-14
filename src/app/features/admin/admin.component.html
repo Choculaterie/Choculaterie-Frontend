@@ -1,11 +1,11 @@
 <div class="page-container">
-    <h1 i18n>Admin Panel</h1>
+    <h1>{{ 'Admin Panel' | t }}</h1>
 
     <mat-tab-group dynamicHeight disablePagination [selectedIndex]="selectedTab()"
         (selectedTabChange)="onTabChange($event)">
 
         <!-- ═══ USERS TAB ═══ -->
-        <mat-tab i18n-label label="Users">
+        <mat-tab [label]="'Users' | t">
             <div class="tab-content">
 
                 <!-- User Detail Panel -->
@@ -13,8 +13,7 @@
                 <mat-card appearance="outlined" class="detail-card">
                     <mat-card-header>
                         <mat-card-title class="detail-header">
-                            <button mat-icon-button (click)="closeUserDetail()" i18n-matTooltip
-                                matTooltip="Back to list">
+                            <button mat-icon-button (click)="closeUserDetail()" [matTooltip]="'Back to list' | t">
                                 <mat-icon>arrow_back</mat-icon>
                             </button>
                             <div class="detail-user-info">
@@ -36,48 +35,47 @@
                     </mat-card-header>
                     <mat-card-content class="detail-body">
                         <div class="detail-grid">
-                            <div class="detail-item"><span class="detail-label" i18n>User ID</span> <span
+                            <div class="detail-item"><span class="detail-label">{{ 'User ID' | t }}</span> <span
                                     class="detail-value muted">{{ u.id }} <button mat-icon-button class="copy-btn"
-                                        (click)="copyToClipboard(u.id)" i18n-matTooltip matTooltip="Copy ID"><img
+                                        (click)="copyToClipboard(u.id)" [matTooltip]="'Copy ID' | t"><img
                                             src="/icons/shapes/form_1.svg" alt="" aria-hidden="true"
                                             class="copy-icon" /></button></span></div>
-                            <div class="detail-item"><span class="detail-label" i18n>Email</span> <span
+                            <div class="detail-item"><span class="detail-label">{{ 'Email' | t }}</span> <span
                                     class="detail-value">{{ u.email ?? '-' }} @if (u.email) { <button mat-icon-button
-                                        class="copy-btn" (click)="copyToClipboard(u.email)" i18n-matTooltip
-                                        matTooltip="Copy email"><img src="/icons/shapes/form_1.svg" alt=""
+                                        class="copy-btn" (click)="copyToClipboard(u.email)" [matTooltip]="'Copy email' | t"><img src="/icons/shapes/form_1.svg" alt=""
                                             aria-hidden="true" class="copy-icon" /></button> }</span>
                             </div>
-                            <div class="detail-item"><span class="detail-label" i18n>Role</span> <span
+                            <div class="detail-item"><span class="detail-label">{{ 'Role' | t }}</span> <span
                                     class="detail-value">{{ u.role }}</span></div>
-                            <div class="detail-item"><span class="detail-label" i18n>Status</span> <span
+                            <div class="detail-item"><span class="detail-label">{{ 'Status' | t }}</span> <span
                                     class="detail-value">{{ u.status }}</span></div>
-                            <div class="detail-item"><span class="detail-label" i18n>Registered</span> <span
+                            <div class="detail-item"><span class="detail-label">{{ 'Registered' | t }}</span> <span
                                     class="detail-value">{{ u.registrationDate | date:'medium' }}</span></div>
-                            <div class="detail-item"><span class="detail-label" i18n>Reports</span> <span
+                            <div class="detail-item"><span class="detail-label">{{ 'Reports' | t }}</span> <span
                                     class="detail-value">{{ u.reportCount }}</span></div>
-                            <div class="detail-item"><span class="detail-label" i18n>Bio</span> <span
+                            <div class="detail-item"><span class="detail-label">{{ 'Bio' | t }}</span> <span
                                     class="detail-value">{{ u.biographie ?? '-' }}</span></div>
                         </div>
 
                         <mat-divider />
 
                         <!-- Linking info -->
-                        <h3 i18n>Linking</h3>
+                        <h3>{{ 'Linking' | t }}</h3>
                         <div class="detail-grid">
                             <div class="detail-item">
-                                <span class="detail-label" i18n>Minecraft</span>
+                                <span class="detail-label">{{ 'Minecraft' | t }}</span>
                                 <span class="detail-value">
                                     @if (u.isMinecraftLinked) {
                                     {{ u.minecraftUsername }} <span class="muted">({{ u.minecraftUUID }})</span>
-                                    } @else { <span class="muted" i18n>Not linked</span> }
+                                    } @else { <span class="muted">{{ 'Not linked' | t }}</span> }
                                 </span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-label" i18n>Discord</span>
+                                <span class="detail-label">{{ 'Discord' | t }}</span>
                                 <span class="detail-value">
                                     @if (u.isDiscordLinked) {
                                     {{ u.discordUsername }} <span class="muted">({{ u.discordId }})</span>
-                                    } @else { <span class="muted" i18n>Not linked</span> }
+                                    } @else { <span class="muted">{{ 'Not linked' | t }}</span> }
                                 </span>
                             </div>
                         </div>
@@ -85,37 +83,35 @@
                         <mat-divider />
 
                         <!-- Keys & Storage -->
-                        <h3 i18n>Keys &amp; Storage</h3>
+                        <h3>{{ 'Keys & Storage' | t }}</h3>
                         <div class="detail-grid">
                             <div class="detail-item">
-                                <span class="detail-label" i18n>API Key</span>
+                                <span class="detail-label">{{ 'API Key' | t }}</span>
                                 <span class="detail-value">
                                     @if (u.hasApiKey) {
                                     <img src="/icons/ui/check.svg" alt="" aria-hidden="true"
-                                        class="mc-icon key-active" /> <span i18n>Active</span>
-                                    <button mat-icon-button color="warn" (click)="deleteApiKey()" i18n-matTooltip
-                                        matTooltip="Revoke API key">
+                                        class="mc-icon key-active" /> <span>{{ 'Active' | t }}</span>
+                                    <button mat-icon-button color="warn" (click)="deleteApiKey()" [matTooltip]="'Revoke API key' | t">
                                         <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
                                     </button>
-                                    } @else { <span class="muted" i18n>None</span> }
+                                    } @else { <span class="muted">{{ 'None' | t }}</span> }
                                 </span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-label" i18n>Save Key</span>
+                                <span class="detail-label">{{ 'Save Key' | t }}</span>
                                 <span class="detail-value">
                                     @if (u.hasSaveKey) {
                                     <img src="/icons/ui/check.svg" alt="" aria-hidden="true"
-                                        class="mc-icon key-active" /> <span i18n>Active</span>
-                                    <button mat-icon-button color="warn" (click)="deleteSaveKey()" i18n-matTooltip
-                                        matTooltip="Revoke save key">
+                                        class="mc-icon key-active" /> <span>{{ 'Active' | t }}</span>
+                                    <button mat-icon-button color="warn" (click)="deleteSaveKey()" [matTooltip]="'Revoke save key' | t">
                                         <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
                                     </button>
-                                    } @else { <span class="muted" i18n>None</span> }
+                                    } @else { <span class="muted">{{ 'None' | t }}</span> }
                                 </span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-label" i18n>Storage</span>
-                                <span class="detail-value" i18n>{{ u.storageUsedMb | numFmt }} MB / {{ u.storageQuotaGb
+                                <span class="detail-label">{{ 'Storage' | t }}</span>
+                                <span class="detail-value">{{ u.storageUsedMb | numFmt }} MB / {{ u.storageQuotaGb
                                     | numFmt }} GB ({{ u.saveCount }} saves)</span>
                             </div>
                         </div>
@@ -123,55 +119,55 @@
                         <mat-divider />
 
                         <!-- Admin actions -->
-                        <h3 i18n>Actions</h3>
+                        <h3>{{ 'Actions' | t }}</h3>
                         <div class="detail-actions">
                             <mat-form-field appearance="outline" class="compact-select badge-select">
-                                <mat-label i18n>Badge</mat-label>
+                                <mat-label>{{ 'Badge' | t }}</mat-label>
                                 <mat-select [value]="editBadge()" (selectionChange)="editBadge.set($event.value)">
-                                    <mat-option value=""><span i18n>None</span></mat-option>
+                                    <mat-option value=""><span>{{ 'None' | t }}</span></mat-option>
                                     @for (b of badges; track b[1]) {
                                     <mat-option [value]="b[0]">{{ badgeLabels[b[1]] }}</mat-option>
                                     }
                                 </mat-select>
                                 <mat-icon matPrefix>workspace_premium</mat-icon>
                             </mat-form-field>
-                            <button mat-stroked-button (click)="saveBadge()"><mat-icon>save</mat-icon> <span i18n>Save
-                                    badge</span></button>
+                            <button mat-stroked-button (click)="saveBadge()"><mat-icon>save</mat-icon> <span>{{ 'Save
+                                    badge' | t }}</span></button>
 
                             <mat-form-field appearance="outline" class="compact-input">
-                                <mat-label i18n>Quota (GB)</mat-label>
+                                <mat-label>{{ 'Quota (GB)' | t }}</mat-label>
                                 <input matInput type="number" [value]="editQuota()"
                                     (input)="editQuota.set(+$any($event.target).value)" min="0" step="0.5" />
                             </mat-form-field>
-                            <button mat-stroked-button (click)="saveQuota()"><mat-icon>save</mat-icon> <span i18n>Save
-                                    quota</span></button>
+                            <button mat-stroked-button (click)="saveQuota()"><mat-icon>save</mat-icon> <span>{{ 'Save
+                                    quota' | t }}</span></button>
                         </div>
 
                         <!-- User's schematics -->
                         @if (u.schematics.length > 0) {
                         <mat-divider />
-                        <h3 i18n>Schematics ({{ u.schematics.length }})</h3>
+                        <h3>{{ 'Schematics' | t }} ({{ u.schematics.length }})</h3>
                         <div class="table-scroll">
                             <table mat-table [dataSource]="u.schematics" class="full-width compact-table">
                                 <ng-container matColumnDef="name">
-                                    <th mat-header-cell *matHeaderCellDef i18n>Name</th>
+                                    <th mat-header-cell *matHeaderCellDef>{{ 'Name' | t }}</th>
                                     <td mat-cell *matCellDef="let s"><a [routerLink]="['/schematics', s.id]">{{ s.name
                                             }}</a></td>
                                 </ng-container>
                                 <ng-container matColumnDef="status">
-                                    <th mat-header-cell *matHeaderCellDef i18n>Status</th>
+                                    <th mat-header-cell *matHeaderCellDef>{{ 'Status' | t }}</th>
                                     <td mat-cell *matCellDef="let s">{{ s.status }}</td>
                                 </ng-container>
                                 <ng-container matColumnDef="visibility">
-                                    <th mat-header-cell *matHeaderCellDef i18n>Visibility</th>
+                                    <th mat-header-cell *matHeaderCellDef>{{ 'Visibility' | t }}</th>
                                     <td mat-cell *matCellDef="let s">{{ s.visibility }}</td>
                                 </ng-container>
                                 <ng-container matColumnDef="reports">
-                                    <th mat-header-cell *matHeaderCellDef i18n>Reports</th>
+                                    <th mat-header-cell *matHeaderCellDef>{{ 'Reports' | t }}</th>
                                     <td mat-cell *matCellDef="let s">{{ s.reportCount }}</td>
                                 </ng-container>
                                 <ng-container matColumnDef="downloads">
-                                    <th mat-header-cell *matHeaderCellDef i18n>Downloads</th>
+                                    <th mat-header-cell *matHeaderCellDef>{{ 'Downloads' | t }}</th>
                                     <td mat-cell *matCellDef="let s">{{ s.downloadCount }}</td>
                                 </ng-container>
                                 <tr mat-header-row
@@ -190,7 +186,7 @@
                 <!-- User list -->
                 <div class="search-col">
                     <mat-form-field appearance="outline" class="search-field">
-                        <mat-label i18n>Search users</mat-label>
+                        <mat-label>{{ 'Search users' | t }}</mat-label>
                         <input matInput [(ngModel)]="usersSearch" (keyup.enter)="searchUsers()"
                             (ngModelChange)="onUserSearchInput($event)" [matAutocomplete]="userSearchAuto" />
                         <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
@@ -209,7 +205,7 @@
                     <div class="search-actions">
                         <button mat-stroked-button class="newest-toggle"
                             (click)="newestOnlyUsers.set(!newestOnlyUsers()); searchUsers()"
-                            i18n="admin.newest_only_toggle">
+                            >
                             <img [src]="newestOnlyUsers() ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
                                 alt="" aria-hidden="true" class="mc-icon" />
                             <span style="transform: translateY(1px); display: inline-block;">Newest only</span>
@@ -221,22 +217,22 @@
                                     d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
                                 <path fill="var(--mc-icon-shadow)"
                                     d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
-                            </svg> <span i18n>Clear</span>
+                            </svg> <span>{{ 'Clear' | t }}</span>
                         </button>
                     </div>
                 </div>
 
                 @if (loadingUsers()) {
-                <app-loading-spinner i18n-message message="Loading users…" />
+                <app-loading-spinner [message]="'Loading users…' | t" />
                 } @else if (users().length === 0) {
-                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No users found" />
+                <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No users found' | t" />
                 } @else {
                 <div class="table-scroll">
                     <table mat-table [dataSource]="users()" matSort (matSortChange)="onUsersSort($event)"
                         [matSortActive]="usersSort() === 'date' ? 'registrationDate' : usersSort() === 'reports' ? 'reportCount' : usersSort()"
                         [matSortDirection]="usersDirection()" class="full-width">
                         <ng-container matColumnDef="username">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Username</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Username' | t }}</th>
                             <td mat-cell *matCellDef="let u">
                                 <a class="user-detail-link" (click)="openUserDetail(u)">
                                     <app-user-link [username]="u.username" />
@@ -244,11 +240,11 @@
                             </td>
                         </ng-container>
                         <ng-container matColumnDef="email">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Email</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Email' | t }}</th>
                             <td mat-cell *matCellDef="let u">{{ u.email }}</td>
                         </ng-container>
                         <ng-container matColumnDef="role">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Role</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Role' | t }}</th>
                             <td mat-cell *matCellDef="let u">
                                 <mat-select [value]="u.role" (selectionChange)="changeRole(u, $event.value)"
                                     class="inline-select">
@@ -259,7 +255,7 @@
                             </td>
                         </ng-container>
                         <ng-container matColumnDef="status">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Status</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Status' | t }}</th>
                             <td mat-cell *matCellDef="let u">
                                 <mat-select [value]="u.status" (selectionChange)="changeStatus(u, $event.value)"
                                     class="inline-select">
@@ -270,25 +266,25 @@
                             </td>
                         </ng-container>
                         <ng-container matColumnDef="reportCount">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Reports</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Reports' | t }}</th>
                             <td mat-cell *matCellDef="let u">{{ u.reportCount }}</td>
                         </ng-container>
                         <ng-container matColumnDef="registrationDate">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Joined</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Joined' | t }}</th>
                             <td mat-cell *matCellDef="let u">{{ u.registrationDate | date:'mediumDate' }}</td>
                         </ng-container>
                         <ng-container matColumnDef="actions">
                             <th mat-header-cell *matHeaderCellDef></th>
                             <td mat-cell *matCellDef="let u">
-                                <button mat-icon-button i18n-matTooltip matTooltip="View details"
+                                <button mat-icon-button [matTooltip]="'View details' | t"
                                     (click)="openUserDetail(u)">
                                     <img src="/icons/math/infinite.svg" alt="" aria-hidden="true" class="mc-icon" />
                                 </button>
-                                <button mat-icon-button i18n-matTooltip matTooltip="Reset reports"
+                                <button mat-icon-button [matTooltip]="'Reset reports' | t"
                                     (click)="resetUserReports(u)" [disabled]="!u.reportCount" class="flag-btn">
                                     <img src="/icons/ui/flag.svg" alt="" aria-hidden="true" class="mc-icon" />
                                 </button>
-                                <button mat-icon-button i18n-matTooltip matTooltip="Login as" (click)="loginAs(u)">
+                                <button mat-icon-button [matTooltip]="'Login as' | t" (click)="loginAs(u)">
                                     <img src="/icons/arrows/symbol_arrow_right.svg" alt="" aria-hidden="true"
                                         class="mc-icon" />
                                 </button>
@@ -308,7 +304,7 @@
         <!-- ═══ SCHEMATICS TAB ═══ -->
         <mat-tab>
             <ng-template mat-tab-label>
-                <span i18n>Schematics</span>
+                <span>{{ 'Schematics' | t }}</span>
                 @if (hasSchematicDeletedNotif()) {
                 <span class="tab-dot"></span>
                 }
@@ -316,7 +312,7 @@
             <div class="tab-content">
                 <div class="search-col">
                     <mat-form-field appearance="outline" class="search-field">
-                        <mat-label i18n>Search schematics</mat-label>
+                        <mat-label>{{ 'Search schematics' | t }}</mat-label>
                         <input matInput [(ngModel)]="schematicsSearch" (keyup.enter)="searchSchematics()"
                             (ngModelChange)="onSchematicSearchInput($event)" [matAutocomplete]="schematicSearchAuto" />
                         <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
@@ -347,61 +343,61 @@
                                     d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
                                 <path fill="var(--mc-icon-shadow)"
                                     d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
-                            </svg> <span i18n>Clear</span>
+                            </svg> <span>{{ 'Clear' | t }}</span>
                         </button>
                     </div>
                 </div>
 
                 @if (loadingSchematics()) {
-                <app-loading-spinner i18n-message message="Loading schematics…" />
+                <app-loading-spinner [message]="'Loading schematics…' | t" />
                 } @else if (schematics().length === 0) {
-                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No schematics found" />
+                <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No schematics found' | t" />
                 } @else {
                 <div class="table-scroll">
                     <table mat-table [dataSource]="schematics()" matSort (matSortChange)="onSchematicsSort($event)"
                         [matSortActive]="schematicsSort() === 'date' ? 'publishDate' : schematicsSort() === 'author' ? 'username' : schematicsSort() === 'reports' ? 'reportCount' : schematicsSort()"
                         [matSortDirection]="schematicsDirection()" class="full-width">
                         <ng-container matColumnDef="name">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Name</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Name' | t }}</th>
                             <td mat-cell *matCellDef="let s">
                                 <a [routerLink]="['/schematics', s.id]">{{ s.name }}</a>
                             </td>
                         </ng-container>
                         <ng-container matColumnDef="username">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Author</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Author' | t }}</th>
                             <td mat-cell *matCellDef="let s">
                                 <app-user-link [username]="s.username" />
                             </td>
                         </ng-container>
                         <ng-container matColumnDef="status">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Status</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Status' | t }}</th>
                             <td mat-cell *matCellDef="let s">{{ s.status }}</td>
                         </ng-container>
                         <ng-container matColumnDef="visibility">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Visibility</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Visibility' | t }}</th>
                             <td mat-cell *matCellDef="let s">{{ s.visibility }}</td>
                         </ng-container>
                         <ng-container matColumnDef="reportCount">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Reports</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Reports' | t }}</th>
                             <td mat-cell *matCellDef="let s">{{ s.reportCount }}</td>
                         </ng-container>
                         <ng-container matColumnDef="publishDate">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Published</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Published' | t }}</th>
                             <td mat-cell *matCellDef="let s">{{ s.publishDate | date:'mediumDate' }}</td>
                         </ng-container>
                         <ng-container matColumnDef="actions">
                             <th mat-header-cell *matHeaderCellDef></th>
                             <td mat-cell *matCellDef="let s">
-                                <button mat-icon-button i18n-matTooltip matTooltip="Toggle status"
+                                <button mat-icon-button [matTooltip]="'Toggle status' | t"
                                     (click)="toggleSchematicStatus(s)">
                                     <img [src]="s.status === 'active' ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
                                         alt="" aria-hidden="true" class="mc-icon" />
                                 </button>
-                                <button mat-icon-button i18n-matTooltip matTooltip="Reset reports"
+                                <button mat-icon-button [matTooltip]="'Reset reports' | t"
                                     (click)="resetSchematicReports(s)" [disabled]="!s.reportCount" class="flag-btn">
                                     <img src="/icons/ui/flag.svg" alt="" aria-hidden="true" class="mc-icon" />
                                 </button>
-                                <button mat-icon-button color="warn" i18n-matTooltip matTooltip="Delete"
+                                <button mat-icon-button color="warn" [matTooltip]="'Delete' | t"
                                     (click)="deleteSchematic(s)">
                                     <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
                                 </button>
@@ -422,23 +418,23 @@
         </mat-tab>
 
         <!-- ═══ LIVE MESSAGES TAB ═══ -->
-        <mat-tab i18n-label label="Live Messages">
+        <mat-tab [label]="'Live Messages' | t">
             <div class="tab-content">
                 <mat-card appearance="outlined" class="form-card">
-                    <mat-card-header><mat-card-title>@if (editingLiveMessageId()) {<span i18n>Edit Live Message</span>}
-                            @else {<span i18n>New Live Message</span>}</mat-card-title></mat-card-header>
+                    <mat-card-header><mat-card-title>@if (editingLiveMessageId()) {<span>{{ 'Edit Live Message' | t }}</span>}
+                            @else {<span>{{ 'New Live Message' | t }}</span>}</mat-card-title></mat-card-header>
                     <mat-card-content>
                         <form [formGroup]="liveMessageForm"
                             (ngSubmit)="editingLiveMessageId() ? updateLiveMessage() : createLiveMessage()"
                             class="live-msg-form">
                             <mat-form-field appearance="outline" class="flex-grow">
-                                <mat-label i18n>Message</mat-label>
+                                <mat-label>{{ 'Message' | t }}</mat-label>
                                 <textarea matInput formControlName="message" rows="2" class="msg-textarea"
                                     maxlength="2000"></textarea>
                             </mat-form-field>
                             <div class="live-msg-bottom">
                                 <mat-form-field appearance="outline" class="live-msg-type">
-                                    <mat-label i18n>Type</mat-label>
+                                    <mat-label>{{ 'Type' | t }}</mat-label>
                                     <mat-select formControlName="type">
                                         @for (t of messageTypes; track t) {
                                         <mat-option [value]="t">{{ t }}</mat-option>
@@ -449,11 +445,11 @@
                                     @if (editingLiveMessageId()) {
                                     <button mat-stroked-button type="button"
                                         (click)="editingLiveMessageId.set(null); liveMessageForm.reset({message: '', type: 'Info'})"
-                                        i18n>Cancel</button>
+                                       >{{ 'Cancel' | t }}</button>
                                     }
                                     <button mat-flat-button type="submit" [disabled]="liveMessageForm.invalid">@if
-                                        (editingLiveMessageId()) {<span i18n>Update</span>} @else {<span
-                                            i18n>Add</span>}</button>
+                                        (editingLiveMessageId()) {<span>{{ 'Update' | t }}</span>} @else {<span
+                                           >{{ 'Add' | t }}</span>}</button>
                                 </div>
                             </div>
                         </form>
@@ -463,33 +459,31 @@
                 @if (loadingLiveMessages()) {
                 <app-loading-spinner />
                 } @else if (liveMessages().length === 0) {
-                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No live messages" />
+                <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No live messages' | t" />
                 } @else {
                 <div class="table-scroll">
                     <table mat-table [dataSource]="liveMessages()" class="full-width">
                         <ng-container matColumnDef="message">
-                            <th mat-header-cell *matHeaderCellDef i18n>Message</th>
+                            <th mat-header-cell *matHeaderCellDef>{{ 'Message' | t }}</th>
                             <td mat-cell *matCellDef="let m" class="msg-cell">{{ m.message }}</td>
                         </ng-container>
                         <ng-container matColumnDef="type">
-                            <th mat-header-cell *matHeaderCellDef i18n>Type</th>
+                            <th mat-header-cell *matHeaderCellDef>{{ 'Type' | t }}</th>
                             <td mat-cell *matCellDef="let m">{{ m.type }}</td>
                         </ng-container>
                         <ng-container matColumnDef="time">
-                            <th mat-header-cell *matHeaderCellDef i18n>Time</th>
+                            <th mat-header-cell *matHeaderCellDef>{{ 'Time' | t }}</th>
                             <td mat-cell *matCellDef="let m">{{ m.time | date:'medium' }}</td>
                         </ng-container>
                         <ng-container matColumnDef="actions">
                             <th mat-header-cell *matHeaderCellDef></th>
                             <td mat-cell *matCellDef="let m">
                                 <div class="live-msg-actions">
-                                    <button mat-icon-button (click)="editLiveMessage(m)" i18n-matTooltip
-                                        matTooltip="Edit">
+                                    <button mat-icon-button (click)="editLiveMessage(m)" [matTooltip]="'Edit' | t">
                                         <img src="/icons/weapons/pen.svg" alt="" aria-hidden="true" matButtonIcon
                                             class="mc-icon" />
                                     </button>
-                                    <button mat-icon-button color="warn" (click)="deleteLiveMessage(m)" i18n-matTooltip
-                                        matTooltip="Delete">
+                                    <button mat-icon-button color="warn" (click)="deleteLiveMessage(m)" [matTooltip]="'Delete' | t">
                                         <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
                                     </button>
                                 </div>
@@ -504,20 +498,20 @@
         </mat-tab>
 
         <!-- ═══ MOD MESSAGES TAB ═══ -->
-        <mat-tab i18n-label label="Mod Messages">
+        <mat-tab [label]="'Mod Messages' | t">
             <div class="tab-content">
                 <mat-card appearance="outlined" class="form-card">
-                    <mat-card-header><mat-card-title i18n>New Mod Message</mat-card-title></mat-card-header>
+                    <mat-card-header><mat-card-title>{{ 'New Mod Message' | t }}</mat-card-title></mat-card-header>
                     <mat-card-content>
                         <form [formGroup]="modMessageForm" (ngSubmit)="createModMessage()" class="live-msg-form">
                             <mat-form-field appearance="outline" class="flex-grow">
-                                <mat-label i18n>Message</mat-label>
+                                <mat-label>{{ 'Message' | t }}</mat-label>
                                 <textarea matInput formControlName="message" rows="2" class="msg-textarea"
                                     maxlength="2000"></textarea>
                             </mat-form-field>
                             <div class="live-msg-bottom">
                                 <mat-form-field appearance="outline" class="live-msg-type">
-                                    <mat-label i18n>Type</mat-label>
+                                    <mat-label>{{ 'Type' | t }}</mat-label>
                                     <mat-select formControlName="type">
                                         @for (t of messageTypes; track t) {
                                         <mat-option [value]="t">{{ t }}</mat-option>
@@ -526,7 +520,7 @@
                                 </mat-form-field>
                                 <div class="live-msg-btns">
                                     <button mat-flat-button type="submit" [disabled]="modMessageForm.invalid"
-                                        i18n>Add</button>
+                                       >{{ 'Add' | t }}</button>
                                 </div>
                             </div>
                         </form>
@@ -536,20 +530,20 @@
                 @if (loadingModMessages()) {
                 <app-loading-spinner />
                 } @else if (modMessages().length === 0) {
-                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No mod messages" />
+                <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No mod messages' | t" />
                 } @else {
                 <div class="table-scroll">
                     <table mat-table [dataSource]="modMessages()" class="full-width">
                         <ng-container matColumnDef="message">
-                            <th mat-header-cell *matHeaderCellDef i18n>Message</th>
+                            <th mat-header-cell *matHeaderCellDef>{{ 'Message' | t }}</th>
                             <td mat-cell *matCellDef="let m" class="msg-cell">{{ m.message }}</td>
                         </ng-container>
                         <ng-container matColumnDef="type">
-                            <th mat-header-cell *matHeaderCellDef i18n>Type</th>
+                            <th mat-header-cell *matHeaderCellDef>{{ 'Type' | t }}</th>
                             <td mat-cell *matCellDef="let m">{{ m.type }}</td>
                         </ng-container>
                         <ng-container matColumnDef="isActive">
-                            <th mat-header-cell *matHeaderCellDef i18n>Active</th>
+                            <th mat-header-cell *matHeaderCellDef>{{ 'Active' | t }}</th>
                             <td mat-cell *matCellDef="let m">
                                 <button mat-icon-button (click)="toggleModMessage(m)">
                                     <img [src]="m.isActive ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
@@ -558,7 +552,7 @@
                             </td>
                         </ng-container>
                         <ng-container matColumnDef="time">
-                            <th mat-header-cell *matHeaderCellDef i18n>Time</th>
+                            <th mat-header-cell *matHeaderCellDef>{{ 'Time' | t }}</th>
                             <td mat-cell *matCellDef="let m">{{ m.time | date:'medium' }}</td>
                         </ng-container>
                         <ng-container matColumnDef="actions">
@@ -578,14 +572,14 @@
         </mat-tab>
 
         <!-- ═══ STORAGE TAB ═══ -->
-        <mat-tab i18n-label label="Storage">
+        <mat-tab [label]="'Storage' | t">
             <div class="tab-content">
                 @if (loadingStorage()) {
-                <app-loading-spinner i18n-message message="Loading storage stats…" />
+                <app-loading-spinner [message]="'Loading storage stats…' | t" />
                 } @else if (storageStats(); as stats) {
                 <div class="disk-progress">
                     <div class="disk-progress-header">
-                        <span i18n>Disk Usage</span>
+                        <span>{{ 'Disk Usage' | t }}</span>
                         <span>{{ stats.usedDiskGb | numFmt }} / {{ stats.totalDiskGb | numFmt }} GB ({{
                             stats.diskUsagePercent | numFmt }}%)</span>
                     </div>
@@ -595,21 +589,19 @@
                         <span class="disk-footer-left"><img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true"
                                 class="mc-icon"
                                 style="width: 20px; height: 20px; transform: translateY(-2px);margin-right: 2px;" />
-                            <span i18n>{{
-                                stats.totalUsersWithSaves }} users
-                                with saves &middot; {{ stats.currentSaveUsageGb | numFmt }} GB used</span></span>
+                            <span>{{ stats.totalUsersWithSaves }} {{ 'users with saves' | t }}
+                                &middot; {{ stats.currentSaveUsageGb | numFmt }} {{ 'GB used' | t }}</span></span>
                         <span class="disk-footer-right"><img src="/icons/ui/warning.svg" alt="" aria-hidden="true"
                                 class="mc-icon"
                                 style="width: 16px; height: 16px; transform: translateY(-2px);margin-right: 2px;" />
-                            <span i18n>Max potential: {{
-                                stats.maxPotentialGb | numFmt }} GB &middot; Free: {{ stats.freeDiskGb | numFmt }}
-                                GB</span></span>
+                            <span>{{ 'Max potential:' | t }} {{ stats.maxPotentialGb | numFmt }} GB &middot;
+                                {{ 'Free:' | t }} {{ stats.freeDiskGb | numFmt }} GB</span></span>
                     </div>
                 </div>
 
                 <div class="search-col">
                     <mat-form-field appearance="outline" class="search-field">
-                        <mat-label i18n>Search storage</mat-label>
+                        <mat-label>{{ 'Search storage' | t }}</mat-label>
                         <input matInput [(ngModel)]="storageSearch" (keyup.enter)="searchStorage()" />
                         <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
                     </mat-form-field>
@@ -621,7 +613,7 @@
                                     d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
                                 <path fill="var(--mc-icon-shadow)"
                                     d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
-                            </svg> <span i18n>Clear</span>
+                            </svg> <span>{{ 'Clear' | t }}</span>
                         </button>
                     </div>
                 </div>
@@ -632,25 +624,25 @@
                         [matSortActive]="storageSort() === 'total' ? 'totalMb' : storageSort() === 'saves' ? 'saveCount' : storageSort() === 'usage' ? 'percentageOfQuota' : storageSort() === 'quota' ? 'quotaGb' : storageSort()"
                         [matSortDirection]="storageDirection()" class="full-width">
                         <ng-container matColumnDef="username">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>User</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'User' | t }}</th>
                             <td mat-cell *matCellDef="let u">
                                 <app-user-link [username]="u.username" />
                             </td>
                         </ng-container>
                         <ng-container matColumnDef="saveCount">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Saves</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Saves' | t }}</th>
                             <td mat-cell *matCellDef="let u">{{ u.saveCount }}</td>
                         </ng-container>
                         <ng-container matColumnDef="totalMb">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Total (MB)</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Total (MB)' | t }}</th>
                             <td mat-cell *matCellDef="let u">{{ u.totalMb | numFmt }}</td>
                         </ng-container>
                         <ng-container matColumnDef="quotaGb">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Quota (GB)</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Quota (GB)' | t }}</th>
                             <td mat-cell *matCellDef="let u">{{ u.quotaGb | numFmt }}</td>
                         </ng-container>
                         <ng-container matColumnDef="percentageOfQuota">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header i18n>Usage %</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Usage %' | t }}</th>
                             <td mat-cell *matCellDef="let u">
                                 <div class="usage-cell">
                                     <mat-progress-bar mode="determinate" [value]="u.percentageOfQuota"
@@ -673,7 +665,7 @@
         <!-- ═══ TAGS TAB ═══ -->
         <mat-tab>
             <ng-template mat-tab-label>
-                <span i18n>Tags</span>
+                <span>{{ 'Tags' | t }}</span>
                 @if (tagSuggestions().length || hasTagSuggestionNotif()) {
                 <span class="tab-dot"></span>
                 }
@@ -683,53 +675,51 @@
                 <!-- Proposed Tags -->
                 <mat-card appearance="outlined" class="form-card">
                     <mat-card-header>
-                        <mat-card-title i18n>Pending Tag Suggestions</mat-card-title>
+                        <mat-card-title>{{ 'Pending Tag Suggestions' | t }}</mat-card-title>
                     </mat-card-header>
                     <mat-card-content>
                         @if (loadingTagSuggestions()) {
                         <app-loading-spinner />
                         } @else if (tagSuggestions().length === 0) {
-                        <p class="no-data" i18n>No pending suggestions.</p>
+                        <p class="no-data">{{ 'No pending suggestions.' | t }}</p>
                         } @else {
                         <table mat-table [dataSource]="tagSuggestions()" class="full-width">
                             <ng-container matColumnDef="suggestedName">
-                                <th mat-header-cell *matHeaderCellDef i18n>Tag name</th>
+                                <th mat-header-cell *matHeaderCellDef>{{ 'Tag name' | t }}</th>
                                 <td mat-cell *matCellDef="let s">
                                     @if (editingAcceptId() === +s.id) {
                                     <input class="inline-input" [value]="acceptRenameValue()"
-                                        (input)="acceptRenameValue.set($any($event.target).value)" i18n-placeholder
-                                        placeholder="Tag name" />
+                                        (input)="acceptRenameValue.set($any($event.target).value)" [placeholder]="'Tag name' | t" />
                                     } @else {
                                     <strong>{{ s.suggestedName }}</strong>
                                     }
                                 </td>
                             </ng-container>
                             <ng-container matColumnDef="username">
-                                <th mat-header-cell *matHeaderCellDef i18n>Proposed by</th>
+                                <th mat-header-cell *matHeaderCellDef>{{ 'Proposed by' | t }}</th>
                                 <td mat-cell *matCellDef="let s">{{ s.username }}</td>
                             </ng-container>
                             <ng-container matColumnDef="createdAt">
-                                <th mat-header-cell *matHeaderCellDef i18n>Date</th>
+                                <th mat-header-cell *matHeaderCellDef>{{ 'Date' | t }}</th>
                                 <td mat-cell *matCellDef="let s">{{ s.createdAt | date:'mediumDate' }}</td>
                             </ng-container>
                             <ng-container matColumnDef="actions">
                                 <th mat-header-cell *matHeaderCellDef></th>
                                 <td mat-cell *matCellDef="let s">
                                     @if (editingAcceptId() === +s.id) {
-                                    <button mat-icon-button color="primary" i18n-matTooltip matTooltip="Confirm accept"
+                                    <button mat-icon-button color="primary" [matTooltip]="'Confirm accept' | t"
                                         (click)="acceptSuggestion(s)">
                                         <img src="/icons/ui/check.svg" alt="" aria-hidden="true" class="mc-icon" />
                                     </button>
-                                    <button mat-icon-button i18n-matTooltip matTooltip="Cancel"
+                                    <button mat-icon-button [matTooltip]="'Cancel' | t"
                                         (click)="cancelAccept()">
                                         <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
                                     </button>
                                     } @else {
-                                    <button mat-icon-button color="primary" i18n-matTooltip
-                                        matTooltip="Accept (rename before confirming)" (click)="startAccept(s)">
+                                    <button mat-icon-button color="primary" [matTooltip]="'Accept (rename before confirming)' | t" (click)="startAccept(s)">
                                         <img src="/icons/ui/check.svg" alt="" aria-hidden="true" class="mc-icon" />
                                     </button>
-                                    <button mat-icon-button color="warn" i18n-matTooltip matTooltip="Refuse"
+                                    <button mat-icon-button color="warn" [matTooltip]="'Refuse' | t"
                                         (click)="refuseSuggestion(s)">
                                         <img src="/icons/ui/forbidden_circle.svg" alt="" aria-hidden="true"
                                             class="mc-icon" />
@@ -744,14 +734,14 @@
                     </mat-card-content>
                 </mat-card>
                 <mat-card appearance="outlined" class="form-card">
-                    <mat-card-header><mat-card-title i18n>Add Tag</mat-card-title></mat-card-header>
+                    <mat-card-header><mat-card-title>{{ 'Add Tag' | t }}</mat-card-title></mat-card-header>
                     <mat-card-content>
                         <form [formGroup]="tagForm" (ngSubmit)="createTag()" class="inline-form">
                             <mat-form-field appearance="outline" class="flex-grow">
-                                <mat-label i18n>Tag name</mat-label>
+                                <mat-label>{{ 'Tag name' | t }}</mat-label>
                                 <input matInput formControlName="name" />
                             </mat-form-field>
-                            <button mat-flat-button type="submit" [disabled]="tagForm.invalid" i18n>Add</button>
+                            <button mat-flat-button type="submit" [disabled]="tagForm.invalid">{{ 'Add' | t }}</button>
                         </form>
                     </mat-card-content>
                 </mat-card>
@@ -759,12 +749,11 @@
                 @if (loadingTags()) {
                 <app-loading-spinner />
                 } @else if (tags().length === 0) {
-                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No tags" i18n-subtitle
-                    subtitle="Add a tag above" />
+                <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No tags' | t" [subtitle]="'Add a tag above' | t" />
                 } @else {
                 <div class="search-col">
                     <mat-form-field appearance="outline" class="search-field">
-                        <mat-label i18n>Filter tags</mat-label>
+                        <mat-label>{{ 'Filter tags' | t }}</mat-label>
                         <input matInput [ngModel]="tagSearch()" (ngModelChange)="tagSearch.set($event)" />
                         <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
                     </mat-form-field>
@@ -776,20 +765,19 @@
                                     d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
                                 <path fill="var(--mc-icon-shadow)"
                                     d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
-                            </svg> <span i18n>Clear</span>
+                            </svg> <span>{{ 'Clear' | t }}</span>
                         </button>
                     </div>
                 </div>
                 <table mat-table [dataSource]="filteredTags()" class="full-width">
                     <ng-container matColumnDef="name">
-                        <th mat-header-cell *matHeaderCellDef i18n>Name</th>
+                        <th mat-header-cell *matHeaderCellDef>{{ 'Name' | t }}</th>
                         <td mat-cell *matCellDef="let t">{{ t.name }}</td>
                     </ng-container>
                     <ng-container matColumnDef="actions">
                         <th mat-header-cell *matHeaderCellDef></th>
                         <td mat-cell *matCellDef="let t">
-                            <button mat-icon-button color="warn" (click)="deleteTag(t)" i18n-matTooltip
-                                matTooltip="Delete">
+                            <button mat-icon-button color="warn" (click)="deleteTag(t)" [matTooltip]="'Delete' | t">
                                 <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
                             </button>
                         </td>
@@ -802,17 +790,17 @@
         </mat-tab>
 
         <!-- ═══ VERSIONS TAB ═══ -->
-        <mat-tab i18n-label label="Versions">
+        <mat-tab [label]="'Versions' | t">
             <div class="tab-content">
                 <mat-card appearance="outlined" class="form-card">
-                    <mat-card-header><mat-card-title i18n>Add Version</mat-card-title></mat-card-header>
+                    <mat-card-header><mat-card-title>{{ 'Add Version' | t }}</mat-card-title></mat-card-header>
                     <mat-card-content>
                         <form [formGroup]="versionForm" (ngSubmit)="createVersion()" class="inline-form">
                             <mat-form-field appearance="outline" class="flex-grow">
-                                <mat-label i18n>Version name</mat-label>
+                                <mat-label>{{ 'Version name' | t }}</mat-label>
                                 <input matInput formControlName="name" placeholder="1.21.4" />
                             </mat-form-field>
-                            <button mat-flat-button type="submit" [disabled]="versionForm.invalid" i18n>Add</button>
+                            <button mat-flat-button type="submit" [disabled]="versionForm.invalid">{{ 'Add' | t }}</button>
                         </form>
                     </mat-card-content>
                 </mat-card>
@@ -820,12 +808,11 @@
                 @if (loadingVersions()) {
                 <app-loading-spinner />
                 } @else if (versions().length === 0) {
-                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No versions" i18n-subtitle
-                    subtitle="Add a version above" />
+                <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No versions' | t" [subtitle]="'Add a version above' | t" />
                 } @else {
                 <div class="search-col">
                     <mat-form-field appearance="outline" class="search-field">
-                        <mat-label i18n>Filter versions</mat-label>
+                        <mat-label>{{ 'Filter versions' | t }}</mat-label>
                         <input matInput [ngModel]="versionSearch()" (ngModelChange)="versionSearch.set($event)" />
                         <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
                     </mat-form-field>
@@ -837,20 +824,19 @@
                                     d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
                                 <path fill="var(--mc-icon-shadow)"
                                     d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
-                            </svg> <span i18n>Clear</span>
+                            </svg> <span>{{ 'Clear' | t }}</span>
                         </button>
                     </div>
                 </div>
                 <table mat-table [dataSource]="filteredVersions()" class="full-width">
                     <ng-container matColumnDef="name">
-                        <th mat-header-cell *matHeaderCellDef i18n>Name</th>
+                        <th mat-header-cell *matHeaderCellDef>{{ 'Name' | t }}</th>
                         <td mat-cell *matCellDef="let v">{{ v.name }}</td>
                     </ng-container>
                     <ng-container matColumnDef="actions">
                         <th mat-header-cell *matHeaderCellDef></th>
                         <td mat-cell *matCellDef="let v">
-                            <button mat-icon-button color="warn" (click)="deleteVersion(v)" i18n-matTooltip
-                                matTooltip="Delete">
+                            <button mat-icon-button color="warn" (click)="deleteVersion(v)" [matTooltip]="'Delete' | t">
                                 <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
                             </button>
                         </td>
@@ -862,27 +848,27 @@
             </div>
         </mat-tab>
         <!-- ╔═══ FAQ TAB ═══ -->
-        <mat-tab i18n-label label="FAQ">
+        <mat-tab [label]="'FAQ' | t">
             <div class="tab-content">
                 <mat-card appearance="outlined" class="form-card">
-                    <mat-card-header><mat-card-title i18n>Add FAQ Entry</mat-card-title></mat-card-header>
+                    <mat-card-header><mat-card-title>{{ 'Add FAQ Entry' | t }}</mat-card-title></mat-card-header>
                     <mat-card-content>
                         <form [formGroup]="faqCreateForm" (ngSubmit)="createFaq()" class="faq-create-form">
                             <mat-form-field appearance="outline">
-                                <mat-label i18n>Question</mat-label>
+                                <mat-label>{{ 'Question' | t }}</mat-label>
                                 <input matInput formControlName="question" maxlength="300" />
                             </mat-form-field>
                             <mat-form-field appearance="outline">
-                                <mat-label i18n>Answer</mat-label>
+                                <mat-label>{{ 'Answer' | t }}</mat-label>
                                 <textarea matInput formControlName="answer" rows="3" maxlength="2000"></textarea>
                             </mat-form-field>
                             <div class="inline-form">
                                 <mat-form-field appearance="outline" style="max-width: 120px">
-                                    <mat-label i18n>Order</mat-label>
+                                    <mat-label>{{ 'Order' | t }}</mat-label>
                                     <input matInput type="number" formControlName="order" />
                                 </mat-form-field>
                                 <button mat-flat-button type="submit" [disabled]="faqCreateForm.invalid"
-                                    i18n>Add</button>
+                                   >{{ 'Add' | t }}</button>
                             </div>
                         </form>
                     </mat-card-content>
@@ -891,33 +877,32 @@
                 @if (loadingAdminFaqs()) {
                 <app-loading-spinner />
                 } @else if (adminFaqs().length === 0) {
-                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No FAQ entries" i18n-subtitle
-                    subtitle="Add one above" />
+                <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No FAQ entries' | t" [subtitle]="'Add one above' | t" />
                 } @else {
                 <mat-accordion multi class="faq-accordion">
                     @for (f of adminFaqs(); track f.id) {
                     @if (editingFaqId() === +f.id) {
                     <mat-expansion-panel expanded>
                         <mat-expansion-panel-header>
-                            <mat-panel-title i18n>Editing…</mat-panel-title>
+                            <mat-panel-title>{{ 'Editing…' | t }}</mat-panel-title>
                         </mat-expansion-panel-header>
                         <form [formGroup]="faqEditForm" (ngSubmit)="saveEditFaq(f)" class="faq-create-form">
                             <mat-form-field appearance="outline">
-                                <mat-label i18n>Question</mat-label>
+                                <mat-label>{{ 'Question' | t }}</mat-label>
                                 <input matInput formControlName="question" maxlength="300" />
                             </mat-form-field>
                             <mat-form-field appearance="outline">
-                                <mat-label i18n>Answer</mat-label>
+                                <mat-label>{{ 'Answer' | t }}</mat-label>
                                 <textarea matInput formControlName="answer" rows="3" maxlength="2000"></textarea>
                             </mat-form-field>
                             <div class="inline-form">
                                 <mat-form-field appearance="outline" style="max-width: 120px">
-                                    <mat-label i18n>Order</mat-label>
+                                    <mat-label>{{ 'Order' | t }}</mat-label>
                                     <input matInput type="number" formControlName="order" />
                                 </mat-form-field>
                                 <button mat-flat-button type="submit" [disabled]="faqEditForm.invalid"
-                                    i18n>Save</button>
-                                <button mat-stroked-button type="button" (click)="cancelEditFaq()" i18n>Cancel</button>
+                                   >{{ 'Save' | t }}</button>
+                                <button mat-stroked-button type="button" (click)="cancelEditFaq()">{{ 'Cancel' | t }}</button>
                             </div>
                         </form>
                     </mat-expansion-panel>
@@ -925,7 +910,7 @@
                     <mat-expansion-panel>
                         <mat-expansion-panel-header>
                             <mat-panel-title>{{ f.question }}</mat-panel-title>
-                            <mat-panel-description i18n>Order: {{ f.order }}</mat-panel-description>
+                            <mat-panel-description>{{ 'Order:' | t }} {{ f.order }}</mat-panel-description>
                         </mat-expansion-panel-header>
                         <p class="faq-answer">{{ f.answer }}</p>
                         <mat-action-row>
@@ -937,7 +922,7 @@
                                         d="M9,4h3v1h-3zM9,5h3v1h-3zM9,6h3v1h-3zM5,7h4v1h-4zM12,7h4v1h-4zM5,8h4v1h-4zM12,8h4v1h-4zM5,9h4v1h-4zM12,9h4v1h-4zM2,10h3v1h-3zM9,10h3v1h-3zM16,10h4v1h-4zM2,11h3v1h-3zM9,11h3v1h-3zM16,11h4v1h-4zM2,12h3v1h-3zM9,12h3v1h-3zM16,12h4v1h-4zM5,13h4v1h-4zM20,13h3v1h-3zM5,14h4v1h-4zM20,14h3v1h-3zM5,15h4v1h-4zM20,15h3v1h-3zM9,16h3v1h-3zM23,16h4v1h-4zM9,17h3v1h-3zM23,17h4v1h-4zM9,18h3v1h-3zM23,18h4v1h-4zM12,19h4v1h-4zM20,19h7v1h-7zM12,20h4v1h-4zM20,20h7v1h-7zM12,21h4v1h-4zM20,21h7v1h-7zM16,22h11v1h-11zM16,23h11v1h-11zM16,24h11v1h-11z" />
                                     <path fill="var(--mc-icon-shadow)"
                                         d="M12,13h4v1h-4zM12,14h4v1h-4zM12,15h4v1h-4zM27,19h3v1h-3zM27,20h3v1h-3zM27,21h3v1h-3zM27,22h3v1h-3zM27,23h3v1h-3zM27,24h3v1h-3zM20,25h10v1h-10zM20,26h10v1h-10zM20,27h10v1h-10z" />
-                                </svg> <span i18n>Edit</span>
+                                </svg> <span>{{ 'Edit' | t }}</span>
                             </button>
                             <button mat-stroked-button color="primary" (click)="deleteFaq(f)">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
@@ -947,7 +932,7 @@
                                         d="M5,2h18v1h-18zM5,3h18v1h-18zM5,4h18v1h-18zM2,5h25v1h-25zM2,6h25v1h-25zM2,7h25v1h-25zM2,8h3v1h-3zM12,8h4v1h-4zM23,8h4v1h-4zM2,9h3v1h-3zM12,9h4v1h-4zM23,9h4v1h-4zM2,10h3v1h-3zM12,10h4v1h-4zM23,10h4v1h-4zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM2,14h10v1h-10zM16,14h11v1h-11zM2,15h10v1h-10zM16,15h11v1h-11zM2,16h10v1h-10zM16,16h11v1h-11zM2,17h10v1h-10zM16,17h11v1h-11zM5,18h7v1h-7zM16,18h7v1h-7zM5,19h7v1h-7zM16,19h7v1h-7zM5,20h7v1h-7zM16,20h7v1h-7zM5,21h4v1h-4zM12,21h4v1h-4zM20,21h3v1h-3zM5,22h4v1h-4zM12,22h4v1h-4zM20,22h3v1h-3zM5,23h4v1h-4zM12,23h4v1h-4zM20,23h3v1h-3z" />
                                     <path fill="var(--mc-icon-shadow)"
                                         d="M5,8h7v1h-7zM16,8h7v1h-7zM27,8h3v1h-3zM5,9h7v1h-7zM16,9h7v1h-7zM27,9h3v1h-3zM5,10h7v1h-7zM16,10h7v1h-7zM27,10h3v1h-3zM5,11h4v1h-4zM16,11h4v1h-4zM27,11h3v1h-3zM5,12h4v1h-4zM16,12h4v1h-4zM27,12h3v1h-3zM5,13h4v1h-4zM16,13h4v1h-4zM27,13h3v1h-3zM27,14h3v1h-3zM27,15h3v1h-3zM27,16h3v1h-3zM27,17h3v1h-3zM12,18h4v1h-4zM23,18h7v1h-7zM12,19h4v1h-4zM23,19h7v1h-7zM12,20h4v1h-4zM23,20h7v1h-7zM9,21h3v1h-3zM23,21h4v1h-4zM9,22h3v1h-3zM23,22h4v1h-4zM9,23h3v1h-3zM23,23h4v1h-4zM9,24h3v1h-3zM16,24h4v1h-4zM23,24h4v1h-4zM9,25h3v1h-3zM16,25h4v1h-4zM23,25h4v1h-4zM9,26h3v1h-3zM16,26h4v1h-4zM23,26h4v1h-4z" />
-                                </svg> <span i18n>Delete</span>
+                                </svg> <span>{{ 'Delete' | t }}</span>
                             </button>
                         </mat-action-row>
                     </mat-expansion-panel>
@@ -961,7 +946,7 @@
         <!-- ╔═══ TICKETS TAB ═══ -->
         <mat-tab>
             <ng-template mat-tab-label>
-                <span i18n>Tickets</span>
+                <span>{{ 'Tickets' | t }}</span>
                 @if (tickets().some(t => !t.isRead) || hasContactTicketNotif()) {
                 <span class="tab-dot"></span>
                 }
@@ -974,7 +959,7 @@
                     <mat-card-header>
                         <mat-card-title>{{ t.title }}</mat-card-title>
                         <mat-card-subtitle>
-                            @if (t.username) { <span>{{ t.username }}</span> } @else { <span i18n>Anonymous</span> }
+                            @if (t.username) { <span>{{ t.username }}</span> } @else { <span>{{ 'Anonymous' | t }}</span> }
                             &nbsp;•&nbsp;
                             {{ t.createdAt | date:'medium' }}
                         </mat-card-subtitle>
@@ -999,11 +984,11 @@
                     </mat-card-content>
                     <mat-card-actions>
                         <button mat-stroked-button (click)="closeTicket()">
-                            <mat-icon>arrow_back</mat-icon> <span i18n>Back to list</span>
+                            <mat-icon>arrow_back</mat-icon> <span>{{ 'Back to list' | t }}</span>
                         </button>
                         <button mat-stroked-button color="warn" (click)="deleteTicket(t)">
                             <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" matButtonIcon
-                                class="mc-icon" /> <span i18n>Delete</span>
+                                class="mc-icon" /> <span>{{ 'Delete' | t }}</span>
                         </button>
                     </mat-card-actions>
                 </mat-card>
@@ -1013,52 +998,51 @@
                     <button mat-stroked-button class="newest-toggle" style="margin-left: auto;" (click)="toggleTicketsUnreadOnly()">
                         <img [src]="ticketsUnreadOnly() ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
                             alt="" aria-hidden="true" class="mc-icon" />
-                        @if (ticketsUnreadOnly()) { <span i18n
-                            style="transform: translateY(1px); display: inline-block;">Show all</span> } @else { <span
-                            i18n style="transform: translateY(1px); display: inline-block;">Unread only</span> }
+                        @if (ticketsUnreadOnly()) { <span
+                            style="transform: translateY(1px); display: inline-block;">{{ 'Show all' | t }}</span> } @else { <span
+                            style="transform: translateY(1px); display: inline-block;">{{ 'Unread only' | t }}</span> }
                     </button>
                 </div>
 
                 @if (loadingTickets()) {
                 <app-loading-spinner />
                 } @else if (tickets().length === 0) {
-                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No tickets" i18n-subtitle
-                    subtitle="No contact messages yet" />
+                <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No tickets' | t" [subtitle]="'No contact messages yet' | t" />
                 } @else {
                 <table mat-table [dataSource]="tickets()" class="full-width">
                     <ng-container matColumnDef="title">
-                        <th mat-header-cell *matHeaderCellDef i18n>Subject</th>
+                        <th mat-header-cell *matHeaderCellDef>{{ 'Subject' | t }}</th>
                         <td mat-cell *matCellDef="let t">
                             <strong [class.unread-label]="!t.isRead">{{ t.title }}</strong>
                         </td>
                     </ng-container>
                     <ng-container matColumnDef="username">
-                        <th mat-header-cell *matHeaderCellDef i18n>From</th>
+                        <th mat-header-cell *matHeaderCellDef>{{ 'From' | t }}</th>
                         <td mat-cell *matCellDef="let t">{{ t.username ?? 'Anonymous' }}</td>
                     </ng-container>
                     <ng-container matColumnDef="isRead">
-                        <th mat-header-cell *matHeaderCellDef i18n>Status</th>
+                        <th mat-header-cell *matHeaderCellDef>{{ 'Status' | t }}</th>
                         <td mat-cell *matCellDef="let t">
                             @if (t.adminReply) {
-                            <span class="status-read" i18n>Replied</span>
+                            <span class="status-read">{{ 'Replied' | t }}</span>
                             } @else if (t.isRead) {
-                            <span class="status-read" i18n>Read</span>
+                            <span class="status-read">{{ 'Read' | t }}</span>
                             } @else {
-                            <span class="status-unread" i18n>New</span>
+                            <span class="status-unread">{{ 'New' | t }}</span>
                             }
                         </td>
                     </ng-container>
                     <ng-container matColumnDef="createdAt">
-                        <th mat-header-cell *matHeaderCellDef i18n>Date</th>
+                        <th mat-header-cell *matHeaderCellDef>{{ 'Date' | t }}</th>
                         <td mat-cell *matCellDef="let t">{{ t.createdAt | date:'mediumDate' }}</td>
                     </ng-container>
                     <ng-container matColumnDef="actions">
                         <th mat-header-cell *matHeaderCellDef></th>
                         <td mat-cell *matCellDef="let t">
-                            <button mat-icon-button i18n-matTooltip matTooltip="View" (click)="viewTicket(t)">
+                            <button mat-icon-button [matTooltip]="'View' | t" (click)="viewTicket(t)">
                                 <img src="/icons/math/infinite.svg" alt="" aria-hidden="true" class="mc-icon" />
                             </button>
-                            <button mat-icon-button color="warn" i18n-matTooltip matTooltip="Delete"
+                            <button mat-icon-button color="warn" [matTooltip]="'Delete' | t"
                                 (click)="deleteTicket(t)">
                                 <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
                             </button>
@@ -1076,18 +1060,18 @@
 
         <mat-tab>
             <ng-template mat-tab-label>
-                <span i18n>Server Logs</span>
+                <span>{{ 'Server Logs' | t }}</span>
                 @if (serverLogs().length > 0 || hasServerErrorNotif()) {
                 <span class="tab-dot"></span>
                 }
             </ng-template>
             <div class="tab-content">
 
-                <h3 i18n>Logged Errors</h3>
+                <h3>{{ 'Logged Errors' | t }}</h3>
 
                 <div class="search-row">
                     <mat-chip-listbox aria-label="Source filter" (change)="setServerLogsSourceFilter($event.value)">
-                        <mat-chip-option value="all" [selected]="serverLogsSourceFilter() === 'all'" i18n>All</mat-chip-option>
+                        <mat-chip-option value="all" [selected]="serverLogsSourceFilter() === 'all'">{{ 'All' | t }}</mat-chip-option>
                         <mat-chip-option value="Backend" [selected]="serverLogsSourceFilter() === 'Backend'">Backend</mat-chip-option>
                         <mat-chip-option value="API" [selected]="serverLogsSourceFilter() === 'API'">API</mat-chip-option>
                     </mat-chip-listbox>
@@ -1096,24 +1080,23 @@
                 @if (loadingServerLogs()) {
                 <app-loading-spinner />
                 } @else if (serverLogs().length === 0) {
-                <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No logged errors" i18n-subtitle
-                    subtitle="Errors and crashes will appear here" />
+                <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No logged errors' | t" [subtitle]="'Errors and crashes will appear here' | t" />
                 } @else {
                 <table mat-table [dataSource]="serverLogs()" class="full-width">
                     <ng-container matColumnDef="source">
-                        <th mat-header-cell *matHeaderCellDef i18n>Source</th>
+                        <th mat-header-cell *matHeaderCellDef>{{ 'Source' | t }}</th>
                         <td mat-cell *matCellDef="let e">{{ e.source }}</td>
                     </ng-container>
                     <ng-container matColumnDef="level">
-                        <th mat-header-cell *matHeaderCellDef i18n>Level</th>
+                        <th mat-header-cell *matHeaderCellDef>{{ 'Level' | t }}</th>
                         <td mat-cell *matCellDef="let e">{{ e.level }}</td>
                     </ng-container>
                     <ng-container matColumnDef="category">
-                        <th mat-header-cell *matHeaderCellDef i18n>Category</th>
+                        <th mat-header-cell *matHeaderCellDef>{{ 'Category' | t }}</th>
                         <td mat-cell *matCellDef="let e">{{ e.category }}</td>
                     </ng-container>
                     <ng-container matColumnDef="message">
-                        <th mat-header-cell *matHeaderCellDef i18n>Message</th>
+                        <th mat-header-cell *matHeaderCellDef>{{ 'Message' | t }}</th>
                         <td mat-cell *matCellDef="let e">
                             {{ e.message }}
                             @if (e.exception) {
@@ -1122,13 +1105,13 @@
                         </td>
                     </ng-container>
                     <ng-container matColumnDef="timestamp">
-                        <th mat-header-cell *matHeaderCellDef i18n>Time</th>
+                        <th mat-header-cell *matHeaderCellDef>{{ 'Time' | t }}</th>
                         <td mat-cell *matCellDef="let e">{{ e.timestamp | date:'medium' }}</td>
                     </ng-container>
                     <ng-container matColumnDef="actions">
                         <th mat-header-cell *matHeaderCellDef></th>
                         <td mat-cell *matCellDef="let e">
-                            <button mat-icon-button color="warn" i18n-matTooltip matTooltip="Dismiss"
+                            <button mat-icon-button color="warn" [matTooltip]="'Dismiss' | t"
                                 (click)="deleteServerLog(e)">
                                 <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
                             </button>
@@ -1146,11 +1129,11 @@
                 <mat-divider />
 
                 <div class="section-header">
-                    <h3 i18n>Live Stream</h3>
+                    <h3>{{ 'Live Stream' | t }}</h3>
                     <button mat-stroked-button class="newest-toggle" (click)="autoScrollLogs.set(!autoScrollLogs())">
                         <img [src]="autoScrollLogs() ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
                             alt="" aria-hidden="true" class="mc-icon" />
-                        <span i18n style="transform: translateY(1px); display: inline-block;">Auto-scroll</span>
+                        <span style="transform: translateY(1px); display: inline-block;">{{ 'Auto-scroll' | t }}</span>
                     </button>
                 </div>
 
@@ -1169,8 +1152,8 @@
                     </div>
                     }
                     @if (filteredLiveLogs().length === 0) {
-                    <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No live activity yet"
-                        i18n-subtitle subtitle="Logs will stream here in real time" />
+                    <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No live activity yet' | t"
+                        [subtitle]="'Logs will stream here in real time' | t" />
                     }
                 </div>
             </div>

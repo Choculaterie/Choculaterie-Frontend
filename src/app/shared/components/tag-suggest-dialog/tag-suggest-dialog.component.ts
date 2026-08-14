@@ -1,4 +1,5 @@
 import { Component, signal, inject } from '@angular/core';
+import { TPipe } from '../../../core/i18n/t.pipe';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,7 +12,7 @@ import { ToastService } from '../../../core/services/toast.service';
 @Component({
     selector: 'app-tag-suggest-dialog',
     standalone: true,
-    imports: [
+    imports: [TPipe, 
         MatDialogModule,
         MatButtonModule,
         MatFormFieldModule,
@@ -20,26 +21,22 @@ import { ToastService } from '../../../core/services/toast.service';
         ReactiveFormsModule,
     ],
     template: `
-        <h2 mat-dialog-title i18n>Propose a new tag</h2>
+        <h2 mat-dialog-title>{{ 'Propose a new tag' | t }}</h2>
         <mat-dialog-content>
-            <p class="dialog-hint" i18n>
-                Suggest a tag you'd like to see added. An admin will review it before it becomes available.
-            </p>
+            <p class="dialog-hint">{{ 'Suggest a tag you\'d like to see added. An admin will review it before it becomes available.' | t }}</p>
             <mat-form-field appearance="outline" class="full-width">
-                <mat-label i18n>Tag name</mat-label>
+                <mat-label>{{ 'Tag name' | t }}</mat-label>
                 <input matInput [formControl]="nameCtrl" placeholder="e.g. oak log"
                     (keydown.enter)="submit()" autocomplete="off" maxlength="30" />
-                <mat-hint i18n>Lowercase letters, numbers, spaces, hyphens and underscores only</mat-hint>
+                <mat-hint>{{ 'Lowercase letters, numbers, spaces, hyphens and underscores only' | t }}</mat-hint>
                 @if (nameCtrl.hasError('pattern')) {
-                <mat-error i18n>Only lowercase letters, numbers, spaces, hyphens and underscores are allowed</mat-error>
+                <mat-error>{{ 'Only lowercase letters, numbers, spaces, hyphens and underscores are allowed' | t }}</mat-error>
                 }
             </mat-form-field>
         </mat-dialog-content>
         <mat-dialog-actions align="end">
-            <button mat-button mat-dialog-close i18n>Cancel</button>
-            <button mat-flat-button [disabled]="nameCtrl.invalid || submitting()" (click)="submit()" i18n>
-                Submit
-            </button>
+            <button mat-button mat-dialog-close>{{ 'Cancel' | t }}</button>
+            <button mat-flat-button [disabled]="nameCtrl.invalid || submitting()" (click)="submit()">{{ 'Submit' | t }}</button>
         </mat-dialog-actions>
     `,
     styles: [`

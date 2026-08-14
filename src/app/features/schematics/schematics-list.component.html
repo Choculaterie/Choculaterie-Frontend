@@ -1,12 +1,12 @@
 <div class="page-container">
     <div class="page-header">
         <h1 class="page-title"><img src="/icons/weapons/pickaxe.svg" alt="" aria-hidden="true" class="mc-icon"
-                style="transform: translateY(-2px);" /> <span i18n>Schematics</span></h1>
-        <button mat-flat-button (click)="onUploadClick()" i18n-matTooltip
-            [matTooltip]="showCreate() ? 'Cancel' : 'Upload Schematic'" class="upload-btn">
+                style="transform: translateY(-2px);" /> <span>{{ 'Schematics' | t }}</span></h1>
+        <button mat-flat-button (click)="onUploadClick()"
+            [matTooltip]="(showCreate() ? 'Cancel' : 'Upload Schematic') | t" class="upload-btn">
             <img [src]="showCreate() ? '/icons/letters/X.svg' : '/icons/arrows/arrow_up.svg'" alt="" aria-hidden="true"
                 matButtonIcon class="mc-icon" />
-            <span class="upload-btn-label" i18n>{{ showCreate() ? 'Cancel' : 'Upload Schematic' }}</span>
+            <span class="upload-btn-label">{{ (showCreate() ? 'Cancel' : 'Upload Schematic') | t }}</span>
         </button>
     </div>
 
@@ -16,35 +16,35 @@
     @if (showUnverifiedBanner()) {
     <div class="unverified-banner">
         <img src="/icons/ui/warning.svg" alt="" aria-hidden="true" class="mc-icon" />
-        <span i18n>Your Minecraft account is not linked. Schematics from unverified accounts are hidden by
-            default.</span>
-        <a [routerLink]="ownProfilePath()" [queryParams]="{tab: 4, section: 'minecraft'}" i18n>Link your account</a>
+        <span>{{ 'Your Minecraft account is not linked. Schematics from unverified accounts are hidden by
+            default.' | t }}</span>
+        <a [routerLink]="ownProfilePath()" [queryParams]="{tab: 4, section: 'minecraft'}">{{ 'Link your account' | t }}</a>
     </div>
     }
 
     <mat-card appearance="outlined" class="form-card" appDropZone [fullPage]="true" accept="image/*,.litematic"
         (filesDrop)="onFilesDropped($event)">
-        <mat-card-header><mat-card-title i18n>Upload New Schematic</mat-card-title></mat-card-header>
+        <mat-card-header><mat-card-title>{{ 'Upload New Schematic' | t }}</mat-card-title></mat-card-header>
         <mat-card-content>
             <form [formGroup]="createForm" (ngSubmit)="submitCreate()">
                 <div class="form-grid">
                     <mat-form-field appearance="outline">
-                        <mat-label i18n>Name</mat-label>
+                        <mat-label>{{ 'Name' | t }}</mat-label>
                         <input matInput formControlName="name" maxlength="50" />
                     </mat-form-field>
                     <mat-form-field appearance="outline">
-                        <mat-label i18n>Type</mat-label>
+                        <mat-label>{{ 'Type' | t }}</mat-label>
                         <mat-select formControlName="schematicType">
-                            <mat-option value="Redstone" i18n>Redstone</mat-option>
-                            <mat-option value="Build" i18n>Build</mat-option>
+                            <mat-option value="Redstone">{{ 'Redstone' | t }}</mat-option>
+                            <mat-option value="Build">{{ 'Build' | t }}</mat-option>
                         </mat-select>
                     </mat-form-field>
                     <mat-form-field appearance="outline" class="span-2">
-                        <mat-label i18n>Description</mat-label>
+                        <mat-label>{{ 'Description' | t }}</mat-label>
                         <textarea matInput formControlName="description" rows="3" maxlength="2000"></textarea>
                     </mat-form-field>
                     <mat-form-field appearance="outline">
-                        <mat-label i18n>Tags</mat-label>
+                        <mat-label>{{ 'Tags' | t }}</mat-label>
                         <mat-chip-grid #createTagChipGrid>
                             @for (tag of createTagList(); track tag) {
                             <mat-chip-row (removed)="removeCreateTag(tag)">
@@ -67,14 +67,14 @@
                                 <span style="display:flex;align-items:center;gap:8px;">
                                     <img src="/icons/weapons/pen.svg" alt="" aria-hidden="true" class="mc-icon"
                                         style="transform: translate(-2px, -2px)" />
-                                    <span i18n>Propose a new tag</span>
+                                    <span>{{ 'Propose a new tag' | t }}</span>
                                 </span>
                             </mat-option>
                             }
                         </mat-autocomplete>
                     </mat-form-field>
                     <mat-form-field appearance="outline">
-                        <mat-label i18n>Versions</mat-label>
+                        <mat-label>{{ 'Versions' | t }}</mat-label>
                         <mat-chip-grid #createVersionChipGrid>
                             @for (ver of createVersionList(); track ver) {
                             <mat-chip-row (removed)="removeCreateVersion(ver)">
@@ -95,7 +95,7 @@
                         </mat-autocomplete>
                     </mat-form-field>
                     <mat-form-field appearance="outline">
-                        <mat-label i18n>Author Name</mat-label>
+                        <mat-label>{{ 'Author Name' | t }}</mat-label>
                         <input matInput formControlName="authorName" maxlength="100" [matAutocomplete]="authorAuto"
                             (input)="onAuthorInput($any($event.target).value)" />
                         <mat-autocomplete #authorAuto="matAutocomplete" [displayWith]="displayAuthor"
@@ -106,19 +106,19 @@
                         </mat-autocomplete>
                     </mat-form-field>
                     <mat-form-field appearance="outline">
-                        <mat-label i18n>Visibility</mat-label>
+                        <mat-label>{{ 'Visibility' | t }}</mat-label>
                         <mat-select formControlName="visibility">
-                            <mat-option value="Public" i18n>Public</mat-option>
-                            <mat-option value="Unlisted" i18n>Unlisted</mat-option>
-                            <mat-option value="Private" i18n>Private</mat-option>
+                            <mat-option value="Public">{{ 'Public' | t }}</mat-option>
+                            <mat-option value="Unlisted">{{ 'Unlisted' | t }}</mat-option>
+                            <mat-option value="Private">{{ 'Private' | t }}</mat-option>
                         </mat-select>
                     </mat-form-field>
                     <mat-form-field appearance="outline">
-                        <mat-label i18n>External Download Link</mat-label>
+                        <mat-label>{{ 'External Download Link' | t }}</mat-label>
                         <input matInput formControlName="downloadLinkMediaFire" maxlength="500" />
                     </mat-form-field>
                     <mat-form-field appearance="outline">
-                        <mat-label i18n>External Video Link</mat-label>
+                        <mat-label>{{ 'External Video Link' | t }}</mat-label>
                         <input matInput formControlName="youtubeLink" maxlength="500" />
                     </mat-form-field>
                 </div>
@@ -132,7 +132,7 @@
                                 d="M2,2h3v1h-3zM12,2h4v1h-4zM23,2h4v1h-4zM2,3h3v1h-3zM12,3h4v1h-4zM23,3h4v1h-4zM2,4h3v1h-3zM12,4h4v1h-4zM23,4h4v1h-4zM5,5h4v1h-4zM20,5h3v1h-3zM5,6h4v1h-4zM20,6h3v1h-3zM5,7h4v1h-4zM20,7h3v1h-3zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM9,14h3v1h-3zM16,14h4v1h-4zM9,15h3v1h-3zM16,15h4v1h-4zM9,16h3v1h-3zM16,16h4v1h-4zM9,17h3v1h-3zM16,17h4v1h-4zM5,18h4v1h-4zM20,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM2,21h3v1h-3zM12,21h4v1h-4zM23,21h4v1h-4zM2,22h3v1h-3zM12,22h4v1h-4zM23,22h4v1h-4zM2,23h3v1h-3zM12,23h4v1h-4zM23,23h4v1h-4z" />
                             <path fill="var(--mc-icon-shadow)"
                                 d="M16,5h4v1h-4zM27,5h3v1h-3zM16,6h4v1h-4zM27,6h3v1h-3zM16,7h4v1h-4zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM27,17h3v1h-3zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM9,21h3v1h-3zM9,22h3v1h-3zM9,23h3v1h-3zM5,24h4v1h-4zM16,24h4v1h-4zM27,24h3v1h-3zM5,25h4v1h-4zM16,25h4v1h-4zM27,25h3v1h-3zM5,26h4v1h-4zM16,26h4v1h-4zM27,26h3v1h-3z" />
-                        </svg> <span i18n>Add Pictures</span>
+                        </svg> <span>{{ 'Add Pictures' | t }}</span>
                     </button>
                     <input #pictureInput type="file" accept="image/*" multiple hidden
                         (change)="onPicturesSelected($event)" />
@@ -143,7 +143,7 @@
                                 d="M8,2h13v1h-13zM8,3h13v1h-13zM8,4h13v1h-13zM18,5h6v1h-6zM18,6h6v1h-6zM18,7h6v1h-6zM18,8h9v1h-9zM18,9h9v1h-9zM18,10h9v1h-9zM14,11h4v1h-4zM24,11h3v1h-3zM14,12h4v1h-4zM24,12h3v1h-3zM14,13h4v1h-4zM24,13h3v1h-3zM11,14h3v1h-3zM24,14h3v1h-3zM11,15h3v1h-3zM24,15h3v1h-3zM11,16h3v1h-3zM24,16h3v1h-3zM11,17h3v1h-3zM24,17h3v1h-3zM8,18h3v1h-3zM24,18h3v1h-3zM8,19h3v1h-3zM24,19h3v1h-3zM8,20h3v1h-3zM24,20h3v1h-3zM5,21h3v1h-3zM5,22h3v1h-3zM5,23h3v1h-3zM2,24h3v1h-3zM2,25h3v1h-3zM2,26h3v1h-3z" />
                             <path fill="var(--mc-icon-shadow)"
                                 d="M11,5h7v1h-7zM11,6h7v1h-7zM11,7h7v1h-7zM21,11h3v1h-3zM27,11h3v1h-3zM21,12h3v1h-3zM27,12h3v1h-3zM21,13h3v1h-3zM27,13h3v1h-3zM18,14h3v1h-3zM27,14h3v1h-3zM18,15h3v1h-3zM27,15h3v1h-3zM18,16h3v1h-3zM27,16h3v1h-3zM18,17h3v1h-3zM27,17h3v1h-3zM14,18h4v1h-4zM27,18h3v1h-3zM14,19h4v1h-4zM27,19h3v1h-3zM14,20h4v1h-4zM27,20h3v1h-3zM11,21h3v1h-3zM27,21h3v1h-3zM11,22h3v1h-3zM27,22h3v1h-3zM11,23h3v1h-3zM27,23h3v1h-3zM8,24h3v1h-3zM8,25h3v1h-3zM8,26h3v1h-3zM5,27h3v1h-3zM5,28h3v1h-3zM5,29h3v1h-3z" />
-                        </svg> <span i18n>Add Litematic Files</span>
+                        </svg> <span>{{ 'Add Litematic Files' | t }}</span>
                     </button>
                     <input #litematicInput type="file" accept=".litematic" multiple hidden
                         (change)="onLitematicsSelected($event)" />
@@ -152,7 +152,7 @@
                 <!-- Picture previews -->
                 @if (pictureFiles.length) {
                 <div class="file-previews">
-                    <h4 i18n>Pictures</h4>
+                    <h4>{{ 'Pictures' | t }}</h4>
                     <div class="preview-grid" cdkDropList cdkDropListOrientation="mixed"
                         (cdkDropListDropped)="dropPicture($event)">
                         @for (f of pictureFiles; track f.name; let i = $index) {
@@ -160,18 +160,16 @@
                             <img [src]="picturePreviews()[i]" [alt]="f.name" (click)="setCover(i)"
                                 style="cursor:pointer" />
                             <div class="preview-actions">
-                                <button mat-icon-button type="button" (click)="removePicture(i)" i18n-matTooltip
-                                    matTooltip="Remove">
+                                <button mat-icon-button type="button" (click)="removePicture(i)" [matTooltip]="'Remove' | t">
                                     <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
                                 </button>
                                 <span class="spacer"></span>
-                                <button mat-icon-button type="button" class="drag-handle" cdkDragHandle i18n-matTooltip
-                                    matTooltip="Drag">
+                                <button mat-icon-button type="button" class="drag-handle" cdkDragHandle [matTooltip]="'Drag' | t">
                                     <img src="/icons/letters/side.svg" alt="" aria-hidden="true" class="mc-icon" />
                                 </button>
                             </div>
                             @if (i === 0) {
-                            <span class="cover-badge" i18n>Cover</span>
+                            <span class="cover-badge">{{ 'Cover' | t }}</span>
                             }
                         </div>
                         }
@@ -182,7 +180,7 @@
                 <!-- Litematic previews -->
                 @if (litematicFiles.length) {
                 <div class="file-previews">
-                    <h4 i18n>Litematic Files</h4>
+                    <h4>{{ 'Litematic Files' | t }}</h4>
                     <div class="file-list-preview" cdkDropList (cdkDropListDropped)="dropLitematic($event)">
                         @for (f of litematicFiles; track f.name; let i = $index) {
                         <div class="file-item" cdkDrag>
@@ -196,20 +194,16 @@
                             <span class="file-name-text">{{ f.name.endsWith('.litematic') ? f.name.slice(0, -10) :
                                 f.name }}</span>
                             <span class="spacer"></span>
-                            <button mat-icon-button type="button" (click)="generatePictureLocal(f)" i18n-matTooltip
-                                matTooltip="Generate picture">
+                            <button mat-icon-button type="button" (click)="generatePictureLocal(f)" [matTooltip]="'Generate picture' | t">
                                 <mat-icon>photo_camera</mat-icon>
                             </button>
-                            <button mat-icon-button type="button" (click)="viewIn3DLocal(f)" i18n-matTooltip
-                                matTooltip="View in 3D">
+                            <button mat-icon-button type="button" (click)="viewIn3DLocal(f)" [matTooltip]="'View in 3D' | t">
                                 <mat-icon>view_in_ar</mat-icon>
                             </button>
-                            <button mat-icon-button type="button" (click)="removeLitematic(i)" i18n-matTooltip
-                                matTooltip="Remove">
+                            <button mat-icon-button type="button" (click)="removeLitematic(i)" [matTooltip]="'Remove' | t">
                                 <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
                             </button>
-                            <button mat-icon-button type="button" class="drag-handle" cdkDragHandle i18n-matTooltip
-                                matTooltip="Drag">
+                            <button mat-icon-button type="button" class="drag-handle" cdkDragHandle [matTooltip]="'Drag' | t">
                                 <img src="/icons/letters/side.svg" alt="" aria-hidden="true" class="mc-icon" />
                             </button>
                         </div>
@@ -220,10 +214,10 @@
 
                 <div class="form-actions">
                     <span class="spacer"></span>
-                    <button mat-stroked-button type="button" (click)="showCreate.set(false)" i18n>Cancel</button>
+                    <button mat-stroked-button type="button" (click)="showCreate.set(false)">{{ 'Cancel' | t }}</button>
                     <button mat-flat-button type="submit" [disabled]="createForm.invalid || creating()">
                         @if (creating()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
-                            i18n>Upload</span> }
+                           >{{ 'Upload' | t }}</span> }
                     </button>
                 </div>
             </form>
@@ -234,9 +228,9 @@
     <!-- Filters -->
     <div class="filters">
         <mat-form-field appearance="outline" class="filter-search">
-            <mat-label i18n>Search</mat-label>
+            <mat-label>{{ 'Search' | t }}</mat-label>
             <input matInput [(ngModel)]="search" (keyup.enter)="loadPage(1)" (ngModelChange)="onSearchInput($event)"
-                [matAutocomplete]="searchAuto" i18n-placeholder placeholder="Search schematics..." />
+                [matAutocomplete]="searchAuto" [placeholder]="'Search schematics...' | t" />
             <img matPrefix src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" class="mc-icon" />
             <mat-autocomplete #searchAuto="matAutocomplete" [displayWith]="displaySuggestion"
                 (optionSelected)="onSuggestionSelected($event)">
@@ -258,47 +252,47 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="filter-sm">
-            <mat-label i18n>Sort</mat-label>
+            <mat-label>{{ 'Sort' | t }}</mat-label>
             <mat-select [(ngModel)]="sort" (selectionChange)="loadPage(1)">
-                <mat-option value="date" i18n>Date</mat-option>
-                <mat-option value="downloads" i18n>Downloads</mat-option>
-                <mat-option value="views" i18n>Views</mat-option>
+                <mat-option value="date">{{ 'Date' | t }}</mat-option>
+                <mat-option value="downloads">{{ 'Downloads' | t }}</mat-option>
+                <mat-option value="views">{{ 'Views' | t }}</mat-option>
             </mat-select>
         </mat-form-field>
 
-        <button mat-icon-button (click)="toggleDirection()" i18n-matTooltip matTooltip="Sort direction">
+        <button mat-icon-button (click)="toggleDirection()" [matTooltip]="'Sort direction' | t">
             <img [src]="direction === 'asc' ? '/icons/arrows/arrow_up.svg' : '/icons/arrows/arrow_down.svg'" alt=""
                 aria-hidden="true" class="mc-icon" />
         </button>
 
-        <button mat-stroked-button (click)="clearFilters()" i18n-matTooltip matTooltip="Clear filters">
+        <button mat-stroked-button (click)="clearFilters()" [matTooltip]="'Clear filters' | t">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
                 height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
                 <path fill="currentColor"
                     d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
                 <path fill="var(--mc-icon-shadow)"
                     d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
-            </svg> <span i18n>Clear</span>
+            </svg> <span>{{ 'Clear' | t }}</span>
         </button>
 
         <button mat-stroked-button class="more-filters-btn" (click)="toggleFilters()"
-            [class.active]="showAdvancedFilters() || hasActiveFilters()" i18n-matTooltip matTooltip="Toggle filters">
+            [class.active]="showAdvancedFilters() || hasActiveFilters()" [matTooltip]="'Toggle filters' | t">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
                 height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
                 <path fill="currentColor"
                     d="M2,5h23v1h-23zM2,6h23v1h-23zM2,7h23v1h-23zM2,8h23v1h-23zM2,12h23v1h-23zM2,13h23v1h-23zM2,14h23v1h-23zM2,15h23v1h-23zM2,20h9v1h-9zM16,20h9v1h-9zM2,21h9v1h-9zM16,21h9v1h-9zM2,22h9v1h-9zM16,22h9v1h-9z" />
                 <path fill="var(--mc-icon-shadow)"
                     d="M7,9h23v1h-23zM7,10h23v1h-23zM7,11h23v1h-23zM7,16h23v1h-23zM7,17h23v1h-23zM7,18h23v1h-23zM7,19h23v1h-23zM7,23h9v1h-9zM21,23h9v1h-9zM7,24h9v1h-9zM21,24h9v1h-9zM7,25h9v1h-9zM21,25h9v1h-9zM7,26h9v1h-9zM21,26h9v1h-9z" />
-            </svg> <span i18n>Filters</span>
+            </svg> <span>{{ 'Filters' | t }}</span>
         </button>
     </div>
 
     <div class="advanced-filters-wrapper" [style.height]="filtersHeight()">
         <div class="advanced-filters" #filtersInner>
             <mat-form-field appearance="outline" class="filter-sm">
-                <mat-label i18n>Tag</mat-label>
+                <mat-label>{{ 'Tag' | t }}</mat-label>
                 <mat-select [(ngModel)]="tag" (selectionChange)="loadPage(1)">
-                    <mat-option value="" i18n>All</mat-option>
+                    <mat-option value="">{{ 'All' | t }}</mat-option>
                     @for (t of allowedTags(); track t.id) {
                     <mat-option [value]="t.name">{{ t.name }}</mat-option>
                     }
@@ -306,9 +300,9 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="filter-sm">
-                <mat-label i18n>Version</mat-label>
+                <mat-label>{{ 'Version' | t }}</mat-label>
                 <mat-select [(ngModel)]="version" (selectionChange)="loadPage(1)">
-                    <mat-option value="" i18n>All</mat-option>
+                    <mat-option value="">{{ 'All' | t }}</mat-option>
                     @for (v of allowedVersions(); track v.id) {
                     <mat-option [value]="v.name">{{ v.name }}</mat-option>
                     }
@@ -316,19 +310,18 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="filter-sm">
-                <mat-label i18n>Type</mat-label>
+                <mat-label>{{ 'Type' | t }}</mat-label>
                 <mat-select [(ngModel)]="type" (selectionChange)="loadPage(1)">
-                    <mat-option value="" i18n>All</mat-option>
-                    <mat-option value="Redstone" i18n>Redstone</mat-option>
-                    <mat-option value="Build" i18n>Build</mat-option>
+                    <mat-option value="">{{ 'All' | t }}</mat-option>
+                    <mat-option value="Redstone">{{ 'Redstone' | t }}</mat-option>
+                    <mat-option value="Build">{{ 'Build' | t }}</mat-option>
                 </mat-select>
             </mat-form-field>
 
-            <button mat-stroked-button class="unverified-toggle" (click)="toggleIncludeUnverified()" i18n-matTooltip
-                matTooltip="Show schematics from users without a linked Minecraft account">
+            <button mat-stroked-button class="unverified-toggle" (click)="toggleIncludeUnverified()" [matTooltip]="'Show schematics from users without a linked Minecraft account' | t">
                 <img [src]="includeUnverified ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'" alt=""
                     aria-hidden="true" class="mc-icon" />
-                <span i18n style="transform: translateY(1px); display: inline-block;">Unverified</span>
+                <span style="transform: translateY(1px); display: inline-block;">{{ 'Unverified' | t }}</span>
             </button>
         </div>
     </div>
@@ -351,19 +344,17 @@
         <img src="loading.gif" alt="" aria-hidden="true" />
     </div>
     } @else if (schematics().length === 0) {
-    <app-empty-state icon="/icons/ui/question_mark!.svg" i18n-title title="No schematics found" i18n-subtitle
-        subtitle="Try adjusting your search or filters">
+    <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No schematics found' | t" [subtitle]="'Try adjusting your search or filters' | t">
         @if (!includeUnverified) {
-        <button mat-stroked-button (click)="toggleIncludeUnverified()" i18n-matTooltip
-            matTooltip="Include schematics from unverified accounts">
+        <button mat-stroked-button (click)="toggleIncludeUnverified()" [matTooltip]="'Include schematics from unverified accounts' | t">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
                 height="18" matButtonIcon class="mc-icon mc-icon--draw" aria-hidden="true">
                 <path fill="currentColor"
                     d="M13,1h3v1h-3zM13,2h3v1h-3zM13,3h3v1h-3zM10,4h3v1h-3zM16,4h3v1h-3zM10,5h3v1h-3zM16,5h3v1h-3zM10,6h3v1h-3zM16,6h3v1h-3zM10,7h3v1h-3zM16,7h3v1h-3zM10,8h3v1h-3zM16,8h3v1h-3zM10,9h3v1h-3zM16,9h3v1h-3zM7,10h3v1h-3zM13,10h3v1h-3zM19,10h3v1h-3zM7,11h3v1h-3zM13,11h3v1h-3zM19,11h3v1h-3zM7,12h3v1h-3zM13,12h3v1h-3zM19,12h3v1h-3zM7,13h3v1h-3zM13,13h3v1h-3zM19,13h3v1h-3zM7,14h3v1h-3zM13,14h3v1h-3zM19,14h3v1h-3zM7,15h3v1h-3zM13,15h3v1h-3zM19,15h3v1h-3zM4,16h3v1h-3zM13,16h3v1h-3zM22,16h3v1h-3zM4,17h3v1h-3zM13,17h3v1h-3zM22,17h3v1h-3zM4,18h3v1h-3zM13,18h3v1h-3zM22,18h3v1h-3zM4,19h3v1h-3zM22,19h3v1h-3zM4,20h3v1h-3zM22,20h3v1h-3zM4,21h3v1h-3zM22,21h3v1h-3zM1,22h3v1h-3zM13,22h3v1h-3zM25,22h3v1h-3zM1,23h3v1h-3zM13,23h3v1h-3zM25,23h3v1h-3zM1,24h3v1h-3zM13,24h3v1h-3zM25,24h3v1h-3zM1,25h27v1h-27zM1,26h27v1h-27zM1,27h27v1h-27z" />
                 <path fill="var(--mc-icon-shadow)"
                     d="M13,7h3v1h-3zM19,7h3v1h-3zM13,8h3v1h-3zM19,8h3v1h-3zM13,9h3v1h-3zM19,9h3v1h-3zM10,13h3v1h-3zM16,13h3v1h-3zM22,13h3v1h-3zM10,14h3v1h-3zM16,14h3v1h-3zM22,14h3v1h-3zM10,15h3v1h-3zM16,15h3v1h-3zM22,15h3v1h-3zM10,16h3v1h-3zM16,16h3v1h-3zM10,17h3v1h-3zM16,17h3v1h-3zM10,18h3v1h-3zM16,18h3v1h-3zM7,19h3v1h-3zM16,19h3v1h-3zM25,19h3v1h-3zM7,20h3v1h-3zM16,20h3v1h-3zM25,20h3v1h-3zM7,21h3v1h-3zM16,21h3v1h-3zM25,21h3v1h-3zM7,22h3v1h-3zM7,23h3v1h-3zM7,24h3v1h-3zM28,25h3v1h-3zM28,26h3v1h-3zM28,27h3v1h-3zM4,28h27v1h-27zM4,29h27v1h-27zM4,30h27v1h-27z" />
-            </svg> <span i18n>Show
-                unverified schematics</span>
+            </svg> <span>{{ 'Show
+                unverified schematics' | t }}</span>
         </button>
         }
     </app-empty-state>
