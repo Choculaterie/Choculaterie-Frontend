@@ -67,8 +67,8 @@ interface PendingItem {
     currentApproved: string | null;
 }
 
-const PH_RE = /\{\$[A-Z0-9_]+\}/g;
-const PH_GROUP_RE = /(?:\{\$[A-Z0-9_]+\})+/g;
+const PH_RE = /\{\$[A-Z0-9_]+\}|\$\{[A-Za-z0-9_.]+\}/g;
+const PH_GROUP_RE = /(?:\{\$[A-Z0-9_]+\}|\$\{[A-Za-z0-9_.]+\})+/g;
 const TAG_ONLY_RE = /^(?:\{\$(?:START|CLOSE)_(?:TAG|BLOCK)_[A-Z0-9_]+\})+$/;
 
 function tokensOf(text: string): string[] {
@@ -127,6 +127,14 @@ function isValueGroup(group: string): boolean {
     return !TAG_ONLY_RE.test(group);
 }
 
+function nameFromDollar(group: string): string {
+    const m = group.match(/^\$\{([A-Za-z0-9_.]+)\}$/);
+    if (!m) return '';
+    const last = m[1].split('.').pop() ?? '';
+    const spaced = last.replace(/_/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase();
+    return EXPANSIONS[spaced] ?? spaced;
+}
+
 function labelsOf(text: string, names: Record<string, string> = {}): { token: string; label: string }[] {
     const groups = tokensOf(text);
     const used = new Set<string>();
@@ -136,7 +144,7 @@ function labelsOf(text: string, names: Record<string, string> = {}): { token: st
         const quoted = new RegExp(`["'\u201c\u201d]\\s*${g.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*["'\u201c\u201d]`).test(text);
         const wrap = (v: string) => (quoted ? v : `"${v}"`);
 
-        const named = names[g];
+        const named = names[g] || nameFromDollar(g);
         if (named && !used.has(named)) {
             used.add(named);
             return { token: g, label: wrap(named) };
@@ -237,6 +245,10 @@ function describeExpr(expr: string): string {
 
                         <div class="fq-actions">
                             <button mat-button (click)="prev()" [disabled]="index() === 0">{{ 'Previous' | t }}</button>
+                            @if (canEdit()) {
+                            <button mat-stroked-button (click)="generate(st)"
+                                [disabled]="generating() === st.id">{{ (generating() === st.id ? 'Generating...' : 'Generate') | t }}</button>
+                            }
                             <span [matTooltip]="problem(st) ?? ''" [matTooltipDisabled]="!problem(st)">
                                 <button mat-flat-button color="primary" (click)="saveAndNext(st)"
                                     [disabled]="!canEdit() || saving() === st.id || !!problem(st)"
@@ -599,6 +611,7 @@ export class TranslationsComponent implements OnInit {
     readonly queue = signal<CatalogString[]>([]);
     readonly index = signal(0);
     readonly saving = signal<string | null>(null);
+    readonly generating = signal<string | null>(null);
     private readonly drafts = signal<Record<string, string>>({});
     private readonly phMeta = signal<Record<string, PlaceholderHint[]>>({});
 
@@ -762,7 +775,8 @@ export class TranslationsComponent implements OnInit {
 
     canEdit(): boolean {
         if (this.isStaff()) return true;
-        return resolveBadge(this.session.profile()?.badge) === Badge.Translator;
+        const badges = (this.session.profile() as { badges?: { badge: number; locale?: string | null }[] } | null)?.badges ?? [];
+        return badges.some((b) => b.badge === Badge.Translator && b.locale === this.locale);
     }
 
     currentLocale(): LocaleProgress | undefined {
@@ -1052,6 +1066,26 @@ export class TranslationsComponent implements OnInit {
             return $localize`${extra.map((m) => m.label).join(', ')} appears too many times.`;
 
         return null;
+    }
+
+    generate(st: CatalogString): void {
+        this.generating.set(st.id);
+        this.http
+            .post<{ text: string; missing: string[] }>('/api/Translations/suggest',
+                { keyId: st.id, locale: this.locale })
+            .subscribe({
+                next: (r) => {
+                    this.setDraft(st, toDisplay(r.text, labelsOf(st.sourceText, this.names(st.id))));
+                    this.generating.set(null);
+                    if (r.missing?.length) {
+                        this.toast.error($localize`The suggestion lost a value. Check it before saving.`);
+                    }
+                },
+                error: (e) => {
+                    this.toast.error(e?.error?.error ?? $localize`Could not generate a suggestion.`);
+                    this.generating.set(null);
+                },
+            });
     }
 
     saveAndNext(st: CatalogString): void {
