@@ -141,16 +141,18 @@ function labelsOf(text: string, names: Record<string, string> = {}): { token: st
     let n = 0;
     return groups.map((g) => {
         if (!isValueGroup(g)) return { token: g, label: tagLabel(g) };
-        const quoted = new RegExp(`["'\u201c\u201d]\\s*${g.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*["'\u201c\u201d]`).test(text);
-        const wrap = (v: string) => (quoted ? v : `"${v}"`);
+
+        const esc = g.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const quoted = new RegExp(`["'\u201c\u201d]${esc}["'\u201c\u201d]`).exec(text);
 
         const named = names[g] || nameFromDollar(g);
-        if (named && !used.has(named)) {
-            used.add(named);
-            return { token: g, label: wrap(named) };
-        }
-        const i = n++;
-        return { token: g, label: wrap(i === 0 ? 'value' : `value ${i + 1}`) };
+        const base = named && !used.has(named) ? named : (n === 0 ? 'value' : `value ${n + 1}`);
+        if (named && !used.has(named)) used.add(named);
+        else n++;
+
+        return quoted
+            ? { token: quoted[0], label: `"${base}"` }
+            : { token: g, label: `"${base}"` };
     });
 }
 
