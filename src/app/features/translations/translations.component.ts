@@ -209,7 +209,7 @@ function describeExpr(expr: string): string {
                     <span class="fq-done">{{ translatedInQueue() }} {{ 'translated' | t }}</span>
                 </div>
                 <mat-progress-bar mode="determinate"
-                    [value]="queue().length ? (index() + 1) / queue().length * 100 : 0" />
+                    [value]="barsIn() && queue().length ? (index() + 1) / queue().length * 100 : 0" />
 
                 @if (current(); as st) {
                 <div class="fq-stage">
@@ -390,7 +390,7 @@ function describeExpr(expr: string): string {
 
             @if (syncResult(); as r) { <p class="tr-sync-result">{{ r }}</p> }
 
-            @if (loading()) {
+            @if (loading() && view() !== 'list') {
             @for (n of [1, 2, 3, 4, 5]; track n) {
             <mat-card appearance="outlined" class="tr-page-row">
                 <div class="tr-row">
@@ -425,6 +425,19 @@ function describeExpr(expr: string): string {
             } @else if (view() === 'list') {
             <app-search-field [(value)]="search" (submitted)="applyListSearch()"
                 [placeholder]="'Search strings...' | t" />
+
+            @if (loading()) {
+            @for (n of [1, 2, 3, 4, 5]; track n) {
+            <mat-card appearance="outlined" class="tr-page-row">
+                <div class="tr-row">
+                    <div class="sk-line sk-name"></div>
+                    <span class="tr-spacer"></span>
+                    <div class="sk-line sk-count"></div>
+                </div>
+            </mat-card>
+            }
+            <app-loading-spinner />
+            } @else {
             @for (st of listed(); track st.id) {
             <mat-card appearance="outlined" class="tr-page-row tr-nav" (click)="openFromList(st)">
                 <div class="tr-row">
@@ -443,6 +456,7 @@ function describeExpr(expr: string): string {
             <mat-paginator [length]="listTotal()" [pageSize]="listPageSize"
                 [pageIndex]="listPage()" [pageSizeOptions]="[25, 50, 100]"
                 (page)="onListPage($event)" />
+            }
 
             <!-- ═══ REVIEW QUEUE ═══ -->
             } @else {
@@ -591,6 +605,7 @@ export class TranslationsComponent implements OnInit {
     readonly mods = signal<{ id: string; name: string }[]>([]);
     readonly locales = signal<LocaleProgress[]>([]);
     readonly barsIn = signal(false);
+    private barsGrown = false;
     readonly addingLocale = signal(false);
     readonly suggestions = signal<{ code: string; label: string }[]>([]);
     search = '';
@@ -652,7 +667,9 @@ export class TranslationsComponent implements OnInit {
             return;
         }
 
-        this.view.set('pages');
+        // Show the destination immediately. Resolving the group is a second fetch, and
+        // rendering the pages view meanwhile is what made the search field disappear.
+        this.view.set(p.get('index') === 'all' ? 'list' : 'pages');
         this.loading.set(true);
         this.http.get<any>(`/api/Translations/groups/${this.locale}`).subscribe({
             next: (r) => {
@@ -855,6 +872,8 @@ export class TranslationsComponent implements OnInit {
     }
 
     private growBars(): void {
+        if (this.barsGrown) { this.barsIn.set(true); return; }
+        this.barsGrown = true;
         this.barsIn.set(false);
         setTimeout(() => this.barsIn.set(true), 40);
     }
@@ -919,6 +938,7 @@ export class TranslationsComponent implements OnInit {
         this.index.set(at);
         this.drafts.set({});
         this.view.set('focus');
+        this.growBars();
         this.syncUrl();
     }
 
@@ -1015,6 +1035,7 @@ export class TranslationsComponent implements OnInit {
                     this.drafts.set({});
                     this.view.set('focus');
                     this.loading.set(false);
+                    this.growBars();
                     this.syncUrl();
                 },
                 error: () => {
@@ -1103,7 +1124,10 @@ export class TranslationsComponent implements OnInit {
             .post(url, { keyId: st.id, locale: this.locale, text })
             .subscribe({
                 next: () => {
-                    if (staff) st.approved = text.trim() ? text : null;
+                    if (staff) {
+                        st.approved = text.trim() ? text : null;
+                        this.queue.update((q) => [...q]);
+                    }
                     else this.toast.success($localize`Sent for review.`);
                     this.saving.set(null);
                     this.next();
