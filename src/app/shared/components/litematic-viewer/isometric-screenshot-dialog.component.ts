@@ -43,7 +43,7 @@ export interface IsometricScreenshotData {
     <div class="screenshot-dialog" [class.embed]="isEmbed()">
         @if (!isEmbed()) {
         <div class="screenshot-header">
-            <h2>Generate Picture</h2>
+            <h2>{{ 'Generate Picture' | t }}</h2>
             <button mat-icon-button type="button" (click)="cancel()">
                 <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
             </button>
@@ -105,24 +105,24 @@ export interface IsometricScreenshotData {
 
         <div class="screenshot-actions">
             <div class="controls-row">
-                <button mat-icon-button type="button" (click)="rotateLeft()" matTooltip="Rotate left 90°">
+                <button mat-icon-button type="button" (click)="rotateLeft()" [matTooltip]="'Rotate left 90°' | t">
                     <img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" class="mc-icon" style="transform: translateY(1px)" />
                 </button>
-                <button mat-icon-button type="button" (click)="rotateRight()" matTooltip="Rotate right 90°">
+                <button mat-icon-button type="button" (click)="rotateRight()" [matTooltip]="'Rotate right 90°' | t">
                     <img src="/icons/arrows/arrow_right.svg" alt="" aria-hidden="true" class="mc-icon" style="transform: translateY(1px)" />
                 </button>
                 <div class="preset-buttons">
-                    <button mat-stroked-button type="button" (click)="applyPreset('front')" matTooltip="Front view">Front</button>
-                    <button mat-stroked-button type="button" (click)="applyPreset('back')" matTooltip="Back view">Back</button>
-                    <button mat-stroked-button type="button" (click)="applyPreset('top')" matTooltip="Top-down view">Top</button>
-                    <button mat-stroked-button type="button" (click)="applyPreset('bottom')" matTooltip="Bottom-up view">Bottom</button>
-                    <button mat-stroked-button type="button" (click)="applyPreset('iso')" matTooltip="Isometric view">Isometric</button>
+                    <button mat-stroked-button type="button" (click)="applyPreset('front')" [matTooltip]="'Front view' | t">{{ 'Front' | t }}</button>
+                    <button mat-stroked-button type="button" (click)="applyPreset('back')" [matTooltip]="'Back view' | t">{{ 'Back' | t }}</button>
+                    <button mat-stroked-button type="button" (click)="applyPreset('top')" [matTooltip]="'Top-down view' | t">{{ 'Top' | t }}</button>
+                    <button mat-stroked-button type="button" (click)="applyPreset('bottom')" [matTooltip]="'Bottom-up view' | t">{{ 'Bottom' | t }}</button>
+                    <button mat-stroked-button type="button" (click)="applyPreset('iso')" [matTooltip]="'Isometric view' | t">{{ 'Isometric' | t }}</button>
                 </div>
                 <span class="spacer"></span>
-                <button mat-icon-button type="button" (click)="flipH()" matTooltip="Flip horizontal">
+                <button mat-icon-button type="button" (click)="flipH()" [matTooltip]="'Flip horizontal' | t">
                     <img src="/icons/arrows/arrow_double_ways.svg" alt="" aria-hidden="true" class="mc-icon" style="transform: translateY(1px)" />
                 </button>
-                <button mat-icon-button type="button" (click)="flipV()" matTooltip="Flip vertical">
+                <button mat-icon-button type="button" (click)="flipV()" [matTooltip]="'Flip vertical' | t">
                     <img src="/icons/arrows/arrow_up_down.svg" alt="" aria-hidden="true" class="mc-icon" style="transform: translateY(1px)" />
                 </button>
             </div>

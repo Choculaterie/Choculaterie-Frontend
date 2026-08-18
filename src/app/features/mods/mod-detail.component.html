@@ -109,7 +109,7 @@
             @if (imagePreview()) {
             <div class="preview-grid">
                 <div class="preview-item" [class.cover]="true">
-                    <img [src]="imagePreview()" alt="Image preview" style="cursor:pointer" />
+                    <img [src]="imagePreview()" [alt]="'Image preview' | t" style="cursor:pointer" />
                     <div class="preview-actions">
                         <button mat-icon-button type="button" (click)="formImage = null; imagePreview.set(null)"
                             [matTooltip]="'Remove' | t">

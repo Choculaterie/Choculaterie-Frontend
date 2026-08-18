@@ -22,6 +22,8 @@ import { UserImgPipe } from '../../shared/pipes/image-url.pipe';
 import { NumberFormatPipe } from '../../shared/pipes/number-format.pipe';
 import type { AdminUserDetailResponse } from '../../api/generated.schemas';
 import { Badge, BADGE_LABELS, BADGE_ICONS, BADGE_COLORS, resolveBadge } from '../../core/enums';
+import { translateText } from '../../core/i18n/translation.store';
+import { TPipe } from '../../core/i18n/t.pipe';
 import { ADMIN, COMMON } from '../../i18n/labels';
 
 export type AdminUserDialogResult = 'deleted' | null;
@@ -42,6 +44,7 @@ export type AdminUserDialogResult = 'deleted' | null;
         MatTableModule,
         MatTooltipModule,
         MatChipsModule,
+        TPipe,
         UserImgPipe,
         NumberFormatPipe,
     ],
@@ -66,45 +69,45 @@ export type AdminUserDialogResult = 'deleted' | null;
 <mat-dialog-content class="user-dlg-content">
     <!-- Info grid -->
     <div class="detail-grid">
-        <div class="detail-item full-width"><span class="detail-label">User ID</span>
+        <div class="detail-item full-width"><span class="detail-label">{{ 'User ID' | t }}</span>
             <span class="detail-value"><span class="muted">{{ u.id }}</span>
-                <button mat-icon-button class="copy-btn" (click)="copy(u.id)" matTooltip="Copy ID">
+                <button mat-icon-button class="copy-btn" (click)="copy(u.id)" [matTooltip]="'Copy ID' | t">
                     <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
                 </button>
             </span>
         </div>
-        <div class="detail-item full-width"><span class="detail-label">Email</span>
+        <div class="detail-item full-width"><span class="detail-label">{{ 'Email' | t }}</span>
             <span class="detail-value">{{ u.email ?? '-' }}
                 @if (u.email) {
-                <button mat-icon-button class="copy-btn" (click)="copy(u.email)" matTooltip="Copy email">
+                <button mat-icon-button class="copy-btn" (click)="copy(u.email)" [matTooltip]="'Copy email' | t">
                     <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
                 </button>
                 }
             </span>
         </div>
-        <div class="detail-item"><span class="detail-label">Role</span><span class="detail-value">{{ u.role }}</span></div>
-        <div class="detail-item"><span class="detail-label">Status</span><span class="detail-value">{{ u.status }}</span></div>
-        <div class="detail-item"><span class="detail-label">Registered</span><span class="detail-value">{{ u.registrationDate | date:'medium' }}</span></div>
-        <div class="detail-item"><span class="detail-label">Reports</span><span class="detail-value">{{ u.reportCount }}</span></div>
+        <div class="detail-item"><span class="detail-label">{{ 'Role' | t }}</span><span class="detail-value">{{ u.role }}</span></div>
+        <div class="detail-item"><span class="detail-label">{{ 'Status' | t }}</span><span class="detail-value">{{ u.status }}</span></div>
+        <div class="detail-item"><span class="detail-label">{{ 'Registered' | t }}</span><span class="detail-value">{{ u.registrationDate | date:'medium' }}</span></div>
+        <div class="detail-item"><span class="detail-label">{{ 'Reports' | t }}</span><span class="detail-value">{{ u.reportCount }}</span></div>
         @if (u.biographie) {
-        <div class="detail-item full-width"><span class="detail-label">Bio</span><span class="detail-value">{{ u.biographie }}</span></div>
+        <div class="detail-item full-width"><span class="detail-label">{{ 'Bio' | t }}</span><span class="detail-value">{{ u.biographie }}</span></div>
         }
     </div>
 
     <mat-divider class="section-div" />
 
     <!-- Linking -->
-    <h4 class="section-title">Linking</h4>
+    <h4 class="section-title">{{ 'Linking' | t }}</h4>
     <div class="detail-grid">
         <div class="detail-item full-width">
             <span class="detail-label">Minecraft</span>
             <span class="detail-value">
                 @if (u.isMinecraftLinked) {
                 {{ u.minecraftUsername }} · <span class="muted">{{ u.minecraftUUID }}</span>
-                <button mat-icon-button class="copy-btn" (click)="copy(u.minecraftUUID)" matTooltip="Copy UUID">
+                <button mat-icon-button class="copy-btn" (click)="copy(u.minecraftUUID)" [matTooltip]="'Copy UUID' | t">
                     <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
                 </button>
-                } @else { <span class="muted">Not linked</span> }
+                } @else { <span class="muted">{{ 'Not linked' | t }}</span> }
             </span>
         </div>
         <div class="detail-item full-width">
@@ -112,10 +115,10 @@ export type AdminUserDialogResult = 'deleted' | null;
             <span class="detail-value">
                 @if (u.isDiscordLinked) {
                 {{ u.discordUsername }} · <span class="muted">{{ u.discordId }}</span>
-                <button mat-icon-button class="copy-btn" (click)="copy(u.discordId)" matTooltip="Copy ID">
+                <button mat-icon-button class="copy-btn" (click)="copy(u.discordId)" [matTooltip]="'Copy ID' | t">
                     <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
                 </button>
-                } @else { <span class="muted">Not linked</span> }
+                } @else { <span class="muted">{{ 'Not linked' | t }}</span> }
             </span>
         </div>
     </div>
@@ -123,32 +126,32 @@ export type AdminUserDialogResult = 'deleted' | null;
     <mat-divider class="section-div" />
 
     <!-- Keys & Storage -->
-    <h4 class="section-title">Keys &amp; Storage</h4>
+    <h4 class="section-title">{{ 'Keys & Storage' | t }}</h4>
     <div class="detail-grid">
         <div class="detail-item">
-            <span class="detail-label">API Key</span>
+            <span class="detail-label">{{ 'API Key' | t }}</span>
             <span class="detail-value">
                 @if (user().hasApiKey) {
-                Active
-                <button mat-icon-button color="warn" (click)="deleteApiKey()" matTooltip="Revoke API key">
+                {{ 'Active' | t }}
+                <button mat-icon-button color="warn" (click)="deleteApiKey()" [matTooltip]="'Revoke API key' | t">
                     <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" />
                 </button>
-                } @else { <span class="muted">None</span> }
+                } @else { <span class="muted">{{ 'None' | t }}</span> }
             </span>
         </div>
         <div class="detail-item">
-            <span class="detail-label">Save Key</span>
+            <span class="detail-label">{{ 'Save Key' | t }}</span>
             <span class="detail-value">
                 @if (user().hasSaveKey) {
-                Active
-                <button mat-icon-button color="warn" (click)="deleteSaveKey()" matTooltip="Revoke save key">
+                {{ 'Active' | t }}
+                <button mat-icon-button color="warn" (click)="deleteSaveKey()" [matTooltip]="'Revoke save key' | t">
                     <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" />
                 </button>
-                } @else { <span class="muted">None</span> }
+                } @else { <span class="muted">{{ 'None' | t }}</span> }
             </span>
         </div>
         <div class="detail-item fill-row">
-            <span class="detail-label">Storage</span>
+            <span class="detail-label">{{ 'Storage' | t }}</span>
             <span class="detail-value">{{ u.storageUsedMb | numFmt }} MB / {{ u.storageQuotaGb | numFmt }} GB ({{ u.saveCount }} saves)</span>
         </div>
     </div>
@@ -156,10 +159,10 @@ export type AdminUserDialogResult = 'deleted' | null;
     <mat-divider class="section-div" />
 
     <!-- Actions -->
-    <h4 class="section-title">Actions</h4>
+    <h4 class="section-title">{{ 'Actions' | t }}</h4>
     <div class="detail-actions">
         <mat-form-field appearance="outline" class="compact-select">
-            <mat-label>Badges</mat-label>
+            <mat-label>{{ 'Badges' | t }}</mat-label>
             <mat-select multiple [value]="editBadges()"
                 (selectionChange)="editBadges.set($event.value)">
                 @for (b of badges; track b[1]) {
@@ -171,7 +174,7 @@ export type AdminUserDialogResult = 'deleted' | null;
 
         @if (editBadges().includes(translatorBadge)) {
         <mat-form-field appearance="outline" class="compact-select">
-            <mat-label>Translator languages</mat-label>
+            <mat-label>{{ 'Translator languages' | t }}</mat-label>
             <mat-select multiple [value]="editLocales()"
                 (selectionChange)="editLocales.set($event.value)">
                 @for (l of locales(); track l.code) {
@@ -179,13 +182,13 @@ export type AdminUserDialogResult = 'deleted' | null;
                 }
             </mat-select>
             @if (!editLocales().length) {
-            <mat-error>Pick at least one language for the Translator badge.</mat-error>
+            <mat-error>{{ 'Pick at least one language for the Translator badge.' | t }}</mat-error>
             }
         </mat-form-field>
         }
 
         <mat-form-field appearance="outline" class="compact-input">
-            <mat-label>Quota (GB)</mat-label>
+            <mat-label>{{ 'Quota (GB)' | t }}</mat-label>
             <input matInput type="number" [value]="editQuota()"
                 (input)="editQuota.set(+$any($event.target).value)" min="0" step="0.5" />
         </mat-form-field>
@@ -194,10 +197,10 @@ export type AdminUserDialogResult = 'deleted' | null;
     <mat-divider class="section-div" />
 
     <!-- Admin Note -->
-    <h4 class="section-title">Admin Note</h4>
+    <h4 class="section-title">{{ 'Admin Note' | t }}</h4>
     <div class="note-row">
         <mat-form-field appearance="outline" class="note-field">
-            <mat-label>Private note (admins only)</mat-label>
+            <mat-label>{{ 'Private note (admins only)' | t }}</mat-label>
             <textarea matInput rows="3" maxlength="2000" [value]="editNote()"
                 (input)="editNote.set($any($event.target).value)"></textarea>
         </mat-form-field>
@@ -206,23 +209,23 @@ export type AdminUserDialogResult = 'deleted' | null;
     <!-- Schematics -->
     @if (u.schematics.length > 0) {
     <mat-divider class="section-div" />
-    <h4 class="section-title">Schematics ({{ u.schematics.length }})</h4>
+    <h4 class="section-title">{{ 'Schematics' | t }} ({{ u.schematics.length }})</h4>
     <div class="table-scroll">
         <table mat-table [dataSource]="u.schematics" class="full-width compact-table">
             <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'Name' | t }}</th>
                 <td mat-cell *matCellDef="let s"><a [routerLink]="['/schematics', s.id]">{{ s.name }}</a></td>
             </ng-container>
             <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'Status' | t }}</th>
                 <td mat-cell *matCellDef="let s">{{ s.status }}</td>
             </ng-container>
             <ng-container matColumnDef="visibility">
-                <th mat-header-cell *matHeaderCellDef>Visibility</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'Visibility' | t }}</th>
                 <td mat-cell *matCellDef="let s">{{ s.visibility }}</td>
             </ng-container>
             <ng-container matColumnDef="reports">
-                <th mat-header-cell *matHeaderCellDef>Reports</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'Reports' | t }}</th>
                 <td mat-cell *matCellDef="let s">{{ s.reportCount }}</td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="['name','status','visibility','reports']"></tr>
@@ -233,8 +236,8 @@ export type AdminUserDialogResult = 'deleted' | null;
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-    <button mat-stroked-button mat-dialog-close>Close</button>
-    <button mat-flat-button (click)="saveAll()">Save</button>
+    <button mat-stroked-button mat-dialog-close>{{ 'Close' | t }}</button>
+    <button mat-flat-button (click)="saveAll()">{{ 'Save' | t }}</button>
 </mat-dialog-actions>
     `,
     styles: [`
@@ -303,7 +306,7 @@ export class AdminUserDialogComponent {
     readonly badges = Object.entries(Badge).filter(([, v]) => typeof v === 'number') as [string, number][];
     readonly badgeLabels = BADGE_LABELS;
 
-    badgeLabel(b: unknown): string { const n = resolveBadge(b); return n != null ? BADGE_LABELS[n] : ''; }
+    badgeLabel(b: unknown): string { const n = resolveBadge(b); return n != null ? translateText(BADGE_LABELS[n]) : ''; }
     badgeIcon(b: unknown): string { const n = resolveBadge(b); return n != null ? BADGE_ICONS[n] : 'star'; }
     badgeColor(b: unknown): string { const n = resolveBadge(b); return n != null ? BADGE_COLORS[n] : '#888'; }
 

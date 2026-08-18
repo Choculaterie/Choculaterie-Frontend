@@ -346,3 +346,12 @@ export const MOD_STATUS = {
     beta: 'Beta',
     broken: 'Broken',
 };
+
+/** Badge and role names. Shown throughout profiles and admin, not user-editable. */
+export const BADGES_ROLES = {
+    admin: 'Admin',
+    moderator: 'Moderator',
+    translator: 'Translator',
+    developer: 'Developer',
+    user: 'User',
+};

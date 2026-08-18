@@ -50,6 +50,7 @@ import { FileSizePipe } from '../../shared/pipes/file-size.pipe';
 import { MarkdownPipe } from '../../shared/pipes/markdown.pipe';
 import { SkeletonImgComponent } from '../../shared/components/skeleton-img/skeleton-img.component';
 import { BADGE_LABELS, BADGE_ICONS, BADGE_COLORS, ROLE_LABELS, resolveBadge } from '../../core/enums';
+import { translateText } from '../../core/i18n/translation.store';
 import { PROFILE, USERS, DIALOGS, AUTH, COMMON } from '../../i18n/labels';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
@@ -122,7 +123,7 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     session = inject(SessionService);
 
     // ── Helpers ──
-    badgeLabel(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_LABELS[n] : ''; }
+    badgeLabel(badge: unknown): string { const n = resolveBadge(badge); return n != null ? translateText(BADGE_LABELS[n]) : ''; }
 
     /// Translator is per language, so its tooltip names the language it covers.
     badgeTooltip(b: { badge: number; locale?: string | null }): string {
@@ -131,7 +132,7 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     }
     badgeIcon(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_ICONS[n] : 'star'; }
     badgeColor(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_COLORS[n] : '#888'; }
-    roleLabel(role: unknown): string { return ROLE_LABELS[role as string] ?? String(role ?? ''); }
+    roleLabel(role: unknown): string { const l = ROLE_LABELS[role as string]; return l ? translateText(l) : String(role ?? ''); }
 
     memberYears(p: any): number | null {
         if (!p?.registrationDate) return null;

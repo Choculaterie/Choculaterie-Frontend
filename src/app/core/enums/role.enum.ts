@@ -4,8 +4,10 @@ export enum Role {
     Admin = 'admin',
 }
 
+import { BADGES_ROLES } from '../../i18n/labels';
+
 export const ROLE_LABELS: Record<string, string> = {
-    [Role.User]: 'User',
-    [Role.Moderator]: 'Moderator',
-    [Role.Admin]: 'Admin',
+    [Role.User]: BADGES_ROLES.user,
+    [Role.Moderator]: BADGES_ROLES.moderator,
+    [Role.Admin]: BADGES_ROLES.admin,
 };

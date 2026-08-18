@@ -71,12 +71,12 @@
     @if (totalItems > 1) {
     <div class="gallery-thumbs">
         @for (pic of s.pictures; track pic.id; let i = $index) {
-        <app-skeleton-img [src]="pic.filePath | schematicImg" [alt]="'Image ' + (i + 1)" height="60px"
+        <app-skeleton-img [src]="pic.filePath | schematicImg" [alt]="('Image' | t) + ' ' + (i + 1)" height="60px"
             borderRadius="8px" [class.active]="i === selectedImage()" (click)="selectedImage.set(i)" />
         }
         @if (hasVideo) {
         <div class="video-thumb" [class.active]="selectedImage() === videoIdx" (click)="selectedImage.set(videoIdx)">
-            <img [src]="getYouTubeThumb(s.youtubeLink)" alt="Video" />
+            <img [src]="getYouTubeThumb(s.youtubeLink)" [alt]="'Video' | t" />
             <mat-icon class="play-overlay">play_circle</mat-icon>
         </div>
         }
@@ -296,7 +296,7 @@
                         @for (tag of editTagList(); track tag) {
                         <mat-chip-row (removed)="removeEditTag(tag)">
                             {{ tag }}
-                            <button matChipRemove aria-label="Remove tag"><img src="/icons/letters/X.svg" alt=""
+                            <button matChipRemove [attr.aria-label]="'Remove tag' | t"><img src="/icons/letters/X.svg" alt=""
                                     aria-hidden="true" class="mc-icon" /></button>
                         </mat-chip-row>
                         }
@@ -326,7 +326,7 @@
                         @for (ver of editVersionList(); track ver) {
                         <mat-chip-row (removed)="removeEditVersion(ver)">
                             {{ ver }}
-                            <button matChipRemove aria-label="Remove version"><img src="/icons/letters/X.svg" alt=""
+                            <button matChipRemove [attr.aria-label]="'Remove version' | t"><img src="/icons/letters/X.svg" alt=""
                                     aria-hidden="true" class="mc-icon" /></button>
                         </mat-chip-row>
                         }
@@ -378,7 +378,7 @@
                     @for (item of editPictureItems(); track $index; let i = $index) {
                     <div class="preview-item" [class.cover]="i === 0" [class.new-file]="item.type === 'new'" cdkDrag>
                         @if (item.type === 'existing') {
-                        <img [src]="item.pic.filePath | schematicImg" alt="Existing picture" (click)="setEditCover(i)"
+                        <img [src]="item.pic.filePath | schematicImg" [alt]="'Existing picture' | t" (click)="setEditCover(i)"
                             style="cursor:pointer" />
                         } @else {
                         <img [src]="item.preview" [alt]="item.file.name" (click)="setEditCover(i)"

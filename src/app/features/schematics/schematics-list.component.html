@@ -48,7 +48,7 @@
                             @for (tag of createTagList(); track tag) {
                             <mat-chip-row (removed)="removeCreateTag(tag)">
                                 {{ tag }}
-                                <button matChipRemove aria-label="Remove tag"><img src="/icons/letters/X.svg" alt=""
+                                <button matChipRemove [attr.aria-label]="'Remove tag' | t"><img src="/icons/letters/X.svg" alt=""
                                         aria-hidden="true" class="mc-icon" /></button>
                             </mat-chip-row>
                             }
@@ -78,7 +78,7 @@
                             @for (ver of createVersionList(); track ver) {
                             <mat-chip-row (removed)="removeCreateVersion(ver)">
                                 {{ ver }}
-                                <button matChipRemove aria-label="Remove version"><img src="/icons/letters/X.svg" alt=""
+                                <button matChipRemove [attr.aria-label]="'Remove version' | t"><img src="/icons/letters/X.svg" alt=""
                                         aria-hidden="true" class="mc-icon" /></button>
                             </mat-chip-row>
                             }

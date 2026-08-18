@@ -5,11 +5,13 @@ export enum Badge {
     Dev = 3,
 }
 
+import { BADGES_ROLES } from '../../i18n/labels';
+
 export const BADGE_LABELS: Record<number, string> = {
-    [Badge.Admin]: 'Admin',
-    [Badge.Moderator]: 'Moderator',
-    [Badge.Translator]: 'Translator',
-    [Badge.Dev]: 'Developer',
+    [Badge.Admin]: BADGES_ROLES.admin,
+    [Badge.Moderator]: BADGES_ROLES.moderator,
+    [Badge.Translator]: BADGES_ROLES.translator,
+    [Badge.Dev]: BADGES_ROLES.developer,
 };
 
 export const BADGE_ICONS: Record<number, string> = {

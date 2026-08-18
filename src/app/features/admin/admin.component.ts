@@ -42,6 +42,7 @@ import { ContentTranslationsDialogComponent, type ContentTranslationsData } from
 import { AdminTicketDialogComponent, AdminTicketDialogData, AdminTicketDialogResult } from './admin-ticket-dialog.component';
 import { AdminUserDialogComponent } from './admin-user-dialog.component';
 import { Role, ROLE_LABELS, Status, STATUS_LABELS, Visibility, Badge, BADGE_LABELS, BADGE_ICONS, BADGE_COLORS, resolveBadge } from '../../core/enums';
+import { translateText } from '../../core/i18n/translation.store';
 import { ADMIN, DIALOGS, COMMON } from '../../i18n/labels';
 
 export interface ServerLogEntryResponse {
@@ -743,7 +744,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
-    badgeLabel(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_LABELS[n] : ''; }
+    badgeLabel(badge: unknown): string { const n = resolveBadge(badge); return n != null ? translateText(BADGE_LABELS[n]) : ''; }
     badgeIcon(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_ICONS[n] : 'star'; }
     badgeColor(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_COLORS[n] : '#888'; }
 

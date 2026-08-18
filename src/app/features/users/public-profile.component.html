@@ -95,7 +95,7 @@
             <div class="name-row">
                 <h1>{{ p.username }}</h1>
                 @if (memberYears(p) != null) {
-                <span class="year-badge" [matTooltip]="'Member since ' + (p.registrationDate | date:'mediumDate')">{{
+                <span class="year-badge" [matTooltip]="('Member since' | t) + ' ' + (p.registrationDate | date:'mediumDate')">{{
                     memberYears(p)
                     }}</span>
                 }

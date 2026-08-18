@@ -1,6 +1,6 @@
 <div class="viewer-dialog">
     <div class="viewer-header">
-        <button mat-icon-button (click)="downloadFile()" [matTooltip]="'Download ' + data.fileName">
+        <button mat-icon-button (click)="downloadFile()" [matTooltip]="('Download' | t) + ' ' + data.fileName">
             <img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" />
         </button>
         <h2>{{ data.fileName }}</h2>

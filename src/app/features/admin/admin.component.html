@@ -126,7 +126,7 @@
                                 <mat-select [value]="editBadge()" (selectionChange)="editBadge.set($event.value)">
                                     <mat-option value=""><span>{{ 'None' | t }}</span></mat-option>
                                     @for (b of badges; track b[1]) {
-                                    <mat-option [value]="b[0]">{{ badgeLabels[b[1]] }}</mat-option>
+                                    <mat-option [value]="b[0]">{{ badgeLabels[b[1]] | t }}</mat-option>
                                     }
                                 </mat-select>
                                 <mat-icon matPrefix>workspace_premium</mat-icon>
@@ -206,7 +206,7 @@
                             >
                             <img [src]="newestOnlyUsers() ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
                                 alt="" aria-hidden="true" class="mc-icon" />
-                            <span style="transform: translateY(1px); display: inline-block;">Newest only</span>
+                            <span style="transform: translateY(1px); display: inline-block;">{{ 'Newest only' | t }}</span>
                         </button>
                         <button mat-stroked-button (click)="usersSearch = ''; searchUsers()">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
@@ -247,7 +247,7 @@
                                 <mat-select [value]="u.role" (selectionChange)="changeRole(u, $event.value)"
                                     class="inline-select">
                                     @for (r of roles; track r) {
-                                    <mat-option [value]="r">{{ roleLabels[r] }}</mat-option>
+                                    <mat-option [value]="r">{{ roleLabels[r] | t }}</mat-option>
                                     }
                                 </mat-select>
                             </td>
@@ -1072,7 +1072,7 @@
                 <h3>{{ 'Logged Errors' | t }}</h3>
 
                 <div class="search-row">
-                    <mat-chip-listbox aria-label="Source filter" (change)="setServerLogsSourceFilter($event.value)">
+                    <mat-chip-listbox [attr.aria-label]="'Source filter' | t" (change)="setServerLogsSourceFilter($event.value)">
                         <mat-chip-option value="all" [selected]="serverLogsSourceFilter() === 'all'">{{ 'All' | t }}</mat-chip-option>
                         <mat-chip-option value="Backend" [selected]="serverLogsSourceFilter() === 'Backend'">Backend</mat-chip-option>
                         <mat-chip-option value="API" [selected]="serverLogsSourceFilter() === 'API'">API</mat-chip-option>
