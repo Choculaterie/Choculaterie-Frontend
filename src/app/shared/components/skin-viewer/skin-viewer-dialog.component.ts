@@ -168,6 +168,8 @@ export class SkinViewerDialogComponent implements AfterViewInit, OnDestroy {
         this.viewer.renderPaused = true;
         this.viewer.render();
         const canvas = this.canvasRef.nativeElement;
+        // No Gecko flip here: this reads the on-screen canvas, which is top-down,
+        // unlike takeScreenshot() which reads an offscreen target bottom-up.
         const url = canvas.toDataURL('image/png');
         this.viewer.renderPaused = false;
         const a = document.createElement('a');

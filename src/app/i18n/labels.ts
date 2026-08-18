@@ -263,6 +263,7 @@ export const ADMIN = {
 };
 
 export const COMMON = {
+    actionUndone: 'Action undone.',
     cancel: 'Cancel',
     confirm: 'Confirm',
     delete: 'Delete',
@@ -316,4 +317,32 @@ export const NAV = {
     logout: 'Logout',
     register: 'Register',
     login: 'Login',
+};
+
+/** Browser tab titles, keyed by first URL segment. Detail pages set their own. */
+export const PAGE_TITLES = {
+    schematics: 'Schematics',
+    mods: 'Mods',
+    faq: 'FAQ',
+    admin: 'Admin',
+    translations: 'Translations',
+};
+
+/** Angular Material's paginator labels, which do not go through the `t` pipe. */
+export const PAGINATOR = {
+    itemsPerPage: 'Items per page:',
+    nextPage: 'Next page',
+    previousPage: 'Previous page',
+    firstPage: 'First page',
+    lastPage: 'Last page',
+    // ${...} is the placeholder form the translation tool understands, so these
+    // show as chips rather than as literal braces.
+    range: 'Page ${page} of ${total}',
+};
+
+/** Mod release types. Stored in the database in English, shown translated. */
+export const MOD_STATUS = {
+    stable: 'Stable',
+    beta: 'Beta',
+    broken: 'Broken',
 };

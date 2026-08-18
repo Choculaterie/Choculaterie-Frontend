@@ -17,8 +17,8 @@
     <span class="spacer"></span>
 
     @if (locales().length > 1) {
-    <button mat-button [matMenuTriggerFor]="langMenu" [matTooltip]="'Language' | t"
-        class="lang-code">{{ currentCode() }}</button>
+    <button mat-icon-button [matMenuTriggerFor]="langMenu" [matTooltip]="'Language' | t"
+        class="lang-code"><span class="lang-code-text">{{ currentCode() }}</span></button>
     <mat-menu #langMenu="matMenu">
         @for (l of locales(); track l.code) {
         <button mat-menu-item (click)="chooseLocale(l.code)">

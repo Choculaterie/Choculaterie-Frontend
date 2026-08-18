@@ -8,7 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatPaginatorModule, PageEvent, MatPaginatorIntl } from '@angular/material/paginator';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
@@ -24,6 +24,7 @@ import { RouterLink } from '@angular/router';
 import { SessionService } from '../../core/services/session.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SCHEMATICS } from '../../i18n/labels';
+import { getLocale } from '../../core/i18n/locale';
 import { sortVersionsDesc } from '../../shared/utils/version-sort';
 import { LitematicViewerComponent, type LitematicViewerData } from '../../shared/components/litematic-viewer/litematic-viewer.component';
 import { IsometricScreenshotDialogComponent, type IsometricScreenshotData } from '../../shared/components/litematic-viewer/isometric-screenshot-dialog.component';
@@ -53,19 +54,6 @@ import { DropZoneDirective } from '../../shared/directives/drop-zone.directive';
         SchematicCardComponent,
         EmptyStateComponent,
         DropZoneDirective,
-    ],
-    providers: [
-        {
-            provide: MatPaginatorIntl,
-            useFactory: () => {
-                const intl = new MatPaginatorIntl();
-                intl.getRangeLabel = (page: number, pageSize: number, length: number) => {
-                    const totalPages = Math.ceil(length / pageSize);
-                    return `${page + 1} of ${totalPages}`;
-                };
-                return intl;
-            },
-        },
     ],
     templateUrl: './schematics-list.component.html',
     styleUrl: './schematics-list.component.scss',
@@ -190,13 +178,19 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     readonly allowedVersions = signal<AllowedVersionResponse[]>([]);
     readonly tagInputValue = signal('');
     readonly versionInputValue = signal('');
+    /** Values stay English; only the shown label is translated. */
+    tagLabel(sourceName: string): string {
+        return this.allowedTags().find(t => (t.sourceName ?? t.name) === sourceName)?.name ?? sourceName;
+    }
+
     readonly filteredTags = computed(() => {
         const q = this.tagInputValue().toLowerCase();
         const selected = this.createTagList();
         return this.allowedTags()
-            .map(t => t.name)
+            .map(t => t.sourceName ?? t.name)
             .filter(name => !selected.includes(name))
-            .filter(name => !q || name.toLowerCase().includes(q));
+            .filter(name => !q || name.toLowerCase().includes(q)
+                || this.tagLabel(name).toLowerCase().includes(q));
     });
     readonly filteredVersions = computed(() => {
         const q = this.versionInputValue().toLowerCase();
@@ -218,7 +212,8 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         }
 
         // Load allowed tags & versions
-        this.schematicsApi.getApiSchematicsTags().subscribe(tags => this.allowedTags.set(tags));
+        this.schematicsApi.getApiSchematicsTags({ params: { lang: getLocale() } })
+            .subscribe(tags => this.allowedTags.set(tags));
         this.schematicsApi.getApiSchematicsVersions().subscribe(versions => this.allowedVersions.set(sortVersionsDesc(versions)));
 
         // React to query param changes (external navigation, tag clicks, back/forward)

@@ -480,8 +480,7 @@
             <div class="edit-actions">
                 <button mat-stroked-button type="button" (click)="editing.set(false)">{{ 'Cancel' | t }}</button>
                 <button mat-flat-button type="submit" [disabled]="editForm.invalid || saving() || !isEditFileValid()">
-                    @if (saving()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span>{{ 'Save
-                        Changes' | t }}</span> }
+                    @if (saving()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span>{{ 'Save Changes' | t }}</span> }
                 </button>
             </div>
         </form>

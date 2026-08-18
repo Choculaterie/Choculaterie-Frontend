@@ -19,6 +19,7 @@ import type { FaqResponse, CaptchaPositionDto } from '../../api/generated.schema
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { simpleDiscord, simpleMatrix } from '@ng-icons/simple-icons';
 import { PROFILE } from '../../i18n/labels';
+import { getLocale } from '../../core/i18n/locale';
 
 @Component({
     selector: 'app-faq',
@@ -65,7 +66,7 @@ export class FaqComponent implements OnInit {
     readonly imagePreviews = signal<string[]>([]);
 
     ngOnInit(): void {
-        this.faqApi.getApiFaq().subscribe({
+        this.faqApi.getApiFaq({ params: { lang: getLocale() } }).subscribe({
             next: (items) => { this.faqs.set(items); this.loadingFaqs.set(false); },
             error: () => this.loadingFaqs.set(false),
         });

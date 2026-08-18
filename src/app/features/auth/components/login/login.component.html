@@ -1,8 +1,7 @@
 <div class="card-page">
   <mat-card class="auth-card" appearance="outlined">
     <mat-card-header>
-      <mat-card-title>@if (step() === 'login') { <span>{{ 'Sign in' | t }}</span> } @else { <span>{{ 'Verify your
-          identity' | t }}</span> }</mat-card-title>
+      <mat-card-title>@if (step() === 'login') { <span>{{ 'Sign in' | t }}</span> } @else { <span>{{ 'Verify your identity' | t }}</span> }</mat-card-title>
       <mat-card-subtitle>
         @if (step() === 'login') { <span>{{ 'Welcome back to Choculaterie' | t }}</span> }
         @else { <span>{{ 'A code was sent to your email' | t }}</span> }
@@ -53,8 +52,7 @@
           <a mat-button [routerLink]="['/auth/register']" [queryParams]="returnUrl ? {returnUrl: returnUrl} : {}"
            >{{ 'Don\'t have an account?' | t }}</a>
           <button mat-flat-button type="submit" [disabled]="loginForm.invalid || loading() || !captchaData()">
-            @if (loading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span>{{ 'Sign
-              in' | t }}</span> }
+            @if (loading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span>{{ 'Sign in' | t }}</span> }
           </button>
         </div>
 
@@ -95,8 +93,7 @@
             <span>{{ 'Back' | t }}</span>
           </button>
           <button mat-flat-button type="submit" [disabled]="verifyForm.invalid || loading()">
-            @if (loading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span>{{ 'Verify &
-              sign in' | t }}</span> }
+            @if (loading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span>{{ 'Verify & sign in' | t }}</span> }
           </button>
         </div>
       </form>

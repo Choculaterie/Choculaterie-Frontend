@@ -1,15 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, TextOnlySnackBar } from '@angular/material/snack-bar';
-import { TranslationStore } from '../i18n/translation.store';
+import { translateText } from '../i18n/translation.store';
+import { COMMON } from '../../i18n/labels';
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
     private snackBar = inject(MatSnackBar);
-    private translations = inject(TranslationStore);
 
     /// Labels arrive in English, so translate at the point of display.
     private t(message: string): string {
-        return this.translations.translate(message);
+        return translateText(message);
     }
     private _muteNextSuccess = false;
 
@@ -38,7 +38,7 @@ export class ToastService {
             ref.onAction().subscribe(() => {
                 // Show "Action undone" immediately, mute the next success()
                 // triggered by undoFn's async callback to prevent double-toast.
-                this.snackBar.open('Action undone.', undefined, {
+                this.snackBar.open(this.t(COMMON.actionUndone), undefined, {
                     duration: 3000,
                     panelClass: ['toast-success'],
                     horizontalPosition: 'start',

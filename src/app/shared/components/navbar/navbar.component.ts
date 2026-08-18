@@ -51,15 +51,14 @@ export class NavbarComponent implements OnInit {
     chooseLocale(code: string): void {
         this.currentCode.set(code.toUpperCase());
         persistLocale(code);
-        // Everything is on the t pipe now, so swapping the map re-renders in place.
         this.translations.load(code);
     }
 
+    private translations = inject(TranslationStore);
     readonly session = inject(SessionService);
     readonly theme = inject(ThemeService);
     readonly realtime = inject(RealtimeService);
     private router = inject(Router);
-    private translations = inject(TranslationStore);
     private usersApi = inject(UsersService);
     private authApi = inject(ApiAuthService);
     private dialog = inject(MatDialog);

@@ -191,6 +191,8 @@ export interface AllowedTagResponse {
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   id: number | string;
   name: string;
+  /** English name. Schematics are stored and filtered by this, never by `name`. */
+  sourceName?: string;
 }
 
 export interface AllowedVersionRequest {

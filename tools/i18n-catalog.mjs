@@ -24,6 +24,15 @@ function scanPipeStrings(dir = 'src', found = new Map()) {
             const text = m[1].replace(/\\"/g, '"');
             if (text.trim()) found.set(text, full);
         }
+        // A piped expression rather than a bare literal, e.g.
+        //   {{ (busy() ? 'Generating...' : 'Generate') | t }}
+        // Neither branch is followed directly by "| t", so take every literal inside.
+        for (const m of src.matchAll(/\(((?:[^()]|\([^()]*\))*)\)\s*\|\s*t\b/g)) {
+            for (const q of m[1].matchAll(/'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)"/g)) {
+                const text = (q[1] ?? q[2]).replace(/\\'/g, "'").replace(/\\"/g, '"');
+                if (text.trim()) found.set(text, full);
+            }
+        }
     }
     return found;
 }

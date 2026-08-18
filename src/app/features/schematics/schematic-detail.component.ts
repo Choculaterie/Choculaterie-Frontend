@@ -43,6 +43,7 @@ import { TagSuggestDialogComponent } from '../../shared/components/tag-suggest-d
 import { UserLinkComponent } from '../../shared/components/user-link/user-link.component';
 import { debounceTime, of, Subject } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { getLocale } from '../../core/i18n/locale';
 
 @Component({
     selector: 'app-schematic-detail',
@@ -234,7 +235,8 @@ export class SchematicDetailComponent implements OnInit {
     ngOnInit(): void {
         this.destroyRef.onDestroy(() => this.ogMeta.clear());
         // Load allowed tags & versions for the edit form
-        this.schematicsApi.getApiSchematicsTags().subscribe(tags => this.allowedTags.set(tags));
+        this.schematicsApi.getApiSchematicsTags({ params: { lang: getLocale() } })
+            .subscribe(tags => this.allowedTags.set(tags));
         this.schematicsApi.getApiSchematicsVersions().subscribe(versions => this.allowedVersions.set(sortVersionsDesc(versions)));
 
         this.authorInput$.pipe(

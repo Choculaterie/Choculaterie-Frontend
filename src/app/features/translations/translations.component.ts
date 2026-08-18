@@ -4,6 +4,7 @@ import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -246,7 +247,18 @@ function describeExpr(expr: string): string {
                         </div>
 
                         <div class="fq-actions">
-                            <button mat-button (click)="prev()" [disabled]="index() === 0">{{ 'Previous' | t }}</button>
+                            <button mat-icon-button (click)="prev()" [disabled]="index() === 0"
+                                [matTooltip]="'Previous' | t">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
+                                    class="mc-icon" aria-hidden="true">
+                                    <path fill="currentColor" d="M9,5h3v1h-3zM9,6h3v1h-3zM9,7h3v1h-3zM5,8h7v1h-7zM5,9h7v1h-7zM5,10h7v1h-7zM2,11h25v1h-25zM2,12h25v1h-25zM2,13h25v1h-25zM5,14h7v1h-7zM5,15h7v1h-7zM5,16h7v1h-7zM5,17h7v1h-7zM9,18h3v1h-3zM9,19h3v1h-3zM9,20h3v1h-3z" />
+                                    <path fill="var(--mc-icon-shadow)" d="M12,8h4v1h-4zM12,9h4v1h-4zM12,10h4v1h-4zM12,14h18v1h-18zM12,15h18v1h-18zM12,16h18v1h-18zM12,17h18v1h-18zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM12,21h4v1h-4zM12,22h4v1h-4zM12,23h4v1h-4z" />
+                                </svg>
+                            </button>
+                            @if (canEdit()) {
+                            <button mat-stroked-button (click)="useSource(st)"
+                                [matTooltip]="'Use the English text as-is' | t">{{ 'Same' | t }}</button>
+                            }
                             @if (canEdit()) {
                             <button mat-stroked-button (click)="generate(st)"
                                 [disabled]="generating() === st.id">{{ (generating() === st.id ? 'Generating...' : 'Generate') | t }}</button>
@@ -256,7 +268,14 @@ function describeExpr(expr: string): string {
                                     [disabled]="!canEdit() || saving() === st.id || !!problem(st)"
                                     >{{ 'Save & next' | t }}</button>
                             </span>
-                            <button mat-stroked-button (click)="next()">{{ 'Skip' | t }}</button>
+                            <button mat-icon-button (click)="next()" [matTooltip]="'Skip' | t"
+                                [disabled]="index() >= queue().length - 1">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
+                                    class="mc-icon" aria-hidden="true">
+                                    <path fill="currentColor" d="M16,5h4v1h-4zM16,6h4v1h-4zM16,7h4v1h-4zM16,8h7v1h-7zM16,9h7v1h-7zM16,10h7v1h-7zM2,11h25v1h-25zM2,12h25v1h-25zM2,13h25v1h-25zM16,14h7v1h-7zM16,15h7v1h-7zM16,16h7v1h-7zM16,17h7v1h-7zM16,18h4v1h-4zM16,19h4v1h-4zM16,20h4v1h-4z" />
+                                    <path fill="var(--mc-icon-shadow)" d="M5,14h11v1h-11zM23,14h7v1h-7zM5,15h11v1h-11zM23,15h7v1h-7zM5,16h11v1h-11zM23,16h7v1h-7zM5,17h11v1h-11zM23,17h7v1h-7zM20,18h7v1h-7zM20,19h7v1h-7zM20,20h7v1h-7zM20,21h3v1h-3zM20,22h3v1h-3zM20,23h3v1h-3z" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -269,8 +288,7 @@ function describeExpr(expr: string): string {
             <div class="tr-list">
                 @if (!canEdit()) {
                 <mat-card appearance="outlined" class="tr-notice">
-                    <p>{{ 'You can browse every language and string here, but saving a translation
-                        needs the Translator badge.' | t }}</p>
+                    <p>{{ 'You can browse every language and string here, but saving a translation needs the Translator badge.' | t }}</p>
                     <p>{{ 'To request it, either open a' | t }}
                         <a routerLink="/faq" class="tr-link">{{ 'ticket' | t }}</a>
                         {{ 'on the contact page, send an' | t }}
@@ -336,8 +354,8 @@ function describeExpr(expr: string): string {
                         <strong>{{ 'Website' | t }}</strong>
                         <span class="tr-spacer"></span>
                         <span class="tr-page-count tr-count-link"
-                            (click)="openList(null); $event.stopPropagation()">{{ currentLocale()?.translated ?? 0 }} /
-                            {{ currentLocale()?.total ?? 0 }} ({{ websitePct() }}%)</span>
+                            (click)="openList(null); $event.stopPropagation()">{{ websiteDone() }} /
+                            {{ websiteTotal() }} ({{ websitePct() }}%)</span>
                     </div>
                     <mat-progress-bar mode="determinate" [value]="barsIn() ? websitePct() : 0" />
                 </mat-card>
@@ -596,7 +614,7 @@ export class TranslationsComponent implements OnInit {
     readonly targetLocales = SUPPORTED_LOCALES.filter((l) => l.code !== SOURCE_LOCALE);
     locale: string = this.targetLocales[0]?.code ?? 'fr';
 
-    readonly view = signal<'languages' | 'sections' | 'mods' | 'mod' | 'pages' | 'list' | 'queue' | 'focus'>('languages');
+    readonly view = signal<'languages' | 'sections' | 'mods' | 'mod' | 'pages' | 'list' | 'queue' | 'focus' | 'content'>('languages');
     readonly listed = signal<CatalogString[]>([]);
     private restoring = false;
     readonly listPage = signal(0);
@@ -629,6 +647,10 @@ export class TranslationsComponent implements OnInit {
     readonly saving = signal<string | null>(null);
     readonly generating = signal<string | null>(null);
     private readonly drafts = signal<Record<string, string>>({});
+
+    /** Set while editing tags or FAQ rather than catalog strings. */
+    readonly contentGroup = signal<string | null>(null);
+    readonly contentGroups = signal<PageGroup[]>([]);
     private readonly phMeta = signal<Record<string, PlaceholderHint[]>>({});
 
     readonly current = computed(() => this.queue()[this.index()] ?? null);
@@ -639,6 +661,16 @@ export class TranslationsComponent implements OnInit {
     ngOnInit(): void {
         this.loadPlaceholderMeta();
         this.loadLocales();
+
+        // Back/forward arrive as param changes now the component survives depth changes.
+        // Our own syncUrl navigations already match urlFor(), so they fall through.
+        this.route.paramMap.subscribe(() => {
+            if (this.router.url.split('?')[0] === this.urlFor().join('/').replace('//', '/')) return;
+            this.restoreFromUrl();
+        });
+    }
+
+    private restoreFromUrl(): void {
         this.restoring = true;
         setTimeout(() => { this.restoring = false; });
 
@@ -651,7 +683,7 @@ export class TranslationsComponent implements OnInit {
         if (!loc) { this.view.set('languages'); return; }
         this.locale = loc;
 
-        if (!section) { this.view.set('sections'); return; }
+        if (!section) { this.view.set('sections'); this.loadContentProgress(); return; }
 
         if (section === 'mods') {
             if (group) { this.activeMod.set(group); this.view.set('mod'); }
@@ -662,7 +694,40 @@ export class TranslationsComponent implements OnInit {
         if (!group) { this.setView('pages'); return; }
 
         if (group === 'all') {
+            // A trailing index means this URL points at one string, not the list.
+            if (p.get('index') !== null) {
+                this.loading.set(true);
+                this.contentGroup.set(null);
+                this.activeGroup.set(null);
+                this.fetchAllStrings({}).then((items) => {
+                    this.queue.set(items);
+                    this.index.set(Math.min(Math.max(index, 0), Math.max(items.length - 1, 0)));
+                    this.drafts.set({});
+                    this.view.set('focus');
+                    this.loading.set(false);
+                    this.growBars();
+                }).catch(() => this.openList(null));
+                return;
+            }
             this.openList(null);
+            return;
+        }
+
+        // Tags and FAQ are not in the catalog groups endpoint, so they resolve from the
+        // content endpoint instead.
+        if (this.isContentGroup(group)) {
+            this.view.set(p.get('index') === 'all' ? 'list' : 'focus');
+            this.loading.set(true);
+            this.http.get<{ groups: PageGroup[] }>(
+                `/api/Translations/content/groups/${this.locale}`).subscribe({
+                next: (r) => {
+                    const g = (r.groups ?? []).find((x) => x.group === group)
+                        ?? { group, label: group, total: 0, translated: 0 };
+                    if (p.get('index') === 'all') this.openContentGroup(g);
+                    else this.startContentQueue(g, index);
+                },
+                error: () => { this.setView('pages'); },
+            });
             return;
         }
 
@@ -674,6 +739,7 @@ export class TranslationsComponent implements OnInit {
             next: (r) => {
                 const groups: PageGroup[] = r.groups ?? [];
                 this.groups.set(groups);
+                this.appendContentGroups();
                 this.overallTotal.set(r.total ?? 0);
                 this.overallTranslated.set(r.translated ?? 0);
                 const match = groups.find((g) => slugify(g.group) === group);
@@ -713,8 +779,11 @@ export class TranslationsComponent implements OnInit {
             return base;
         }
 
+        // A string from the unscoped list has no group, but the URL still needs a 4th
+        // segment or it collapses onto the pages route.
         const g = this.activeGroup();
-        if (g) { base.push(slugify(g.group)); base.push(String(this.index())); }
+        base.push(g ? slugify(g.group) : 'all');
+        base.push(String(this.index()));
         return base;
     }
 
@@ -762,10 +831,19 @@ export class TranslationsComponent implements OnInit {
         return out;
     }
 
+     /**
+      * Highlights only the labels this string actually has. Highlighting any quoted
+      * text marked things as variables that had no chip to insert.
+      */
     segments(text: string | null | undefined, id?: string): { text: string; isValue: boolean }[] {
-        const shown = this.display(text, id);
+        const pairs = labelsOf(text ?? '', id ? this.names(id) : {});
+        const shown = toDisplay(text, pairs);
+        const labels = [...new Set(pairs.map((x) => x.label).filter(Boolean))]
+            .sort((a, b) => b.length - a.length);
+        if (!labels.length) return shown ? [{ text: shown, isValue: false }] : [];
+
+        const re = new RegExp(labels.map((l) => l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
         const out: { text: string; isValue: boolean }[] = [];
-        const re = /"[a-z0-9 ]{1,24}"/gi;
         let last = 0;
         for (const m of shown.matchAll(re)) {
             if (m.index! > last) out.push({ text: shown.slice(last, m.index), isValue: false });
@@ -805,9 +883,18 @@ export class TranslationsComponent implements OnInit {
         return l.total ? Math.round((l.translated / l.total) * 100) : 0;
     }
 
+    // Tags and FAQ are listed under Website, so they count towards it.
+    websiteTotal(): number {
+        return (this.currentLocale()?.total ?? 0) + this.contentTotal();
+    }
+
+    websiteDone(): number {
+        return (this.currentLocale()?.translated ?? 0) + this.contentDone();
+    }
+
     websitePct(): number {
-        const l = this.currentLocale();
-        return l ? this.pctOf(l) : 0;
+        const t = this.websiteTotal();
+        return t ? Math.round(this.websiteDone() / t * 100) : 0;
     }
 
     private loadLocales(): void {
@@ -876,6 +963,9 @@ export class TranslationsComponent implements OnInit {
     }
 
     openList(g: PageGroup | null): void {
+        if (g && this.isContentGroup(g.group)) { this.openContentGroup(g); return; }
+
+        this.contentGroup.set(null);
         this.activeGroup.set(g);
         this.search = '';
         this.listPage.set(0);
@@ -906,6 +996,27 @@ export class TranslationsComponent implements OnInit {
 
     private fetchList(): void {
         this.loading.set(true);
+        const content = this.contentGroup();
+        if (content) {
+            this.http.get<{ total: number; items: CatalogString[] }>(
+                `/api/Translations/content/${this.locale}`, {
+                    params: {
+                        group: content,
+                        page: this.listPage() + 1,
+                        pageSize: this.listPageSize,
+                        ...(this.search.trim() ? { search: this.search.trim() } : {}),
+                    },
+                }).subscribe({
+                next: (r) => {
+                    this.listed.set(r.items ?? []);
+                    this.listTotal.set(r.total ?? 0);
+                    this.loading.set(false);
+                },
+                error: () => { this.listed.set([]); this.listTotal.set(0); this.loading.set(false); },
+            });
+            return;
+        }
+
         const g = this.activeGroup();
         this.http
             .get<{ total: number; items: CatalogString[] }>(`/api/Translations/strings/${this.locale}`, {
@@ -939,8 +1050,9 @@ export class TranslationsComponent implements OnInit {
         this.syncUrl();
     }
 
-    setView(v: 'languages' | 'sections' | 'mods' | 'mod' | 'pages' | 'list' | 'queue'): void {
+    setView(v: 'languages' | 'sections' | 'mods' | 'mod' | 'pages' | 'list' | 'queue' | 'content'): void {
         this.view.set(v);
+        if (v === 'sections') this.loadContentProgress();
         this.growBars();
         this.syncUrl();
         this.reload();
@@ -953,6 +1065,106 @@ export class TranslationsComponent implements OnInit {
 
     private modLabel(slug: string): string {
         return this.mods().find((m) => slugify(m.name) === slug)?.name ?? slug;
+    }
+
+    readonly contentTotal = signal(0);
+    readonly contentDone = signal(0);
+    contentPct(): number {
+        const t = this.contentTotal();
+        return t ? Math.round(this.contentDone() / t * 100) : 0;
+    }
+
+    /** Counts for the sections card, without opening the group list. */
+    loadContentProgress(): void {
+        this.http.get<{ total: number; translated: number; groups: PageGroup[] }>(
+            `/api/Translations/content/groups/${this.locale}`).subscribe({
+            next: (r) => {
+                this.contentGroups.set(r.groups ?? []);
+                this.contentTotal.set(r.total ?? 0);
+                this.contentDone.set(r.translated ?? 0);
+                this.growBars();
+            },
+            error: () => { this.contentGroups.set([]); },
+        });
+    }
+
+    /** True for the database-backed groups listed under Website. */
+    isContentGroup(group: string): boolean {
+        return group === 'tags' || group === 'faq';
+    }
+
+    /**
+     * Tags and FAQ are database rows, not catalog strings, but they appear as
+     * ordinary groups under Website so translators do not have to care.
+     */
+    private appendContentGroups(): void {
+        this.http.get<{ total: number; translated: number; groups: PageGroup[] }>(
+            `/api/Translations/content/groups/${this.locale}`).subscribe({
+            next: (r) => {
+                const extra = r.groups ?? [];
+                this.contentGroups.set(extra);
+                this.contentTotal.set(r.total ?? 0);
+                this.contentDone.set(r.translated ?? 0);
+                // The backend orders groups by size, so these slot in by size too.
+                this.groups.update((g) => [
+                    ...g.filter((x) => !this.isContentGroup(x.group)),
+                    ...extra,
+                ].sort((a, b) => b.total - a.total));
+                this.growBars();
+            },
+            error: () => this.contentGroups.set([]),
+        });
+    }
+
+    private async fetchAllContent(group: string): Promise<CatalogString[]> {
+        const out: CatalogString[] = [];
+        for (let page = 1; ; page++) {
+            const r = await firstValueFrom(this.http.get<{ total: number; items: CatalogString[] }>(
+                `/api/Translations/content/${this.locale}`,
+                { params: { group, page, pageSize: 200 } }));
+            out.push(...(r.items ?? []));
+            if (out.length >= (r.total ?? 0) || !(r.items ?? []).length) break;
+        }
+        return out;
+    }
+
+     /**
+      * Shared by catalog strings and by tags/FAQ so the two cannot drift: untranslated
+      * last, and resume at the first one still to do.
+      */
+    private installQueue(items: CatalogString[], startAt: number): void {
+        items.sort((a, b) => Number(!a.approved) - Number(!b.approved));
+        this.queue.set(items);
+        const done = items.filter((x) => x.approved).length;
+        const target = startAt > 0 ? startAt : Math.min(done, Math.max(items.length - 1, 0));
+        this.index.set(Math.max(target, 0));
+        this.drafts.set({});
+        this.view.set('focus');
+        this.loading.set(false);
+        this.growBars();
+        this.syncUrl();
+    }
+
+    private startContentQueue(g: PageGroup, startAt = 0): void {
+        this.contentGroup.set(g.group);
+        this.activeGroup.set(g);
+        this.loading.set(true);
+        this.fetchAllContent(g.group).then((items) => {
+            this.installQueue(items, startAt);
+        }).catch(() => {
+            this.loading.set(false);
+            this.toast.error('Failed to load this group.');
+        });
+    }
+
+    openContentGroup(g: PageGroup): void {
+        this.contentGroup.set(g.group);
+        this.activeGroup.set(g);
+        this.search = '';
+        this.listPage.set(0);
+        this.view.set('list');
+        this.syncUrl();
+        this.fetchList();
     }
 
     openMods(): void {
@@ -995,6 +1207,7 @@ export class TranslationsComponent implements OnInit {
                         this.groups.set(r.groups ?? []);
                         this.overallTotal.set(r.total ?? 0);
                         this.overallTranslated.set(r.translated ?? 0);
+                        this.appendContentGroups();
                         this.growBars();
                     } else {
                         this.pending.set(r.items ?? []);
@@ -1010,36 +1223,45 @@ export class TranslationsComponent implements OnInit {
     }
 
     startQueue(g: PageGroup, startAt = 0): void {
+        if (this.isContentGroup(g.group)) { this.startContentQueue(g, startAt); return; }
+
+        // Must clear, or a catalog group opened after Tags/FAQ saves to the wrong endpoint.
+        this.contentGroup.set(null);
         this.loading.set(true);
         this.activeGroup.set(g);
-        this.http
-            .get<{ items: CatalogString[] }>(`/api/Translations/strings/${this.locale}`, {
-                params: {
-                    group: g.group,
-                    pageSize: 200,
-                    ...(this.search.trim() ? { search: this.search.trim() } : {}),
-                    ...(this.untranslatedOnly ? { untranslatedOnly: true } : {}),
-                },
-            })
-            .subscribe({
-                next: (r) => {
-                    const items = r.items ?? [];
-                    items.sort((a, b) => Number(!a.approved) - Number(!b.approved));
-                    this.queue.set(items);
-                    const done = items.filter((x) => x.approved).length;
-                    const target = startAt > 0 ? startAt : Math.min(done, Math.max(items.length - 1, 0));
-                    this.index.set(Math.max(target, 0));
-                    this.drafts.set({});
-                    this.view.set('focus');
-                    this.loading.set(false);
-                    this.growBars();
-                    this.syncUrl();
-                },
-                error: () => {
-                    this.toast.error($localize`Failed to load this page's strings.`);
-                    this.loading.set(false);
-                },
+        this.fetchAllStrings({
+            group: g.group,
+            ...(this.search.trim() ? { search: this.search.trim() } : {}),
+            ...(this.untranslatedOnly ? { untranslatedOnly: true } : {}),
+        })
+            .then((items) => this.installQueue(items, startAt))
+            .catch(() => {
+                this.toast.error($localize`Failed to load this page's strings.`);
+                this.loading.set(false);
             });
+    }
+
+    /// The strings endpoint hard-caps pageSize at 200, so a group can exceed one
+    /// page. Loop until every match is collected rather than silently truncating
+    /// the queue, which is what let Next dead-end and bounce back to the pages list.
+    private async fetchAllStrings(params: Record<string, string | boolean>): Promise<CatalogString[]> {
+        const pageSize = 200;
+        const first = await firstValueFrom(
+            this.http.get<{ total: number; items: CatalogString[] }>(`/api/Translations/strings/${this.locale}`,
+                { params: { ...params, page: 1, pageSize } }),
+        );
+        const items = [...(first.items ?? [])];
+        const total = first.total ?? items.length;
+
+        const remaining = Math.ceil((total - items.length) / pageSize);
+        for (let page = 2; page <= remaining + 1 && items.length < total; page++) {
+            const r = await firstValueFrom(
+                this.http.get<{ items: CatalogString[] }>(`/api/Translations/strings/${this.locale}`,
+                    { params: { ...params, page, pageSize } }),
+            );
+            items.push(...(r.items ?? []));
+        }
+        return items;
     }
 
     exitFocus(): void {
@@ -1065,6 +1287,11 @@ export class TranslationsComponent implements OnInit {
 
     setDraft(st: CatalogString, value: string): void {
         this.drafts.update((d) => ({ ...d, [st.id]: value }));
+    }
+
+    /** Copies the English text in, for terms that are identical. */
+    useSource(st: CatalogString): void {
+        this.setDraft(st, st.sourceText);
     }
 
     problem(st: CatalogString): string | null {
@@ -1115,6 +1342,24 @@ export class TranslationsComponent implements OnInit {
         if (text === (st.approved ?? '')) { this.next(); return; }
 
         this.saving.set(st.id);
+
+        if (this.contentGroup()) {
+            this.http.post('/api/Translations/content/submit',
+                { id: st.id, locale: this.locale, text }).subscribe({
+                next: () => {
+                    st.approved = text.trim() ? text : null;
+                    this.queue.update((q) => [...q]);
+                    this.saving.set(null);
+                    this.next();
+                },
+                error: (e) => {
+                    this.toast.error(e?.error?.error ?? 'Failed to save translation.');
+                    this.saving.set(null);
+                },
+            });
+            return;
+        }
+
         const staff = this.isStaff();
         const url = staff ? '/api/Translations/admin/set' : '/api/Translations/submit';
         this.http

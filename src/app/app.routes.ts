@@ -1,5 +1,17 @@
-import { Routes } from '@angular/router';
+import { Routes, UrlMatchResult, UrlSegment } from '@angular/router';
 import { authGuard, roleGuard } from './core/guards';
+
+const TRANSLATIONS_PARAMS = ['loc', 'section', 'group', 'index'];
+
+/** Matches /translations plus up to four optional path params, as one route. */
+export function translationsUrl(segments: UrlSegment[]): UrlMatchResult | null {
+    if (!segments.length || segments[0].path !== 'translations') return null;
+    if (segments.length > TRANSLATIONS_PARAMS.length + 1) return null;
+
+    const posParams: Record<string, UrlSegment> = {};
+    segments.slice(1).forEach((s, i) => { posParams[TRANSLATIONS_PARAMS[i]] = s; });
+    return { consumed: segments, posParams };
+}
 
 export const routes: Routes = [
     {
@@ -80,27 +92,9 @@ export const routes: Routes = [
             import('./features/internal/icon-batch-render.component').then((m) => m.IconBatchRenderComponent),
     },
     {
-        path: 'translations',
-        loadComponent: () =>
-            import('./features/translations/translations.component').then((m) => m.TranslationsComponent),
-    },
-    {
-        path: 'translations/:loc',
-        loadComponent: () =>
-            import('./features/translations/translations.component').then((m) => m.TranslationsComponent),
-    },
-    {
-        path: 'translations/:loc/:section',
-        loadComponent: () =>
-            import('./features/translations/translations.component').then((m) => m.TranslationsComponent),
-    },
-    {
-        path: 'translations/:loc/:section/:group',
-        loadComponent: () =>
-            import('./features/translations/translations.component').then((m) => m.TranslationsComponent),
-    },
-    {
-        path: 'translations/:loc/:section/:group/:index',
+        // One route, not five: separate route configs recreate the component on each
+        // depth change, which wiped the open editor.
+        matcher: translationsUrl,
         loadComponent: () =>
             import('./features/translations/translations.component').then((m) => m.TranslationsComponent),
     },

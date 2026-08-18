@@ -1,8 +1,7 @@
 <div class="card-page">
   <mat-card class="auth-card" appearance="outlined">
     <mat-card-header>
-      <mat-card-title>@if (step() === 'register') { <span>{{ 'Create an account' | t }}</span> } @else { <span>{{ 'Verify your
-          email' | t }}</span> }</mat-card-title>
+      <mat-card-title>@if (step() === 'register') { <span>{{ 'Create an account' | t }}</span> } @else { <span>{{ 'Verify your email' | t }}</span> }</mat-card-title>
       <mat-card-subtitle>
         @if (step() === 'register') { <span>{{ 'Join the Choculaterie community' | t }}</span> }
         @else { <span>{{ 'A code was sent to your email' | t }}</span> }
@@ -90,8 +89,7 @@
             autocomplete="new-password" />
           <img matPrefix src="/icons/weapons/swords.svg" alt="" aria-hidden="true" class="mc-icon" />
           <mat-error>
-            @if (registerForm.get('passwordConfirm')?.hasError('required')) { <span>{{ 'Please confirm your
-              password' | t }}</span> }
+            @if (registerForm.get('passwordConfirm')?.hasError('required')) { <span>{{ 'Please confirm your password' | t }}</span> }
             @else if (registerForm.hasError('mismatch')) { <span>{{ 'Passwords do not match' | t }}</span> }
           </mat-error>
         </mat-form-field>
@@ -128,8 +126,7 @@
         <div class="form-actions">
           <button mat-stroked-button type="button" (click)="cancelConfirm()">{{ 'Back' | t }}</button>
           <button mat-flat-button type="submit" [disabled]="confirmForm.invalid || loading()">
-            @if (loading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span>{{ 'Verify &
-              create account' | t }}</span> }
+            @if (loading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span>{{ 'Verify & create account' | t }}</span> }
           </button>
         </div>
       </form>

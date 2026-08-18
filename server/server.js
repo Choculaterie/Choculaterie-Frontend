@@ -268,14 +268,14 @@ const STATIC_META_RE = /<title>[^<]*<\/title>[\s\S]*?(<\/head>)/;
 function injectMeta(html, title, metaBlock) {
     const esc = (s) => (s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
     // Replace <title>
-    html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
+    html = html.replace(/<title>[^<]*<\/title>/, () => `<title>${esc(title)}</title>`);
     // Remove the static OG comment marker
     html = html.replace(/[ \t]*<!--[ \t]*Static OpenGraph[^\n]*-->\n?/gi, '');
     // Remove any existing og: / twitter: meta tags
     html = html.replace(/[ \t]*<meta\s+property="og:[^>]*\/?>\n?/gi, '');
     html = html.replace(/[ \t]*<meta\s+name="twitter:[^>]*\/?>\n?/gi, '');
     // Inject fresh tags right before </head>
-    return html.replace('</head>', `  ${metaBlock}\n</head>`);
+    return html.replace('</head>', () => `  ${metaBlock}\n</head>`);
 }
 
 // ── HTTP server ───────────────────────────────────────────────────────────────
@@ -287,7 +287,14 @@ const server = http.createServer(async (req, res) => {
     // Try to serve as a static file first.
     // Only treat known asset extensions as files — usernames like "beanie._.boi"
     // produce a fake extension (".boi") and must fall through to the SPA.
-    const filePath = path.join(STATIC_DIR, urlPath);
+    // path.join keeps "..", so resolve and confine to the static root.
+    const staticRoot = path.resolve(STATIC_DIR);
+    const filePath = path.resolve(staticRoot, '.' + decodeURIComponent(urlPath));
+    if (filePath !== staticRoot && !filePath.startsWith(staticRoot + path.sep)) {
+        res.writeHead(403);
+        res.end('Forbidden');
+        return;
+    }
     const ext = path.extname(filePath).toLowerCase();
 
     if (ext && MIME[ext] && ext !== '.html') {
@@ -300,6 +307,7 @@ const server = http.createServer(async (req, res) => {
             }
             res.writeHead(200, {
                 'Content-Type': MIME[ext] ?? 'application/octet-stream',
+                'X-Content-Type-Options': 'nosniff',
                 'Cache-Control': ext === '.js' || ext === '.css'
                     ? 'public, max-age=31536000, immutable'
                     : 'public, max-age=3600',
@@ -321,6 +329,9 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(200, {
             'Content-Type': 'text/html; charset=utf-8',
             'Cache-Control': 'no-cache',
+            'X-Frame-Options': 'DENY',
+            'X-Content-Type-Options': 'nosniff',
+            'Referrer-Policy': 'strict-origin-when-cross-origin',
         });
         res.end(html);
     } catch (err) {

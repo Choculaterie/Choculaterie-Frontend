@@ -258,16 +258,10 @@
                         <img matPrefix src="/icons/ui/smile.svg" alt="" aria-hidden="true" class="mc-icon" />
                         @if (usernameChecking()) { <img src="loading.gif" alt="" matSuffix class="btn-loading-gif" /> }
                         <mat-error>
-                            @if (profileForm.get('username')?.hasError('required')) { <span>{{ 'Username is
-                                required' | t }}</span> }
-                            @else if (profileForm.get('username')?.hasError('minlength')) { <span>{{ 'Minimum 3
-                                characters' | t }}</span> }
-                            @else if (profileForm.get('username')?.hasError('pattern')) { <span>{{ 'Only letters,
-                                numbers,
-                                hyphens, underscores' | t }}</span> }
-                            @else if (profileForm.get('username')?.hasError('usernameTaken')) { <span>{{ 'Username is
-                                already
-                                taken' | t }}</span> }
+                            @if (profileForm.get('username')?.hasError('required')) { <span>{{ 'Username is required' | t }}</span> }
+                            @else if (profileForm.get('username')?.hasError('minlength')) { <span>{{ 'Minimum 3 characters' | t }}</span> }
+                            @else if (profileForm.get('username')?.hasError('pattern')) { <span>{{ 'Only letters, numbers, hyphens, underscores' | t }}</span> }
+                            @else if (profileForm.get('username')?.hasError('usernameTaken')) { <span>{{ 'Username is already taken' | t }}</span> }
                         </mat-error>
                     </mat-form-field>
                     <mat-form-field class="full-width profile-bio-field" appearance="outline">
@@ -280,8 +274,7 @@
                         <button mat-flat-button type="submit"
                             [disabled]="profileForm.invalid || profileForm.pending || profileSaving()">
                             @if (profileSaving()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
-                            <span>{{ 'Save
-                                profile' | t }}</span> }
+                            <span>{{ 'Save profile' | t }}</span> }
                         </button>
                     </div>
                 </form>
@@ -385,18 +378,15 @@
                             <mat-error>
                                 @if (emailForm.get('email')?.hasError('required')) { <span>{{ 'Email is required' | t }}</span>
                                 }
-                                @else if (emailForm.get('email')?.hasError('email')) { <span>{{ 'Enter a valid
-                                    email' | t }}</span> }
-                                @else if (emailForm.get('email')?.hasError('emailTaken')) { <span>{{ 'Email is already
-                                    in use' | t }}</span> }
+                                @else if (emailForm.get('email')?.hasError('email')) { <span>{{ 'Enter a valid email' | t }}</span> }
+                                @else if (emailForm.get('email')?.hasError('emailTaken')) { <span>{{ 'Email is already in use' | t }}</span> }
                             </mat-error>
                         </mat-form-field>
                         <div class="form-actions">
                             <button mat-flat-button type="submit"
                                 [disabled]="emailForm.invalid || emailForm.pending || editLoading()">
                                 @if (editLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
-                                <span>{{ 'Update
-                                    email' | t }}</span> }
+                                <span>{{ 'Update email' | t }}</span> }
                             </button>
                         </div>
                     </form>
@@ -412,8 +402,7 @@
                             <mat-label>{{ 'Verification code' | t }}</mat-label>
                             <input matInput formControlName="code" autocomplete="one-time-code" maxlength="10" />
                             <img matPrefix src="/icons/ui/hashtag.svg" alt="" aria-hidden="true" class="mc-icon" />
-                            <mat-error>@if (confirmForm.get('code')?.hasError('required')) { <span>{{ 'Code is
-                                    required' | t }}</span>
+                            <mat-error>@if (confirmForm.get('code')?.hasError('required')) { <span>{{ 'Code is required' | t }}</span>
                                 }</mat-error>
                         </mat-form-field>
                         <div class="form-actions">
@@ -442,8 +431,7 @@
                     <div class="form-actions">
                         <button mat-flat-button (click)="requestPasswordReset()" [disabled]="resetLoading()">
                             @if (resetLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
-                            <span>{{ 'Send reset
-                                code' | t }}</span> }
+                            <span>{{ 'Send reset code' | t }}</span> }
                         </button>
                     </div>
                     }
@@ -469,8 +457,7 @@
                                 <img [src]="hideResetPassword() ? '/icons/ui/forbidden_circle.svg' : '/icons/circled/circle_empty_2.svg'"
                                     alt="" aria-hidden="true" class="mc-icon" />
                             </button>
-                            <mat-error>@if (resetForm.get('newPassword')?.hasError('required')) { <span>{{ 'Password is
-                                    required' | t }}</span>
+                            <mat-error>@if (resetForm.get('newPassword')?.hasError('required')) { <span>{{ 'Password is required' | t }}</span>
                                 }</mat-error>
                         </mat-form-field>
 
@@ -511,9 +498,7 @@
                             <img matPrefix src="/icons/weapons/swords.svg" alt="" aria-hidden="true" class="mc-icon"
                                 style="transform: translate(1px, 1px);" />
                             <mat-error>
-                                @if (resetForm.get('confirmPassword')?.hasError('required')) { <span>{{ 'Please confirm
-                                    your
-                                    password' | t }}</span> }
+                                @if (resetForm.get('confirmPassword')?.hasError('required')) { <span>{{ 'Please confirm your password' | t }}</span> }
                                 @else if (resetForm.hasError('mismatch')) { <span>{{ 'Passwords do not match' | t }}</span> }
                             </mat-error>
                         </mat-form-field>
@@ -521,8 +506,7 @@
                         <div class="form-actions">
                             <button mat-flat-button type="submit" [disabled]="resetForm.invalid || resetLoading()">
                                 @if (resetLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else
-                                { <span>{{ 'Change
-                                    password' | t }}</span> }
+                                { <span>{{ 'Change password' | t }}</span> }
                             </button>
                         </div>
                     </form>
@@ -588,8 +572,7 @@
                     <div class="form-actions">
                         <button mat-flat-button (click)="generateMcCode()" [disabled]="mcLoading()">
                             @if (mcLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
-                               >{{ 'Generate linking
-                                code' | t }}</span> }
+                               >{{ 'Generate linking code' | t }}</span> }
                         </button>
                     </div>
                     }
@@ -654,8 +637,7 @@
                     <div class="form-actions">
                         <button mat-flat-button (click)="generateDcCode()" [disabled]="dcLoading()">
                             @if (dcLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span
-                               >{{ 'Generate linking
-                                code' | t }}</span> }
+                               >{{ 'Generate linking code' | t }}</span> }
                         </button>
                     </div>
                     }

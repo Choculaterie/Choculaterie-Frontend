@@ -38,6 +38,7 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 import { UserLinkComponent } from '../../shared/components/user-link/user-link.component';
 import { UserImgPipe, TicketImgPipe } from '../../shared/pipes/image-url.pipe';
 import { NumberFormatPipe } from '../../shared/pipes/number-format.pipe';
+import { ContentTranslationsDialogComponent, type ContentTranslationsData } from './content-translations-dialog.component';
 import { AdminTicketDialogComponent, AdminTicketDialogData, AdminTicketDialogResult } from './admin-ticket-dialog.component';
 import { AdminUserDialogComponent } from './admin-user-dialog.component';
 import { Role, ROLE_LABELS, Status, STATUS_LABELS, Visibility, Badge, BADGE_LABELS, BADGE_ICONS, BADGE_COLORS, resolveBadge } from '../../core/enums';
@@ -1449,4 +1450,19 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
+
+    /** Tags and FAQ entries live in the database, so they get their own editor. */
+    translateTag(t: { id: number | string; name: string }): void {
+        this.dialog.open(ContentTranslationsDialogComponent, {
+            width: '560px', maxWidth: '95vw', maxHeight: '85vh', autoFocus: false,
+            data: { kind: 'tag', id: +t.id, question: t.name } as ContentTranslationsData,
+        });
+    }
+
+    translateFaq(f: { id: number | string; question: string; answer: string }): void {
+        this.dialog.open(ContentTranslationsDialogComponent, {
+            width: '640px', maxWidth: '95vw', maxHeight: '85vh', autoFocus: false,
+            data: { kind: 'faq', id: +f.id, question: f.question, answer: f.answer } as ContentTranslationsData,
+        });
+    }
 }

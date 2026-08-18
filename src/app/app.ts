@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef, effect, signal } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
@@ -9,6 +9,8 @@ import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { AdminService } from './api/admin';
 import { RealtimeService } from './core/services/realtime.service';
 import { ThemeService } from './core/services/theme.service';
+import { translateText } from './core/i18n/translation.store';
+import { PAGE_TITLES } from './i18n/labels';
 
 @Component({
   selector: 'app-root',
@@ -34,6 +36,19 @@ export class App implements OnInit {
   // Expose announcements from the shared realtime service
   readonly announcements = this.realtime.announcements;
 
+  /** Current tab title in English, or null when the page sets its own. */
+  private readonly titleLabel = signal<string | null>(null);
+
+  constructor() {
+    // Reads translateText, so it re-runs on a language change as well as on
+    // navigation. Returning before that read leaves a self-titled page alone.
+    effect(() => {
+      const label = this.titleLabel();
+      if (label === null) return;
+      this.titleService.setTitle(translateText(label));
+    });
+  }
+
   ngOnInit(): void {
     // Seed initial announcements via HTTP, then poll for changes every 10s
     this.adminApi.getApiAdminLiveMessages().subscribe({
@@ -49,29 +64,14 @@ export class App implements OnInit {
       const segments = e.urlAfterRedirects.split('?')[0].split('/').filter(Boolean);
       const first = segments[0];
 
-      // Home page shows siteName
-      if (!first) {
-        this.titleService.setTitle(this.siteName);
+      // Detail pages set their own title; null means leave it alone.
+      if (first && this.selfTitledRoutes.has(first) && segments.length > 1) {
+        this.titleLabel.set(null);
         return;
       }
 
-      // Detail pages (schematics/:id, users/:username, qs/:id) are handled by their components
-      // Don't override their title here - let them set it themselves
-      const isDetailPage = this.selfTitledRoutes.has(first) && segments.length > 1;
-      if (isDetailPage) {
-        return;
-      }
-
-      // For main list pages (schematics, mods, faq, etc), show the page name
-      const mainListRoutes = new Set(['schematics', 'mods', 'faq', 'admin']);
-      if (mainListRoutes.has(first)) {
-        const label = first.charAt(0).toUpperCase() + first.slice(1).replace(/-/g, ' ');
-        this.titleService.setTitle(label);
-        return;
-      }
-
-      // Everything else defaults to siteName as fallback
-      this.titleService.setTitle(this.siteName);
+      // siteName is not in the catalog, so it passes through untranslated.
+      this.titleLabel.set(PAGE_TITLES[first as keyof typeof PAGE_TITLES] ?? this.siteName);
     });
   }
 }
