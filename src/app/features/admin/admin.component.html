@@ -767,6 +767,7 @@
                         </button>
                     </div>
                 </div>
+                <div class="table-scroll">
                 <table mat-table [dataSource]="filteredTags()" class="full-width">
                     <ng-container matColumnDef="name">
                         <th mat-header-cell *matHeaderCellDef>{{ 'Name' | t }}</th>
@@ -786,6 +787,7 @@
                     <tr mat-header-row *matHeaderRowDef="tagColumns"></tr>
                     <tr mat-row *matRowDef="let row; columns: tagColumns;"></tr>
                 </table>
+                </div>
                 }
             </div>
         </mat-tab>
@@ -829,6 +831,7 @@
                         </button>
                     </div>
                 </div>
+                <div class="table-scroll">
                 <table mat-table [dataSource]="filteredVersions()" class="full-width">
                     <ng-container matColumnDef="name">
                         <th mat-header-cell *matHeaderCellDef>{{ 'Name' | t }}</th>
@@ -845,6 +848,7 @@
                     <tr mat-header-row *matHeaderRowDef="versionColumns"></tr>
                     <tr mat-row *matRowDef="let row; columns: versionColumns;"></tr>
                 </table>
+                </div>
                 }
             </div>
         </mat-tab>
@@ -1011,6 +1015,7 @@
                 } @else if (tickets().length === 0) {
                 <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No tickets' | t" [subtitle]="'No contact messages yet' | t" />
                 } @else {
+                <div class="table-scroll">
                 <table mat-table [dataSource]="tickets()" class="full-width">
                     <ng-container matColumnDef="title">
                         <th mat-header-cell *matHeaderCellDef>{{ 'Subject' | t }}</th>
@@ -1053,6 +1058,7 @@
                     <tr mat-header-row *matHeaderRowDef="ticketColumns"></tr>
                     <tr mat-row *matRowDef="let row; columns: ticketColumns;" [class.unread-row]="!row.isRead"></tr>
                 </table>
+                </div>
                 <mat-paginator [length]="ticketsTotalCount()" [pageSize]="ticketsPageSize()" [pageIndex]="ticketsPage()"
                     [pageSizeOptions]="[25, 50, 100]" (page)="onTicketsPageChange($event)" showFirstLastButtons />
                 }
@@ -1084,6 +1090,7 @@
                 } @else if (serverLogs().length === 0) {
                 <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No logged errors' | t" [subtitle]="'Errors and crashes will appear here' | t" />
                 } @else {
+                <div class="table-scroll">
                 <table mat-table [dataSource]="serverLogs()" class="full-width">
                     <ng-container matColumnDef="source">
                         <th mat-header-cell *matHeaderCellDef>{{ 'Source' | t }}</th>
@@ -1124,6 +1131,7 @@
                         [class.highlight-row]="row.level === 'Critical' || highlightedServerLogIds().has(row.id)"
                         (click)="onServerLogRowClick(row)"></tr>
                 </table>
+                </div>
                 <mat-paginator [length]="serverLogsTotalCount()" [pageSize]="serverLogsPageSize()" [pageIndex]="serverLogsPage()"
                     [pageSizeOptions]="[25, 50, 100]" (page)="onServerLogsPageChange($event)" showFirstLastButtons />
                 }
