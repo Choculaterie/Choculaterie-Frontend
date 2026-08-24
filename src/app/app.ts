@@ -6,6 +6,7 @@ import { filter } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
+import { TitleSpotlightComponent } from './shared/components/title-spotlight/title-spotlight.component';
 import { AdminService } from './api/admin';
 import { RealtimeService } from './core/services/realtime.service';
 import { ThemeService } from './core/services/theme.service';
@@ -15,7 +16,7 @@ import { PAGE_TITLES } from './i18n/labels';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent, FooterComponent, MatIconModule],
+  imports: [RouterOutlet, NavbarComponent, FooterComponent, TitleSpotlightComponent, MatIconModule],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
