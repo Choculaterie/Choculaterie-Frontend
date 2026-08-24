@@ -1,7 +1,9 @@
 import { Component, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 
 const STORAGE_KEY = 'chocu-title-spotlight-dismissed-eternal-angler';
+const PROMO_KEY = 'eternal-angler';
 
 @Component({
     selector: 'app-title-spotlight',
@@ -15,6 +17,7 @@ const STORAGE_KEY = 'chocu-title-spotlight-dismissed-eternal-angler';
                     href="https://store.steampowered.com/app/4378770/Eternal_Angler/"
                     target="_blank"
                     rel="noopener noreferrer"
+                    (click)="trackClick()"
                 >
                     <img
                         class="title-spotlight__art"
@@ -173,6 +176,12 @@ const STORAGE_KEY = 'chocu-title-spotlight-dismissed-eternal-angler';
 })
 export class TitleSpotlightComponent {
     readonly visible = signal(!this.isDismissed());
+
+    constructor(private http: HttpClient) { }
+
+    trackClick(): void {
+        this.http.post(`/api/Promo/${PROMO_KEY}/click`, {}).subscribe({ error: () => { } });
+    }
 
     dismiss(event: Event): void {
         event.preventDefault();
