@@ -1,0 +1,28 @@
+diff --git a/node_modules/schematic-renderer/dist/schematic-renderer.es.js b/node_modules/schematic-renderer/dist/schematic-renderer.es.js
+index f8d6922..57db3b1 100644
+--- a/node_modules/schematic-renderer/dist/schematic-renderer.es.js
++++ b/node_modules/schematic-renderer/dist/schematic-renderer.es.js
+@@ -4635,11 +4635,12 @@ ${C || "(no log captured)"}`);
+       (I == null ? void 0 : I.enableTiltShift) === true && this.setTiltShiftEnabled(true);
+     }
+     setupEventListeners() {
+-      window.addEventListener("resize", () => {
++      this._resizeHandler = () => {
+         this.resizeTimeout && window.cancelAnimationFrame(this.resizeTimeout), this.resizeTimeout = window.requestAnimationFrame(() => {
+           this.updateCanvasSize(), this.resizeTimeout = null;
+         });
+-      });
++      };
++      window.addEventListener("resize", this._resizeHandler);
+     }
+     updateCanvasSize() {
+       const A = this.schematicRenderer.canvas, I = A.parentElement;
+@@ -4892,7 +4893,7 @@ ${C || "(no log captured)"}`);
+       return this.passes.get(A);
+     }
+     dispose() {
+-      this.disposed = true, this.contextLost = true, this.resizeTimeout !== null && (window.cancelAnimationFrame(this.resizeTimeout), this.resizeTimeout = null), window.removeEventListener("resize", this.updateCanvasSize);
++      this.disposed = true, this.contextLost = true, this.resizeTimeout !== null && (window.cancelAnimationFrame(this.resizeTimeout), this.resizeTimeout = null), window.removeEventListener("resize", this._resizeHandler);
+       const A = this.renderer.domElement;
+       A.removeEventListener("webglcontextlost", this.handleContextLost), A.removeEventListener("webglcontextrestored", this.handleContextRestored), this.passes.forEach((I) => {
+         I.dispose && I.dispose();

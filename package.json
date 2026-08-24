@@ -6,6 +6,7 @@
     "build": "ng build",
     "i18n:catalog": "node tools/i18n-catalog.mjs",
     "ng": "ng",
+    "postinstall": "patch-package",
     "start": "ng serve",
     "test": "ng test",
     "watch": "ng build --watch --configuration development"
@@ -44,6 +45,7 @@
     "@angular/compiler-cli": "^21.2.0",
     "@angular/material": "^21.2.0",
     "orval": "^8.5.1",
+    "patch-package": "^8.0.1",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2"
   }

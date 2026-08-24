@@ -21,6 +21,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { SchematicRenderer } from 'schematic-renderer';
 import * as THREE from 'three';
 import { RESOURCE_PACK_URL } from './resource-pack';
+import { hasWebGLSupport } from './webgl-support';
 
 export interface IsometricScreenshotData {
     fileData: ArrayBuffer;
@@ -813,6 +814,12 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
     }
 
     private async init(): Promise<void> {
+        if (!hasWebGLSupport()) {
+            this.error.set('Your browser doesn\'t support WebGL, which is required for this feature. Please enable it or try a different browser.');
+            this.loading.set(false);
+            return;
+        }
+
         try {
             const source = this.resolveSource();
             if (!source) {

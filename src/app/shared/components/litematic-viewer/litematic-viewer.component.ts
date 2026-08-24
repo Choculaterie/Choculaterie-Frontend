@@ -18,6 +18,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SchematicRenderer, DiffViewer } from 'schematic-renderer';
 import * as THREE from 'three';
 import { RESOURCE_PACK_URL } from './resource-pack';
+import { hasWebGLSupport } from './webgl-support';
 
 /** The subset of SchematicObject's public API the clip-plane/rebuild logic below needs. */
 interface SchematicWithBounds {
@@ -170,6 +171,12 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
     }
 
     private async initViewer(): Promise<void> {
+        if (!hasWebGLSupport()) {
+            this.error.set('Your browser doesn\'t support WebGL, which is required for the 3D viewer. Please enable it or try a different browser.');
+            this.loading.set(false);
+            return;
+        }
+
         const canvas = this.canvasRef.nativeElement;
         const hasDiff = this.data.parentFileData !== undefined;
 
