@@ -23,7 +23,7 @@ export class OgMetaService {
             ? (rawPath.startsWith('http') ? rawPath : `${environment.apiBasePath}/images/schematics/${rawPath.split('/').map(encodeURIComponent).join('/')}`)
             : null;
 
-        const pageTitle = s.name;
+        const pageTitle = `${s.name} · ${this.siteName}`;
         this.title.setTitle(pageTitle);
         this.set('og:title', pageTitle);
         this.set('og:description', description);
@@ -35,7 +35,7 @@ export class OgMetaService {
     }
 
     setUser(u: { username: string | null; biographie?: string | null; filePath?: string | null }): void {
-        const pageTitle = u.username ?? 'User';
+        const pageTitle = `${u.username ?? 'User'} · ${this.siteName}`;
         const description = u.biographie?.trim().substring(0, 200)
             ?? `${u.username ?? 'A user'}'s profile on Choculaterie.`;
         const imageUrl = u.filePath
@@ -53,7 +53,7 @@ export class OgMetaService {
     }
 
     setQuickShare(fileName: string): void {
-        const pageTitle = `${fileName} · Quick Share`;
+        const pageTitle = `${fileName} · ${this.siteName}`;
         const description = `Minecraft litematic quick share, expires in 48\u00a0hours`;
         this.title.setTitle(pageTitle);
         this.set('og:title', pageTitle);

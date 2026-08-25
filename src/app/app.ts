@@ -46,7 +46,8 @@ export class App implements OnInit {
     effect(() => {
       const label = this.titleLabel();
       if (label === null) return;
-      this.titleService.setTitle(translateText(label));
+      const title = label === this.siteName ? label : `${translateText(label)} · ${this.siteName}`;
+      this.titleService.setTitle(title);
     });
   }
 

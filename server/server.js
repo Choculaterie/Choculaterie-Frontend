@@ -145,7 +145,7 @@ async function resolveMeta(urlPath, isCrawler) {
     if (schematicMatch) {
         const data = await apiGet(`/api/Schematics/${schematicMatch[1]}`);
         if (data) {
-            const title = data.name;
+            const title = `${data.name} · ${SITE_NAME}`;
             const description = (data.description ?? '').trim().substring(0, 200)
                 || `A Minecraft schematic by ${data.authorName ?? 'unknown'} on ${SITE_NAME}.`;
             const pic = data.pictures?.[0]?.filePath;
@@ -162,7 +162,7 @@ async function resolveMeta(urlPath, isCrawler) {
         const data = await apiGet(`/api/Users/${encodeURIComponent(userMatch[1])}`);
         if (data) {
             const username = data.username ?? userMatch[1];
-            const title = username;
+            const title = `${username} · ${SITE_NAME}`;
             const description = (data.biographie ?? '').trim().substring(0, 200)
                 || `${username}'s profile on ${SITE_NAME}.`;
             const fp = data.filePath;
@@ -191,7 +191,7 @@ async function resolveMeta(urlPath, isCrawler) {
         }
 
         if (data) {
-            const title = 'Quick Share';
+            const title = `${id}.litematic · ${SITE_NAME}`;
             const description = 'Minecraft litematic quick share, expires in 48 hours.';
             const fp = data.screenshotPath;
             const image = fp
@@ -204,7 +204,8 @@ async function resolveMeta(urlPath, isCrawler) {
     // Known SPA list/section routes - return the same short title Angular will set
     const firstSegment = urlPath.split('/').filter(Boolean)[0] ?? '';
     if (firstSegment in ROUTE_TITLES) {
-        const title = ROUTE_TITLES[firstSegment];
+        const label = ROUTE_TITLES[firstSegment];
+        const title = firstSegment === '' ? label : `${label} · ${SITE_NAME}`;
         return { title, metaBlock: buildMeta(title, DEFAULT_DESC, FALLBACK_IMAGE) };
     }
 
