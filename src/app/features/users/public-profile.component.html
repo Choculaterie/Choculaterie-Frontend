@@ -101,12 +101,12 @@
                 }
                 @if (p.badges?.length) {
                 @for (b of p.badges; track $index) {
-                <mat-icon class="badge-icon" [style.color]="badgeColor(b.badge)"
-                    [matTooltip]="badgeTooltip(b)">{{ badgeIcon(b.badge) }}</mat-icon>
+                <img [src]="badgeIcon(b.badge)" alt="" aria-hidden="true" class="mc-icon badge-icon"
+                    [matTooltip]="badgeTooltip(b)" />
                 }
                 } @else if (p.badge != null) {
-                <mat-icon class="badge-icon" [style.color]="badgeColor(p.badge)" [matTooltip]="badgeLabel(p.badge)">{{
-                    badgeIcon(p.badge) }}</mat-icon>
+                <img [src]="badgeIcon(p.badge)" alt="" aria-hidden="true" class="mc-icon badge-icon"
+                    [matTooltip]="badgeLabel(p.badge)" />
                 }
             </div>
             @if (p.biographie) {

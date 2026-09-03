@@ -8,7 +8,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -49,7 +48,7 @@ import { UserImgPipe } from '../../shared/pipes/image-url.pipe';
 import { FileSizePipe } from '../../shared/pipes/file-size.pipe';
 import { MarkdownPipe } from '../../shared/pipes/markdown.pipe';
 import { SkeletonImgComponent } from '../../shared/components/skeleton-img/skeleton-img.component';
-import { BADGE_LABELS, BADGE_ICONS, BADGE_COLORS, ROLE_LABELS, resolveBadge } from '../../core/enums';
+import { BADGE_LABELS, BADGE_ICONS, ROLE_LABELS, resolveBadge } from '../../core/enums';
 import { translateText } from '../../core/i18n/translation.store';
 import { PROFILE, USERS, DIALOGS, AUTH, COMMON } from '../../i18n/labels';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -72,7 +71,6 @@ import { matfMinecraftColored } from '@ng-icons/material-file-icons/colored';
         MatFormFieldModule,
         MatInputModule,
         MatButtonModule,
-        MatIconModule,
         MatChipsModule,
         MatDividerModule,
         MatTabsModule,
@@ -130,8 +128,7 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         const label = this.badgeLabel(b.badge);
         return b.locale ? `${label} (${b.locale.toUpperCase()})` : label;
     }
-    badgeIcon(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_ICONS[n] : 'star'; }
-    badgeColor(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_COLORS[n] : '#888'; }
+    badgeIcon(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_ICONS[n] : '/icons/ui/start.svg'; }
     roleLabel(role: unknown): string { const l = ROLE_LABELS[role as string]; return l ? translateText(l) : String(role ?? ''); }
 
     memberYears(p: any): number | null {

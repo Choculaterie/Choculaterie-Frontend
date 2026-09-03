@@ -20,6 +20,9 @@ import { simpleGithub, simpleDiscord } from '@ng-icons/simple-icons';
                 <a href="https://discord.gg/choculaterie" target="_blank" rel="noopener" aria-label="Discord">
                     <ng-icon name="simpleDiscord" size="18" /> Discord
                 </a>
+                <a href="https://status.choculaterie.com/" target="_blank" rel="noopener" aria-label="Status">
+                    <img src="/icons/data/graph_up.svg" alt="" aria-hidden="true" class="mc-icon status-icon" /> {{ 'Status' | t }}
+                </a>
             </div>
         </footer>
     `,
@@ -50,6 +53,14 @@ import { simpleGithub, simpleDiscord } from '@ng-icons/simple-icons';
             text-decoration: none;
             transition: color 0.2s;
             &:hover { color: var(--mat-sys-primary); }
+        }
+        .footer-links .mc-icon {
+            width: 18px;
+            height: 18px;
+        }
+        .status-icon {
+            position: relative;
+            top: -1px;
         }
     `,
 })

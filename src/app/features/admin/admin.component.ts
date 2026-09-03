@@ -41,7 +41,7 @@ import { NumberFormatPipe } from '../../shared/pipes/number-format.pipe';
 import { ContentTranslationsDialogComponent, type ContentTranslationsData } from './content-translations-dialog.component';
 import { AdminTicketDialogComponent, AdminTicketDialogData, AdminTicketDialogResult } from './admin-ticket-dialog.component';
 import { AdminUserDialogComponent } from './admin-user-dialog.component';
-import { Role, ROLE_LABELS, Status, STATUS_LABELS, Visibility, Badge, BADGE_LABELS, BADGE_ICONS, BADGE_COLORS, resolveBadge } from '../../core/enums';
+import { Role, ROLE_LABELS, Status, STATUS_LABELS, Visibility, Badge, BADGE_LABELS, BADGE_ICONS, resolveBadge } from '../../core/enums';
 import { translateText } from '../../core/i18n/translation.store';
 import { ADMIN, DIALOGS, COMMON } from '../../i18n/labels';
 
@@ -110,8 +110,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly roleLabels = ROLE_LABELS;
     readonly statusLabels = STATUS_LABELS;
     readonly badgeLabels = BADGE_LABELS;
-    readonly badgeIcons = BADGE_ICONS;
-    readonly badgeColors = BADGE_COLORS;
     readonly Visibility = Visibility;
     readonly messageTypes = ['Info', 'Warning', 'Alert'];
 
@@ -745,8 +743,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     badgeLabel(badge: unknown): string { const n = resolveBadge(badge); return n != null ? translateText(BADGE_LABELS[n]) : ''; }
-    badgeIcon(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_ICONS[n] : 'star'; }
-    badgeColor(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_COLORS[n] : '#888'; }
+    badgeIcon(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_ICONS[n] : '/icons/ui/start.svg'; }
 
     copyToClipboard(value: unknown): void {
         navigator.clipboard.writeText(String(value ?? '')).then(

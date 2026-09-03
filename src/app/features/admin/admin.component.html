@@ -26,8 +26,8 @@
                                 <div>
                                     <span class="detail-username">{{ u.username }}</span>
                                     @if (u.badge != null) {
-                                    <mat-icon class="badge-icon" [style.color]="badgeColor(u.badge)"
-                                        [matTooltip]="badgeLabel(u.badge)">{{ badgeIcon(u.badge) }}</mat-icon>
+                                    <img [src]="badgeIcon(u.badge)" alt="" aria-hidden="true" class="mc-icon badge-icon"
+                                        [matTooltip]="badgeLabel(u.badge)" />
                                     }
                                 </div>
                             </div>

@@ -15,17 +15,10 @@ export const BADGE_LABELS: Record<number, string> = {
 };
 
 export const BADGE_ICONS: Record<number, string> = {
-    [Badge.Admin]: 'shield',
-    [Badge.Moderator]: 'security',
-    [Badge.Translator]: 'translate',
-    [Badge.Dev]: 'code',
-};
-
-export const BADGE_COLORS: Record<number, string> = {
-    [Badge.Admin]: '#e53935',
-    [Badge.Moderator]: '#1e88e5',
-    [Badge.Translator]: '#43a047',
-    [Badge.Dev]: '#8e24aa',
+    [Badge.Admin]: '/icons/ui/shield_empty.svg',
+    [Badge.Moderator]: '/icons/weapons/sword.svg',
+    [Badge.Translator]: '/icons/letters/T.svg',
+    [Badge.Dev]: '/icons/weapons/pickaxe.svg',
 };
 
 /** Maps a badge name string (e.g. "Dev") to its numeric enum value. */

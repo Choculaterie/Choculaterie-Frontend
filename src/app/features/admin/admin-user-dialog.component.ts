@@ -21,7 +21,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 import { UserImgPipe } from '../../shared/pipes/image-url.pipe';
 import { NumberFormatPipe } from '../../shared/pipes/number-format.pipe';
 import type { AdminUserDetailResponse } from '../../api/generated.schemas';
-import { Badge, BADGE_LABELS, BADGE_ICONS, BADGE_COLORS, resolveBadge } from '../../core/enums';
+import { Badge, BADGE_LABELS, resolveBadge } from '../../core/enums';
 import { translateText } from '../../core/i18n/translation.store';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { ADMIN, COMMON } from '../../i18n/labels';
@@ -307,8 +307,6 @@ export class AdminUserDialogComponent {
     readonly badgeLabels = BADGE_LABELS;
 
     badgeLabel(b: unknown): string { const n = resolveBadge(b); return n != null ? translateText(BADGE_LABELS[n]) : ''; }
-    badgeIcon(b: unknown): string { const n = resolveBadge(b); return n != null ? BADGE_ICONS[n] : 'star'; }
-    badgeColor(b: unknown): string { const n = resolveBadge(b); return n != null ? BADGE_COLORS[n] : '#888'; }
 
     private loadBadges(): void {
         this.http.get<{ badge: number; locale: string | null }[]>(
