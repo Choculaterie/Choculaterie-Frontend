@@ -452,7 +452,7 @@ export class AdminComponent implements OnInit, OnDestroy {
                 });
                 ref.afterClosed().subscribe((result: AdminTicketDialogResult | undefined) => {
                     this.openedTicketId = null;
-                    this.router.navigate([], { queryParams: { ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
+                    this.router.navigate([], { queryParams: { tab: 8, ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
                     if (result?.deleted) {
                         this.tickets.update(list => list.filter(x => x.id !== full.id));
                     } else if (result?.updated) {
@@ -463,7 +463,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             error: (err) => {
                 this.openedTicketId = null;
                 this.toast.error(err.error?.detail ?? ADMIN.failed);
-                this.router.navigate([], { queryParams: { ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
+                this.router.navigate([], { queryParams: { tab: 8, ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
             },
         });
     }
@@ -1347,7 +1347,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             return;
         }
         this.openedTicketId = null;
-        this.router.navigate([], { queryParams: { ticketId: t.id }, queryParamsHandling: 'merge', replaceUrl: true });
+       this.router.navigate([], { queryParams: { tab: 8, ticketId: t.id }, queryParamsHandling: 'merge', replaceUrl: true });
     }
 
     closeTicket(): void { this.selectedTicket.set(null); }
