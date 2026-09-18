@@ -32,6 +32,7 @@ import { RealtimeService } from '../../core/services/realtime.service';
 import type { AdminUserResponse, AdminSchematicResponse, AdminUserDetailResponse, AdminUserSchematicResponse, LiveMessageResponse, ModMessageResponse, StorageStatsResponse, UserStorageResponse, AllowedTagResponse, AllowedVersionResponse, TagSuggestionResponse, AdminNotificationResponse, FaqResponse, ContactTicketResponse } from '../../api/generated.schemas';
 import type { GetApiAdminTicketsParams, GetApiAdminServerLogsParams } from '../../api/generated.schemas';
 import { AdminLogsService } from './services/admin-logs.service';
+import { AdminPlugin, AdminPluginsService } from './services/admin-plugins.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
@@ -43,7 +44,7 @@ import { AdminTicketDialogComponent, AdminTicketDialogData, AdminTicketDialogRes
 import { AdminUserDialogComponent } from './admin-user-dialog.component';
 import { Role, ROLE_LABELS, Status, STATUS_LABELS, Visibility, Badge, BADGE_LABELS, BADGE_ICONS, resolveBadge } from '../../core/enums';
 import { translateText } from '../../core/i18n/translation.store';
-import { ADMIN, DIALOGS, COMMON } from '../../i18n/labels';
+import { ADMIN, DIALOGS, COMMON, PLUGINS } from '../../i18n/labels';
 
 export interface ServerLogEntryResponse {
     id: number;
@@ -99,6 +100,104 @@ export class AdminComponent implements OnInit, OnDestroy {
     private session = inject(SessionService);
     readonly realtime = inject(RealtimeService);
     readonly adminLogsService = inject(AdminLogsService);
+    private pluginsApi = inject(AdminPluginsService);
+    readonly plugins = signal<AdminPlugin[]>([]);
+    readonly pluginDragging = signal(false);
+    readonly pluginUploading = signal(false);
+    readonly pluginErrors = signal<string[]>([]);
+    readonly pluginColumns = ['name', 'id', 'version', 'kind', 'hosts', 'actions'];
+
+    loadPlugins(): void {
+        this.pluginsApi.list().subscribe({
+            next: list => this.plugins.set(list),
+            error: () => this.toast.error(PLUGINS.failedToLoad),
+        });
+    }
+
+    onPluginDragOver(event: DragEvent): void {
+        event.preventDefault();
+        this.pluginDragging.set(true);
+    }
+
+    onPluginDragLeave(event: DragEvent): void {
+        event.preventDefault();
+        this.pluginDragging.set(false);
+    }
+
+    onPluginDrop(event: DragEvent): void {
+        event.preventDefault();
+        this.pluginDragging.set(false);
+        const files = Array.from(event.dataTransfer?.files ?? []);
+        this.uploadPlugins(files);
+    }
+
+    onPluginFilesPicked(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        this.uploadPlugins(Array.from(input.files ?? []));
+        input.value = '';
+    }
+
+    private uploadPlugins(files: File[]): void {
+        const manifests = files.filter(f => f.name.toLowerCase().endsWith('.json'));
+        if (manifests.length === 0) {
+            this.pluginErrors.set([PLUGINS.onlyJson]);
+            return;
+        }
+        this.pluginErrors.set([]);
+        this.pluginUploading.set(true);
+        this.pluginsApi.upload(manifests).subscribe({
+            next: result => {
+                this.pluginUploading.set(false);
+                this.pluginErrors.set((result.rejected ?? []).map(r => `${r.file}: ${r.error}`));
+                if ((result.accepted ?? []).length > 0) {
+                    this.toast.success(PLUGINS.uploaded(result.accepted.length));
+                }
+                this.loadPlugins();
+            },
+            error: () => {
+                this.pluginUploading.set(false);
+                this.toast.error(PLUGINS.uploadFailed);
+            },
+        });
+    }
+
+    deletePlugin(plugin: AdminPlugin): void {
+        const ref = this.dialog.open(ConfirmDialogComponent, {
+            data: {
+                title: DIALOGS.deletePlugin,
+                message: DIALOGS.deletePluginMsg(plugin.name),
+                confirmText: COMMON.delete,
+                warn: true,
+            } as ConfirmDialogData,
+        });
+
+        ref.afterClosed().subscribe(confirmed => {
+            if (!confirmed) {
+                return;
+            }
+            this.pluginsApi.remove(plugin.id).subscribe({
+                next: () => {
+                    this.loadPlugins();
+                    this.toast.success(PLUGINS.deleted(plugin.name), {
+                        duration: 8000,
+                        onUndo: () => this.restorePlugin(plugin),
+                    });
+                },
+                error: () => this.toast.error(PLUGINS.failedToDelete),
+            });
+        });
+    }
+
+    private restorePlugin(plugin: AdminPlugin): void {
+        this.pluginsApi.restore(plugin.id).subscribe({
+            next: () => {
+                this.toast.success(PLUGINS.restored(plugin.name));
+                this.loadPlugins();
+            },
+            error: () => this.toast.error(PLUGINS.failedToRestore),
+        });
+    }
+
     private location = inject(Location);
     private router = inject(Router);
     private route = inject(ActivatedRoute);
@@ -302,9 +401,9 @@ export class AdminComponent implements OnInit, OnDestroy {
                     switch (tab) {
                         case 0: this.usersPage.set(zeroIdx); break;
                         case 1: this.schematicsPage.set(zeroIdx); break;
-                        case 4: this.storagePage.set(zeroIdx); break;
-                        case 8: this.ticketsPage.set(zeroIdx); break;
-                        case 9: this.serverLogsPage.set(zeroIdx); break;
+                        case 5: this.storagePage.set(zeroIdx); break;
+                        case 9: this.ticketsPage.set(zeroIdx); break;
+                        case 10: this.serverLogsPage.set(zeroIdx); break;
                     }
                 }
 
@@ -314,7 +413,7 @@ export class AdminComponent implements OnInit, OnDestroy {
                 }
 
                 const ticketId = params['ticketId'];
-                if (ticketId != null && ticketId !== '' && tab === 8) {
+                if (ticketId != null && ticketId !== '' && tab === 9) {
                     if (this.openedTicketId !== ticketId) {
                         this.openedTicketId = ticketId;
                         this.openTicketById(ticketId);
@@ -452,7 +551,7 @@ export class AdminComponent implements OnInit, OnDestroy {
                 });
                 ref.afterClosed().subscribe((result: AdminTicketDialogResult | undefined) => {
                     this.openedTicketId = null;
-                    this.router.navigate([], { queryParams: { tab: 8, ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
+                    this.router.navigate([], { queryParams: { tab: 9, ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
                     if (result?.deleted) {
                         this.tickets.update(list => list.filter(x => x.id !== full.id));
                     } else if (result?.updated) {
@@ -463,7 +562,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             error: (err) => {
                 this.openedTicketId = null;
                 this.toast.error(err.error?.detail ?? ADMIN.failed);
-                this.router.navigate([], { queryParams: { tab: 8, ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
+                this.router.navigate([], { queryParams: { tab: 9, ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
             },
         });
     }
@@ -476,12 +575,13 @@ export class AdminComponent implements OnInit, OnDestroy {
             case 1: this.loadSchematics(); break;
             case 2: this.loadLiveMessages(); break;
             case 3: this.loadModMessages(); break;
-            case 4: this.loadStorage(); break;
-            case 5: this.loadTags(); this.loadTagSuggestions(); break;
-            case 6: this.loadVersions(); break;
-            case 7: this.loadAdminFaqs(); break;
-            case 8: this.loadTickets(); break;
-            case 9: this.loadServerLogs(); break;
+            case 4: this.loadPlugins(); break;
+            case 5: this.loadStorage(); break;
+            case 6: this.loadTags(); this.loadTagSuggestions(); break;
+            case 7: this.loadVersions(); break;
+            case 8: this.loadAdminFaqs(); break;
+            case 9: this.loadTickets(); break;
+            case 10: this.loadServerLogs(); break;
         }
     }
 
@@ -1347,7 +1447,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             return;
         }
         this.openedTicketId = null;
-       this.router.navigate([], { queryParams: { tab: 8, ticketId: t.id }, queryParamsHandling: 'merge', replaceUrl: true });
+       this.router.navigate([], { queryParams: { tab: 9, ticketId: t.id }, queryParamsHandling: 'merge', replaceUrl: true });
     }
 
     closeTicket(): void { this.selectedTicket.set(null); }

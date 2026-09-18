@@ -569,6 +569,62 @@
             </div>
         </mat-tab>
 
+        <mat-tab [label]="'Plugins' | t">
+            <div class="tab-content">
+                <div class="plugin-dropzone" [class.dragging]="pluginDragging()"
+                    (dragover)="onPluginDragOver($event)" (dragleave)="onPluginDragLeave($event)"
+                    (drop)="onPluginDrop($event)" (click)="pluginFileInput.click()">
+                    <p>{{ 'Drag and drop plugin .json files here, or click to choose' | t }}</p>
+                    <p class="hint">{{ 'Rejected if the manifest is not a valid plugin' | t }}</p>
+                </div>
+                <input #pluginFileInput type="file" accept="application/json,.json" multiple hidden
+                    (change)="onPluginFilesPicked($event)" />
+
+                @if (pluginUploading()) {
+                <p>{{ 'Uploading...' | t }}</p>
+                }
+                @for (problem of pluginErrors(); track problem) {
+                <p class="plugin-error">{{ problem }}</p>
+                }
+
+                <table mat-table [dataSource]="plugins()" class="full-width">
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef>{{ 'Name' | t }}</th>
+                        <td mat-cell *matCellDef="let p">{{ p.name }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="id">
+                        <th mat-header-cell *matHeaderCellDef>{{ 'Id' | t }}</th>
+                        <td mat-cell *matCellDef="let p">{{ p.id }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="version">
+                        <th mat-header-cell *matHeaderCellDef>{{ 'Version' | t }}</th>
+                        <td mat-cell *matCellDef="let p">{{ p.version || '-' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="kind">
+                        <th mat-header-cell *matHeaderCellDef>{{ 'Kind' | t }}</th>
+                        <td mat-cell *matCellDef="let p">{{ p.kind }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="hosts">
+                        <th mat-header-cell *matHeaderCellDef>{{ 'Hosts' | t }}</th>
+                        <td mat-cell *matCellDef="let p">{{ p.hosts.join(', ') }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let p">
+                            <button mat-button color="warn" (click)="deletePlugin(p)">{{ 'Delete' | t }}</button>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="pluginColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: pluginColumns;"></tr>
+                </table>
+
+                @if (plugins().length === 0 && !pluginUploading()) {
+                <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No plugins uploaded' | t"
+                    [subtitle]="'Drop a plugin manifest above to publish it to the mod' | t" />
+                }
+            </div>
+        </mat-tab>
+
         <!-- ═══ STORAGE TAB ═══ -->
         <mat-tab [label]="'Storage' | t">
             <div class="tab-content">
@@ -1168,6 +1224,7 @@
                 </div>
             </div>
         </mat-tab>
+
 
     </mat-tab-group>
 </div>

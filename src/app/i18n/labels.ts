@@ -138,6 +138,8 @@ export const DIALOGS = {
     deleteSchematicMsg: (name: string) => `Are you sure you want to delete "${name}"?`,
     deleteVersion: 'Delete Version',
     deleteTag: 'Delete Tag',
+    deletePlugin: 'Delete plugin?',
+    deletePluginMsg: (name: string) => `Remove "${name}" from the catalogue? Players will no longer be able to install it.`,
     loginAs: 'Login As',
     loginAsMsg: (username: string) => `Login as "${username}"? Your current session will be replaced.`,
     deleteTagMsg: (name: string) => `Delete tag "${name}"? Schematics using this tag will lose it.`,
@@ -260,6 +262,28 @@ export const ADMIN = {
     deleteSaveKeyMsg: (username: string) => `Revoke the save key for "${username}"? Their mod client will stop working.`,
     saveKeyDeleted: 'Save key revoked.',
     copied: 'Copied to clipboard!',
+};
+
+export const PLUGINS = {
+    tab: 'Plugins',
+    dropzone: 'Drag and drop plugin .json files here, or click to choose',
+    dropzoneHint: 'Rejected if the manifest is not a valid plugin',
+    uploading: 'Uploading…',
+    colName: 'Name',
+    colId: 'Id',
+    colVersion: 'Version',
+    colKind: 'Kind',
+    colHosts: 'Hosts',
+    noPlugins: 'No plugins uploaded',
+    noPluginsHint: 'Drop a plugin manifest above to publish it to the mod',
+    onlyJson: 'Only .json manifests can be uploaded.',
+    failedToLoad: 'Failed to load plugins',
+    uploadFailed: 'Plugin upload failed',
+    uploaded: (n: number) => `Uploaded ${n} plugin(s)`,
+    deleted: (name: string) => `Deleted ${name}`,
+    failedToDelete: 'Failed to delete plugin',
+    restored: (name: string) => `Restored ${name}`,
+    failedToRestore: 'Failed to restore plugin',
 };
 
 export const COMMON = {

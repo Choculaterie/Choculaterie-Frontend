@@ -679,3 +679,26 @@ mat-accordion .faq-answer {
     word-break: break-word;
     opacity: 0.85;
 }
+.plugin-dropzone {
+    border: 2px dashed var(--mat-sys-outline, #888);
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 16px;
+
+    &.dragging {
+        border-color: var(--mat-sys-primary, #4caf50);
+        background: rgba(76, 175, 80, 0.08);
+    }
+
+    .hint {
+        opacity: 0.7;
+        font-size: 0.85em;
+    }
+}
+
+.plugin-error {
+    color: var(--mat-sys-error, #ff5252);
+    margin: 4px 0;
+}
