@@ -33,6 +33,14 @@ function scanPipeStrings(dir = 'src', found = new Map()) {
                 if (text.trim()) found.set(text, full);
             }
         }
+        for (const m of src.matchAll(/\btranslateText\(\s*'((?:[^'\\]|\\.)*)'/g)) {
+            const text = m[1].replace(/\\'/g, "'");
+            if (text.trim()) found.set(text, full);
+        }
+        for (const m of src.matchAll(/\btranslateText\(\s*"((?:[^"\\]|\\.)*)"/g)) {
+            const text = m[1].replace(/\\"/g, '"');
+            if (text.trim()) found.set(text, full);
+        }
     }
     return found;
 }

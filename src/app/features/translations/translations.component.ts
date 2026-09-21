@@ -22,6 +22,7 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 import { SUPPORTED_LOCALES, SOURCE_LOCALE } from '../../core/i18n/locale';
 import { SessionService } from '../../core/services/session.service';
 import { Badge, resolveBadge } from '../../core/enums';
+import { translateText } from '../../core/i18n/translation.store';
 import ISO6391 from 'iso-639-1';
 
 interface PlaceholderHint {
@@ -289,12 +290,15 @@ function describeExpr(expr: string): string {
                 @if (!canEdit()) {
                 <mat-card appearance="outlined" class="tr-notice">
                     <p>{{ 'You can browse every language and string here, but saving a translation needs the Translator badge.' | t }}</p>
-                    <p>{{ 'To request it, either open a' | t }}
-                        <a routerLink="/faq" class="tr-link">{{ 'ticket' | t }}</a>
-                        {{ 'on the contact page, send an' | t }}
-                        <a routerLink="/faq" class="tr-link">{{ 'email' | t }}</a>
-                        {{ 'or ask on' | t }}
-                        <a routerLink="/faq" class="tr-link">{{ 'Discord' | t }}</a>.</p>
+                    <p>
+                        @for (part of badgeRequestParts(); track $index) {
+                        @if (part.isLink) {
+                        <a routerLink="/faq" class="tr-link">{{ part.text }}</a>
+                        } @else {
+                        <ng-container>{{ part.text }}</ng-container>
+                        }
+                        }
+                    </p>
                 </mat-card>
                 }
                 <div class="tr-row tr-head">
@@ -633,6 +637,17 @@ export class TranslationsComponent implements OnInit {
     readonly loading = signal(false);
     readonly syncing = signal(false);
     readonly syncResult = signal<string | null>(null);
+
+    readonly badgeRequestParts = computed(() => {
+        const text = translateText('To request it, open a ${ticket} on the contact page, send an ${email}, or ask on ${discord}.');
+        const words: Record<string, string> = {
+            '${ticket}': translateText('ticket'),
+            '${email}': translateText('email'),
+            '${discord}': translateText('Discord'),
+        };
+        return text.split(/(\$\{ticket\}|\$\{email\}|\$\{discord\})/g)
+            .map((part) => ({ text: words[part] ?? part, isLink: part in words }));
+    });
 
     readonly groups = signal<PageGroup[]>([]);
     readonly overallTotal = signal(0);
