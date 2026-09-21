@@ -41,6 +41,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 import { PasswordDialogComponent, PasswordDialogData } from '../../shared/components/password-dialog/password-dialog.component';
 import { ImageCropperDialogComponent, CropperDialogData, CropperDialogResult } from '../../shared/components/image-cropper-dialog/image-cropper-dialog.component';
 import { SkinViewerDialogComponent, type SkinViewerDialogData } from '../../shared/components/skin-viewer/skin-viewer-dialog.component';
+import { DiscordCardDialogComponent, type DiscordCardDialogData } from '../../shared/components/discord-card/discord-card-dialog.component';
 import { OgMetaService } from '../../core/services/og-meta.service';
 import { SessionService } from '../../core/services/session.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -143,6 +144,14 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
             width: '90vw',
             maxWidth: '760px',
             panelClass: 'litematic-viewer-dialog',
+        });
+    }
+
+    openDiscordCard(username: string): void {
+        this.dialog.open(DiscordCardDialogComponent, {
+            data: { username } as DiscordCardDialogData,
+            width: '90vw',
+            maxWidth: '420px',
         });
     }
 

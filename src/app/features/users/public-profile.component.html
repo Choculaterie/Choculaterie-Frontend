@@ -102,11 +102,13 @@
                 @if (p.badges?.length) {
                 @for (b of p.badges; track $index) {
                 <img [src]="badgeIcon(b.badge)" alt="" aria-hidden="true" class="mc-icon badge-icon"
-                    [matTooltip]="badgeTooltip(b)" />
+                    draggable="false" (contextmenu)="$event.preventDefault()"
+                    [matTooltip]="badgeTooltip(b)" matTooltipTouchGestures="on" />
                 }
                 } @else if (p.badge != null) {
                 <img [src]="badgeIcon(p.badge)" alt="" aria-hidden="true" class="mc-icon badge-icon"
-                    [matTooltip]="badgeLabel(p.badge)" />
+                    draggable="false" (contextmenu)="$event.preventDefault()"
+                    [matTooltip]="badgeLabel(p.badge)" matTooltipTouchGestures="on" />
                 }
             </div>
             @if (p.biographie) {
@@ -127,9 +129,13 @@
         </div>
         }
         @if (p.discordUsername || p.isDiscordLinked) {
-        <div class="meta-item"><ng-icon name="simpleDiscord" size="18" /> <strong>{{ 'Discord:' | t }}</strong> {{
-            p.discordUsername
-            }}</div>
+        <div class="meta-item" [class.meta-item--dc]="p.discordUsername"
+            (click)="p.discordUsername && openDiscordCard(p.username!)">
+            <ng-icon name="simpleDiscord" size="18" /> <strong>{{ 'Discord:' | t }}</strong>
+            @if (p.discordUsername) {
+            <span class="mc-name">{{ p.discordUsername }}</span>
+            }
+        </div>
         }
         @if (isOwnProfile() && ownProfile()?.hasSecurityKeys) {
         <div class="meta-item"><img src="/icons/weather/lightning.svg" alt="" aria-hidden="true" class="mc-icon" />

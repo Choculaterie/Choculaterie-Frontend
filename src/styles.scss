@@ -547,6 +547,9 @@ img[src*='icons/'] {
   flex-shrink: 0;
   display: block;
   align-self: center;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .mc-icon--fixed-white {

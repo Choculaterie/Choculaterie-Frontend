@@ -50,12 +50,15 @@ async function main(): Promise<void> {
         locale = SOURCE_LOCALE;
     }
 
-    const [{ bootstrapApplication }, { appConfig }, { App }, { loadTranslationMap }] = await Promise.all([
+    const [{ bootstrapApplication }, { appConfig }, { App }, { loadTranslationMap }, { dropStaleRendererCaches }] = await Promise.all([
         import('@angular/platform-browser'),
         import('./app/app.config'),
         import('./app/app'),
         import('./app/core/i18n/translation.store'),
+        import('./app/shared/components/litematic-viewer/resource-pack'),
     ]);
+
+    const cachesFresh = dropStaleRendererCaches().catch(() => undefined);
 
     // Brief wait so a translated page does not flash English, but never let the
     // bundle hold up first paint. Both caps start now, so the wait stays bounded.
@@ -66,6 +69,7 @@ async function main(): Promise<void> {
 
     const formatLocale = await formats;
     await settled;
+    await cachesFresh;
 
     // If the map lost the race it lands later and the signal re-renders.
     await bootstrapApplication(App, {
