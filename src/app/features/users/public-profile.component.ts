@@ -546,6 +546,39 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         }, 2000);
     }
 
+    readonly resumingSubscription = signal(false);
+
+    resumeSubscription(): void {
+        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+            data: {
+                title: 'Renew Premium subscription?',
+                message: 'Here is what happens if you renew:',
+                bullets: [
+                    'Billing continues as normal, so you will be charged again next month.',
+                    'You keep every Premium perk without interruption.',
+                    'You can cancel again at any time.',
+                ],
+                confirmText: 'Renew subscription',
+                cancelText: 'Not now',
+            } as ConfirmDialogData,
+        });
+        dialogRef.afterClosed().subscribe((confirmed) => {
+            if (!confirmed) return;
+            this.resumingSubscription.set(true);
+            this.billingApi.resumeSubscription().subscribe({
+                next: () => {
+                    this.resumingSubscription.set(false);
+                    this.toast.success('Your subscription will renew as normal.');
+                    this.billingApi.getSubscription().subscribe({ next: (s) => this.subscription.set(s) });
+                },
+                error: (err) => {
+                    this.resumingSubscription.set(false);
+                    this.toast.error(err?.error?.message ?? 'Could not renew your subscription.');
+                },
+            });
+        });
+    }
+
     cancelSubscription(): void {
         const dialogRef = this.dialog.open(ConfirmDialogComponent, {
             data: {

@@ -756,6 +756,11 @@
                             (click)="cancelSubscription()">
                             {{ 'Cancel subscription' | t }}
                         </button>
+                        } @else if (sub?.subscription?.provider === 'Stripe' && sub?.subscription?.cancelAtPeriodEnd) {
+                        <button mat-flat-button color="primary" class="premium-action"
+                            [disabled]="resumingSubscription()" (click)="resumeSubscription()">
+                            {{ 'Renew' | t }}
+                        </button>
                         }
                         } @else {
                         <img src="/premium.png" alt="" aria-hidden="true" class="mc-icon premium-icon" />

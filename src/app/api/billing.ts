@@ -33,6 +33,10 @@ export class BillingService {
         return this.http.post<{ message: string }>('/api/Billing/cancel', null);
     }
 
+    resumeSubscription(): Observable<{ message: string }> {
+        return this.http.post<{ message: string }>('/api/Billing/resume', null);
+    }
+
     adminResetPremiumForTesting(userId: string): Observable<{ message: string; cancelledSubscriptions: string[] }> {
         return this.http.post<{ message: string; cancelledSubscriptions: string[] }>(
             `/api/Admin/users/${userId}/premium/reset-for-testing`, null);
