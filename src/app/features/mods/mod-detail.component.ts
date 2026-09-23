@@ -27,6 +27,7 @@ import { DropZoneDirective } from '../../shared/directives/drop-zone.directive';
 import { MODS, DIALOGS, COMMON } from '../../i18n/labels';
 import { sortVersionsDesc } from '../../shared/utils/version-sort';
 import { parseModJar } from '../../shared/utils/parse-mod-jar';
+import { environment } from '../../environments/environment';
 
 @Component({
     selector: 'app-mod-detail',
@@ -193,35 +194,16 @@ export class ModDetailComponent implements OnInit {
     }
 
     private startDownloads(mods: ModListItemResponse[]): void {
-        let remaining = mods.length;
-        let failed = 0;
         for (const mod of mods) {
-            this.modsApi.getApiModsIdDownload<Blob>(mod.id as any, {
-                responseType: 'blob',
-            } as any).subscribe({
-                next: (blob) => {
-                    const url = URL.createObjectURL(blob as Blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    const name = (mod.title || 'mod-download').trim() || 'mod-download';
-                    a.download = name.toLowerCase().endsWith('.jar') ? name : `${name}.jar`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    remaining--;
-                    if (remaining === 0) {
-                        if (failed) this.toast.error(MODS.downloadFailed);
-                        else this.toast.success(MODS.downloadStarted);
-                    }
-                },
-                error: () => {
-                    failed++;
-                    remaining--;
-                    if (remaining === 0) this.toast.error(MODS.downloadFailed);
-                },
-            });
+            const name = (mod.title || 'mod-download').trim() || 'mod-download';
+            const a = document.createElement('a');
+            a.href = `${environment.apiBasePath}/api/Mods/${mod.id}/download`;
+            a.download = name.toLowerCase().endsWith('.jar') ? name : `${name}.jar`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
+        this.toast.success(MODS.downloadStarted);
     }
 
     editMod(mod: ModListItemResponse): void {

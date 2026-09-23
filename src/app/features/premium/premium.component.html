@@ -1,0 +1,66 @@
+<div class="premium-page">
+    <button mat-icon-button class="back-btn" (click)="goBack()" [matTooltip]="'Back' | t">
+        <img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" class="mc-icon" />
+    </button>
+    <header class="premium-header">
+        <h1>{{ 'Choculaterie Premium' | t }}</h1>
+        <p>{{ 'Support the project and unlock extra perks.' | t }}</p>
+    </header>
+
+    @if (subscription()?.isPremium) {
+    <mat-card appearance="outlined" class="status-card">
+        <mat-card-content>
+            <img src="/premium_gold.png" alt="" aria-hidden="true" class="mc-icon premium-icon" />
+            <div>
+                <strong>{{ 'You\'re Premium' | t }}</strong>
+                @if (subscription()?.premiumUntil) {
+                <p>{{ 'Active until' | t }} {{ subscription()!.premiumUntil | date:'longDate' }}</p>
+                }
+            </div>
+        </mat-card-content>
+    </mat-card>
+    }
+
+    <table class="compare-table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>{{ 'Free' | t }}</th>
+                <th>{{ 'Premium' | t }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ 'Price' | t }}</td>
+                <td>$0</td>
+                <td>$5 {{ '/month' | t }}</td>
+            </tr>
+            <tr>
+                <td>{{ 'Cloud storage' | t }}</td>
+                <td>5 GB</td>
+                <td>15 GB</td>
+            </tr>
+            <tr>
+                <td>{{ 'Manual upload and download' | t }}</td>
+                <td><img src="/icons/ui/check.svg" alt="Yes" class="mc-icon check-icon" /></td>
+                <td><img src="/icons/ui/check.svg" alt="Yes" class="mc-icon check-icon" /></td>
+            </tr>
+            <tr>
+                <td>{{ 'Automatic cloud sync' | t }}</td>
+                <td>—</td>
+                <td><img src="/icons/ui/check.svg" alt="Yes" class="mc-icon check-icon" /></td>
+            </tr>
+            <tr>
+                <td>{{ 'Premium badge on your profile' | t }}</td>
+                <td>—</td>
+                <td><img src="/icons/ui/check.svg" alt="Yes" class="mc-icon check-icon" /></td>
+            </tr>
+        </tbody>
+    </table>
+
+    @if (!subscription()?.isPremium) {
+    <button mat-flat-button color="primary" class="subscribe-btn" [disabled]="checkingOut()" (click)="subscribe()">
+        {{ (checkingOut() ? 'Redirecting…' : 'Subscribe with card') | t }}
+    </button>
+    }
+</div>

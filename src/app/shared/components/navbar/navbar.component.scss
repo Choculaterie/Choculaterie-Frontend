@@ -194,3 +194,17 @@
         padding: 0 0.5rem;
     }
 }
+.premium-item {
+    color: var(--mat-sys-primary);
+
+    span {
+        color: var(--mat-sys-primary);
+        font-weight: 500;
+    }
+
+    svg.mc-icon {
+        width: var(--mat-menu-item-icon-size, 24px);
+        height: var(--mat-menu-item-icon-size, 24px);
+        margin-right: var(--mat-menu-item-spacing, 12px);
+    }
+}

@@ -20,7 +20,21 @@ const SNAP_THRESHOLD = 20; // backend tolerance in px
     styleUrl: './captcha.component.scss',
 })
 export class CaptchaComponent {
-    @ViewChild('canvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
+    private canvasEl?: ElementRef<HTMLCanvasElement>;
+
+    @ViewChild('canvas', { static: false })
+    set canvasRef(ref: ElementRef<HTMLCanvasElement> | undefined) {
+        this.canvasEl = ref;
+        if (!ref) return;
+
+        this.ctx = ref.nativeElement.getContext('2d');
+        if (!this.ctx) {
+            this.phase.set('error');
+            this.errorMsg.set('Your browser is blocking canvas rendering, which this check needs.');
+            return;
+        }
+        this.draw();
+    }
 
     private captchaService = inject(CaptchaService);
 
@@ -94,10 +108,6 @@ export class CaptchaComponent {
                     }));
 
                 this.phase.set('challenge');
-                setTimeout(() => {
-                    this.ctx = this.canvasRef?.nativeElement?.getContext('2d') ?? null;
-                    this.draw();
-                });
             },
             error: () => {
                 this.phase.set('error');
@@ -333,7 +343,7 @@ export class CaptchaComponent {
     // ── Helpers ──
 
     private canvasPos(e: MouseEvent): { x: number; y: number } {
-        const rect = this.canvasRef.nativeElement.getBoundingClientRect();
+        const rect = this.canvasEl!.nativeElement.getBoundingClientRect();
         const scaleX = CANVAS_W / rect.width;
         const scaleY = CANVAS_H / rect.height;
         return {
@@ -344,7 +354,7 @@ export class CaptchaComponent {
 
     private canvasTouchPos(e: TouchEvent): { x: number; y: number } {
         const touch = e.touches[0] || e.changedTouches[0];
-        const rect = this.canvasRef.nativeElement.getBoundingClientRect();
+        const rect = this.canvasEl!.nativeElement.getBoundingClientRect();
         const scaleX = CANVAS_W / rect.width;
         const scaleY = CANVAS_H / rect.height;
         return {

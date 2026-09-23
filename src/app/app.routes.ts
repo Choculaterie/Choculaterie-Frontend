@@ -54,6 +54,11 @@ export const routes: Routes = [
         redirectTo: 'not-found',
     },
     {
+        path: 'premium',
+        loadComponent: () =>
+            import('./features/premium/premium.component').then((m) => m.PremiumComponent),
+    },
+    {
         path: 'faq',
         loadComponent: () =>
             import('./features/faq/faq.component').then((m) => m.FaqComponent),

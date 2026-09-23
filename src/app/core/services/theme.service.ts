@@ -14,7 +14,9 @@ export class ThemeService {
       const theme = this._theme();
       document.documentElement.setAttribute('data-theme', theme);
       document.documentElement.style.colorScheme = theme;
-      localStorage.setItem(this.storageKey, theme);
+      try {
+        localStorage.setItem(this.storageKey, theme);
+      } catch { /* empty */ }
     });
   }
 
@@ -23,8 +25,14 @@ export class ThemeService {
   }
 
   private getInitialTheme(): Theme {
-    const saved = localStorage.getItem(this.storageKey) as Theme | null;
-    if (saved === 'light' || saved === 'dark') return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    try {
+      const saved = localStorage.getItem(this.storageKey) as Theme | null;
+      if (saved === 'light' || saved === 'dark') return saved;
+    } catch { /* empty */ }
+    try {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } catch {
+      return 'light';
+    }
   }
 }

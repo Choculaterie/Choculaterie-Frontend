@@ -3,6 +3,7 @@ export enum Badge {
     Moderator = 1,
     Translator = 2,
     Dev = 3,
+    Premium = 4,
 }
 
 import { BADGES_ROLES } from '../../i18n/labels';
@@ -12,6 +13,7 @@ export const BADGE_LABELS: Record<number, string> = {
     [Badge.Moderator]: BADGES_ROLES.moderator,
     [Badge.Translator]: BADGES_ROLES.translator,
     [Badge.Dev]: BADGES_ROLES.developer,
+    [Badge.Premium]: BADGES_ROLES.premium,
 };
 
 export const BADGE_ICONS: Record<number, string> = {
@@ -19,6 +21,7 @@ export const BADGE_ICONS: Record<number, string> = {
     [Badge.Moderator]: '/icons/weapons/sword.svg',
     [Badge.Translator]: '/icons/letters/T.svg',
     [Badge.Dev]: '/icons/weapons/pickaxe.svg',
+    [Badge.Premium]: '/premium_gold.png',
 };
 
 /** Maps a badge name string (e.g. "Dev") to its numeric enum value. */

@@ -48,8 +48,8 @@
             <button class="cover-edit-btn"
                 [matTooltip]="(p.coverImagePath ? 'Change cover (5:1 ratio recommended)' : 'Add cover image (5:1 ratio recommended)') | t"
                 (click)="coverInput.click()" [disabled]="coverUploading()">
-                <img [src]="p.coverImagePath ? '/icons/weapons/pen_white.svg' : '/icons/ui/add_image.svg'" alt=""
-                    aria-hidden="true" class="mc-icon" [class.mc-icon--fixed-white]="p.coverImagePath" />
+                <img src="/icons/weapons/pen_white.svg" alt="" aria-hidden="true"
+                    class="mc-icon mc-icon--fixed-white" />
             </button>
             @if (p.coverImagePath) {
             <button class="cover-delete-btn" [matTooltip]="'Remove cover' | t" (click)="deleteCoverImage()"
@@ -102,13 +102,19 @@
                 @if (p.badges?.length) {
                 @for (b of p.badges; track $index) {
                 <img [src]="badgeIcon(b.badge)" alt="" aria-hidden="true" class="mc-icon badge-icon"
-                    draggable="false" (contextmenu)="$event.preventDefault()"
-                    [matTooltip]="badgeTooltip(b)" matTooltipTouchGestures="on" />
+                    [class.badge-clickable]="isPremiumBadge(b.badge)"
+                    [class.badge-icon--premium]="isPremiumBadge(b.badge)" draggable="false"
+                    (click)="onBadgeClick(b.badge)"
+                    (contextmenu)="$event.preventDefault()" [matTooltip]="badgeTooltip(b)"
+                    matTooltipTouchGestures="on" />
                 }
                 } @else if (p.badge != null) {
                 <img [src]="badgeIcon(p.badge)" alt="" aria-hidden="true" class="mc-icon badge-icon"
-                    draggable="false" (contextmenu)="$event.preventDefault()"
-                    [matTooltip]="badgeLabel(p.badge)" matTooltipTouchGestures="on" />
+                    [class.badge-clickable]="isPremiumBadge(p.badge)"
+                    [class.badge-icon--premium]="isPremiumBadge(p.badge)" draggable="false"
+                    (click)="onBadgeClick(p.badge)"
+                    (contextmenu)="$event.preventDefault()" [matTooltip]="badgeLabel(p.badge)"
+                    matTooltipTouchGestures="on" />
                 }
             </div>
             @if (p.biographie) {
@@ -731,8 +737,40 @@
                                     q.saveCount }}</span></div>
                         </div>
                     </mat-card-content>
+                    <div id="premium-section" class="premium-banner"
+                        [class.section-highlight]="highlightSection() === 'premium'">
+                        @if (!loadingSubscription()) {
+                        @let sub = subscription();
+                        @if (sub?.isPremium) {
+                        <img src="/premium_gold.png" alt="" aria-hidden="true" class="mc-icon premium-icon" />
+                        <div class="premium-text">
+                            <strong>{{ 'Premium active' | t }}</strong>
+                            @if (sub?.subscription?.cancelAtPeriodEnd) {
+                            <p>{{ 'Your subscription will not renew.' | t }}</p>
+                            } @else if (sub?.premiumUntil) {
+                            <p>{{ 'Renews or ends on' | t }} {{ sub!.premiumUntil | date:'longDate' }}</p>
+                            }
+                        </div>
+                        @if (sub?.subscription?.provider === 'Stripe' && !sub?.subscription?.cancelAtPeriodEnd) {
+                        <button mat-stroked-button class="premium-action" [disabled]="cancellingSubscription()"
+                            (click)="cancelSubscription()">
+                            {{ 'Cancel subscription' | t }}
+                        </button>
+                        }
+                        } @else {
+                        <img src="/premium.png" alt="" aria-hidden="true" class="mc-icon premium-icon" />
+                        <div class="premium-text">
+                            <strong>{{ 'Free plan' | t }}</strong>
+                            <p>{{ 'Upgrade to support the project and unlock extra perks.' | t }}</p>
+                        </div>
+                        <a mat-flat-button color="primary" class="premium-action"
+                            routerLink="/premium">{{ 'View Premium' | t }}</a>
+                        }
+                        }
+                    </div>
                 </mat-card>
                 }
+
 
                 @if (loadingSaves()) {
                 <app-loading-spinner [message]="'Loading saves…' | t" />
@@ -807,3 +845,9 @@
     </mat-tab-group>
     }
 </div>
+
+@if (isAdminRoleOnly() && isOwnProfile()) {
+<button mat-stroked-button class="admin-test-fab" (click)="resetPremiumForTesting()">
+    {{ 'Reset Premium (testing)' | t }}
+</button>
+}

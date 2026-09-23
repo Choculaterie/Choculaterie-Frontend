@@ -305,36 +305,22 @@ export class SchematicDetailComponent implements OnInit {
 
     downloadSingleFile(file: SchematicFileResponse): void {
         const s = this.schematic()!;
-        this.schematicsApi.getApiSchematicsIdDownloadFileId<Blob>(s.id, Number(file.id), {
-            responseType: 'blob',
-        } as any).subscribe({
-            next: (blob) => {
-                const url = URL.createObjectURL(blob as Blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = file.name;
-                a.click();
-                URL.revokeObjectURL(url);
-            },
-            error: (err) => this.toast.error(err.error?.detail ?? err.error?.message ?? SCHEMATICS.downloadFailed),
-        });
+        this.browserDownload(
+            `${environment.apiBasePath}/api/Schematics/${s.id}/download/${Number(file.id)}`, file.name);
+    }
+
+    private browserDownload(url: string, fileName: string): void {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     }
 
     private downloadAllAsZip(s: SchematicDetailResponse): void {
-        this.schematicsApi.getApiSchematicsIdDownload<Blob>(s.id, {
-            responseType: 'blob',
-        } as any).subscribe({
-            next: (blob) => {
-                const url = URL.createObjectURL(blob as Blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${s.name}.zip`;
-                a.click();
-                URL.revokeObjectURL(url);
-                this.toast.success(SCHEMATICS.downloadStarted);
-            },
-            error: (err) => this.toast.error(err.error?.detail ?? err.error?.message ?? SCHEMATICS.downloadFailed),
-        });
+        this.browserDownload(`${environment.apiBasePath}/api/Schematics/${s.id}/download`, `${s.name}.zip`);
+        this.toast.success(SCHEMATICS.downloadStarted);
     }
 
     private showDownloadPicker(s: SchematicDetailResponse): void {

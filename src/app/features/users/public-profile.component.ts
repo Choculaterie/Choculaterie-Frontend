@@ -8,6 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -27,6 +28,7 @@ import { SecurityKeysService } from '../../api/security-keys';
 import { SaveManagerService } from '../../api/save-manager';
 import { PasswordResetService } from '../../api/password-reset';
 import { LinkingService } from '../../api/linking';
+import { BillingService, OwnSubscriptionResponse } from '../../api/billing';
 import type {
     OwnProfileResponse, PublicProfileResponse, UserProfileResponse,
     SchematicListItemResponse, PublicUserListItemResponse,
@@ -49,7 +51,7 @@ import { UserImgPipe } from '../../shared/pipes/image-url.pipe';
 import { FileSizePipe } from '../../shared/pipes/file-size.pipe';
 import { MarkdownPipe } from '../../shared/pipes/markdown.pipe';
 import { SkeletonImgComponent } from '../../shared/components/skeleton-img/skeleton-img.component';
-import { BADGE_LABELS, BADGE_ICONS, ROLE_LABELS, resolveBadge } from '../../core/enums';
+import { Badge, BADGE_LABELS, BADGE_ICONS, ROLE_LABELS, resolveBadge } from '../../core/enums';
 import { translateText } from '../../core/i18n/translation.store';
 import { PROFILE, USERS, DIALOGS, AUTH, COMMON } from '../../i18n/labels';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -72,6 +74,7 @@ import { matfMinecraftColored } from '@ng-icons/material-file-icons/colored';
         MatFormFieldModule,
         MatInputModule,
         MatButtonModule,
+        MatProgressBarModule,
         MatChipsModule,
         MatDividerModule,
         MatTabsModule,
@@ -114,6 +117,7 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     private saveManagerApi = inject(SaveManagerService);
     private passwordResetApi = inject(PasswordResetService);
     private linkingApi = inject(LinkingService);
+    private billingApi = inject(BillingService);
     private injector = inject(Injector);
     private dialog = inject(MatDialog);
     private toast = inject(ToastService);
@@ -130,6 +134,34 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         return b.locale ? `${label} (${b.locale.toUpperCase()})` : label;
     }
     badgeIcon(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_ICONS[n] : '/icons/ui/start.svg'; }
+
+    readonly isAdminRoleOnly = computed(() => this.session.user()?.role?.toLowerCase() === 'admin');
+
+    resetPremiumForTesting(): void {
+        const userId = this.ownProfile()?.id;
+        if (!userId) return;
+        this.billingApi.adminResetPremiumForTesting(userId).subscribe({
+            next: () => {
+                this.toast.success('Premium reset for testing.');
+                this.billingApi.getSubscription().subscribe({ next: (s) => this.subscription.set(s) });
+            },
+            error: (err) => this.toast.error(err?.error?.message ?? 'Reset failed.'),
+        });
+    }
+    isPremiumBadge(badge: unknown): boolean { return resolveBadge(badge) === Badge.Premium; }
+
+    onBadgeClick(badge: unknown): void {
+        if (!this.isPremiumBadge(badge)) return;
+        if (this.isOwnProfile()) {
+            this.selectedTab.set(5);
+            setTimeout(() => this.scrollToSection('premium'), 300);
+            setTimeout(() => this.highlightSection.set('premium'), 900);
+            setTimeout(() => this.highlightSection.set(null), 4900);
+        } else {
+            this.router.navigate(['/premium']);
+        }
+    }
+
     roleLabel(role: unknown): string { const l = ROLE_LABELS[role as string]; return l ? translateText(l) : String(role ?? ''); }
 
     memberYears(p: any): number | null {
@@ -309,6 +341,10 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     readonly verifyingSave = signal(false);
     saveColumns = ['worldName', 'fileSizeBytes', 'createdAt', 'updatedAt', 'actions'];
 
+    readonly subscription = signal<OwnSubscriptionResponse | null>(null);
+    readonly loadingSubscription = signal(true);
+    readonly cancellingSubscription = signal(false);
+
     // ── Own Profile: Password Reset ──
     readonly resetStep = signal<'request' | 'confirm'>('request');
     private _emailSpamTimer: ReturnType<typeof setTimeout> | null = null;
@@ -482,6 +518,63 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         this.saveManagerApi.getApiSaveManagerQuota().subscribe({
             next: (q) => this.saveQuota.set(q),
             error: () => { },
+        });
+
+        this.billingApi.getSubscription().subscribe({
+            next: (s) => {
+                this.subscription.set(s);
+                this.loadingSubscription.set(false);
+                if (!s?.isPremium && this.route.snapshot.queryParams['checkout'] === 'success') {
+                    this.pollForPremium(10);
+                }
+            },
+            error: () => this.loadingSubscription.set(false),
+        });
+    }
+
+    private pollForPremium(attemptsLeft: number): void {
+        if (attemptsLeft <= 0) return;
+        setTimeout(() => {
+            this.billingApi.getSubscription().subscribe({
+                next: (s) => {
+                    this.subscription.set(s);
+                    if (!s?.isPremium) this.pollForPremium(attemptsLeft - 1);
+                },
+                error: () => this.pollForPremium(attemptsLeft - 1),
+            });
+        }, 2000);
+    }
+
+    cancelSubscription(): void {
+        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+            data: {
+                title: 'Cancel Premium subscription?',
+                message: 'Here is what happens if you cancel:',
+                bullets: [
+                    'You keep every Premium perk until the end of your current billing period.',
+                    'You will not be charged again after that.',
+                    'Your worlds and files are never deleted.',
+                    'You can resubscribe at any time.',
+                ],
+                confirmText: 'Cancel subscription',
+                cancelText: 'Keep subscription',
+                warn: true,
+            } as ConfirmDialogData,
+        });
+        dialogRef.afterClosed().subscribe((confirmed) => {
+            if (!confirmed) return;
+            this.cancellingSubscription.set(true);
+            this.billingApi.cancelSubscription().subscribe({
+                next: () => {
+                    this.cancellingSubscription.set(false);
+                    this.toast.success('Your subscription will end at the end of the current period.');
+                    this.billingApi.getSubscription().subscribe({ next: (s) => this.subscription.set(s) });
+                },
+                error: (err) => {
+                    this.cancellingSubscription.set(false);
+                    this.toast.error(err?.error?.message ?? 'Could not cancel your subscription.');
+                },
+            });
         });
     }
 
@@ -719,11 +812,13 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
 
     downloadSave(save: SaveListItemResponse): void {
         this.downloadingIds.update(s => new Set(s).add(save.id));
-        this.http.get(`/api/SaveManager/${save.id}/download`, { responseType: 'blob' }).subscribe({
-            next: (blob) => {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a'); a.href = url; a.download = `${save.worldName}.zip`; a.click();
-                URL.revokeObjectURL(url); this.toast.success(PROFILE.downloadStarted);
+        this.http.get<{ url: string }>(`/api/SaveManager/${save.id}/download-url`).subscribe({
+            next: ({ url }) => {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${save.worldName}.zip`;
+                a.click();
+                this.toast.success(PROFILE.downloadStarted);
                 this.downloadingIds.update(s => { const n = new Set(s); n.delete(save.id); return n; });
             },
             error: (err) => {

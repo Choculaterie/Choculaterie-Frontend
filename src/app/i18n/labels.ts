@@ -378,4 +378,5 @@ export const BADGES_ROLES = {
     translator: 'Translator',
     developer: 'Developer',
     user: 'User',
+    premium: 'Premium',
 };

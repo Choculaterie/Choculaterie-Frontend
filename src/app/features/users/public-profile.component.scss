@@ -359,6 +359,13 @@ $sk: linear-gradient(90deg,
     cursor: default;
 }
 
+.badge-icon--premium {
+    width: 35px;
+    height: 35px;
+    position: relative;
+    top: 1px;
+}
+
 .year-badge {
     display: inline-flex;
     align-items: center;
@@ -1066,6 +1073,7 @@ mat-divider {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    overflow: hidden;
 
     mat-card-content {
         padding: 1rem;
@@ -1074,6 +1082,7 @@ mat-divider {
             padding: 0.75rem;
         }
     }
+
 }
 
 .quota-stats {
@@ -1159,4 +1168,63 @@ mat-divider {
 
 button img.mc-icon--fixed-white {
     filter: none !important;
+}
+.badge-clickable {
+    cursor: pointer;
+}
+
+.admin-test-fab {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 20;
+    opacity: 0.55;
+    background: var(--mat-sys-surface-container-high);
+    transition: opacity 0.2s ease;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.premium-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-sizing: border-box;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--mat-sys-outline-variant);
+    background: color-mix(in srgb, var(--mat-sys-primary) 6%, transparent);
+    transition: background 0.5s ease;
+
+    @media (max-width: 600px) {
+        padding: 0.75rem;
+    }
+
+    .premium-icon {
+        width: 50px;
+        height: 50px;
+        flex: none;
+        position: relative;
+        top: 1px;
+    }
+
+    .premium-text {
+        flex: 1;
+        min-width: 0;
+
+        p {
+            margin: 0.15rem 0 0;
+            color: var(--mat-sys-on-surface-variant);
+        }
+    }
+
+    .premium-action {
+        flex: none;
+        margin-left: auto;
+    }
+
+    &.section-highlight {
+        background: color-mix(in srgb, var(--mat-sys-primary) 20%, transparent);
+    }
 }

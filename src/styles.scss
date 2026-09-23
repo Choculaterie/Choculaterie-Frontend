@@ -35,6 +35,7 @@
 
 html {
   height: 100%;
+  scrollbar-gutter: stable;
   // Light theme (default)
   @include mat.theme((color: (primary: mat.$magenta-palette, tertiary: mat.$violet-palette, theme-type: light),
       typography: Minecraft,
@@ -356,6 +357,12 @@ html[data-theme='dark'] {
   }
 }
 
+.cdk-global-scrollblock {
+  position: static !important;
+  overflow: hidden !important;
+  width: auto !important;
+}
+
 // Litematic 3D viewer dialog - remove default padding for full-bleed canvas
 .litematic-viewer-dialog .mat-mdc-dialog-container .mdc-dialog__surface {
   padding: 0;
@@ -467,6 +474,16 @@ img[src*='icons/'] {
 
 :root[data-theme='light'] img[src*='icons/'] {
   filter: invert(1);
+}
+
+html:not([data-theme]) img[src*='icons/'] {
+  filter: invert(1);
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) img[src*='icons/'] {
+    filter: none;
+  }
 }
 
 :root[data-theme='light'] .mat-pseudo-checkbox-minimal.mat-pseudo-checkbox-checked,
