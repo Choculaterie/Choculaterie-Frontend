@@ -78,8 +78,30 @@
         border-bottom: none;
     }
 
-    .check-icon {
+    .check-icon,
+    .cross-icon {
         margin: 0 auto;
+    }
+
+    .cross-icon {
+        opacity: 0.45;
+    }
+
+    .feature-with-info {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .info-point {
+        width: 14px;
+        height: 14px;
+        cursor: help;
+        opacity: 0.7;
+    }
+
+    .info-point:hover {
+        opacity: 1;
     }
 }
 

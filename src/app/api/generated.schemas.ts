@@ -792,6 +792,15 @@ export interface SaveListItemResponse {
   fileSizeBytes: number | string;
   createdAt: string;
   updatedAt: string;
+  versionCount: number;
+}
+
+export interface SaveVersionResponse {
+  id: string;
+  createdAt: string;
+  fileCount: number;
+  totalBytes: number | string;
+  isHead: boolean;
 }
 
 export interface SaveQuotaResponse {

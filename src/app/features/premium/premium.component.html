@@ -46,13 +46,19 @@
                 <td><img src="/icons/ui/check.svg" alt="Yes" class="mc-icon check-icon" /></td>
             </tr>
             <tr>
-                <td>{{ 'Automatic cloud sync' | t }}</td>
-                <td>—</td>
+                <td>
+                    <span class="feature-with-info">{{ 'Automatic cloud sync' | t }}
+                        <img src="/icons/ui/!!.svg" alt="" aria-hidden="true" class="mc-icon info-point"
+                            [matTooltip]="'Pick which worlds sync by marking them as favourite with the star in the mod. Only favourited worlds upload automatically.' | t"
+                            matTooltipTouchGestures="on" />
+                    </span>
+                </td>
+                <td><img src="/icons/letters/X.svg" alt="No" class="mc-icon cross-icon" /></td>
                 <td><img src="/icons/ui/check.svg" alt="Yes" class="mc-icon check-icon" /></td>
             </tr>
             <tr>
                 <td>{{ 'Premium badge on your profile' | t }}</td>
-                <td>—</td>
+                <td><img src="/icons/letters/X.svg" alt="No" class="mc-icon cross-icon" /></td>
                 <td><img src="/icons/ui/check.svg" alt="Yes" class="mc-icon check-icon" /></td>
             </tr>
         </tbody>

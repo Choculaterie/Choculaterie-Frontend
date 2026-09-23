@@ -40,6 +40,7 @@ import { UserCardComponent } from '../../shared/components/user-card/user-card.c
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { ReportDialogComponent, ReportDialogData, ReportDialogResult } from '../../shared/components/report-dialog/report-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SaveVersionsDialogComponent, SaveVersionsDialogData } from '../../shared/components/save-versions-dialog/save-versions-dialog.component';
 import { PasswordDialogComponent, PasswordDialogData } from '../../shared/components/password-dialog/password-dialog.component';
 import { ImageCropperDialogComponent, CropperDialogData, CropperDialogResult } from '../../shared/components/image-cropper-dialog/image-cropper-dialog.component';
 import { SkinViewerDialogComponent, type SkinViewerDialogData } from '../../shared/components/skin-viewer/skin-viewer-dialog.component';
@@ -811,6 +812,12 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     }
 
     downloadSave(save: SaveListItemResponse): void {
+        if ((save.versionCount ?? 0) > 1) {
+            this.dialog.open(SaveVersionsDialogComponent, {
+                data: { saveId: save.id, worldName: save.worldName } as SaveVersionsDialogData,
+            });
+            return;
+        }
         this.downloadingIds.update(s => new Set(s).add(save.id));
         this.http.get<{ url: string }>(`/api/SaveManager/${save.id}/download-url`).subscribe({
             next: ({ url }) => {

@@ -798,7 +798,8 @@
                         <ng-container matColumnDef="actions">
                             <th mat-header-cell *matHeaderCellDef></th>
                             <td mat-cell *matCellDef="let s">
-                                <button mat-icon-button (click)="downloadSave(s)" [disabled]="downloadingIds().has(s.id)" [matTooltip]="'Download' | t">
+                                <button mat-icon-button (click)="downloadSave(s)" [disabled]="downloadingIds().has(s.id)"
+                                    [matTooltip]="(s.versionCount > 1 ? 'Download a version' : 'Download') | t">
                                     @if (downloadingIds().has(s.id)) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
                                     <img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" /> }
                                 </button>
