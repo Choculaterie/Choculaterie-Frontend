@@ -21,7 +21,7 @@ export const BADGE_ICONS: Record<number, string> = {
     [Badge.Moderator]: '/icons/weapons/sword.svg',
     [Badge.Translator]: '/icons/letters/T.svg',
     [Badge.Dev]: '/icons/weapons/pickaxe.svg',
-    [Badge.Premium]: '/premium_gold.png',
+    [Badge.Premium]: '/premium.png',
 };
 
 /** Maps a badge name string (e.g. "Dev") to its numeric enum value. */

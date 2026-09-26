@@ -10,7 +10,7 @@
     @if (subscription()?.isPremium) {
     <mat-card appearance="outlined" class="status-card">
         <mat-card-content>
-            <img src="/premium_gold.png" alt="" aria-hidden="true" class="mc-icon premium-icon" />
+            <img src="/premium.png" alt="" aria-hidden="true" class="mc-icon premium-icon" />
             <div>
                 <strong>{{ 'You\'re Premium' | t }}</strong>
                 @if (subscription()?.premiumUntil) {
@@ -50,6 +50,17 @@
                     <span class="feature-with-info">{{ 'Automatic cloud sync' | t }}
                         <img src="/icons/ui/!!.svg" alt="" aria-hidden="true" class="mc-icon info-point"
                             [matTooltip]="'Pick which worlds sync by marking them as favourite with the star in the mod. Only favourited worlds upload automatically.' | t"
+                            matTooltipTouchGestures="on" />
+                    </span>
+                </td>
+                <td><img src="/icons/letters/X.svg" alt="No" class="mc-icon cross-icon" /></td>
+                <td><img src="/icons/ui/check.svg" alt="Yes" class="mc-icon check-icon" /></td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="feature-with-info">{{ 'Version history per world' | t }}
+                        <img src="/icons/ui/!!.svg" alt="" aria-hidden="true" class="mc-icon info-point"
+                            [matTooltip]="'Premium keeps earlier backups of each world, one per day over the last three days, so you can roll back to how it was on a previous day. Free keeps only the current one.' | t"
                             matTooltipTouchGestures="on" />
                     </span>
                 </td>
