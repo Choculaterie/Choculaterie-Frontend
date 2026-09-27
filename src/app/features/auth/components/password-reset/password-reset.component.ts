@@ -15,7 +15,7 @@ import { AUTH } from '../../../../i18n/labels';
 @Component({
     selector: 'app-password-reset',
     standalone: true,
-    imports: [TPipe, 
+    imports: [TPipe,
         ReactiveFormsModule,
         RouterLink,
         MatCardModule,
@@ -56,7 +56,7 @@ export class PasswordResetComponent implements OnDestroy {
                 this.scheduleSpamHint();
             },
             error: () => {
-                // Always show the same message for security (don't reveal if email exists)
+
                 this.loading.set(false);
                 this.step.set('confirm');
                 this.scheduleSpamHint();

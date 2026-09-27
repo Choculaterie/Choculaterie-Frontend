@@ -24,7 +24,7 @@ import { getLocale } from '../../core/i18n/locale';
 @Component({
     selector: 'app-faq',
     standalone: true,
-    imports: [TPipe, 
+    imports: [TPipe,
         ReactiveFormsModule,
         MatExpansionModule,
         MatButtonModule,
@@ -83,7 +83,7 @@ export class FaqComponent implements OnInit {
         const remaining = 5 - this.imageFiles.length;
         const toAdd = chosen.slice(0, remaining);
         this.imageFiles = [...this.imageFiles, ...toAdd];
-        // Generate preview URLs
+
         const newPreviews = toAdd.map(f => URL.createObjectURL(f));
         this.imagePreviews.update(prev => [...prev, ...newPreviews]);
         if (chosen.length > remaining) {

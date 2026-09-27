@@ -6,10 +6,6 @@ const TOKEN_KEY = 'auth_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
 const USER_KEY = 'auth_user';
 
-/**
- * Manages session state only (token + user signals).
- * HTTP calls belong to the generated API services in src/app/api.
- */
 @Injectable({ providedIn: 'root' })
 export class SessionService {
     private _user = signal<LoginResponse | null>(this.loadUser());
@@ -32,7 +28,7 @@ export class SessionService {
         localStorage.setItem(REFRESH_TOKEN_KEY, session.refreshToken);
         localStorage.setItem(USER_KEY, JSON.stringify(session));
         this._user.set(session);
-        this._profile.set(null); // clear cached profile so fresh data is fetched
+        this._profile.set(null);
     }
 
     setProfile(profile: OwnProfileResponse): void {

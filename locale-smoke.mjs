@@ -1,17 +1,9 @@
-/**
- * Renders the schematics grid in each locale and fails on console errors, an empty
- * date (missing CLDR data) or text identical to English (bundle never loaded).
- *
- * Usage:  node locale-smoke.mjs   |   BASE=http://localhost:4321 node locale-smoke.mjs
- */
 import assert from 'node:assert';
 import { chromium } from 'playwright';
 
 const BASE = process.env.BASE ?? 'https://choculaterie.com';
 const LOCALES = (process.env.LOCALES ?? 'en,fr').split(',');
 
-// The sandbox this runs in cannot resolve the API host; those failures are not
-// what this check is about.
 const IGNORE = /ERR_NAME_NOT_RESOLVED|ERR_FAILED|Failed to load resource/;
 
 const browser = await chromium.launch();
@@ -43,8 +35,7 @@ for (const loc of LOCALES) {
         assert.ok(cards > 0, `${loc}: no cards rendered`);
         assert.ok(date.trim(), `${loc}: card date rendered empty, locale data is probably missing`);
         assert.deepStrictEqual(real, [], `${loc}: console errors`);
-        // A non-source locale that renders identical text to English means the
-        // bundle never arrived, which is exactly how the CORS bug looked.
+
         if (loc !== 'en' && englishNav) {
             assert.notStrictEqual(nav, englishNav, `${loc}: navbar identical to English, bundle did not load`);
         }

@@ -13,7 +13,6 @@ export interface SiteStats {
     userCount: number;
 }
 
-/** Unified inbox item for the dialog (admin + user notifications). */
 export type InboxItem =
     | (AdminNotificationResponse & { source: 'admin' })
     | (UserNotificationResponse & { source: 'user' });
@@ -41,7 +40,6 @@ export class RealtimeService {
         this.userNotifications().some(n => !n.isRead)
     );
 
-    /** Combined inbox list, newest first. */
     readonly inboxItems = computed<InboxItem[]>(() => {
         const admin: InboxItem[] = this.session.isAdminOrMod()
             ? this.adminNotifications().map(n => ({ ...n, source: 'admin' as const }))
@@ -104,7 +102,6 @@ export class RealtimeService {
         this.stats.set(s);
     }
 
-    /** Fetch existing notifications from the REST API and seed the signal store */
     seedAdminNotifications(): void {
         if (!this.session.isAdminOrMod()) return;
         this.adminApi.getApiAdminNotifications().subscribe({
@@ -123,14 +120,12 @@ export class RealtimeService {
         });
     }
 
-    /** Seed both admin (if applicable) and user notifications. */
     seedInbox(): void {
         this.seedAdminNotifications();
         this.seedUserNotifications();
         this.startUserNotificationPolling();
     }
 
-    /** Poll for live message changes every 10s instead of pushing them over a websocket. */
     startLiveMessagePolling(): void {
         interval(LIVE_MESSAGES_POLL_INTERVAL).pipe(
             switchMap(() => this.adminApi.getApiAdminLiveMessages().pipe(
@@ -141,7 +136,6 @@ export class RealtimeService {
         });
     }
 
-    /** Light poll for user inbox while authenticated. */
     startUserNotificationPolling(): void {
         this.userNotifPollSub?.unsubscribe();
         if (!this.session.isAuthenticated()) return;

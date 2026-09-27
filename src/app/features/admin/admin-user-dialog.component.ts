@@ -342,7 +342,6 @@ export class AdminUserDialogComponent {
         const newQuota = this.editQuota();
         const newNote = this.editNote().trim() || null;
 
-        // Translator is granted per language, so it expands into one row per locale.
         const grants: { badge: number; locale: string | null }[] = [];
         for (const b of this.editBadges()) {
             if (b === this.translatorBadge) {

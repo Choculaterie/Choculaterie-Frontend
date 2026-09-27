@@ -1,9 +1,8 @@
-/** Renders a single block's icon as a data URL, driven by the /internal/icon-batch route. */
 import * as THREE from 'three';
 import { SchematicRenderer } from 'schematic-renderer';
 import { RESOURCE_PACK_URL } from './resource-pack';
 
-const ICON_SIZE = 128; // offline render, no client-side perf cost
+const ICON_SIZE = 128;
 
 let rendererPromise: Promise<SchematicRenderer> | null = null;
 
@@ -51,14 +50,12 @@ function blobToDataUrl(blob: Blob): Promise<string> {
     });
 }
 
-// Connection-state blocks (walls, redstone wire...) render empty with no properties set.
 function fallbackStateFor(name: string): string | null {
     if (name === 'redstone_wire') return '[east=none,north=none,south=none,west=none,power=0]';
     if (name.endsWith('_wall')) return '[up=true]';
     return '[north=true,east=true,south=true,west=true,up=true,down=true,bottom=true,waterlogged=false]';
 }
 
-/** Renders one block (e.g. "minecraft:oak_stairs") to a PNG data URL, or null if unresolvable. */
 export async function renderBlockIconDataUrl(blockKey: string): Promise<string | null> {
     const renderer = await getRenderer();
     let mesh: THREE.Object3D | null | undefined = await renderer.cubane.getBlockMesh(blockKey);

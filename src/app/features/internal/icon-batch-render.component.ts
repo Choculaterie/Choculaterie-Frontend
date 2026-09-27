@@ -8,7 +8,6 @@ declare global {
     }
 }
 
-/** Not a real page: a hook for the offline Puppeteer-driven block-icon pre-render script. */
 @Component({
     selector: 'app-icon-batch-render',
     standalone: true,

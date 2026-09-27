@@ -23,7 +23,6 @@
         }
     </div>
 
-    <!-- Create / Edit form -->
     @if (showForm() && isAdmin()) {
     <mat-card appearance="outlined" class="form-card" #formCard appDropZone [fullPage]="true" accept="image/*,.jar"
         (filesDrop)="onFilesDropped($event)">

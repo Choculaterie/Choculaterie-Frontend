@@ -1,14 +1,6 @@
 import { Directive, ElementRef, EventEmitter, HostListener, Input, Output, Renderer2, inject, OnDestroy, OnInit } from '@angular/core';
 import { ToastService } from '../../core/services/toast.service';
 
-/**
- * Drop-zone directive - purely functional, no visual feedback.
- *
- * fullPage=true : shows a fixed viewport overlay (dark blur + dashed frame)
- *                 and processes any drop on it.
- * fullPage=false: transparent - just calls preventDefault on dragover/drop
- *                 and emits filesDrop.  All visuals are handled by the page.
- */
 @Directive({
     selector: '[appDropZone]',
     standalone: true,
@@ -47,8 +39,6 @@ export class DropZoneDirective implements OnInit, OnDestroy {
         this.removeFpOverlay();
     }
 
-    // ── Full-page: document.documentElement handlers ──
-
     private onHtmlEnter(e: DragEvent): void {
         e.preventDefault();
         this.showFpOverlay();
@@ -65,8 +55,6 @@ export class DropZoneDirective implements OnInit, OnDestroy {
         this.processFiles(e);
     }
 
-    // ── Local element handlers (no visuals) ──
-
     @HostListener('dragover', ['$event'])
     onHostOver(e: DragEvent): void {
         if (this.fullPage) return;
@@ -80,8 +68,6 @@ export class DropZoneDirective implements OnInit, OnDestroy {
         e.stopPropagation();
         this.processFiles(e);
     }
-
-    // ── File processing ──
 
     private processFiles(e: DragEvent): void {
         const files = Array.from(e.dataTransfer?.files ?? []);
@@ -115,8 +101,6 @@ export class DropZoneDirective implements OnInit, OnDestroy {
             return type === p;
         });
     }
-
-    // ── Full-page overlay ──
 
     private showFpOverlay(): void {
         if (this.fpOverlay) return;

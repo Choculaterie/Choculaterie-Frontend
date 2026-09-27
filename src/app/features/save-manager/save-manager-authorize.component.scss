@@ -21,8 +21,6 @@
     color: var(--mat-sys-on-surface-variant);
 }
 
-// ── Card variants ──
-
 .auth-card {
     border-radius: 16px;
 
@@ -42,15 +40,13 @@
     }
 }
 
-// ── State icons ──
-
 .state-icon {
     font-size: 3rem;
     width: 3rem;
     height: 3rem;
     align-self: center;
     color: var(--mat-sys-on-surface-variant);
-    // for <img> MC icons used as state icons
+
     &.mc-icon { display: block; }
 
     &--success {
@@ -73,8 +69,6 @@ p {
     color: var(--mat-sys-on-surface-variant);
     line-height: 1.5;
 }
-
-// ── App identity row ──
 
 .app-identity {
     display: flex;
@@ -99,8 +93,6 @@ p {
         color: var(--mat-sys-on-surface-variant);
     }
 }
-
-// ── Permissions list ──
 
 .auth-info {
     display: flex;
@@ -136,8 +128,6 @@ p {
     }
 }
 
-// ── Expiry note ──
-
 .expires-note {
     display: flex;
     align-items: center;
@@ -152,8 +142,6 @@ p {
     }
 }
 
-// ── Action buttons ──
-
 .auth-actions {
     display: flex;
     gap: 1rem;
@@ -162,8 +150,6 @@ p {
         flex: 1;
     }
 }
-
-// ── Key display ──
 
 .key-toggle {
     all: unset;
@@ -202,7 +188,6 @@ p {
     }
 }
 
-
 .key-row {
     display: flex;
     align-items: center;
@@ -234,4 +219,3 @@ p {
 mat-divider {
     margin: 0.25rem 0;
 }
-

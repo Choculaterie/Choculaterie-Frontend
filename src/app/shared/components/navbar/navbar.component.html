@@ -35,7 +35,7 @@
     </button>
 
     @if (session.isAuthenticated()) {
-    <!-- ── Inbox (personal + admin when applicable) ── -->
+
     <div class="inbox-wrap">
         <button mat-icon-button class="inbox-btn" (click)="openInbox($event)" [matTooltip]="'Inbox' | t">
             <img src="/icons/communication/mail.svg" alt="" aria-hidden="true" class="mc-icon" />

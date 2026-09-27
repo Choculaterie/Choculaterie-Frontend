@@ -4,8 +4,6 @@
     padding: 2rem 1rem 4rem;
 }
 
-// ── Hero ──────────────────────────────────────────────────────────────────────
-
 .faq-hero {
     text-align: center;
     margin-bottom: 2.5rem;
@@ -20,8 +18,6 @@
         opacity: 0.7;
     }
 }
-
-// ── FAQ Accordion ─────────────────────────────────────────────────────────────
 
 .faq-section {
     margin-bottom: 2rem;
@@ -85,8 +81,6 @@
 .section-divider {
     margin: 2rem 0;
 }
-
-// ── Contact ───────────────────────────────────────────────────────────────────
 
 .contact-section {
     h2 {
@@ -166,9 +160,6 @@
     }
 }
 
-// CSS-only email obfuscation - no plain email text anywhere in HTML or CSS
-// \73 = s, \75 = u, \70 = p, \6F = o, \72 = r, \74 = t
-// \40 = @, \2E = .
 .obf-email {
     color: var(--mat-sys-primary);
     text-decoration: underline;
@@ -177,11 +168,11 @@
     user-select: all;
 
     &::before {
-        content: '\73\75\70\70\6F\72\74'; // support
+        content: '\73\75\70\70\6F\72\74';
     }
 
     &::after {
-        content: '\40 choculaterie\2E com'; // @choculaterie.com
+        content: '\40 choculaterie\2E com';
     }
 
     &:hover {
@@ -192,8 +183,6 @@
 .channel-divider {
     margin: 1.5rem 0;
 }
-
-// ── Contact Form ──────────────────────────────────────────────────────────────
 
 .contact-form {
     display: flex;
@@ -262,8 +251,6 @@
         filter: contrast(0) !important;
     }
 }
-
-// ── Success State ─────────────────────────────────────────────────────────────
 
 .success-state {
     display: flex;

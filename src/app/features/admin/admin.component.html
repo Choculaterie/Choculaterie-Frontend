@@ -4,11 +4,9 @@
     <mat-tab-group dynamicHeight disablePagination [selectedIndex]="selectedTab()"
         (selectedTabChange)="onTabChange($event)">
 
-        <!-- ═══ USERS TAB ═══ -->
         <mat-tab [label]="'Users' | t">
             <div class="tab-content">
 
-                <!-- User Detail Panel -->
                 @if (selectedUser(); as u) {
                 <mat-card appearance="outlined" class="detail-card">
                     <mat-card-header>
@@ -59,7 +57,6 @@
 
                         <mat-divider />
 
-                        <!-- Linking info -->
                         <h3>{{ 'Linking' | t }}</h3>
                         <div class="detail-grid">
                             <div class="detail-item">
@@ -82,7 +79,6 @@
 
                         <mat-divider />
 
-                        <!-- Keys & Storage -->
                         <h3>{{ 'Keys & Storage' | t }}</h3>
                         <div class="detail-grid">
                             <div class="detail-item">
@@ -118,7 +114,6 @@
 
                         <mat-divider />
 
-                        <!-- Admin actions -->
                         <h3>{{ 'Actions' | t }}</h3>
                         <div class="detail-actions">
                             <mat-form-field appearance="outline" class="compact-select badge-select">
@@ -141,7 +136,6 @@
                             <button mat-stroked-button (click)="saveQuota()"><mat-icon>save</mat-icon> <span>{{ 'Save quota' | t }}</span></button>
                         </div>
 
-                        <!-- User's schematics -->
                         @if (u.schematics.length > 0) {
                         <mat-divider />
                         <h3>{{ 'Schematics' | t }} ({{ u.schematics.length }})</h3>
@@ -181,7 +175,6 @@
                 </mat-card>
                 } @else {
 
-                <!-- User list -->
                 <div class="search-col">
                     <mat-form-field appearance="outline" class="search-field">
                         <mat-label>{{ 'Search users' | t }}</mat-label>
@@ -299,7 +292,6 @@
             </div>
         </mat-tab>
 
-        <!-- ═══ SCHEMATICS TAB ═══ -->
         <mat-tab>
             <ng-template mat-tab-label>
                 <span>{{ 'Schematics' | t }}</span>
@@ -415,7 +407,6 @@
             </div>
         </mat-tab>
 
-        <!-- ═══ LIVE MESSAGES TAB ═══ -->
         <mat-tab [label]="'Live Messages' | t">
             <div class="tab-content">
                 <mat-card appearance="outlined" class="form-card">
@@ -495,7 +486,6 @@
             </div>
         </mat-tab>
 
-        <!-- ═══ MOD MESSAGES TAB ═══ -->
         <mat-tab [label]="'Mod Messages' | t">
             <div class="tab-content">
                 <mat-card appearance="outlined" class="form-card">
@@ -625,7 +615,6 @@
             </div>
         </mat-tab>
 
-        <!-- ═══ STORAGE TAB ═══ -->
         <mat-tab [label]="'Storage' | t">
             <div class="tab-content">
                 @if (loadingStorage()) {
@@ -716,8 +705,6 @@
             </div>
         </mat-tab>
 
-
-        <!-- ═══ TAGS TAB ═══ -->
         <mat-tab>
             <ng-template mat-tab-label>
                 <span>{{ 'Tags' | t }}</span>
@@ -727,7 +714,6 @@
             </ng-template>
             <div class="tab-content">
 
-                <!-- Proposed Tags -->
                 <mat-card appearance="outlined" class="form-card">
                     <mat-card-header>
                         <mat-card-title>{{ 'Pending Tag Suggestions' | t }}</mat-card-title>
@@ -849,7 +835,6 @@
             </div>
         </mat-tab>
 
-        <!-- ═══ VERSIONS TAB ═══ -->
         <mat-tab [label]="'Versions' | t">
             <div class="tab-content">
                 <mat-card appearance="outlined" class="form-card">
@@ -909,7 +894,7 @@
                 }
             </div>
         </mat-tab>
-        <!-- ╔═══ FAQ TAB ═══ -->
+
         <mat-tab [label]="'FAQ' | t">
             <div class="tab-content">
                 <mat-card appearance="outlined" class="form-card">
@@ -1006,7 +991,6 @@
             </div>
         </mat-tab>
 
-        <!-- ╔═══ TICKETS TAB ═══ -->
         <mat-tab>
             <ng-template mat-tab-label>
                 <span>{{ 'Tickets' | t }}</span>
@@ -1016,7 +1000,6 @@
             </ng-template>
             <div class="tab-content">
 
-                <!-- Ticket Detail Panel -->
                 @if (selectedTicket(); as t) {
                 <mat-card appearance="outlined" class="ticket-detail">
                     <mat-card-header>
@@ -1225,8 +1208,6 @@
                 </div>
             </div>
         </mat-tab>
-
-
 
     </mat-tab-group>
 </div>

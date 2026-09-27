@@ -32,7 +32,7 @@ export interface IsometricScreenshotData {
 @Component({
     selector: 'app-isometric-screenshot-dialog',
     standalone: true,
-    imports: [TPipe, 
+    imports: [TPipe,
         MatDialogModule,
         MatButtonModule,
         MatIconModule,
@@ -467,7 +467,7 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
     }
 
     startViewerDrag(event: PointerEvent): void {
-        // Left = orbit yaw/pitch (ours). Right = pan (orbit controls). Don't steal right-click.
+
         if (event.button !== 0) return;
         event.preventDefault();
         this.cancelAnimation();
@@ -553,7 +553,7 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
         const cm = this.schemRenderer?.cameraManager as any;
         const controls = cm?.controls?.get?.(cm.activeControlKey) as any;
         if (!controls) return;
-        // Left-drag is owned by our yaw/pitch handler; right-drag pans without resetting.
+
         controls.enableRotate = false;
         controls.enablePan = true;
         controls.enableZoom = true;
@@ -684,7 +684,6 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
             });
             blob = await this.normalizeGeckoOrientation(blob);
 
-            // Restore live view fully before unfreezing (takeScreenshot resizes the canvas).
             if (!embed) {
                 this.schemRenderer.setGridVisible(true);
                 await this.schemRenderer.renderManager?.setBackgroundMode('solid', { color: '#1a1a2e' });
@@ -773,7 +772,7 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
             cam.aspect = state.aspect;
             cam.updateProjectionMatrix();
         }
-        // Re-apply orbit distance from saved yaw/pitch so resize cannot leave a zoomed framing.
+
         this.applyCameraDirection();
         if (state.target && controls?.target) {
             const dir = cam.position.clone().sub(controls.target).normalize();
@@ -804,7 +803,7 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
             ctx.drawImage(src, 0, 0, w, h);
         } catch { /* ignore */ }
         this.freezeUrl.set(freeze.toDataURL('image/png'));
-        // Wait until the overlay is actually painted before mutating the WebGL canvas.
+
         await new Promise<void>(r => setTimeout(r, 32));
         await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
     }

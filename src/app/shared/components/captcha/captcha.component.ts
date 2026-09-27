@@ -10,7 +10,7 @@ import type { CaptchaPositionDto, CaptchaShape, CaptchaTrackPointDto } from '../
 
 const CANVAS_W = 400;
 const CANVAS_H = 300;
-const SNAP_THRESHOLD = 20; // backend tolerance in px
+const SNAP_THRESHOLD = 20;
 
 @Component({
     selector: 'app-captcha',
@@ -53,12 +53,10 @@ export class CaptchaComponent {
     private draggables: DraggableShape[] = [];
     private ctx: CanvasRenderingContext2D | null = null;
 
-    // Drag state
     private dragTarget: DraggableShape | null = null;
     private dragOffsetX = 0;
     private dragOffsetY = 0;
 
-    // Timing - all timestamps are ms since captchaLoadTime
     private captchaLoadTime = 0;
     private dragStartTime = 0;
     private currentDragPath: CaptchaTrackPointDto[] = [];
@@ -80,7 +78,6 @@ export class CaptchaComponent {
         this.reset.emit();
     }
 
-    /** Fetch captcha challenge from the backend API. */
     private loadChallenge(): void {
         this.phase.set('loading');
         this.errorMsg.set('');
@@ -94,7 +91,6 @@ export class CaptchaComponent {
                 this.allShapes = challenge.shapes;
                 this.captchaLoadTime = Date.now();
 
-                // Build draggables with center-based positions from the API
                 this.draggables = challenge.shapes
                     .filter(s => s.isDraggable)
                     .map(s => ({
@@ -115,8 +111,6 @@ export class CaptchaComponent {
             },
         });
     }
-
-    // ── Pointer events ──
 
     onPointerDown(e: MouseEvent): void {
         const pos = this.canvasPos(e);
@@ -151,10 +145,8 @@ export class CaptchaComponent {
         this.endDrag();
     }
 
-    // ── Drag logic (all coordinates are center-based) ──
-
     private startDrag(x: number, y: number): void {
-        // Find topmost draggable under pointer (reverse = top first)
+
         for (let i = this.draggables.length - 1; i >= 0; i--) {
             const d = this.draggables[i];
             if (d.placed) continue;
@@ -169,7 +161,7 @@ export class CaptchaComponent {
                     y: Math.round(y),
                     timestamp: Date.now() - this.captchaLoadTime,
                 }];
-                // Move to end of array for top z-order rendering
+
                 this.draggables.splice(i, 1);
                 this.draggables.push(d);
                 this.draw();
@@ -195,7 +187,6 @@ export class CaptchaComponent {
         const drag = this.dragTarget;
         this.dragTarget = null;
 
-        // Find matching cutout by shapeId
         const cutout = this.allShapes.find(
             s => s.isCutout && s.id === drag.shapeId,
         );
@@ -206,7 +197,7 @@ export class CaptchaComponent {
             const dist = Math.hypot(drag.cx - cutX, drag.cy - cutY);
 
             if (dist <= SNAP_THRESHOLD) {
-                // Snap center to cutout center
+
                 drag.cx = cutX;
                 drag.cy = cutY;
                 drag.placed = true;
@@ -246,28 +237,22 @@ export class CaptchaComponent {
         }
     }
 
-    // ── Drawing (all shapes use center-based x, y) ──
-
     private draw(): void {
         if (!this.ctx) return;
         const ctx = this.ctx;
         ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
-        // Background
         ctx.fillStyle = '#f5f5f5';
         ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-        // 1. Cutout targets (gray dashed)
         for (const s of this.allShapes.filter(sh => sh.isCutout)) {
             this.drawShape(ctx, s.type, Number(s.x), Number(s.y), Number(s.size), s.color, { dashed: true });
         }
 
-        // 2. Decorative shapes (not cutout, not draggable)
         for (const s of this.allShapes.filter(sh => !sh.isCutout && !sh.isDraggable)) {
             this.drawShape(ctx, s.type, Number(s.x), Number(s.y), Number(s.size), s.color, {});
         }
 
-        // 3. Draggable shapes at their current positions
         for (const d of this.draggables) {
             this.drawShape(ctx, d.type, d.cx, d.cy, d.size,
                 d.placed ? d.color + '99' : d.color,
@@ -275,10 +260,6 @@ export class CaptchaComponent {
         }
     }
 
-    /**
-     * Draw a shape centered at (cx, cy) with the given size.
-     * Supported types: circle, triangle, rectangle.
-     */
     private drawShape(
         ctx: CanvasRenderingContext2D,
         type: string, cx: number, cy: number, size: number, color: string,
@@ -340,8 +321,6 @@ export class CaptchaComponent {
         ctx.closePath();
     }
 
-    // ── Helpers ──
-
     private canvasPos(e: MouseEvent): { x: number; y: number } {
         const rect = this.canvasEl!.nativeElement.getBoundingClientRect();
         const scaleX = CANVAS_W / rect.width;
@@ -364,13 +343,12 @@ export class CaptchaComponent {
     }
 }
 
-/** Internal shape used for draggable pieces - center-based coordinates. */
 interface DraggableShape {
     shapeId: string;
     type: string;
     color: string;
     size: number;
-    cx: number; // current center X
-    cy: number; // current center Y
+    cx: number;
+    cy: number;
     placed: boolean;
 }

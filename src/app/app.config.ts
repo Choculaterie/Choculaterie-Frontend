@@ -21,9 +21,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     { provide: MatPaginatorIntl, useClass: TranslatedPaginatorIntl },
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher },
-    // Focus the dialog container on open instead of the first tabbable control
-    // (e.g. a close/download icon button), which otherwise renders with a
-    // "stuck" focus/active style until the user clicks elsewhere.
+
     { provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { autoFocus: 'dialog' } },
   ],
 };

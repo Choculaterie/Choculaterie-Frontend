@@ -7,18 +7,11 @@ import { COMMON } from '../../i18n/labels';
 export class ToastService {
     private snackBar = inject(MatSnackBar);
 
-    /// Labels arrive in English, so translate at the point of display.
     private t(message: string): string {
         return translateText(message);
     }
     private _muteNextSuccess = false;
 
-    /**
-     * Show a success toast. If an `onUndo` callback is provided, the action
-     * button reads "Undo" and executes the callback when clicked.
-     * After undo is clicked, a plain "Action undone" toast is shown and the
-     * next success() call is silently suppressed to prevent a double-toast.
-     */
     success(message: string, options?: { duration?: number; onUndo?: () => void }): MatSnackBarRef<TextOnlySnackBar> {
         message = this.t(message);
         if (this._muteNextSuccess) {
@@ -36,8 +29,7 @@ export class ToastService {
         if (options?.onUndo) {
             const undoFn = options.onUndo;
             ref.onAction().subscribe(() => {
-                // Show "Action undone" immediately, mute the next success()
-                // triggered by undoFn's async callback to prevent double-toast.
+
                 this.snackBar.open(this.t(COMMON.actionUndone), undefined, {
                     duration: 3000,
                     panelClass: ['toast-success'],
@@ -76,7 +68,6 @@ export class ToastService {
         return ref;
     }
 
-    /** Persistent "check spam" toast – never auto-dismisses. Call dismissSpamHint() to clear. */
     private _spamRef: MatSnackBarRef<TextOnlySnackBar> | null = null;
 
     showSpamHint(): void {

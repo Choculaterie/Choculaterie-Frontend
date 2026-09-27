@@ -10,7 +10,6 @@
         </button>
     </div>
 
-    <!-- Create form -->
     @if (showCreate()) {
 
     @if (showUnverifiedBanner()) {
@@ -122,7 +121,6 @@
                     </mat-form-field>
                 </div>
 
-                <!-- File uploads -->
                 <div class="file-row">
                     <button mat-stroked-button type="button" (click)="pictureInput.click()">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
@@ -148,7 +146,6 @@
                         (change)="onLitematicsSelected($event)" />
                 </div>
 
-                <!-- Picture previews -->
                 @if (pictureFiles.length) {
                 <div class="file-previews">
                     <h4>{{ 'Pictures' | t }}</h4>
@@ -176,7 +173,6 @@
                 </div>
                 }
 
-                <!-- Litematic previews -->
                 @if (litematicFiles.length) {
                 <div class="file-previews">
                     <h4>{{ 'Litematic Files' | t }}</h4>
@@ -224,7 +220,6 @@
     </mat-card>
     }
 
-    <!-- Filters -->
     <div class="filters">
         <mat-form-field appearance="outline" class="filter-search">
             <mat-label>{{ 'Search' | t }}</mat-label>
@@ -325,7 +320,6 @@
         </div>
     </div>
 
-    <!-- Results -->
     @if (loading()) {
     <div class="skeleton-grid">
         @for (n of [1,2,3,4,5,6]; track n) {

@@ -21,7 +21,7 @@ type PageState = 'loading' | 'pending' | 'approved' | 'cancelled' | 'expired' | 
 @Component({
     selector: 'app-save-manager-authorize',
     standalone: true,
-    imports: [TPipe, 
+    imports: [TPipe,
         DatePipe,
         RouterLink,
         MatCardModule,
@@ -101,7 +101,7 @@ export class SaveManagerAuthorizeComponent implements OnInit {
                 this.actionLoading.set(false);
             },
             error: () => {
-                // Even if backend errors, treat as cancelled from user perspective
+
                 this.state.set('cancelled');
                 this.actionLoading.set(false);
             },

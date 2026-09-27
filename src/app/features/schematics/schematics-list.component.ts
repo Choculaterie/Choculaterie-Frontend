@@ -34,7 +34,7 @@ import { DropZoneDirective } from '../../shared/directives/drop-zone.directive';
 @Component({
     selector: 'app-schematics-list',
     standalone: true,
-    imports: [TPipe, 
+    imports: [TPipe,
         FormsModule,
         ReactiveFormsModule,
         MatFormFieldModule,
@@ -73,7 +73,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     private gridResizeObserver?: ResizeObserver;
 
     constructor() {
-        // Attach ResizeObserver after each time the grid renders (loading → false)
+
         effect(() => {
             if (!this.loading()) {
                 afterNextRender(() => this.attachGridObserver(), { injector: this.injector });
@@ -86,11 +86,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     private readonly rawSchematics = signal<SchematicListItemResponse[]>([]);
     private readonly numColumns = signal(1);
     readonly schematics = computed(() => this.rawSchematics());
-    // Cards have variable height (description length, tags, etc.), so CSS `columns:` balances
-    // column breaks by total height, not by item count - any fixed count-per-column
-    // redistribution meant to "undo" its column-major fill silently desyncs from where the
-    // browser actually breaks columns, scrambling the read order. Explicit per-column arrays
-    // sidestep this entirely: each item's column is assigned here, not guessed at by the browser.
+
     readonly schematicColumns = computed(() =>
         this.distributeIntoColumns(this.rawSchematics(), this.numColumns()));
     @ViewChild('schematicGrid') private schematicGrid?: ElementRef<HTMLElement>;
@@ -115,17 +111,17 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         const opening = !this.showAdvancedFilters();
         this.showAdvancedFilters.set(opening);
         if (opening) {
-            // Let Angular render the content first, then read its natural height
+
             requestAnimationFrame(() => {
                 const h = this.filtersInner?.nativeElement.scrollHeight ?? 0;
                 this.filtersHeight.set(h + 'px');
-                // Reset to auto after transition so resize still works
+
                 this.filtersInner?.nativeElement.closest('.advanced-filters-wrapper')?.addEventListener(
                     'transitionend', () => this.filtersHeight.set('auto'), { once: true }
                 );
             });
         } else {
-            // Snap from auto back to px so the transition has a from-value
+
             const h = this.filtersInner?.nativeElement.scrollHeight ?? 0;
             this.filtersHeight.set(h + 'px');
             requestAnimationFrame(() => this.filtersHeight.set('0px'));
@@ -134,20 +130,17 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
 
     readonly hasActiveFilters = computed(() => !!this.tag || !!this.type || !!this.version || this.includeUnverified);
 
-    /** True when the user is logged in but has NOT linked their Minecraft account */
     readonly showUnverifiedBanner = computed(() => {
         if (!this.session.isAuthenticated()) return false;
         const profile = this.session.profile();
         return profile ? !profile.isMinecraftLinked : false;
     });
 
-    /** The URL path to the user's own profile */
     readonly ownProfilePath = computed(() => {
         const username = this.session.user()?.username;
         return username ? `/users/${username}` : '/profile';
     });
 
-    // Create form
     readonly showCreate = signal(false);
     readonly creating = signal(false);
 
@@ -168,7 +161,6 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         youtubeLink: ['', Validators.maxLength(500)],
     });
 
-    // Autocomplete
     readonly searchSuggestions = signal<{ label: string; type: 'schematic' | 'user' }[]>([]);
     readonly authorSuggestions = signal<AuthorSearchResultResponse[]>([]);
     readonly selectedAuthorId = signal<string | null>(null);
@@ -178,7 +170,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     readonly allowedVersions = signal<AllowedVersionResponse[]>([]);
     readonly tagInputValue = signal('');
     readonly versionInputValue = signal('');
-    /** Values stay English; only the shown label is translated. */
+
     tagLabel(sourceName: string): string {
         return this.allowedTags().find(t => (t.sourceName ?? t.name) === sourceName)?.name ?? sourceName;
     }
@@ -204,19 +196,17 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     private authorInput$ = new Subject<string>();
 
     ngOnInit(): void {
-        // Restore scroll position on back-navigation
+
         const saved = sessionStorage.getItem('schematics_scroll');
         if (saved) {
             this.pendingScrollRestore = parseInt(saved, 10);
             sessionStorage.removeItem('schematics_scroll');
         }
 
-        // Load allowed tags & versions
         this.schematicsApi.getApiSchematicsTags({ params: { lang: getLocale() } })
             .subscribe(tags => this.allowedTags.set(tags));
         this.schematicsApi.getApiSchematicsVersions().subscribe(versions => this.allowedVersions.set(sortVersionsDesc(versions)));
 
-        // React to query param changes (external navigation, tag clicks, back/forward)
         this.route.queryParams.subscribe(params => {
             this.search = params['search'] ?? '';
             this.tag = params['tag'] ?? '';
@@ -227,7 +217,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
             this.includeUnverified = params['includeUnverified'] === 'true';
             const parsedPageSize = Number.parseInt(params['pageSize'], 10);
             this.pageSize.set(this.normalizePageSize(Number.isNaN(parsedPageSize) ? null : parsedPageSize));
-            // Auto-expand advanced filters when any advanced filter is active (no animation)
+
             if (this.hasActiveFilters()) {
                 this.showAdvancedFilters.set(true);
                 this.filtersHeight.set('auto');
@@ -236,7 +226,6 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
             this.loadData(page > 0 ? page : 1);
         });
 
-        // Search autocomplete - combines schematic names + user suggestions
         this.searchInput$.pipe(
             debounceTime(300),
             switchMap(q => q.length >= 2
@@ -251,7 +240,6 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
             ),
         ).subscribe(suggestions => this.searchSuggestions.set(suggestions));
 
-        // Author autocomplete (free input, suggestions are optional)
         this.authorInput$.pipe(
             debounceTime(300),
             switchMap(q => q.length >= 2
@@ -323,7 +311,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     }
 
     loadPage(page: number): void {
-        // Update URL - the queryParams subscription will trigger loadData
+
         this.router.navigate([], {
             queryParams: {
                 search: this.search || null,
@@ -422,7 +410,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     }
 
     private readonly MAX_FILES = 10;
-    private readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+    private readonly MAX_FILE_SIZE = 5 * 1024 * 1024;
 
     onPicturesSelected(event: Event): void {
         const scrollY = window.scrollY;
@@ -527,7 +515,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     }
 
     setCover(index: number): void {
-        if (index === 0) return; // already first
+        if (index === 0) return;
         const files = [...this.pictureFiles];
         const [moved] = files.splice(index, 1);
         files.unshift(moved);
@@ -565,7 +553,6 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         this.creating.set(true);
         const v = this.createForm.getRawValue();
 
-        // Reorder pictures so the cover is first
         const ordered = [...this.pictureFiles];
         if (this.coverIndex() > 0 && ordered.length > 1) {
             const [cover] = ordered.splice(this.coverIndex(), 1);
@@ -656,11 +643,10 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         const el = this.schematicGrid?.nativeElement;
         if (!el) return;
         this.gridResizeObserver?.disconnect();
-        // Use entry.contentRect.width - the actual rendered width of the grid element.
-        // This is accurate in every browser regardless of scrollbar model.
+
         this.gridResizeObserver = new ResizeObserver((entries) => {
             const width = entries[0]?.contentRect.width ?? el.clientWidth;
-            // gap is 1rem = 16px; 260px matches `.schematic-column`'s intended min width.
+
             const cols = Math.max(1, Math.floor((width + 16) / (260 + 16)));
             if (cols !== this.numColumns()) {
                 this.numColumns.set(cols);
@@ -669,7 +655,6 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         this.gridResizeObserver.observe(el);
     }
 
-    /** Round-robin item `i` into column `i % numCols`, so reading across columns (row-major) always matches `items`' own order, regardless of how tall any individual card renders. */
     private distributeIntoColumns(
         items: SchematicListItemResponse[], numCols: number,
     ): { item: SchematicListItemResponse; index: number }[][] {

@@ -1,16 +1,8 @@
-/**
- * Guards: English pays nothing for translation support, a language switch re-renders
- * in place without reloading, the tab title follows it, and a slow bundle never
- * holds up first paint.
- *
- * Run against a dev server:  npx ng serve --port 4321  &&  node i18n.e2e.mjs
- */
 import assert from 'node:assert';
 import { chromium } from 'playwright';
 
 const BASE = process.env.BASE ?? 'http://localhost:4321';
 
-// Real message ids, from public/assets/i18n-messages.json.
 const BUNDLE = { t1cc1r: 'ZZ_HOME', tpkcque: 'ZZ_SCHEMATICS', t1fis1: 'ZZ_MODS' };
 const PROGRESS = { locales: [{ code: 'fr', label: 'Francais', total: 10, translated: 10 }] };
 const CORS = { 'access-control-allow-origin': '*' };
@@ -19,7 +11,6 @@ const navText = (page) => page.locator('app-navbar').first().innerText();
 const waitNav = (page, pattern, opts) => page.waitForFunction(
     (p) => new RegExp(p).test(document.querySelector('app-navbar')?.innerText ?? ''), pattern, opts);
 
-/** addInitScript runs once per document load, so this separates reloads from pushState. */
 const countLoads = () => {
     const n = Number(sessionStorage.getItem('__loads') ?? 0) + 1;
     sessionStorage.setItem('__loads', String(n));
@@ -32,8 +23,7 @@ async function makeContext(browser, { bundleDelayMs = 0 } = {}) {
         await r.fulfill({ json: BUNDLE, headers: CORS });
     });
     await ctx.route('**/api/Translations/progress**', (r) => r.fulfill({ json: PROGRESS, headers: CORS }));
-    // Everything else is aborted rather than stubbed: a wrong-shaped body throws
-    // inside change detection, which is the very thing being observed.
+
     await ctx.route('**/api/**', (r) =>
         (/Translations\/(bundle|progress)/.test(r.request().url()) ? r.fallback() : r.abort()));
     return ctx;
@@ -41,7 +31,6 @@ async function makeContext(browser, { bundleDelayMs = 0 } = {}) {
 
 const browser = await chromium.launch();
 
-// --- 1 + 2 + 3: English untaxed, switch re-renders in place, title follows ------
 {
     const ctx = await makeContext(browser);
     const page = await ctx.newPage();
@@ -78,7 +67,6 @@ const browser = await chromium.launch();
     await ctx.close();
 }
 
-// --- 4: a slow bundle must not block first paint --------------------------------
 {
     const STALL = 10_000;
     const ctx = await makeContext(browser, { bundleDelayMs: STALL });

@@ -26,7 +26,6 @@
     }
 }
 
-// Icon-only mode: make it look like a proper square icon button on mobile
 @media (max-width: 600px) {
     button.upload-btn {
         min-width: 0;
@@ -35,7 +34,6 @@
         padding: 0;
         border-radius: 50%;
 
-        // mat-flat-button puts icon + text in a flex row with a gap - remove it
         .mat-icon,
         img.mc-icon {
             margin: 0;
@@ -101,15 +99,11 @@
     }
 }
 
-// On mobile grid: direction-toggle (2nd-to-last button) and clear (last button)
-// auto-fill into the bottom 2 columns
 @media (max-width: 900px) {
     .filters>button:last-child {
         width: 100%;
     }
 }
-
-// ── More-filters toggle button ────────────────────────────────────────────────
 
 .more-filters-btn {
     position: relative;
@@ -128,8 +122,6 @@
     border-radius: 50%;
     background: var(--mat-sys-primary);
 }
-
-// ── Collapsible advanced filters ──────────────────────────────────────────────
 
 .advanced-filters-wrapper {
     height: 0;
@@ -151,11 +143,6 @@
     }
 }
 
-// Real content uses explicit per-column arrays (assigned in the component) instead of CSS
-// `columns:` masonry - `columns:` balances breaks by total column height, which silently
-// disagreed with any JS-side assumption about how many items land in each column once card
-// heights vary, scrambling the reading order. Flex columns keep the same masonry look (each
-// column independently stacks its own variable-height cards) while keeping order deterministic.
 .schematic-grid {
     display: flex;
     gap: 1rem;
@@ -170,15 +157,11 @@
     flex: 1 1 0;
     min-width: 0;
 
-    // app-schematic-card's own host already has margin-bottom: 1rem (for its other,
-    // non-grid usages) - without this it stacks with this column's `gap`, doubling the spacing.
     app-schematic-card {
         margin-bottom: 0;
     }
 }
 
-// Skeleton placeholders are uniform height, so plain CSS-column masonry (no reordering concerns)
-// is fine here.
 .skeleton-grid {
     columns: 260px auto;
     column-gap: 1rem;
@@ -397,7 +380,6 @@
     opacity: 0.5;
 }
 
-// CDK drag-drop
 .cdk-drag-preview {
     box-sizing: border-box;
     border-radius: 8px;
@@ -418,8 +400,6 @@
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-// ── Propose tag ───────────────────────────────────────────────────────────────
-
 .propose-tag-row {
     display: flex;
     align-items: center;
@@ -435,8 +415,6 @@
         opacity: 1;
     }
 }
-
-// ── Unverified banner ─────────────────────────────────────────────────────────
 
 .unverified-banner {
     display: flex;
@@ -467,8 +445,6 @@
         }
     }
 }
-
-// ── Paginator customization ───────────────────────────────────────────────────
 
 ::ng-deep .mat-mdc-paginator-container {
     display: flex;

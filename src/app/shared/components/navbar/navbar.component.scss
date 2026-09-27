@@ -26,19 +26,17 @@
     transform: translateY(-1.5px);
 }
 
-// An icon button so the hover overlay matches the theme and inbox buttons.
-// mat-icon-button hardcodes Arial for ligatures, so reclaim the toolbar font.
 .lang-code {
     font-family: inherit;
     font-weight: 500;
-    // Same size as .username, the text it sits beside.
+
     font-size: 0.9rem;
 }
 
 .lang-code .lang-code-text {
     display: inline-block;
     line-height: 1;
-    // Label only, so the button box and its hover circle stay put.
+
     transform: translate(1px, 2px);
 }
 
@@ -103,7 +101,6 @@
     }
 }
 
-
 .dropdown-arrow {
     width: 20px;
     height: 20px;
@@ -136,12 +133,9 @@
     display: none;
 }
 
-// ── Mobile menu button: hidden on desktop, shown on mobile (unauthenticated only) ──
 .mobile-menu-btn {
     display: none;
 }
-
-// ── Admin Inbox ───────────────────────────────────────────────────────────────
 
 .inbox-wrap {
     position: relative;
@@ -164,8 +158,6 @@
     pointer-events: none;
     border: 2px solid var(--mat-sys-surface);
 }
-
-
 
 @media (max-width: 850px) {
 

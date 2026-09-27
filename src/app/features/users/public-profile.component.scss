@@ -1,4 +1,3 @@
-// ═══ Skeleton loader ═══
 @keyframes shimmer {
     0% {
         background-position: 200% 0;
@@ -68,7 +67,6 @@ $sk: linear-gradient(90deg,
     height: 13px;
 }
 
-// ═══ Split drag-drop overlay ═══
 .split-overlay {
     position: fixed;
     inset: 0;
@@ -128,7 +126,6 @@ $sk: linear-gradient(90deg,
     padding: 0.5rem;
 }
 
-// ═══ Banner Header ═══
 .profile-header {
     position: relative;
     border-radius: 12px;
@@ -147,7 +144,6 @@ $sk: linear-gradient(90deg,
     }
 }
 
-// ═══ Cover image element ═══
 .cover-pic {
     position: relative;
     width: 100%;
@@ -160,7 +156,6 @@ $sk: linear-gradient(90deg,
     }
 }
 
-// ═══ Profile Content Section ═══
 .profile-content {
     position: relative;
     padding: 1.5rem;
@@ -171,7 +166,6 @@ $sk: linear-gradient(90deg,
     align-items: center;
 }
 
-// When there's no banner at all (not own profile, no cover), undo the avatar overlap
 .page-container>.profile-content:first-of-type {
     padding-left: 0;
     padding-right: 0;
@@ -182,11 +176,10 @@ $sk: linear-gradient(90deg,
 
     .profile-info {
         min-height: 0;
-        max-height: 64px; // 36px headline + 8px gap + 20px body-medium = exactly 1 bio line, caps centering there
+        max-height: 64px;
     }
 }
 
-// ═══ Cover Actions (own profile) ═══
 .cover-actions {
     position: absolute;
     top: 0.5rem;
@@ -227,7 +220,6 @@ $sk: linear-gradient(90deg,
     }
 }
 
-// ═══ Avatar ═══
 .profile-avatar {
     width: 120px;
     height: 120px;
@@ -252,7 +244,6 @@ $sk: linear-gradient(90deg,
         background: var(--mat-sys-surface-variant);
     }
 
-    /* Ensure inline SVG fallback fills the avatar and is clipped to the circle */
     .mc-icon {
         width: 75% !important;
         height: 75% !important;
@@ -328,12 +319,11 @@ $sk: linear-gradient(90deg,
     background: rgba(0, 0, 0, 0.35);
 }
 
-// ═══ Profile Info ═══
 .profile-info {
     flex: 1 1 180px;
     min-width: 0;
     min-height: 68px;
-    max-height: 68px; // caps flexbox centering contribution so bio beyond 1 line doesn't shift the name further up
+    max-height: 68px;
     overflow: visible;
 }
 
@@ -384,13 +374,11 @@ $sk: linear-gradient(90deg,
     margin: 0.5rem 0 0;
 }
 
-// No cover on desktop: also use normal bio color
 .profile-header:not(.has-cover) .bio {
     color: var(--mat-sys-on-surface-variant);
     text-shadow: none;
 }
 
-// ═══ Social Links ═══
 .social-links {
     display: flex;
     gap: 0.5rem;
@@ -421,7 +409,6 @@ $sk: linear-gradient(90deg,
     }
 }
 
-// ═══ Meta Grid ═══
 .meta-grid {
     display: flex;
     flex-wrap: wrap;
@@ -506,12 +493,8 @@ $sk: linear-gradient(90deg,
     margin-left: auto;
 }
 
-// ═══ Tabs & Content ═══
 ::ng-deep {
 
-    // Allow the tab body to scroll vertically without clipping CDK drag previews.
-    // CDK drag uses a portal to <body> for previews, so overflow here is irrelevant
-    // to them - we can safely set overflow: hidden and they still work.
     .mat-mdc-tab-body-content {
         overflow: hidden !important;
     }
@@ -542,8 +525,7 @@ $sk: linear-gradient(90deg,
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    // With overflow:hidden on the tab body, width is now properly constrained.
-    // These elements will resolve 100% against the real viewport-width parent.
+
     min-width: 0;
     max-width: 100%;
 }
@@ -581,8 +563,7 @@ $sk: linear-gradient(90deg,
     .repo-card {
         display: flex;
         flex-direction: column;
-        // mat-card's own corner radius doesn't auto-clip its children - without this the
-        // square-cornered placeholder/image sits on top of the card's rounded top edge.
+
         overflow: hidden;
         transition: box-shadow 0.2s;
 
@@ -680,7 +661,6 @@ mat-divider {
     width: 100%;
 }
 
-// ═══ Account / Form styles ═══
 .profile-bio-field {
     margin-top: 0.5rem;
 }
@@ -794,7 +774,6 @@ mat-divider {
     color: var(--mat-sys-on-secondary-container);
 }
 
-// ═══ Linking ═══
 .link-status {
     display: flex;
     align-items: center;
@@ -957,7 +936,6 @@ mat-divider {
     span { flex: 1; }
 }
 
-// ═══ Social Link Editor ═══
 .social-links-list {
     display: flex;
     flex-direction: column;
@@ -974,7 +952,6 @@ mat-divider {
     box-sizing: border-box;
     overflow: visible;
 
-    // Ensure mat-form-field outlines are never clipped after drag
     .mat-mdc-form-field {
         overflow: visible;
     }
@@ -997,7 +974,6 @@ mat-divider {
 .social-links-list.cdk-drop-list-dragging .social-link-row:not(.cdk-drag-placeholder) {
     transition: transform 250ms cubic-bezier(0, 0, .2, 1);
 }
-
 
 .social-platform-field {
     width: 160px;
@@ -1034,7 +1010,6 @@ mat-divider {
     gap: 0.5rem;
 }
 
-// ═══ Security Key Actions ═══
 .key-actions {
     display: flex;
     flex-direction: column;
@@ -1130,7 +1105,6 @@ mat-divider {
     }
 }
 
-// ═══ Fix action icon buttons in saves/keys tables (prevent dots) ═══
 ::ng-deep {
 
     .saves-table .mat-column-actions,
@@ -1142,13 +1116,8 @@ mat-divider {
     }
 }
 
-// ═══ Scrollable table wrapper (security keys, save manager) ═══
 .table-scroll {
-    // The table must be contained to the visible page width so overflow-x
-    // actually triggers.  We can't rely on parent width constraints because
-    // the Angular tab body has overflow-y: visible which can break width
-    // containment in some browsers.  Using 100vw minus the page padding
-    // guarantees the wrapper never exceeds the viewport.
+
     max-width: calc(100vw - 1.5rem);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;

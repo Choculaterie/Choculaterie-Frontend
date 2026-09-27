@@ -73,8 +73,7 @@ export class NavbarComponent implements OnInit {
     private profileFetchPending = false;
 
     constructor() {
-        // Re-fetch the profile whenever it's missing (initial load, or after a
-        // token refresh clears the cached profile via setSession).
+
         effect(() => {
             if (this.session.isAuthenticated() && !this.session.profile() && !this.profileFetchPending) {
                 this.profileFetchPending = true;
@@ -85,7 +84,6 @@ export class NavbarComponent implements OnInit {
             }
         });
 
-        // Seed / refresh inbox when auth state becomes true (login or page load)
         effect(() => {
             if (this.session.isAuthenticated()) {
                 this.realtime.seedInbox();
@@ -95,10 +93,6 @@ export class NavbarComponent implements OnInit {
         });
     }
 
-    // A half finished language reads worse than English, so only offer one once the
-    // website strings are at least half done. Mods are not in the catalog and so
-    // cannot count toward it.
-    /// Only people who can actually contribute see the entry point.
     canTranslate(): boolean {
         if (this.session.isAdminOrMod()) return true;
         const badges = (this.session.profile() as { badges?: { badge: number }[] } | null)?.badges ?? [];
@@ -120,8 +114,6 @@ export class NavbarComponent implements OnInit {
     ngOnInit(): void {
         this.loadLocales();
 
-        // Roles can change while a session is open, so re-read the profile on each
-        // navigation. Without it a newly granted badge stays invisible until logout.
         this.router.events
             .pipe(filter((e) => e instanceof NavigationEnd))
             .subscribe(() => {

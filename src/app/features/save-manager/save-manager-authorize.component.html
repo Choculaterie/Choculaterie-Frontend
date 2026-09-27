@@ -1,5 +1,5 @@
 <div class="authorize-page">
-    <!-- ── Loading ── -->
+
     @if (state() === 'loading') {
     <div class="state-center">
         <mat-spinner diameter="48" />
@@ -7,7 +7,6 @@
     </div>
     }
 
-    <!-- ── Expired / Not Found ── -->
     @if (state() === 'expired') {
     <mat-card class="auth-card auth-card--warn">
         <mat-card-content>
@@ -19,7 +18,6 @@
     </mat-card>
     }
 
-    <!-- ── Error ── -->
     @if (state() === 'error') {
     <mat-card class="auth-card auth-card--warn">
         <mat-card-content>
@@ -31,7 +29,6 @@
     </mat-card>
     }
 
-    <!-- ── Pending - awaiting user decision ── -->
     @if (state() === 'pending') {
     <mat-card class="auth-card">
         <mat-card-content>
@@ -82,7 +79,6 @@
     </mat-card>
     }
 
-    <!-- ── Approved ── -->
     @if (state() === 'approved') {
     <mat-card class="auth-card auth-card--success">
         <mat-card-content>
@@ -110,7 +106,6 @@
     </mat-card>
     }
 
-    <!-- ── Cancelled ── -->
     @if (state() === 'cancelled') {
     <mat-card class="auth-card">
         <mat-card-content>

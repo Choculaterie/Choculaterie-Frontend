@@ -8,15 +8,12 @@ interface CatalogKey {
     sourceText: string;
 }
 
-// A signal: replacing it marks every view holding a `t` binding dirty, so Angular
-// schedules the re-render itself.
 const map = signal<Record<string, string>>({});
 
 export function translateText(text: string): string {
     return map()[text] ?? text;
 }
 
-/** Builds the text -> translation map. Safe to call again to switch language. */
 export async function loadTranslationMap(locale: string = getLocale()): Promise<void> {
     if (locale === SOURCE_LOCALE) {
         map.set({});
@@ -38,8 +35,6 @@ export async function loadTranslationMap(locale: string = getLocale()): Promise<
         if (translated) byText[k.sourceText] = translated;
     }
 
-    // A few strings still use $localize (toasts, dialog labels). They resolve when
-    // used, not at module load, so loading the bundle here is in time.
     if (Object.keys(bundle).length) {
         try {
             loadTranslations(bundle);

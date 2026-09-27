@@ -10,10 +10,10 @@ import { TPipe } from '../../core/i18n/t.pipe';
 import { ToastService } from '../../core/services/toast.service';
 
 export interface ContentTranslationsData {
-    /** Which admin endpoint family to talk to. */
+
     kind: 'tag' | 'faq';
     id: number;
-    /** The English text, shown as the reference to translate from. */
+
     question: string;
     answer?: string;
 }
@@ -26,7 +26,6 @@ interface Row {
     saving: boolean;
 }
 
-/** Tags and FAQ are database rows, not catalog strings, so they are edited here. */
 @Component({
     selector: 'app-content-translations-dialog',
     standalone: true,

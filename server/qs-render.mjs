@@ -1,5 +1,3 @@
-// Headless isometric render of a litematic: nucleation (WASM) builds the same mesh
-// the browser viewer uses, then we rasterize it on the CPU. No browser, no WebGL.
 import fs from 'node:fs';
 import zlib from 'node:zlib';
 import init, { SchematicWrapper, ResourcePackWrapper, MeshConfigWrapper } from 'nucleation';
@@ -8,8 +6,6 @@ let ready = null;
 let cachedPack = null;
 let cachedPackPath = null;
 
-// nucleation bakes AO into vertex colors but not directional light, so the
-// Minecraft face-shading constants have to be applied here.
 function faceShade(nx, ny, nz) {
     if (ny > 0.5) return 1.0;
     if (ny < -0.5) return 0.5;
@@ -17,7 +13,6 @@ function faceShade(nx, ny, nz) {
     return 0.6;
 }
 
-// Parsing the 7MB pack takes ~200ms, so keep it for the process lifetime.
 async function getPack(packPath) {
     ready ??= init();
     await ready;
@@ -28,8 +23,6 @@ async function getPack(packPath) {
     return cachedPack;
 }
 
-// Renders a litematic to a transparent isometric PNG. packPath must be the same
-// pack.zip the browser viewer loads, or the textures won't match it.
 export async function renderLitematic(litematicBytes, { packPath, size = 1024, ssaa = 2, yawDeg = 45, pitchDeg = 35 } = {}) {
     const pack = await getPack(packPath);
 
@@ -38,7 +31,7 @@ export async function renderLitematic(litematicBytes, { packPath, size = 1024, s
 
     const cfg = new MeshConfigWrapper();
     cfg.setAmbientOcclusion(true);
-    cfg.setGreedyMeshing(false); // greedy merges faces and breaks per-block UVs
+    cfg.setGreedyMeshing(false);
     cfg.setCullHiddenFaces(true);
 
     const mesh = schem.toMesh(pack, cfg);
@@ -54,14 +47,12 @@ export async function renderLitematic(litematicBytes, { packPath, size = 1024, s
 
     if (!layers.length) throw new Error('empty mesh');
 
-    // Orthographic isometric, same angles as the viewer.
     const yaw = (yawDeg * Math.PI) / 180;
     const pitch = (pitchDeg * Math.PI) / 180;
     const fx = -Math.cos(pitch) * Math.sin(yaw);
     const fy = -Math.sin(pitch);
     const fz = -Math.cos(pitch) * Math.cos(yaw);
-    // right = cross(f, worldUp), up = cross(right, f). Sign errors here rotate
-    // the whole image 180°, so keep the derivation explicit.
+
     const rx = Math.cos(yaw), ry = 0, rz = -Math.sin(yaw);
     const ux = ry * fz - rz * fy;
     const uy = rz * fx - rx * fz;
@@ -84,9 +75,6 @@ export async function renderLitematic(litematicBytes, { packPath, size = 1024, s
     const cU = (minU + maxU) / 2, cV = (minV + maxV) / 2;
     const toScreen = (u, v) => [W / 2 + (u - cU) * scale, H / 2 - (v - cV) * scale];
 
-    // ponytail: ~85MB of scratch at 1024/ssaa2. The raster loop below never awaits,
-    // so only one render's buffers are ever live at a time; if these ever need to be
-    // concurrent, pool them or drop ssaa to 1.
     const color = new Float32Array(W * H * 4);
     const depth = new Float32Array(W * H).fill(Infinity);
 
@@ -95,7 +83,6 @@ export async function renderLitematic(litematicBytes, { packPath, size = 1024, s
     for (const layer of layers) {
         const { pos, uv, col, nrm, idx, blend, alphaTest } = layer;
 
-        // Transparent geometry must blend back-to-front.
         let order = null;
         if (blend) {
             const n = idx.length / 3;
@@ -152,8 +139,6 @@ export async function renderLitematic(litematicBytes, { packPath, size = 1024, s
                     const tu = w0 * uv[i0 * 2] + w1 * uv[i1 * 2] + w2 * uv[i2 * 2];
                     const tv = w0 * uv[i0 * 2 + 1] + w1 * uv[i1 * 2 + 1] + w2 * uv[i2 * 2 + 1];
 
-                    // Nearest-neighbour keeps Minecraft's crisp pixels. Atlas rows and
-                    // nucleation's V coords are both top-down, so do NOT flip V here.
                     let ax = Math.floor(tu * aW);
                     let ay = Math.floor(tv * aH);
                     ax = ax < 0 ? 0 : ax >= aW ? aW - 1 : ax;
@@ -194,7 +179,6 @@ export async function renderLitematic(litematicBytes, { packPath, size = 1024, s
     return encodePng(downsample(color, W, H, ssaa), size, size);
 }
 
-// Box-filter the supersampled buffer down to output size. This is the antialiasing.
 function downsample(src, W, H, ssaa) {
     const w = W / ssaa, h = H / ssaa;
     const out = Buffer.allocUnsafe(w * h * 4);
@@ -205,7 +189,7 @@ function downsample(src, W, H, ssaa) {
             for (let sy = 0; sy < ssaa; sy++) {
                 for (let sx = 0; sx < ssaa; sx++) {
                     const i = ((y * ssaa + sy) * W + (x * ssaa + sx)) * 4;
-                    // Weight colour by alpha so transparent edges don't darken toward black.
+
                     const sa = src[i + 3];
                     r += src[i] * sa; g += src[i + 1] * sa; b += src[i + 2] * sa; a += sa;
                 }
@@ -221,17 +205,16 @@ function downsample(src, W, H, ssaa) {
     return out;
 }
 
-// Minimal PNG writer; zlib is stdlib, so this isn't worth a dependency.
 function encodePng(rgba, w, h) {
     const raw = Buffer.allocUnsafe((w * 4 + 1) * h);
     for (let y = 0; y < h; y++) {
-        raw[y * (w * 4 + 1)] = 0; // filter type 0
+        raw[y * (w * 4 + 1)] = 0;
         rgba.copy(raw, y * (w * 4 + 1) + 1, y * w * 4, (y + 1) * w * 4);
     }
     const ihdr = Buffer.alloc(13);
     ihdr.writeUInt32BE(w, 0);
     ihdr.writeUInt32BE(h, 4);
-    ihdr[8] = 8; ihdr[9] = 6; // 8-bit RGBA
+    ihdr[8] = 8; ihdr[9] = 6;
     return Buffer.concat([
         Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
         chunk('IHDR', ihdr),

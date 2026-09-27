@@ -86,8 +86,6 @@ export class ViewerComponent implements OnInit, OnDestroy {
             return;
         }
 
-        // Use native fetch - bypasses Angular interceptors so no Authorization header
-        // is added, avoiding a CORS preflight OPTIONS on this public endpoint.
         fetch(url)
             .then(res => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -98,7 +96,7 @@ export class ViewerComponent implements OnInit, OnDestroy {
                 const fileName = url.split('/').pop()?.split('?')[0] ?? 'schematic.litematic';
                 this.pendingData = { fileData: buffer, fileName };
                 this.state.set('ready');
-                // viewerHost renders after state change - wait one tick
+
                 setTimeout(() => this.mountViewer());
             })
             .catch(() => {

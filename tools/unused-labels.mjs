@@ -1,14 +1,9 @@
-/**
- * Lists labels.ts entries that no component references. The catalog builder scans
- * that file wholesale, so a dead entry still reaches translators. Read-only.
- */
 import fs from 'node:fs';
 import path from 'node:path';
 
 const LABELS = 'src/app/i18n/labels.ts';
 const src = fs.readFileSync(LABELS, 'utf8');
 
-// Collect GROUP -> [keys], tracking nesting so nested objects are attributed.
 const groups = [];
 let current = null;
 for (const line of src.split('\n')) {
@@ -29,7 +24,6 @@ const files = [];
 })('src');
 const haystack = files.map((f) => fs.readFileSync(f, 'utf8')).join('\n');
 
-// Text reachable through a template pipe stays in the catalog regardless of labels.
 const pipeTexts = new Set();
 for (const f of files) {
     const t = fs.readFileSync(f, 'utf8');
@@ -37,7 +31,6 @@ for (const f of files) {
     for (const m of t.matchAll(/"((?:[^"\\]|\\.)*)"\s*\|\s*t\b/g)) pipeTexts.add(m[1]);
 }
 
-// Values, so we can tell a dead label from one whose text still ships via a pipe.
 const values = {};
 {
     let cur = null;

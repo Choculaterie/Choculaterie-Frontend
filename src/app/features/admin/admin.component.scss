@@ -51,7 +51,6 @@ h1 {
     }
 }
 
-// Search: field + actions on same row; wraps on mobile
 .search-col {
     display: flex;
     gap: 0.75rem;
@@ -78,7 +77,6 @@ h1 {
     min-height: 40px;
 }
 
-// Live message form
 .live-msg-form {
     display: flex;
     flex-direction: column;
@@ -203,7 +201,6 @@ a {
     }
 }
 
-// User detail panel
 .detail-card {
     margin-bottom: 1rem;
 }
@@ -386,8 +383,6 @@ a {
     min-width: 160px;
 }
 
-// ── Tab badges / dots ─────────────────────────────────────────────────────────
-
 .tab-badge {
     display: inline-flex;
     align-items: center;
@@ -413,8 +408,6 @@ a {
     margin-left: 6px;
     flex-shrink: 0;
 }
-
-// ── Table row states ──────────────────────────────────────────────────────────
 
 .unread-row td {
     font-weight: 500;
@@ -446,8 +439,6 @@ a {
     background: color-mix(in srgb, var(--mat-sys-error) 10%, transparent) !important;
 }
 
-// ── Tag suggestion inline input ───────────────────────────────────────────────
-
 .inline-input {
     border: 1px solid var(--mat-sys-outline);
     border-radius: 4px;
@@ -470,8 +461,6 @@ a {
     font-size: 0.9rem;
 }
 
-// ── FAQ create form ───────────────────────────────────────────────────────────
-
 .faq-create-form {
     display: flex;
     flex-direction: column;
@@ -487,8 +476,6 @@ a {
     margin-left: auto;
     justify-content: flex-end;
 }
-
-// ── FAQ accordion (match public FAQ page styling) ─────────────────────────────
 
 mat-accordion mat-expansion-panel {
     border: 1px solid var(--mat-sys-outline-variant);
@@ -511,8 +498,6 @@ mat-accordion .faq-answer {
     overflow-wrap: break-word;
     word-break: break-word;
 }
-
-// ── Ticket detail ─────────────────────────────────────────────────────────────
 
 .ticket-detail {
     max-width: 720px;
@@ -560,8 +545,6 @@ mat-accordion .faq-answer {
     }
 }
 
-// ── Propose tag row in schematic form ────────────────────────────────────────
-
 .propose-tag-row {
     grid-column: span 1;
     display: flex;
@@ -577,8 +560,6 @@ mat-accordion .faq-answer {
         opacity: 1;
     }
 }
-
-// ── Paginator customization (match schematics index) ──────────────────────────
 
 ::ng-deep .mat-mdc-paginator-container {
     display: flex;
@@ -612,8 +593,6 @@ mat-accordion .faq-answer {
         padding: 0 0.5rem;
     }
 }
-
-// ── Server Logs: live tail ──────────────────────────────────────────────────
 
 .log-list {
     display: flex;

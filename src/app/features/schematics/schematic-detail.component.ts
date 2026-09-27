@@ -48,7 +48,7 @@ import { getLocale } from '../../core/i18n/locale';
 @Component({
     selector: 'app-schematic-detail',
     standalone: true,
-    imports: [TPipe, 
+    imports: [TPipe,
         RouterLink,
         DatePipe,
         ReactiveFormsModule,
@@ -100,14 +100,13 @@ export class SchematicDetailComponent implements OnInit {
     readonly editing = signal(false);
     readonly generateEmbed = signal<{ fileData: ArrayBuffer; fileName: string } | null>(null);
     readonly noDescriptionText = $localize`No description provided.`;
-    /** Map of block name (e.g. "spruce_slab") → icon object URL */
+
     readonly blockTextureMap = signal<Map<string, string>>(new Map());
     readonly hasLitematicFiles: Signal<boolean> = computed(() => {
         const s = this.schematic();
         return !!s && s.files.some(f => f.name.endsWith('.litematic'));
     });
 
-    // YouTube embed helpers
     getYouTubeId(url: string | null): string | null {
         if (!url) return null;
         const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
@@ -162,15 +161,14 @@ export class SchematicDetailComponent implements OnInit {
         youtubeLink: ['', Validators.maxLength(500)],
     });
 
-    // Edit file management
     private readonly MAX_FILES = 10;
-    private readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-    /** Unified ordered list of existing + new pictures (supports cross-category D&D) */
+    private readonly MAX_FILE_SIZE = 5 * 1024 * 1024;
+
     readonly editPictureItems = signal<(
         | { type: 'existing'; pic: SchematicPictureResponse }
         | { type: 'new'; file: File; preview: string }
     )[]>([]);
-    /** Unified ordered list of existing + new files */
+
     readonly editFileItems = signal<(
         | { type: 'existing'; file: SchematicFileResponse }
         | { type: 'new'; file: File }
@@ -234,7 +232,7 @@ export class SchematicDetailComponent implements OnInit {
 
     ngOnInit(): void {
         this.destroyRef.onDestroy(() => this.ogMeta.clear());
-        // Load allowed tags & versions for the edit form
+
         this.schematicsApi.getApiSchematicsTags({ params: { lang: getLocale() } })
             .subscribe(tags => this.allowedTags.set(tags));
         this.schematicsApi.getApiSchematicsVersions().subscribe(versions => this.allowedVersions.set(sortVersionsDesc(versions)));
@@ -248,8 +246,6 @@ export class SchematicDetailComponent implements OnInit {
             takeUntilDestroyed(this.destroyRef),
         ).subscribe(authors => this.authorSuggestions.set(authors));
 
-        // React to route param changes so re-navigating to a different schematic
-        // (e.g. after forking) reloads the data without tearing down the component.
         this.route.paramMap.pipe(
             takeUntilDestroyed(this.destroyRef),
             switchMap(params => {
@@ -406,11 +402,11 @@ export class SchematicDetailComponent implements OnInit {
             downloadLinkMediaFire: s.downloadLinkMediaFire ?? '',
             youtubeLink: s.youtubeLink ?? '',
         });
-        // If authorExist is populated, then authorName is a valid user ID
+
         this.selectedAuthorId.set(s.authorExist ? s.authorName : null);
         this.editTagList.set(s.tags ?? []);
         this.editVersionList.set(s.versions ?? []);
-        // Initialize unified ordered arrays
+
         this.editPictureItems.set(s.pictures.map(p => ({ type: 'existing' as const, pic: p })));
         this.editFileItems.set(s.files.map(f => ({ type: 'existing' as const, file: f })));
         this.editRemovedPictureIds.set([]);
@@ -420,8 +416,6 @@ export class SchematicDetailComponent implements OnInit {
         this.editing.set(true);
         setTimeout(() => document.querySelector('.edit-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
     }
-
-    // --- Edit file management methods ---
 
     setEditCover(index: number): void {
         if (index === 0) return;
@@ -559,7 +553,7 @@ export class SchematicDetailComponent implements OnInit {
     }
 
     onAuthorInput(q: string): void {
-        // Clear selectedAuthorId when user types custom text (not a selected author)
+
         this.selectedAuthorId.set(null);
         this.authorInput$.next(q);
     }
@@ -631,9 +625,6 @@ export class SchematicDetailComponent implements OnInit {
         const removePicIds = this.editRemovedPictureIds();
         const removeFileIds = this.editRemovedFileIds();
 
-        // Build interleaved picture order: "42,new:0,43,new:1"
-        // New files are collected in the order they appear in the unified list.
-        // The backend assigns order via these tokens, so interleaving is fully preserved.
         const pictureOrderTokens: string[] = [];
         const newPics: File[] = [];
         for (const item of this.editPictureItems()) {
@@ -646,7 +637,6 @@ export class SchematicDetailComponent implements OnInit {
         }
         const pictureOrder = pictureOrderTokens.length > 0 ? pictureOrderTokens.join(',') : undefined;
 
-        // Build interleaved file order: "7,new:0,8,new:1"
         const fileOrderTokens: string[] = [];
         const newLitematics: File[] = [];
         for (const item of this.editFileItems()) {
@@ -683,7 +673,7 @@ export class SchematicDetailComponent implements OnInit {
                 this.saving.set(false);
                 this.editing.set(false);
                 this.toast.success(SCHEMATICS.schematicUpdated);
-                // Reload detail
+
                 this.selectedImage.set(0);
                 this.schematicsApi.getApiSchematicsId(s.id).subscribe({
                     next: (updated) => {
@@ -729,7 +719,6 @@ export class SchematicDetailComponent implements OnInit {
             return { name: (rawName || '').trim(), count: parseInt(count?.trim() || '1', 10) };
         }).filter(b => b.name);
 
-        // Group similar blocks (e.g. wall_torch + torch → Torch)
         const grouped = new Map<string, { displayName: string; count: number }>();
         for (const { name, count } of raw) {
             const normalized = this.normalizeBlockName(name);
@@ -742,15 +731,13 @@ export class SchematicDetailComponent implements OnInit {
             }
         }
 
-        // Sort by count descending, then alphabetically
         return [...grouped.values()]
             .sort((a, b) => b.count - a.count || a.displayName.localeCompare(b.displayName))
             .map(g => ({ name: g.displayName, count: String(g.count) }));
     }
 
-    /** Normalize block variant names so wall/directional variants are grouped with their base. */
     private normalizeBlockName(name: string): string {
-        // Exact renames
+
         const ALIASES: Record<string, string> = {
             wall_torch: 'torch',
             redstone_wall_torch: 'redstone_torch',
@@ -759,7 +746,6 @@ export class SchematicDetailComponent implements OnInit {
         };
         if (ALIASES[name]) return ALIASES[name];
 
-        // Pattern-based: *_wall_sign → *_sign, *_wall_banner → *_banner, *_wall_hanging_sign → *_hanging_sign
         if (name.endsWith('_wall_sign')) return name.replace('_wall_sign', '_sign');
         if (name.endsWith('_wall_banner')) return name.replace('_wall_banner', '_banner');
         if (name.endsWith('_wall_hanging_sign')) return name.replace('_wall_hanging_sign', '_hanging_sign');
@@ -768,10 +754,6 @@ export class SchematicDetailComponent implements OnInit {
         return name;
     }
 
-    /**
-     * Collect all unique block names from file blockLists and resolve their atlas textures.
-     * Also resolves normalized names so grouped blocks still get textures.
-     */
     private resolveBlockTextures(schematic: SchematicDetailResponse): void {
         const allNames = new Set<string>();
         for (const f of schematic.files) {
@@ -780,7 +762,7 @@ export class SchematicDetailComponent implements OnInit {
                     const rawName = entry.trim().split(':')[0];
                     if (rawName) {
                         allNames.add(rawName);
-                        // Also add the normalized name (for grouped blocks)
+
                         const normalized = this.normalizeBlockName(rawName);
                         if (normalized !== rawName) allNames.add(normalized);
                     }
@@ -791,7 +773,6 @@ export class SchematicDetailComponent implements OnInit {
         this.blockTextures.resolveAll([...allNames]).subscribe(m => this.blockTextureMap.set(m));
     }
 
-    /** Get icon object URL for a block name (display name with spaces) */
     getBlockIconUrl(displayName: string): string | undefined {
         const key = displayName.toLowerCase().replace(/ /g, '_');
         return this.blockTextureMap().get(key);
@@ -848,7 +829,6 @@ export class SchematicDetailComponent implements OnInit {
         });
     }
 
-    /** Files section / non-edit: always download. */
     generatePicture(file: SchematicFileResponse): void {
         const s = this.schematic()!;
         this.schematicsApi.getApiSchematicsIdDownloadFileId<Blob>(s.id, Number(file.id), {
@@ -867,7 +847,6 @@ export class SchematicDetailComponent implements OnInit {
         file.arrayBuffer().then(buffer => this.openGenerateDownload(buffer, file.name));
     }
 
-    /** Edit-form litematic rows: Use as picture, preview replaces top gallery. */
     generatePictureForItem(item: { type: 'existing'; file: SchematicFileResponse } | { type: 'new'; file: File }): void {
         if (item.type === 'existing') {
             const s = this.schematic()!;
@@ -931,7 +910,7 @@ export class SchematicDetailComponent implements OnInit {
             this.validateEditFiles();
             this.toast.success('Screenshot added to pictures.');
         } else {
-            // In read-only mode, download the screenshot
+
             const url = URL.createObjectURL(file);
             const a = document.createElement('a');
             a.href = url;

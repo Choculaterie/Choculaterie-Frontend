@@ -14,10 +14,6 @@ export interface LiveLogEntry {
 
 const MAX_ENTRIES = 300;
 
-/**
- * Drives the admin "Server Logs" live tail. Connections to both backends'
- * `/hubs/logs` are only opened while the Server Logs tab is visible.
- */
 @Injectable({ providedIn: 'root' })
 export class AdminLogsService {
     private session = inject(SessionService);

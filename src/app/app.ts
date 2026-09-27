@@ -26,23 +26,19 @@ export class App implements OnInit {
   private titleService = inject(Title);
   private destroyRef = inject(DestroyRef);
   readonly realtime = inject(RealtimeService);
-  // Injecting ThemeService here bootstraps it and applies data-theme to <html> immediately
+
   private _theme = inject(ThemeService);
 
   private readonly siteName = 'Choculaterie';
 
-  /** Routes whose components set their own page title via OgMetaService */
   private readonly selfTitledRoutes = new Set(['schematics', 'users', 'qs']);
 
-  // Expose announcements from the shared realtime service
   readonly announcements = this.realtime.announcements;
 
-  /** Current tab title in English, or null when the page sets its own. */
   private readonly titleLabel = signal<string | null>(null);
 
   constructor() {
-    // Reads translateText, so it re-runs on a language change as well as on
-    // navigation. Returning before that read leaves a self-titled page alone.
+
     effect(() => {
       const label = this.titleLabel();
       if (label === null) return;
@@ -52,13 +48,12 @@ export class App implements OnInit {
   }
 
   ngOnInit(): void {
-    // Seed initial announcements via HTTP, then poll for changes every 10s
+
     this.adminApi.getApiAdminLiveMessages().subscribe({
       next: (res) => this.realtime.seedAnnouncements(res),
     });
     this.realtime.startLiveMessagePolling();
 
-    // Set page title from the first URL segment
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd),
       takeUntilDestroyed(this.destroyRef),
@@ -66,13 +61,11 @@ export class App implements OnInit {
       const segments = e.urlAfterRedirects.split('?')[0].split('/').filter(Boolean);
       const first = segments[0];
 
-      // Detail pages set their own title; null means leave it alone.
       if (first && this.selfTitledRoutes.has(first) && segments.length > 1) {
         this.titleLabel.set(null);
         return;
       }
 
-      // siteName is not in the catalog, so it passes through untranslated.
       this.titleLabel.set(PAGE_TITLES[first as keyof typeof PAGE_TITLES] ?? this.siteName);
     });
   }

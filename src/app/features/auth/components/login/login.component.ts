@@ -19,7 +19,7 @@ import { AUTH } from '../../../../i18n/labels';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [TPipe, 
+  imports: [TPipe,
     RouterLink,
     ReactiveFormsModule,
     MatCardModule,
@@ -82,7 +82,7 @@ export class LoginComponent implements OnDestroy {
       next: (res) => {
         this.loading.set(false);
         if (!res.token) {
-          // Backend requires email verification (returns 200 with message, no token)
+
           this.step.set('verify');
           this.scheduleSpamHint();
           return;
@@ -124,22 +124,18 @@ export class LoginComponent implements OnDestroy {
     this.loading.set(true);
     this.errorMsg.set('');
 
-    // Step 1: Get login challenge options
     this.securityKeysApi.postApiSecurityKeysLoginOptions({}).subscribe({
       next: async (resp: any) => {
         try {
-          // The backend returns { sessionId, options: { challenge, ... } }
-          // or it may return { sessionId, challenge, ... } at the top level
+
           const sessionId = resp.sessionId;
           const opts = resp.options ?? resp;
 
-          // Convert challenge from base64url to ArrayBuffer
           const publicKeyOptions: any = {
             ...opts,
             challenge: this.base64UrlToBuffer(opts.challenge),
           };
 
-          // Convert allowCredentials[].id from base64url to ArrayBuffer
           if (opts.allowCredentials?.length) {
             publicKeyOptions.allowCredentials = opts.allowCredentials.map((c: any) => ({
               ...c,
@@ -147,11 +143,9 @@ export class LoginComponent implements OnDestroy {
             }));
           }
 
-          // Step 2: Call browser WebAuthn API
           const assertion = await navigator.credentials.get({ publicKey: publicKeyOptions }) as any;
           if (!assertion) { this.loading.set(false); return; }
 
-          // Step 3: Send assertion to server
           const response = {
             id: assertion.id,
             rawId: this.bufferToBase64Url(assertion.rawId),

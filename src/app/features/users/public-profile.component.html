@@ -15,7 +15,6 @@
         }}</div>
     } @else if (displayProfile(); as p) {
 
-    <!-- Split drag-drop overlay (own profile only) -->
     @if (dragOver() && isOwnProfile()) {
     <div class="split-overlay" (dragover)="$event.preventDefault()" (dragleave)="onOverlayLeave($event)"
         (drop)="$event.preventDefault()">
@@ -34,7 +33,6 @@
     </div>
     }
 
-    <!-- Banner Header (show if has cover or if own profile) -->
     @if (p.coverImagePath || isOwnProfile()) {
     <div class="profile-header" [class.has-cover]="p.coverImagePath">
         @if (p.coverImagePath) {
@@ -64,7 +62,6 @@
     </div>
     }
 
-    <!-- Profile Info Section (below banner) -->
     <div class="profile-content">
         <div class="profile-avatar" [class.editable]="isOwnProfile()">
             @if (isOwnProfile() && picUploading()) {
@@ -123,7 +120,6 @@
         </div>
     </div>
 
-    <!-- Meta Grid -->
     <div class="meta-grid">
         @if (p.minecraftUsername || p.isMinecraftLinked) {
         <div class="meta-item" [class.meta-item--mc]="p.minecraftUsername"
@@ -193,7 +189,6 @@
         </div>
     </div>
 
-    <!-- Content Tabs -->
     <mat-tab-group dynamicHeight disablePagination [selectedIndex]="selectedTab()"
         (selectedTabChange)="onTabChange($event.index)">
 
@@ -250,7 +245,6 @@
 
         @if (isOwnProfile()) {
 
-        <!-- Account -->
         <mat-tab [label]="'Account' | t">
             <div class="tab-content">
                 @let op = ownProfile()!;
@@ -658,7 +652,6 @@
             </div>
         </mat-tab>
 
-        <!-- Security Keys -->
         <mat-tab [label]="'Security Keys' | t">
             <div class="tab-content">
                 @if (loadingKeys()) {
@@ -717,7 +710,6 @@
             </div>
         </mat-tab>
 
-        <!-- Save Manager -->
         <mat-tab [label]="'Save Manager' | t">
             <div class="tab-content">
                 @if (saveQuota(); as q) {
@@ -780,7 +772,6 @@
                     </div>
                 </mat-card>
                 }
-
 
                 @if (loadingSaves()) {
                 <app-loading-spinner [message]="'Loading saves…' | t" />

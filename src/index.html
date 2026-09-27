@@ -5,12 +5,11 @@
   <meta charset="utf-8" />
   <title>Choculaterie</title>
   <base href="/" />
-  <!-- Tell the browser the preferred color-scheme BEFORE any CSS loads - prevents white flash -->
+
   <meta name="color-scheme" content="light dark" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
 
-  <!-- Apply saved theme before Angular boots to prevent flash -->
   <script>
     (function () {
       var saved = localStorage.getItem('theme-preference');
@@ -20,7 +19,7 @@
       document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
     })();
   </script>
-  <!-- Match Material 3 magenta surface tokens exactly so the pre-Angular paint is seamless -->
+
   <style>
     html,
     body,
@@ -35,7 +34,7 @@
       background: #141218;
     }
   </style>
-  <!-- Static OpenGraph tags - Angular's Meta service overrides these in live browsers for page-specific content. -->
+
   <meta property="og:site_name" content="Choculaterie" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Choculaterie - Minecraft Schematics" />

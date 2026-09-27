@@ -6,7 +6,6 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-// ── Config ────────────────────────────────────────────────────────────────────
 const PORT = parseInt(process.env.PORT ?? '4000', 10);
 const STATIC_DIR = process.env.STATIC_DIR ?? path.join(__dirname, 'public');
 const API_BASE = process.env.API_BASE ?? 'http://localhost:5289';
@@ -17,13 +16,11 @@ const DEFAULT_TITLE = `${SITE_NAME} - Minecraft Schematics`;
 const DEFAULT_DESC = 'Browse, download and share Minecraft schematics on Choculaterie.';
 const FALLBACK_IMAGE = `${SITE_URL}/server_logo.png`;
 
-// Crawlers fetch HTML once and never run JS, so they need correct OG tags up front.
 const CRAWLER_UA_RE = /bot|facebookexternalhit|whatsapp|telegram|slack|discord|embedly|quora link preview|showyoubot|outbrain|pinterest|vkshare|redditbot|w3c_validator/i;
 function isCrawlerUA(ua) {
     return !!ua && CRAWLER_UA_RE.test(ua);
 }
 
-// ── MIME types ────────────────────────────────────────────────────────────────
 const MIME = {
     '.html': 'text/html; charset=utf-8',
     '.js': 'application/javascript',
@@ -44,7 +41,6 @@ const MIME = {
     '.zip': 'application/zip',
 };
 
-// ── Internal API fetch (no auth, public endpoints) ───────────────────────────
 function apiGet(path) {
     return new Promise((resolve) => {
         const url = `${API_BASE}${path}`;
@@ -63,7 +59,6 @@ function apiGet(path) {
     });
 }
 
-// Same as apiGet, but for a raw binary body (the litematic file itself) rather than JSON.
 function apiGetBuffer(path) {
     return new Promise((resolve) => {
         const url = `${API_BASE}${path}`;
@@ -79,7 +74,6 @@ function apiGetBuffer(path) {
     });
 }
 
-// Uploads a file as multipart/form-data; hand-rolled, not worth a form-data library for this.
 function apiPutFile(path, fieldName, filename, buffer, contentType) {
     return new Promise((resolve) => {
         const boundary = `----choculaterieBoundary${Date.now()}${Math.random().toString(16).slice(2)}`;
@@ -109,7 +103,6 @@ function apiPutFile(path, fieldName, filename, buffer, contentType) {
     });
 }
 
-// ── Build OG meta tags string ─────────────────────────────────────────────────
 function buildMeta(title, description, image, type = 'website') {
     const esc = (s) => (s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
     const t = esc(title);
@@ -124,7 +117,6 @@ function buildMeta(title, description, image, type = 'website') {
     ].join('\n  ');
 }
 
-// ── Static route → title map (must match what Angular's app.ts sets) ─────────
 const ROUTE_TITLES = {
     '': SITE_NAME,
     'schematics': 'Schematics',
@@ -138,9 +130,8 @@ const ROUTE_TITLES = {
     'not-found': 'Not found',
 };
 
-// ── Fetch meta for a given URL path ───────────────────────────────────────────
 async function resolveMeta(urlPath, isCrawler) {
-    // /schematics/:id
+
     const schematicMatch = urlPath.match(/^\/schematics\/([0-9a-f-]{36})\/?$/i);
     if (schematicMatch) {
         const data = await apiGet(`/api/Schematics/${schematicMatch[1]}`);
@@ -156,7 +147,6 @@ async function resolveMeta(urlPath, isCrawler) {
         }
     }
 
-    // /users/:username
     const userMatch = urlPath.match(/^\/users\/([^/?#]+)\/?$/);
     if (userMatch) {
         const data = await apiGet(`/api/Users/${encodeURIComponent(userMatch[1])}`);
@@ -173,14 +163,11 @@ async function resolveMeta(urlPath, isCrawler) {
         }
     }
 
-    // /qs/:id  - quick share (uses /qs/{id}/info to get screenshotPath without triggering the 302 redirect)
     const qsMatch = urlPath.match(/^\/qs\/([^/?#]+)\/?$/);
     if (qsMatch) {
         const id = qsMatch[1];
         let data = await apiGet(`/qs/${id}/info`);
 
-        // Rendering takes ~1s, so crawlers can block on it; visitors get it
-        // fire-and-forget.
         if (data && !data.screenshotPath) {
             if (isCrawler) {
                 await generateQsScreenshot(id);
@@ -201,7 +188,6 @@ async function resolveMeta(urlPath, isCrawler) {
         }
     }
 
-    // Known SPA list/section routes - return the same short title Angular will set
     const firstSegment = urlPath.split('/').filter(Boolean)[0] ?? '';
     if (firstSegment in ROUTE_TITLES) {
         const label = ROUTE_TITLES[firstSegment];
@@ -212,21 +198,17 @@ async function resolveMeta(urlPath, isCrawler) {
     return null;
 }
 
-// ── Quick-share screenshot generation ────────────────────────────────────────
-// qs-render meshes with nucleation, the same WASM the browser viewer uses, then
-// rasterizes on the CPU. No browser; ~1s even at 100k blocks.
 const QS_PACK_PATH = path.join(STATIC_DIR, 'assets', 'litematic-viewer', 'pack.zip');
-const qsGenerating = new Set(); // lock: IDs currently being rendered
+const qsGenerating = new Set();
 let qsRenderer = null;
 
-// Dynamic import because nucleation ships ESM only and this file is CommonJS.
 function getQsRenderer() {
     qsRenderer ??= import('./qs-render.mjs');
     return qsRenderer;
 }
 
 async function generateQsScreenshot(id) {
-    // Prevent duplicate concurrent renders of the same id.
+
     if (qsGenerating.has(id)) return;
     qsGenerating.add(id);
 
@@ -250,7 +232,6 @@ async function generateQsScreenshot(id) {
     }
 }
 
-// ── Read index.html once and cache it ────────────────────────────────────────
 let indexHtmlCache = null;
 function getIndexHtml() {
     if (!indexHtmlCache) {
@@ -259,36 +240,27 @@ function getIndexHtml() {
     return indexHtmlCache;
 }
 
-// On SIGHUP invalidate cache (useful after deploy without restart)
 process.on('SIGHUP', () => { indexHtmlCache = null; console.log('Index cache cleared.'); });
 
-// ── Replace static OG placeholders in index.html ─────────────────────────────
-// Look for the static defaults block we control and swap them out
 const STATIC_META_RE = /<title>[^<]*<\/title>[\s\S]*?(<\/head>)/;
 
 function injectMeta(html, title, metaBlock) {
     const esc = (s) => (s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-    // Replace <title>
+
     html = html.replace(/<title>[^<]*<\/title>/, () => `<title>${esc(title)}</title>`);
-    // Remove the static OG comment marker
+
     html = html.replace(/[ \t]*<!--[ \t]*Static OpenGraph[^\n]*-->\n?/gi, '');
-    // Remove any existing og: / twitter: meta tags
+
     html = html.replace(/[ \t]*<meta\s+property="og:[^>]*\/?>\n?/gi, '');
     html = html.replace(/[ \t]*<meta\s+name="twitter:[^>]*\/?>\n?/gi, '');
-    // Inject fresh tags right before </head>
+
     return html.replace('</head>', () => `  ${metaBlock}\n</head>`);
 }
 
-// ── HTTP server ───────────────────────────────────────────────────────────────
 const server = http.createServer(async (req, res) => {
-    // Strip query string
+
     const urlPath = (req.url || '/').split('?')[0];
 
-
-    // Try to serve as a static file first.
-    // Only treat known asset extensions as files — usernames like "beanie._.boi"
-    // produce a fake extension (".boi") and must fall through to the SPA.
-    // path.join keeps "..", so resolve and confine to the static root.
     const staticRoot = path.resolve(STATIC_DIR);
     const filePath = path.resolve(staticRoot, '.' + decodeURIComponent(urlPath));
     if (filePath !== staticRoot && !filePath.startsWith(staticRoot + path.sep)) {
@@ -299,7 +271,7 @@ const server = http.createServer(async (req, res) => {
     const ext = path.extname(filePath).toLowerCase();
 
     if (ext && MIME[ext] && ext !== '.html') {
-        // Static asset - serve directly
+
         fs.readFile(filePath, (err, data) => {
             if (err) {
                 res.writeHead(404);
@@ -318,15 +290,14 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    // SPA route - serve index.html with injected meta
     try {
         const resolved = await resolveMeta(urlPath, isCrawlerUA(req.headers['user-agent']));
         let html = getIndexHtml();
-        // Always inject OG meta - use resolved data or fall back to site defaults
+
         const title = resolved?.title ?? DEFAULT_TITLE;
         const metaBlock = resolved?.metaBlock ?? buildMeta(DEFAULT_TITLE, DEFAULT_DESC, FALLBACK_IMAGE);
         html = injectMeta(html, title, metaBlock);
-        // Never let the CDN cache SPA HTML under asset-like URLs for long
+
         res.writeHead(200, {
             'Content-Type': 'text/html; charset=utf-8',
             'Cache-Control': 'no-cache',

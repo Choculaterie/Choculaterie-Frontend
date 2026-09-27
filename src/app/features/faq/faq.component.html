@@ -1,12 +1,10 @@
 <div class="faq-page">
 
-    <!-- ─── Hero ─── -->
     <section class="faq-hero">
         <h1>{{ 'Frequently Asked Questions' | t }}</h1>
         <p>{{ 'Can\'t find what you\'re looking for? Reach out below.' | t }}</p>
     </section>
 
-    <!-- ─── FAQ Accordion ─── -->
     <section class="faq-section">
         @if (loadingFaqs()) {
         <div class="faq-skeleton">
@@ -32,7 +30,6 @@
 
     <mat-divider class="section-divider" />
 
-    <!-- ─── Contact ─── -->
     <section class="contact-section">
         <h2>{{ 'Still have questions?' | t }}</h2>
         <p>{{ 'Get in touch through any of the channels below, or fill out the form.' | t }}</p>
@@ -61,7 +58,7 @@
                 <img src="/icons/communication/mail.svg" alt="" aria-hidden="true" class="mc-icon" />
                 <div>
                     <strong>{{ 'Email' | t }}</strong>
-                    <!-- Email assembled only on click - no mailto href in DOM -->
+
                     <span class="obf-email" role="link" tabindex="0" aria-label="support@choculaterie.com"
                         (click)="openEmail()" (keydown.enter)="openEmail()"></span>
                 </div>
@@ -95,7 +92,6 @@
                 <mat-hint>{{ 'So I can reply to you' | t }}</mat-hint>
             </mat-form-field>
 
-            <!-- Image attachments -->
             <div class="attachments">
                 <button type="button" mat-stroked-button (click)="imgInput.click()" [disabled]="imageFiles.length >= 5">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"

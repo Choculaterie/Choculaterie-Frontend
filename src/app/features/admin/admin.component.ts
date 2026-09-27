@@ -59,7 +59,7 @@ export interface ServerLogEntryResponse {
 @Component({
     selector: 'app-admin',
     standalone: true,
-    imports: [TPipe, 
+    imports: [TPipe,
         FormsModule,
         ReactiveFormsModule,
         RouterLink,
@@ -212,12 +212,10 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly Visibility = Visibility;
     readonly messageTypes = ['Info', 'Warning', 'Alert'];
 
-    // Tab persistence via query params
     readonly selectedTab = signal(0);
-    /** Avoid re-opening the same ticket dialog from repeated queryParam emissions. */
+
     private openedTicketId: number | string | null = null;
 
-    // ── Users (server-side) ──
     readonly users = signal<AdminUserResponse[]>([]);
     readonly usersTotalCount = signal(0);
     readonly loadingUsers = signal(true);
@@ -229,14 +227,12 @@ export class AdminComponent implements OnInit, OnDestroy {
     usersSearch = '';
     userColumns = ['username', 'email', 'role', 'status', 'reportCount', 'registrationDate', 'actions'];
 
-    // Search autocomplete
     readonly userSearchSuggestions = signal<string[]>([]);
     readonly schematicSearchSuggestions = signal<{ label: string; type: 'schematic' | 'user' }[]>([]);
     private userSearchInput$ = new Subject<string>();
     private schematicSearchInput$ = new Subject<string>();
     private autoSubs: Subscription[] = [];
 
-    // ── Schematics (server-side) ──
     readonly schematics = signal<AdminSchematicResponse[]>([]);
     readonly schematicsTotalCount = signal(0);
     readonly loadingSchematics = signal(true);
@@ -247,7 +243,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     schematicsSearch = '';
     schematicColumns = ['name', 'username', 'status', 'visibility', 'reportCount', 'publishDate', 'actions'];
 
-    // Live Messages
     readonly liveMessages = signal<LiveMessageResponse[]>([]);
     readonly loadingLiveMessages = signal(true);
     readonly editingLiveMessageId = signal<number | null>(null);
@@ -257,7 +252,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         type: ['Info', Validators.required],
     });
 
-    // Mod Messages
     readonly modMessages = signal<ModMessageResponse[]>([]);
     readonly loadingModMessages = signal(true);
     modMessageColumns = ['message', 'type', 'isActive', 'time', 'actions'];
@@ -266,7 +260,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         type: ['Info', Validators.required],
     });
 
-    // ── Storage (server-side) ──
     readonly storageStats = signal<StorageStatsResponse | null>(null);
     readonly storageTotalCount = signal(0);
     readonly loadingStorage = signal(true);
@@ -277,13 +270,11 @@ export class AdminComponent implements OnInit, OnDestroy {
     storageSearch = '';
     storageColumns = ['username', 'saveCount', 'totalMb', 'quotaGb', 'percentageOfQuota'];
 
-    // ── User Detail ──
     readonly selectedUser = signal<AdminUserDetailResponse | null>(null);
     readonly loadingUserDetail = signal(false);
     readonly editBadge = signal<string>('');
     readonly editQuota = signal<number>(1);
 
-    // Notification type helpers for tab dots
     readonly hasSchematicDeletedNotif = computed(() =>
         this.realtime.adminNotifications().some(n => !n.isRead && n.type === 'schematic_deleted')
     );
@@ -297,7 +288,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.realtime.adminNotifications().some(n => !n.isRead && n.type === 'server_error')
     );
 
-    /** IDs of schematics mentioned in unread schematic_deleted notifications */
     readonly highlightedSchematicIds = computed(() => {
         const ids = new Set<string>();
         this.realtime.adminNotifications()
@@ -317,7 +307,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         return ids;
     });
 
-    /** Called when user clicks on a highlighted schematic row – marks only the matching notification(s) as read */
     onSchematicRowClick(s: AdminSchematicResponse): void {
         if (!this.highlightedSchematicIds().has(s.id)) return;
         this.realtime.adminNotifications()
@@ -341,7 +330,6 @@ export class AdminComponent implements OnInit, OnDestroy {
             });
     }
 
-    /** IDs of server log entries mentioned in unread server_error notifications */
     readonly highlightedServerLogIds = computed(() => {
         const ids = new Set<number>();
         this.realtime.adminNotifications()
@@ -356,7 +344,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         return ids;
     });
 
-    /** Called when user clicks on a highlighted server log row – marks only the matching notification(s) as read */
     onServerLogRowClick(e: ServerLogEntryResponse): void {
         if (!this.highlightedServerLogIds().has(e.id)) return;
         this.realtime.adminNotifications()
@@ -377,11 +364,10 @@ export class AdminComponent implements OnInit, OnDestroy {
             });
     }
 
-    // Track which tabs have been loaded
     private loadedTabs = new Set<number>();
 
     ngOnInit(): void {
-        // React to tab / ticketId / userId query changes (including inbox navigation while already on /admin)
+
         this.autoSubs.push(
             this.route.queryParams.subscribe(params => {
                 const tabParam = parseInt(params['tab'], 10);
@@ -391,7 +377,7 @@ export class AdminComponent implements OnInit, OnDestroy {
                 if (tab !== prevTab) {
                     this.applyTabFromRoute(tab, prevTab);
                 } else {
-                    // Ensure data for the current tab is loaded even on first emit
+
                     this.loadTabData(tab);
                 }
 
@@ -424,7 +410,6 @@ export class AdminComponent implements OnInit, OnDestroy {
             }),
         );
 
-        // User search autocomplete
         this.autoSubs.push(
             this.userSearchInput$.pipe(
                 debounceTime(300),
@@ -435,7 +420,6 @@ export class AdminComponent implements OnInit, OnDestroy {
             ).subscribe(names => this.userSearchSuggestions.set(names)),
         );
 
-        // Schematic search autocomplete
         this.autoSubs.push(
             this.schematicSearchInput$.pipe(
                 debounceTime(300),
@@ -488,7 +472,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         const params = new URLSearchParams(window.location.search);
         if (idx) params.set('tab', String(idx)); else params.delete('tab');
         params.delete('page');
-        // Drop ticketId when leaving tickets tab via manual click
+
         if (idx !== 9) params.delete('ticketId');
         const qs = params.toString();
         this.location.replaceState(window.location.pathname + (qs ? '?' + qs : ''));
@@ -499,7 +483,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.scrollActiveTabIntoView();
     }
 
-    /** Switch tab when the URL query changes (e.g. inbox click while already on /admin). */
     private applyTabFromRoute(idx: number, prevIdx: number): void {
         this.selectedTab.set(idx);
         this.resetTabPaging(idx);
@@ -538,7 +521,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             next: (full) => {
                 if (!full.isRead) this.markTicketRead(full);
                 this.markNotificationsByType('contact_ticket');
-                // Keep list in sync if already loaded
+
                 this.tickets.update(list => {
                     const exists = list.some(x => x.id === full.id);
                     return exists ? list.map(x => x.id === full.id ? full : x) : list;
@@ -585,7 +568,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         }
     }
 
-    // ── Users ──
     loadUsers(): void {
         this.loadingUsers.set(true);
         this.adminApi.getApiAdminUsers({
@@ -710,7 +692,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
-    // ── User Detail ──
     openUserDetail(user: AdminUserResponse): void {
         this.loadingUserDetail.set(true);
         this.setQueryParam('userId', String(user.id));
@@ -852,7 +833,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         );
     }
 
-    // ── Schematics ──
     loadSchematics(): void {
         this.loadingSchematics.set(true);
         this.adminApi.getApiAdminSchematics({
@@ -946,7 +926,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
-    // ── Live Messages ──
     loadLiveMessages(): void {
         this.loadingLiveMessages.set(true);
         this.adminApi.getApiAdminLiveMessages().subscribe({
@@ -1010,7 +989,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
-    // ── Mod Messages ──
     loadModMessages(): void {
         this.loadingModMessages.set(true);
         this.adminApi.getApiAdminModMessages().subscribe({
@@ -1053,7 +1031,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
-    // ── Storage ──
     loadStorage(): void {
         this.loadingStorage.set(true);
         this.adminApi.getApiAdminStorage({
@@ -1106,7 +1083,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.loadStorage();
     }
 
-    // ── Tags ──
     readonly tags = signal<AllowedTagResponse[]>([]);
     readonly loadingTags = signal(true);
     tagColumns = ['name', 'actions'];
@@ -1157,7 +1133,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
-    // ── Versions ──
     readonly versions = signal<AllowedVersionResponse[]>([]);
     readonly loadingVersions = signal(true);
     versionColumns = ['name', 'actions'];
@@ -1208,7 +1183,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
-    // ── Tag Suggestions ──
     readonly tagSuggestions = signal<TagSuggestionResponse[]>([]);
     readonly loadingTagSuggestions = signal(false);
     readonly editingAcceptId = signal<number | null>(null);
@@ -1266,7 +1240,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
-    // ── Notifications ──
     readonly notifications = signal<AdminNotificationResponse[]>([]);
     readonly loadingNotifications = signal(false);
     notificationColumns = ['type', 'message', 'isRead', 'createdAt', 'actions'];
@@ -1303,7 +1276,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
-    /** Mark all unread notifications of the given type as read */
     markNotificationsByType(type: string): void {
         this.realtime.adminNotifications()
             .filter(n => !n.isRead && n.type === type)
@@ -1314,7 +1286,6 @@ export class AdminComponent implements OnInit, OnDestroy {
             });
     }
 
-    // ── FAQ Admin ──
     readonly adminFaqs = signal<FaqResponse[]>([]);
     readonly loadingAdminFaqs = signal(false);
     readonly editingFaqId = signal<number | null>(null);
@@ -1388,7 +1359,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
-    // ── Tickets ──
     readonly tickets = signal<ContactTicketResponse[]>([]);
     readonly loadingTickets = signal(false);
     readonly ticketsTotalCount = signal(0);
@@ -1398,7 +1368,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly selectedTicket = signal<ContactTicketResponse | null>(null);
     ticketColumns = ['title', 'username', 'isRead', 'createdAt', 'actions'];
 
-    // ── Server Logs ──
     readonly serverLogs = signal<ServerLogEntryResponse[]>([]);
     readonly loadingServerLogs = signal(false);
     readonly serverLogsTotalCount = signal(0);
@@ -1439,7 +1408,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     viewTicket(t: ContactTicketResponse): void {
-        // Route through query params so openTicketById handles the dialog (and inbox deep-links share the path)
+
         const current = this.route.snapshot.queryParams['ticketId'];
         if (current != null && String(current) === String(t.id)) {
             this.openedTicketId = t.id;
@@ -1502,7 +1471,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.loadTickets();
     }
 
-    // ── Server Logs ──
     loadServerLogs(): void {
         this.loadingServerLogs.set(true);
         const filter = this.serverLogsSourceFilter();
@@ -1548,8 +1516,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
-
-    /** Tags and FAQ entries live in the database, so they get their own editor. */
     translateTag(t: { id: number | string; name: string }): void {
         this.dialog.open(ContentTranslationsDialogComponent, {
             width: '560px', maxWidth: '95vw', maxHeight: '85vh', autoFocus: false,

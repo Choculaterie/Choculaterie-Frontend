@@ -40,7 +40,7 @@ interface ModSummary {
 @Component({
     selector: 'app-mods',
     standalone: true,
-    imports: [TPipe, 
+    imports: [TPipe,
         FormsModule,
         RouterLink,
         MatCardModule,
@@ -124,9 +124,9 @@ export class ModsComponent implements OnInit {
         const summaries: ModSummary[] = Array.from(map.entries()).map(([name, versions]) => {
             const totalDownloads = versions.reduce((sum, v) => sum + Number(v.downloadCount), 0);
             const latest = versions[0];
-            // Use the imagePath from the API; if null the template shows an icon
+
             const img = versions.find(v => v.imagePath)?.imagePath ?? null;
-            // Collect all unique game versions across all entries and compute range
+
             const allGameVersions = [...new Set(
                 versions.flatMap(v => v.gameVersion.split(',').map(s => s.trim()).filter(Boolean))
             )].sort(compareVersions);

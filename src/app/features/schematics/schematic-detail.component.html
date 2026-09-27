@@ -35,7 +35,6 @@
     } @else if (schematic()) {
     @let s = schematic()!;
 
-    <!-- Image gallery (or inline generate preview when editing) -->
     @if (generateEmbed(); as gen) {
     <div class="gallery gallery-generate">
         <div class="gallery-main">
@@ -85,7 +84,6 @@
 </div>
 }
 
-<!-- Header -->
 <div class="detail-header">
     <div>
         <div class="title-row">
@@ -188,9 +186,8 @@
     }
 </div>
 
-<!-- Info cards -->
 <div class="detail-grid">
-    <!-- Description -->
+
     <mat-card appearance="outlined">
         <mat-card-header><mat-card-title>{{ 'Description' | t }}</mat-card-title></mat-card-header>
         <mat-card-content>
@@ -199,7 +196,6 @@
         </mat-card-content>
     </mat-card>
 
-    <!-- Details -->
     <mat-card appearance="outlined">
         <mat-card-header><mat-card-title>{{ 'Details' | t }}</mat-card-title></mat-card-header>
         <mat-card-content>
@@ -267,7 +263,6 @@
     </mat-card>
 </div>
 
-<!-- Tags -->
 @if (editing()) {
 <mat-card appearance="outlined" class="edit-card" appDropZone [fullPage]="true" accept="image/*,.litematic"
     (filesDrop)="onEditFilesDropped($event)">
@@ -370,7 +365,6 @@
                 </mat-form-field>
             </div>
 
-            <!-- Pictures (unified list - supports cross-category drag & drop) -->
             <div class="file-previews">
                 <h4>{{ 'Pictures' | t }} ({{ editPictureItems().length }} / 10)</h4>
                 <div class="preview-grid" cdkDropList cdkDropListOrientation="mixed"
@@ -418,7 +412,6 @@
             }
             </div>
 
-            <!-- Litematic Files (unified list - supports cross-category drag & drop) -->
             <div class="file-previews">
                 <h4>{{ 'Litematic Files' | t }} ({{ editFileItems().length }} / 10)</h4>
                 <div class="file-list-preview" cdkDropList (cdkDropListDropped)="dropFile($event)">
@@ -488,7 +481,6 @@
 </mat-card>
 }
 
-<!-- Files -->
 @if (s.files.length) {
 <div class="files-section">
     <h3><span>{{ 'Files' | t }}</span></h3>

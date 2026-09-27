@@ -3,7 +3,6 @@ import { authGuard, roleGuard } from './core/guards';
 
 const TRANSLATIONS_PARAMS = ['loc', 'section', 'group', 'index'];
 
-/** Matches /translations plus up to four optional path params, as one route. */
 export function translationsUrl(segments: UrlSegment[]): UrlMatchResult | null {
     if (!segments.length || segments[0].path !== 'translations') return null;
     if (segments.length > TRANSLATIONS_PARAMS.length + 1) return null;
@@ -97,8 +96,7 @@ export const routes: Routes = [
             import('./features/internal/icon-batch-render.component').then((m) => m.IconBatchRenderComponent),
     },
     {
-        // One route, not five: separate route configs recreate the component on each
-        // depth change, which wiped the open editor.
+
         matcher: translationsUrl,
         loadComponent: () =>
             import('./features/translations/translations.component').then((m) => m.TranslationsComponent),

@@ -10,7 +10,7 @@ export class FileSizePipe implements PipeTransform {
         const i = Math.floor(Math.log(b) / Math.log(k));
         const value = b / Math.pow(k, i);
         const maxDecimals = Math.min(decimals, 2);
-        // Remove trailing zeros for cleaner display
+
         const formatted = parseFloat(value.toFixed(i === 0 ? 0 : maxDecimals));
         return `${formatted} ${sizes[i]}`;
     }

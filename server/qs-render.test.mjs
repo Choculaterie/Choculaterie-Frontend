@@ -1,7 +1,3 @@
-// Self-check: node server/qs-render.test.mjs
-// Renders an oak-log cube and asserts projection, texturing and PNG output.
-// Catches the two bugs that are easy to reintroduce: a flipped view basis
-// (image upside down) and a flipped atlas V (nothing drawn at all).
 import assert from 'node:assert';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,7 +18,6 @@ const png = await renderLitematic(schem.to_litematic(), { packPath, size, ssaa: 
 
 assert.deepEqual([...png.subarray(0, 8)], [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], 'not a PNG');
 
-// Decode enough of the PNG to inspect pixels; every row uses filter type 0.
 const { inflateSync } = await import('node:zlib');
 const idat = [];
 for (let i = 8; i < png.length;) {
@@ -41,23 +36,18 @@ const px = (x, y) => {
 let opaque = 0;
 for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (px(x, y)[3] > 200) opaque++;
 
-// A cube seen isometrically fills roughly three quarters of its bounding box.
 assert.ok(opaque > size * size * 0.5, `too few opaque pixels: ${opaque}`);
 assert.ok(opaque < size * size * 0.95, `suspiciously full frame: ${opaque}`);
 
-// Corners must be transparent: a hexagon, not a rectangle.
 for (const [x, y] of [[1, 1], [size - 2, 1], [1, size - 2], [size - 2, size - 2]]) {
     assert.ok(px(x, y)[3] < 40, `corner (${x},${y}) should be empty, got alpha ${px(x, y)[3]}`);
 }
 
-// The log top is lit at 1.0 and the bark sides at 0.6, so the top must be
-// clearly brighter. A flipped atlas V samples empty texels and never gets here.
 const lum = (p) => p[0] * 0.299 + p[1] * 0.587 + p[2] * 0.114;
 const top = lum(px(size >> 1, size * 0.22 | 0));
 const side = lum(px(size * 0.25 | 0, size * 0.72 | 0));
 assert.ok(top > side * 1.25, `top face (${top.toFixed(1)}) should outshine the side (${side.toFixed(1)})`);
 
-// A negated view basis rotates the image 180°, which inverts this ratio.
 const halfLum = (from, to) => {
     let sum = 0, n = 0;
     for (let y = from; y < to; y++) {

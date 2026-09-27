@@ -24,12 +24,10 @@ export const BADGE_ICONS: Record<number, string> = {
     [Badge.Premium]: '/premium.png',
 };
 
-/** Maps a badge name string (e.g. "Dev") to its numeric enum value. */
 const BADGE_NAME_TO_NUM: Record<string, number> = Object.fromEntries(
     Object.entries(Badge).filter(([, v]) => typeof v === 'number').map(([k, v]) => [k, v as number]),
 );
 
-/** Resolve a badge value from the API (number, string name, or string number) to its enum number. */
 export function resolveBadge(badge: unknown): number | undefined {
     if (badge == null) return undefined;
     const n = Number(badge);

@@ -1,4 +1,3 @@
-
 export const AUTH = {
     signIn: 'Sign in',
     verifyIdentity: 'Verify your identity',
@@ -343,7 +342,6 @@ export const NAV = {
     login: 'Login',
 };
 
-/** Browser tab titles, keyed by first URL segment. Detail pages set their own. */
 export const PAGE_TITLES = {
     schematics: 'Schematics',
     mods: 'Mods',
@@ -352,26 +350,22 @@ export const PAGE_TITLES = {
     translations: 'Translations',
 };
 
-/** Angular Material's paginator labels, which do not go through the `t` pipe. */
 export const PAGINATOR = {
     itemsPerPage: 'Items per page:',
     nextPage: 'Next page',
     previousPage: 'Previous page',
     firstPage: 'First page',
     lastPage: 'Last page',
-    // ${...} is the placeholder form the translation tool understands, so these
-    // show as chips rather than as literal braces.
+
     range: 'Page ${page} of ${total}',
 };
 
-/** Mod release types. Stored in the database in English, shown translated. */
 export const MOD_STATUS = {
     stable: 'Stable',
     beta: 'Beta',
     broken: 'Broken',
 };
 
-/** Badge and role names. Shown throughout profiles and admin, not user-editable. */
 export const BADGES_ROLES = {
     admin: 'Admin',
     moderator: 'Moderator',

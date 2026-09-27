@@ -21,13 +21,10 @@ function installStorageFallback(): void {
     }
 }
 
-// Angular ships CLDR data for English only; without registering a locale every
-// `| date` binding throws. Add an entry when a language goes live.
 const LOCALE_DATA: Record<string, () => Promise<{ default: unknown }>> = {
     fr: () => import('@angular/common/locales/fr'),
 };
 
-/** Registers date/number formats for `locale`, or falls back to English formats. */
 async function useLocaleFormats(locale: string): Promise<string> {
     const load = LOCALE_DATA[locale.split('-')[0]];
     if (!load) return SOURCE_LOCALE;
@@ -60,8 +57,6 @@ async function main(): Promise<void> {
 
     const cachesFresh = dropStaleRendererCaches().catch(() => undefined);
 
-    // Brief wait so a translated page does not flash English, but never let the
-    // bundle hold up first paint. Both caps start now, so the wait stays bounded.
     const cap = () => new Promise((r) => setTimeout(r, 400));
     const ready = loadTranslationMap(locale).catch(() => undefined);
     const formats = Promise.race([useLocaleFormats(locale), cap().then(() => SOURCE_LOCALE)]);
@@ -71,7 +66,6 @@ async function main(): Promise<void> {
     await settled;
     await cachesFresh;
 
-    // If the map lost the race it lands later and the signal re-renders.
     await bootstrapApplication(App, {
         ...appConfig,
         providers: [...appConfig.providers, { provide: LOCALE_ID, useValue: formatLocale }],

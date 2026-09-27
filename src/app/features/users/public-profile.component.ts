@@ -66,7 +66,7 @@ import { matfMinecraftColored } from '@ng-icons/material-file-icons/colored';
 @Component({
     selector: 'app-public-profile',
     standalone: true,
-    imports: [TPipe, 
+    imports: [TPipe,
         DatePipe,
         RouterLink,
         FormsModule,
@@ -126,10 +126,8 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     private ogMeta = inject(OgMetaService);
     session = inject(SessionService);
 
-    // ── Helpers ──
     badgeLabel(badge: unknown): string { const n = resolveBadge(badge); return n != null ? translateText(BADGE_LABELS[n]) : ''; }
 
-    /// Translator is per language, so its tooltip names the language it covers.
     badgeTooltip(b: { badge: number; locale?: string | null }): string {
         const label = this.badgeLabel(b.badge);
         return b.locale ? `${label} (${b.locale.toUpperCase()})` : label;
@@ -202,33 +200,27 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         return !!PublicProfileComponent.BRAND_ICONS[platform.toLowerCase()];
     }
 
-    // ── State ──
     readonly isOwnProfile = signal(false);
     readonly loading = signal(true);
     readonly error = signal('');
     readonly selectedTab = signal(0);
     readonly highlightSection = signal<string | null>(null);
 
-    // Public profile data
     readonly quickProfile = signal<PublicProfileResponse | null>(null);
     readonly enrichedProfile = signal<UserProfileResponse | null>(null);
 
-    // Own profile data
     readonly ownProfile = signal<OwnProfileResponse | null>(null);
 
-    // Unified display profile
     readonly displayProfile = computed<any>(() => {
         if (this.isOwnProfile()) return this.ownProfile();
         return this.enrichedProfile() ?? this.quickProfile();
     });
 
-    // Content (shared)
     readonly loadingContent = signal(true);
     readonly schematics = signal<SchematicListItemResponse[]>([]);
     readonly likedSchematics = signal<SchematicListItemResponse[]>([]);
     readonly likedUsers = signal<PublicUserListItemResponse[]>([]);
 
-    // Schematics tab: server-paginated (modules excluded server-side), masonry-reordered to match schematics-list
     private gridResizeObserver?: ResizeObserver;
     private readonly numColumns = signal(1);
     @ViewChild('schematicGrid') private schematicGrid?: ElementRef<HTMLElement>;
@@ -260,7 +252,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         if (username) this.loadSchematics(username);
     }
 
-
     private reorderForRowFirst(items: SchematicListItemResponse[], numCols: number): SchematicListItemResponse[] {
         const n = items.length;
         if (numCols <= 1 || n <= numCols) return items;
@@ -289,7 +280,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         this.gridResizeObserver.observe(el);
     }
 
-    // ── Own Profile: Validators ──
     private usernameAvailableValidator(): AsyncValidatorFn {
         return (control) => {
             const value = control.value?.trim();
@@ -314,7 +304,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         };
     }
 
-    // ── Own Profile: Email Update ──
     readonly editStep = signal<'form' | 'confirm'>('form');
     readonly editLoading = signal(false);
     readonly pendingEmail = signal<string | null>(null);
@@ -326,14 +315,12 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     });
     confirmForm = this.fb.nonNullable.group({ code: ['', Validators.required] });
 
-    // ── Own Profile: Security Keys ──
     readonly securityKeys = signal<SecurityKeyResponse[]>([]);
     readonly loadingKeys = signal(true);
     readonly registeringKey = signal(false);
     newKeyName = '';
     secKeyColumns = ['keyName', 'dateAdded', 'lastUsed', 'useCount', 'actions'];
 
-    // ── Own Profile: Save Manager ──
     readonly saves = signal<SaveListItemResponse[]>([]);
     readonly saveQuota = signal<SaveQuotaResponse | null>(null);
     readonly loadingSaves = signal(true);
@@ -346,7 +333,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     readonly loadingSubscription = signal(true);
     readonly cancellingSubscription = signal(false);
 
-    // ── Own Profile: Password Reset ──
     readonly resetStep = signal<'request' | 'confirm'>('request');
     private _emailSpamTimer: ReturnType<typeof setTimeout> | null = null;
     private _resetSpamTimer: ReturnType<typeof setTimeout> | null = null;
@@ -369,7 +355,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     pwHasDigit = () => /\d/.test(this.resetForm.get('newPassword')?.value ?? '');
     pwHasSpecial = () => /[^a-zA-Z0-9]/.test(this.resetForm.get('newPassword')?.value ?? '');
 
-    // ── Own Profile: Linking ──
     readonly mcLinkData = signal<any>(null);
     readonly mcLoading = signal(false);
     readonly mcTimerSeconds = signal(0);
@@ -379,7 +364,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     readonly dcTimerSeconds = signal(0);
     private dcTimerHandle: ReturnType<typeof setInterval> | null = null;
 
-    // ── Own Profile: Editing ──
     readonly profileSaving = signal(false);
     readonly picUploading = signal(false);
     readonly coverUploading = signal(false);
@@ -389,7 +373,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     readonly socialSaving = signal(false);
     readonly hasEmptyUrls = computed(() => this.editSocialLinks().some(l => !l.url.trim()));
 
-    // Reactive signals for async validator pending state
     readonly usernameChecking = signal(false);
     readonly emailChecking = signal(false);
 
@@ -410,7 +393,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
             status => this.emailChecking.set(status === 'PENDING'),
         );
 
-        // Attach the masonry-column ResizeObserver once the schematics grid renders.
         effect(() => {
             if (!this.loadingSchematics() && this.schematics().length > 0) {
                 afterNextRender(() => this.attachGridObserver(), { injector: this.injector });
@@ -423,10 +405,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     }
 
     private _dragListeners: { enter: any; over: any; leave: any; drop: any } | null = null;
-
-    // ══════════════════════════════════════════
-    // Lifecycle
-    // ══════════════════════════════════════════
 
     ngOnInit(): void {
         const html = document.documentElement;
@@ -449,14 +427,13 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
             const tabParam = parseInt(this.route.snapshot.queryParams['tab'], 10);
             if (!isNaN(tabParam)) this.selectedTab.set(tabParam);
 
-            // Handle section scroll (e.g. ?section=minecraft)
             const sectionParam = this.route.snapshot.queryParams['section'];
             if (sectionParam) {
-                // Wait for the tab content to render, then scroll
+
                 setTimeout(() => this.scrollToSection(sectionParam), 600);
-                // Highlight AFTER the scroll animation finishes
+
                 setTimeout(() => this.highlightSection.set(sectionParam), 1400);
-                // Remove highlight after a few seconds
+
                 setTimeout(() => this.highlightSection.set(null), 5400);
             }
 
@@ -645,19 +622,14 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         });
     }
 
-    // ══════════════════════════════════════════
-    // Tabs
-    // ══════════════════════════════════════════
-
     onTabChange(index: number): void {
         this.selectedTab.set(index);
         const params = new URLSearchParams(window.location.search);
         if (index) params.set('tab', String(index)); else params.delete('tab');
-        params.delete('section'); // clear section param on tab change
+        params.delete('section');
         const qs = params.toString();
         this.location.replaceState(window.location.pathname + (qs ? '?' + qs : ''));
 
-        // Scroll the active tab label into view (disablePagination disables Angular's auto-scroll)
         setTimeout(() => {
             const active = document.querySelector('.mat-mdc-tab.mdc-tab--active');
             active?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
@@ -670,10 +642,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
             el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }
-
-    // ══════════════════════════════════════════
-    // Public: Like / Report
-    // ══════════════════════════════════════════
 
     toggleLike(): void {
         if (!this.session.isAuthenticated()) { this.router.navigate(['/auth/register']); return; }
@@ -706,10 +674,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         });
     }
 
-    // ══════════════════════════════════════════
-    // Own: Email Update
-    // ══════════════════════════════════════════
-
     submitEmail(): void {
         if (this.emailForm.invalid) return;
         this.editLoading.set(true);
@@ -737,10 +701,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
 
     cancelConfirm(): void { this.clearEmailSpamHint(); this.editStep.set('form'); this.pendingEmail.set(null); this.confirmForm.reset(); }
 
-    // ══════════════════════════════════════════
-    // Own: Security Keys
-    // ══════════════════════════════════════════
-
     deleteKey(key: SecurityKeyResponse): void {
         const dialogRef = this.dialog.open(ConfirmDialogComponent, {
             data: { title: DIALOGS.deleteSecurityKey, message: DIALOGS.deleteSecurityKeyMsg(key.keyName), confirmText: COMMON.delete, warn: true } as ConfirmDialogData,
@@ -764,7 +724,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
                     const sessionId = resp.sessionId;
                     const opts = resp.options ?? resp;
 
-                    // Convert base64url fields to ArrayBuffer for the browser WebAuthn API
                     const publicKeyOptions: any = {
                         ...opts,
                         challenge: this.base64UrlToBuffer(opts.challenge),
@@ -824,10 +783,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         for (const b of bytes) str += String.fromCharCode(b);
         return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     }
-
-    // ══════════════════════════════════════════
-    // Own: Save Manager
-    // ══════════════════════════════════════════
 
     unlockSaveKey(): void {
         const dialogRef = this.dialog.open(PasswordDialogComponent, {
@@ -895,10 +850,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         });
     }
 
-    // ══════════════════════════════════════════
-    // Own: Password Reset
-    // ══════════════════════════════════════════
-
     requestPasswordReset(): void {
         this.resetLoading.set(true);
         const email = this.ownProfile()?.email;
@@ -920,10 +871,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
             error: (err) => { this.resetLoading.set(false); this.toast.error(err.error?.detail ?? PROFILE.failedToResetPassword); },
         });
     }
-
-    // ══════════════════════════════════════════
-    // Own: Profile Update
-    // ══════════════════════════════════════════
 
     submitProfile(): void {
         if (this.profileForm.invalid) return;
@@ -952,10 +899,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
             error: (err) => { this.profileSaving.set(false); this.toast.error(err.error?.detail ?? PROFILE.profileUpdateFailed); },
         });
     }
-
-    // ══════════════════════════════════════════
-    // Own: Profile Picture
-    // ══════════════════════════════════════════
 
     onPictureSelected(event: Event): void {
         const input = event.target as HTMLInputElement;
@@ -1019,10 +962,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         });
     }
 
-    // ══════════════════════════════════════════
-    // Own: Cover Image
-    // ══════════════════════════════════════════
-
     onCoverSelected(event: Event): void {
         const input = event.target as HTMLInputElement;
         const file = input.files?.[0]; input.value = '';
@@ -1066,10 +1005,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         });
     }
 
-    // ══════════════════════════════════════════
-    // Own: Social Links
-    // ══════════════════════════════════════════
-
     addSocialLink(): void { this.editSocialLinks.update(links => [...links, { platform: 'website', url: '' }]); this.socialLinksDirty.set(true); }
     removeSocialLink(index: number): void { this.editSocialLinks.update(links => links.filter((_, i) => i !== index)); this.socialLinksDirty.set(true); }
     dropSocialLink(event: CdkDragDrop<void>): void {
@@ -1110,10 +1045,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
             error: (err) => { this.socialSaving.set(false); this.toast.error(err.error?.detail ?? PROFILE.socialLinksFailed); },
         });
     }
-
-    // ══════════════════════════════════════════
-    // Own: Minecraft Linking
-    // ══════════════════════════════════════════
 
     copyLinkCode(code: string): void {
         navigator.clipboard.writeText(`/link ${code}`).then(
@@ -1182,10 +1113,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
             }
         });
     }
-
-    // ══════════════════════════════════════════
-    // Own: Discord Linking
-    // ══════════════════════════════════════════
 
     generateDcCode(): void {
         this.dcLoading.set(true);

@@ -22,7 +22,6 @@
         </div>
     </div>
 
-    <!-- Create mod form (admin only) -->
     @if (showCreateForm() && isAdmin()) {
     <mat-card appearance="outlined" class="form-card" #formCard appDropZone [fullPage]="true" accept="image/*,.jar"
         (filesDrop)="onFilesDropped($event)">

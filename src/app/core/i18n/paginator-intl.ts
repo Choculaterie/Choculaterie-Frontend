@@ -3,11 +3,6 @@ import { MatPaginatorIntl } from '@angular/material/paginator';
 import { translateText } from './translation.store';
 import { PAGINATOR } from '../../i18n/labels';
 
-/**
- * Material builds the paginator labels in TypeScript, so they never pass through the
- * `t` pipe and stayed English. Reading translateText inside an effect re-runs this on
- * a language change, and `changes` is what tells live paginators to repaint.
- */
 @Injectable()
 export class TranslatedPaginatorIntl extends MatPaginatorIntl {
     constructor() {

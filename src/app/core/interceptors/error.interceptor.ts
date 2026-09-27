@@ -18,7 +18,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
     return next(req).pipe(
         catchError((error) => {
-            // Ignore non-HTTP errors (e.g. TimeoutError handled by timeoutInterceptor)
+
             if (!(error instanceof HttpErrorResponse)) {
                 return throwError(() => error);
             }
@@ -27,7 +27,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
             switch (error.status) {
                 case 401: {
-                    // Don't refresh on auth-related requests (login, refresh itself)
+
                     if (req.url.includes('/api/Auth/')) {
                         return throwError(() => error);
                     }
@@ -52,7 +52,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
                                 isRefreshing = false;
                                 session.setSession(res);
                                 refreshToken$.next(res.token);
-                                // Retry original request with new token
+
                                 return next(req.clone({
                                     setHeaders: { Authorization: `Bearer ${res.token}` },
                                 }));
@@ -67,7 +67,6 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
                         );
                     }
 
-                    // Another request is already refreshing - wait for the new token
                     return refreshToken$.pipe(
                         filter((token) => token !== null),
                         take(1),

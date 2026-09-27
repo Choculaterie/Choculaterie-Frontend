@@ -87,8 +87,7 @@ export class ShortUrlRedirectComponent implements OnInit, OnDestroy {
                 this.state.set('viewing');
                 setTimeout(() => {
                     const viewer = this.mountViewer();
-                    // Only capture if the server still has no preview (eager upload usually
-                    // finished already). Avoids a second full mesh build + Puppeteer race.
+
                     this.maybeCaptureAndUploadPreview(id, viewer);
                 });
             },
@@ -138,11 +137,6 @@ export class ShortUrlRedirectComponent implements OnInit, OnDestroy {
         this.ogMeta.clear();
     }
 
-    /**
-     * If the server already has a preview (eager Puppeteer from upload), skip.
-     * Otherwise capture from the interactive viewer mesh once it finishes loading
-     * (one pack + one mesh only; no second headless load).
-     */
     private async maybeCaptureAndUploadPreview(id: string, viewer: LitematicViewerComponent | null): Promise<void> {
         try {
             if (!viewer) return;
@@ -154,7 +148,6 @@ export class ShortUrlRedirectComponent implements OnInit, OnDestroy {
             await this.waitUntilNotLoading(viewer);
             if (viewer.error()) return;
 
-            // Re-check: eager gen may have finished while the viewer was loading.
             const again = await firstValueFrom(
                 this.http.get<{ screenshotPath?: string }>(`/qs/${id}/info`),
             ).catch(() => null);

@@ -20,7 +20,6 @@ import * as THREE from 'three';
 import { RESOURCE_PACK_URL } from './resource-pack';
 import { hasWebGLSupport } from './webgl-support';
 
-/** The subset of SchematicObject's public API the clip-plane/rebuild logic below needs. */
 interface SchematicWithBounds {
     group: THREE.Object3D;
     rebuildMesh(): Promise<void>;
@@ -30,14 +29,14 @@ interface SchematicWithBounds {
 export interface LitematicViewerData {
     fileData: ArrayBuffer;
     fileName: string;
-    /** Enables diff mode. Pass `null` (not omitted) to diff against "nothing". */
+
     parentFileData?: ArrayBuffer | null;
 }
 
 @Component({
     selector: 'app-litematic-viewer',
     standalone: true,
-    imports: [TPipe, 
+    imports: [TPipe,
         MatDialogModule,
         MatButtonModule,
         MatIconModule,
@@ -61,8 +60,6 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
     readonly flyMode = signal(false);
     readonly flyLocked = signal(false);
 
-    // Y-range slicer (X/Z stay fixed). Signals, not fields: this app is zoneless and drag
-    // tracking runs via document-level listeners Angular doesn't instrument.
     minY = 0;
     maxY = 0;
     readonly currentMinY = signal(0);
@@ -72,8 +69,6 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
     private minZ = 0;
     private maxZ = 0;
 
-    // Clip planes give instant live feedback while dragging; a real rebuild only runs once the
-    // drag ends (see commitRenderingBounds), since clipping can't regenerate a culled face.
     private readonly minYClipPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     private readonly maxYClipPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
     private clipYOffset = 0;
@@ -81,8 +76,7 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
     private renderingBoundsCommitQueued = false;
     private pendingCommitMinY = 0;
     private pendingCommitMaxY = 0;
-    // What's actually loaded right now; a commit discards anything outside this range. See
-    // resetToFullRangeIfNeeded.
+
     private lastCommittedMinY = 0;
     private lastCommittedMaxY = 0;
 
@@ -91,7 +85,6 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
     private readonly schematicId = 'main';
     private destroyed = false;
 
-    // Manual drag tracking: mat-slider only commits on pointer-up (see attachDragListeners).
     private dragSetter: ((value: number) => void) | null = null;
     private dragEl: HTMLElement | null = null;
     private dragMin = 0;
@@ -124,10 +117,6 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
         URL.revokeObjectURL(url);
     }
 
-    /**
-     * Captures a transparent isometric PNG from the already-loaded viewer mesh
-     * (same quality as the interactive view; no second schematic load).
-     */
     async capturePreviewPng(width = 1024, height = 1024): Promise<File | null> {
         const renderer = this.schemRenderer;
         if (!renderer || this.loading() || this.error()) return null;
@@ -155,12 +144,12 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
             return null;
         } finally {
             try {
-                // Restore live view; takeScreenshot resizes the canvas.
+
                 renderer.setGridVisible(true);
                 if (prevMode && prevMode !== 'isometric') {
                     renderer.setCameraMode(prevMode);
                 } else {
-                    // Stay isometric but put the solid BG/grid back for interactive use.
+
                     renderer.setCameraMode('isometric');
                 }
                 await renderer.renderManager?.setBackgroundMode('solid', { color: '#1a1a2e' });
@@ -228,7 +217,7 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
                 (renderer.cameraManager as any).on('flyControlsLocked', () => this.flyLocked.set(true));
                 (renderer.cameraManager as any).on('flyControlsUnlocked', () => {
                     this.flyLocked.set(false);
-                    // Library re-shows its own overlay on every unlock; keep ours the only one.
+
                     renderer.cameraManager.flyControls?.setOverlayVisible(false);
                 });
 
@@ -248,7 +237,7 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
             }
 
             this.loading.set(false);
-            // Sliders are behind @if (!loading()); wait a tick for the ViewChild refs to exist.
+
             setTimeout(() => this.attachDragListeners());
         } catch (e) {
             console.error('Litematic viewer init error:', e);
@@ -261,14 +250,12 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
         return fetch(RESOURCE_PACK_URL).then(r => r.blob());
     }
 
-    /** Only arms fly mode; entering still needs a canvas click (see enterFlyMode). */
     toggleFlyMode(): void {
         const enabled = this.schemRenderer?.cameraManager.toggleFlyControls();
         this.flyMode.set(!!enabled);
         this.schemRenderer?.cameraManager.flyControls?.setOverlayVisible(false);
     }
 
-    /** Click handler for our own "Click to enter fly mode" overlay. */
     enterFlyMode(): void {
         this.schemRenderer?.cameraManager.flyControls?.lock();
     }
@@ -296,16 +283,15 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
         this.updateClipPlanes();
     }
 
-    /** (Re-)assigns the two clip planes to every material currently in the schematic's group. */
     private wireClippingPlanesOntoMaterials(schematicObj: SchematicWithBounds): void {
         schematicObj.group.traverse((obj) => {
-            // schematic-renderer bundles its own three.js, so `instanceof THREE.Mesh` fails.
+
             const mesh = obj as unknown as { isMesh?: boolean; material?: THREE.Material | THREE.Material[] };
             if (!mesh.isMesh || !mesh.material) return;
             const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
             for (const mat of materials) {
                 mat.clippingPlanes = [this.minYClipPlane, this.maxYClipPlane];
-                mat.needsUpdate = true; // clipping plane count is baked into the compiled shader
+                mat.needsUpdate = true;
             }
         });
     }
@@ -326,7 +312,6 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
         this.schemRenderer?.invalidate();
     }
 
-    /** Real, properly-capped rebuild at the current Y range; single-flight. */
     private commitRenderingBounds(): void {
         this.pendingCommitMinY = this.currentMinY();
         this.pendingCommitMaxY = this.currentMaxY();
@@ -334,7 +319,6 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
         void this.runRenderingBoundsCommit();
     }
 
-    /** Rebuilds against the full bounds when a drag crosses outside what's currently loaded. */
     private resetToFullRangeIfNeeded(): void {
         if (this.lastCommittedMinY <= this.minY && this.lastCommittedMaxY >= this.maxY) return;
         this.pendingCommitMinY = this.minY;
@@ -354,7 +338,7 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
                 this.renderingBoundsCommitQueued = false;
                 const targetMinY = this.pendingCommitMinY;
                 const targetMaxY = this.pendingCommitMaxY;
-                // Setting schematicObj.renderingBounds directly produces an unclipped rebuild.
+
                 this.schemRenderer?.setRenderingBounds(
                     this.schematicId,
                     [this.minX, targetMinY, this.minZ],
@@ -362,7 +346,7 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
                     false,
                 );
                 await this.waitForMeshesToSettle(schematicObj);
-                // rebuildMesh() disposes old materials and may re-centre the group.
+
                 this.clipYOffset = schematicObj.group.position.y;
                 this.wireClippingPlanesOntoMaterials(schematicObj);
                 this.disableClipPlanes();
@@ -376,7 +360,6 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
         }
     }
 
-    /** Polls the group's child count until steady; rebuildMesh()'s own promise isn't reliable. */
     private async waitForMeshesToSettle(schematicObj: SchematicWithBounds, maxWaitMs = 90000): Promise<void> {
         const start = Date.now();
         let lastCount = -1;
@@ -384,7 +367,7 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
         while (Date.now() - start < maxWaitMs) {
             const count = schematicObj.group.children.length;
             if (count > 0 && count === lastCount) {
-                if (++stableStreak >= 3) return; // unchanged for ~600ms
+                if (++stableStreak >= 3) return;
             } else {
                 stableStreak = 0;
             }
@@ -393,7 +376,6 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
         }
     }
 
-    /** Wires up manual drag tracking on the slider wrapper elements once they exist. */
     private attachDragListeners(): void {
         const minYEl = this.minYTrackRef?.nativeElement;
         const maxYEl = this.maxYTrackRef?.nativeElement;
@@ -421,7 +403,7 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
         this.dragMin = min;
         this.dragMax = max;
         this.dragSetter = setter;
-        this.updateClipPlanes(); // re-enable, was disabled after the last commit
+        this.updateClipPlanes();
         this.updateFromPointer(event);
         document.addEventListener('pointermove', this.onDocPointerMove);
         document.addEventListener('pointerup', this.onDocPointerUp);
@@ -437,7 +419,7 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
         this.dragEl = null;
         document.removeEventListener('pointermove', this.onDocPointerMove);
         document.removeEventListener('pointerup', this.onDocPointerUp);
-        // Clip planes were only ever a live preview; hand off to a real, capped rebuild now.
+
         if (wasDragging) this.commitRenderingBounds();
     };
 

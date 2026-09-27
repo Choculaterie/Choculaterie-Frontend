@@ -1,6 +1,5 @@
 @use '@angular/material' as mat;
 
-// Self-hosted Minecraft fonts
 @font-face {
   font-family: 'Minecraft';
   src: url('/static/fonts/MinecraftRegular-Bmg3.otf') format('opentype');
@@ -36,14 +35,13 @@
 html {
   height: 100%;
   scrollbar-gutter: stable;
-  // Light theme (default)
+
   @include mat.theme((color: (primary: mat.$magenta-palette, tertiary: mat.$violet-palette, theme-type: light),
       typography: Minecraft,
       density: 0,
     ));
 }
 
-// Dark theme via manual toggle
 html[data-theme='dark'] {
   @include mat.theme((color: (primary: mat.$magenta-palette, tertiary: mat.$violet-palette, theme-type: dark),
       typography: Minecraft,
@@ -51,7 +49,6 @@ html[data-theme='dark'] {
     ));
 }
 
-// Dark theme via OS preference when no manual override
 @media (prefers-color-scheme: dark) {
   html:not([data-theme]) {
     @include mat.theme((color: (primary: mat.$magenta-palette, tertiary: mat.$violet-palette, theme-type: dark),
@@ -61,11 +58,6 @@ html[data-theme='dark'] {
   }
 }
 
-// Material's generated elevation shadows (mat-sys-level*) are plain black at every theme-type -
-// on a dark surface a black drop shadow barely reads against the equally-dark background, so
-// every card/element hovering via `box-shadow: var(--mat-sys-levelN)` looked like it wasn't
-// doing anything in dark mode. Add a light-tinted glow alongside the drop shadow so the same
-// hover styling stays visible in both themes without touching each component.
 @mixin visible-dark-elevation {
   --mat-sys-level2: 0px 3px 3px -2px rgba(0, 0, 0, .4), 0px 3px 4px 0px rgba(0, 0, 0, .3), 0px 0px 0px 1px rgba(255, 255, 255, .12);
   --mat-sys-level3: 0px 3px 5px -1px rgba(0, 0, 0, .4), 0px 6px 10px 0px rgba(0, 0, 0, .3), 0px 0px 0px 1px rgba(255, 255, 255, .14);
@@ -89,7 +81,6 @@ body {
   height: 100%;
 }
 
-/* ── Material Symbols Outlined (M3 icons) ────────────────────── */
 .material-icons {
   font-family: 'Material Symbols Outlined' !important;
   font-weight: normal;
@@ -109,7 +100,6 @@ body {
   }
 }
 
-/* Fix icon button centering - force square 40×40 state layer & centered glyph */
 .mat-mdc-icon-button.mat-mdc-button-base {
   --mdc-icon-button-state-layer-size: 40px;
   --mdc-icon-button-icon-size: 24px;
@@ -125,14 +115,12 @@ body {
   }
 }
 
-/* ── SVG icon sizing ────────────────────────────────────── */
 svg.mc-icon {
   display: inline-block;
   vertical-align: middle;
   flex-shrink: 0;
 }
 
-/* ── Utility layout ─────────────────────────────────────────── */
 .page-container {
   max-width: 960px;
   margin: 0 auto;
@@ -207,7 +195,6 @@ svg.mc-icon {
   }
 }
 
-/* ── Button icon + text alignment ────────────────────────────── */
 button[mat-flat-button],
 button[mat-stroked-button],
 a[mat-flat-button],
@@ -219,7 +206,6 @@ a[mat-stroked-button] {
   }
 }
 
-/* ── Toast snack-bar (Gmail-style, M3) ──────────────────────────────── */
 .mat-mdc-snack-bar-container {
   --mdc-snackbar-container-shape: 12px;
   margin: 0 0 1rem 1rem !important;
@@ -252,7 +238,6 @@ a[mat-stroked-button] {
   }
 }
 
-/* Light theme (default) */
 .mat-mdc-snack-bar-container.toast-success,
 .mat-mdc-snack-bar-container.toast-error,
 .mat-mdc-snack-bar-container.toast-info {
@@ -261,7 +246,6 @@ a[mat-stroked-button] {
   }
 }
 
-/* Dark theme */
 html[data-theme='dark'] {
   .mat-mdc-snack-bar-container.toast-success,
   .mat-mdc-snack-bar-container.toast-error,
@@ -272,11 +256,6 @@ html[data-theme='dark'] {
   }
 }
 
-/* ── Markdown rendered content ──────────────────────────────── */
-
-
-
-/* Fix async validator spinner alignment in mat-form-field suffix */
 .mat-mdc-form-field .mat-mdc-form-field-icon-suffix {
   padding-right: 0.75rem;
 }
@@ -363,7 +342,6 @@ html[data-theme='dark'] {
   width: auto !important;
 }
 
-// Litematic 3D viewer dialog - remove default padding for full-bleed canvas
 .litematic-viewer-dialog .mat-mdc-dialog-container .mdc-dialog__surface {
   padding: 0;
   overflow: hidden;
@@ -373,7 +351,6 @@ html[data-theme='dark'] {
   }
 }
 
-// Inbox dialog - full-bleed content
 .inbox-dialog-panel {
   .mat-mdc-dialog-container .mdc-dialog__surface {
     padding: 0;
@@ -392,12 +369,6 @@ html[data-theme='dark'] {
   }
 }
 
-/* ── Swipeable tab headers ────────────────────────────────────── */
-// Angular Material positions .mat-mdc-tab-list with translateX() internally.
-// Nulling that transform hands scroll control entirely to the container's
-// native overflow-x, so the user can finger-scroll freely in both directions
-// without the browser and Angular fighting each other.
-// disablePagination (on each mat-tab-group) removes the arrow buttons.
 @media (max-width: 600px) {
   .mat-mdc-tab-label-container {
     overflow-x: auto !important;
@@ -411,41 +382,30 @@ html[data-theme='dark'] {
   }
 
   .mat-mdc-tab-list {
-    // Make the list as wide as all tab labels combined so the container
-    // actually has content to scroll over.
+
     min-width: max-content;
-    // Kill Angular's transform-scroll so it doesn't double-offset tabs.
+
     transform: none !important;
   }
 
-  // Ensure arrows are gone on all screen sizes with disablePagination.
   .mat-mdc-tab-header-pagination {
     display: none !important;
   }
 }
 
-/* ── Scrollable table fix ──────────────────────────────────────── */
-// Tables inside .table-scroll should fill the wrapper width when their content
-// is narrower than the viewport, but overflow (and enable horizontal scroll)
-// when content is wider.
 .table-scroll .mat-mdc-table,
 .table-scroll table.mat-mdc-table {
   width: 100%;
-  // min-content, not max-content: max-content sizes columns to their longest
-  // unwrapped header, which forced a scrollbar the data never needed.
+
   min-width: min-content;
 }
 
-// Actions columns contain icon buttons.  Material's MDC table sets overflow:hidden
-// on cells, which causes icon ligature text to be clipped and rendered as "..."
-// (3 dots). Override globally so icon buttons in actions columns always render.
 .mat-column-actions {
   overflow: visible !important;
   text-overflow: clip !important;
   white-space: nowrap;
 }
 
-/* ── Inline loading GIF (replaces mat-spinner diameter="18") ── */
 .btn-loading-gif {
   width: 18px;
   height: 18px;
@@ -453,7 +413,6 @@ html[data-theme='dark'] {
   vertical-align: middle;
 }
 
-/* ── Pixel-art icons (public/icons/**) ── */
 img[src*='icons/'] {
   width: 20px;
   height: 20px;
@@ -491,8 +450,6 @@ html:not([data-theme]) img[src*='icons/'] {
   filter: invert(1);
 }
 
-
-/* mat-pseudo-checkbox checkmark → check.svg */
 .mat-pseudo-checkbox-checked.mat-pseudo-checkbox-full,
 .mat-pseudo-checkbox-indeterminate.mat-pseudo-checkbox-full {
   background-color: var(--mat-sys-primary) !important;
@@ -523,7 +480,6 @@ html:not([data-theme]) img[src*='icons/'] {
   }
 }
 
-/* Game version multi-select → box.svg / box_checked.svg */
 .game-versions-panel .mat-pseudo-checkbox-full {
   border: none !important;
   border-radius: 0 !important;
@@ -551,7 +507,6 @@ html:not([data-theme]) img[src*='icons/'] {
   filter: invert(1);
 }
 
-/* ── MC icon replacements ── */
 .mat-mdc-form-field-icon-prefix>img.mc-icon,
 .mat-mdc-form-field-icon-suffix>img.mc-icon {
   padding: 0 12px;
@@ -573,12 +528,10 @@ html:not([data-theme]) img[src*='icons/'] {
   filter: none !important;
 }
 
-/* Drawn / accent-coloured icons (use with inline SVGs that use currentColor) */
 .mc-icon--draw {
   color: var(--mat-sys-secondary);
 }
 
-/* Inverted-theme icon: dark on dark theme, white on light theme */
 .mc-icon--inverted {
   filter: invert(1);
 }
@@ -661,7 +614,6 @@ html:not([data-theme]) img[src*='icons/'] {
   filter: none;
 }
 
-/* ── Paginator navigation icons ── */
 .mat-mdc-paginator-navigation-previous,
 .mat-mdc-paginator-navigation-next,
 .mat-mdc-paginator-navigation-first,
@@ -692,8 +644,6 @@ html:not([data-theme]) img[src*='icons/'] {
 
 }
 
-/* Two-tone like the drawn icons: currentColor for the shape, --mc-icon-shadow
-   for the shadow, so a disabled button greys the arrow through its own colour. */
 .mat-mdc-paginator-navigation-previous::after {
   background-color: currentColor;
   -webkit-mask-image: url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%20shape-rendering='crispEdges'><path%20fill='black'%20d='M16%2C5h6v1h-6zM16%2C6h6v1h-6zM16%2C7h6v1h-6zM10%2C8h6v1h-6zM10%2C9h6v1h-6zM10%2C10h6v1h-6zM3%2C11h7v1h-7zM3%2C12h7v1h-7zM3%2C13h7v1h-7zM10%2C14h6v1h-6zM10%2C15h6v1h-6zM10%2C16h6v1h-6zM10%2C17h6v1h-6zM16%2C18h6v1h-6zM16%2C19h6v1h-6zM16%2C20h6v1h-6z'/></svg>");
@@ -823,13 +773,11 @@ html:not([data-theme]) img[src*='icons/'] {
   mask-size: contain;
 }
 
-/* Material marks these aria-disabled, not disabled, so they stayed clickable. */
 .mat-mdc-paginator .mat-mdc-icon-button[aria-disabled='true'],
 .mat-mdc-paginator .mat-mdc-icon-button[disabled] {
   pointer-events: none;
   cursor: default;
 
-  // The shadow is a fixed colour, so it has to dim with the shape.
   &::before {
     opacity: 0.38;
   }
@@ -844,7 +792,6 @@ html:not([data-theme]) img[src*='icons/'] {
   }
 }
 
-/* ── Flag reset-reports button ── */
 .flag-btn {
   overflow: visible !important;
   position: relative;
@@ -877,7 +824,6 @@ html:not([data-theme]) img[src*='icons/'] {
   }
 }
 
-/* ── Check mark button (inbox dialog) ── */
 .check-icon-btn {
   overflow: visible !important;
   position: relative;
@@ -910,7 +856,6 @@ html:not([data-theme]) img[src*='icons/'] {
   }
 }
 
-/* ── Mat select arrow → tild_full_down ── */
 .mat-mdc-select-arrow-wrapper {
 
   .mat-mdc-select-arrow svg {
@@ -946,7 +891,6 @@ html:not([data-theme]) img[src*='icons/'] {
   }
 }
 
-/* ── Mat sort header custom arrows ── */
 .mat-sort-header-arrow {
   transition: opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) !important;
   transform: none !important;

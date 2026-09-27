@@ -22,7 +22,7 @@ export interface SkinViewerDialogData {
 @Component({
     selector: 'app-skin-viewer-dialog',
     standalone: true,
-    imports: [TPipe, 
+    imports: [TPipe,
         MatDialogModule,
         MatButtonModule,
         MatIconModule,
@@ -47,7 +47,7 @@ export class SkinViewerDialogComponent implements AfterViewInit, OnDestroy {
         private dialogRef: MatDialogRef<SkinViewerDialogComponent>,
         private mojang: MojangProxyService,
     ) {
-        // Show player name immediately from the passed-in data
+
         this.playerName.set(data.username);
     }
 
@@ -87,7 +87,7 @@ export class SkinViewerDialogComponent implements AfterViewInit, OnDestroy {
         this.error.set('');
 
         try {
-            // Step 1: username → UUID via proxy
+
             const profileUrl = `https://api.mojang.com/users/profiles/minecraft/${encodeURIComponent(username)}`;
             const profile = await this.mojang
                 .getApiMojangProxy<{ id: string; name: string }>({ endpoint: profileUrl })
@@ -102,7 +102,6 @@ export class SkinViewerDialogComponent implements AfterViewInit, OnDestroy {
             const uuid = profile.id.replace(/-/g, '');
             this.playerName.set(profile.name);
 
-            // Step 2: UUID → session profile with textures
             const sessionUrl = `https://sessionserver.mojang.com/session/minecraft/profile/${uuid}`;
             const session = await this.mojang
                 .getApiMojangProxy<{ name: string; properties: { name: string; value: string }[] }>({ endpoint: sessionUrl })
@@ -168,8 +167,7 @@ export class SkinViewerDialogComponent implements AfterViewInit, OnDestroy {
         this.viewer.renderPaused = true;
         this.viewer.render();
         const canvas = this.canvasRef.nativeElement;
-        // No Gecko flip here: this reads the on-screen canvas, which is top-down,
-        // unlike takeScreenshot() which reads an offscreen target bottom-up.
+
         const url = canvas.toDataURL('image/png');
         this.viewer.renderPaused = false;
         const a = document.createElement('a');
@@ -189,9 +187,9 @@ export class SkinViewerDialogComponent implements AfterViewInit, OnDestroy {
         out.height = 128;
         const ctx = out.getContext('2d')!;
         ctx.imageSmoothingEnabled = false;
-        // Face base layer (8,8 on the skin texture)
+
         ctx.drawImage(img, 8, 8, 8, 8, 0, 0, 128, 128);
-        // Hat/overlay layer (40,8 on the skin texture)
+
         ctx.drawImage(img, 40, 8, 8, 8, 0, 0, 128, 128);
         const a = document.createElement('a');
         a.href = out.toDataURL('image/png');

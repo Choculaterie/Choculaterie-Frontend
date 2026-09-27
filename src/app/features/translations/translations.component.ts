@@ -26,8 +26,8 @@ import { translateText } from '../../core/i18n/translation.store';
 import ISO6391 from 'iso-639-1';
 
 interface PlaceholderHint {
-    token: string;   // what the app needs, e.g. {$PH_1}
-    label: string;   // what the translator sees, e.g. "value 2"
+    token: string;
+    label: string;
     hint: string;
 }
 
@@ -181,8 +181,8 @@ const EXPANSIONS: Record<string, string> = {
 
 function describeExpr(expr: string): string {
     let inner = expr.replace(/^\{\{\s*/, '').replace(/\s*\}\}$/, '').trim();
-    inner = inner.split('|')[0].trim();                 // drop any pipe
-    inner = inner.replace(/\(.*\)$/, '');               // drop call parentheses
+    inner = inner.split('|')[0].trim();
+    inner = inner.replace(/\(.*\)$/, '');
     const last = inner.split(/[.?]/).filter(Boolean).pop() ?? '';
     const word = last.replace(/[^A-Za-z0-9_]/g, '');
     if (!word || word.length > 24) return '';
@@ -192,7 +192,7 @@ function describeExpr(expr: string): string {
 
 @Component({
     selector: 'app-translations',
-    imports: [TPipe, 
+    imports: [TPipe,
         DatePipe, FormsModule, RouterLink, MatCardModule, MatButtonModule, MatIconModule,
         MatSelectModule, MatFormFieldModule, MatInputModule, MatTooltipModule,
         MatProgressBarModule, MatPaginatorModule, MatAutocompleteModule, SearchFieldComponent,
@@ -663,7 +663,6 @@ export class TranslationsComponent implements OnInit {
     readonly generating = signal<string | null>(null);
     private readonly drafts = signal<Record<string, string>>({});
 
-    /** Set while editing tags or FAQ rather than catalog strings. */
     readonly contentGroup = signal<string | null>(null);
     readonly contentGroups = signal<PageGroup[]>([]);
     private readonly phMeta = signal<Record<string, PlaceholderHint[]>>({});
@@ -677,8 +676,6 @@ export class TranslationsComponent implements OnInit {
         this.loadPlaceholderMeta();
         this.loadLocales();
 
-        // Back/forward arrive as param changes now the component survives depth changes.
-        // Our own syncUrl navigations already match urlFor(), so they fall through.
         this.route.paramMap.subscribe(() => {
             if (this.router.url.split('?')[0] === this.urlFor().join('/').replace('//', '/')) return;
             this.restoreFromUrl();
@@ -709,7 +706,7 @@ export class TranslationsComponent implements OnInit {
         if (!group) { this.setView('pages'); return; }
 
         if (group === 'all') {
-            // A trailing index means this URL points at one string, not the list.
+
             if (p.get('index') !== null) {
                 this.loading.set(true);
                 this.contentGroup.set(null);
@@ -728,8 +725,6 @@ export class TranslationsComponent implements OnInit {
             return;
         }
 
-        // Tags and FAQ are not in the catalog groups endpoint, so they resolve from the
-        // content endpoint instead.
         if (this.isContentGroup(group)) {
             this.view.set(p.get('index') === 'all' ? 'list' : 'focus');
             this.loading.set(true);
@@ -746,8 +741,6 @@ export class TranslationsComponent implements OnInit {
             return;
         }
 
-        // Show the destination immediately. Resolving the group is a second fetch, and
-        // rendering the pages view meanwhile is what made the search field disappear.
         this.view.set(p.get('index') === 'all' ? 'list' : 'pages');
         this.loading.set(true);
         this.http.get<any>(`/api/Translations/groups/${this.locale}`).subscribe({
@@ -794,8 +787,6 @@ export class TranslationsComponent implements OnInit {
             return base;
         }
 
-        // A string from the unscoped list has no group, but the URL still needs a 4th
-        // segment or it collapses onto the pages route.
         const g = this.activeGroup();
         base.push(g ? slugify(g.group) : 'all');
         base.push(String(this.index()));
@@ -846,10 +837,6 @@ export class TranslationsComponent implements OnInit {
         return out;
     }
 
-     /**
-      * Highlights only the labels this string actually has. Highlighting any quoted
-      * text marked things as variables that had no chip to insert.
-      */
     segments(text: string | null | undefined, id?: string): { text: string; isValue: boolean }[] {
         const pairs = labelsOf(text ?? '', id ? this.names(id) : {});
         const shown = toDisplay(text, pairs);
@@ -898,7 +885,6 @@ export class TranslationsComponent implements OnInit {
         return l.total ? Math.round((l.translated / l.total) * 100) : 0;
     }
 
-    // Tags and FAQ are listed under Website, so they count towards it.
     websiteTotal(): number {
         return (this.currentLocale()?.total ?? 0) + this.contentTotal();
     }
@@ -1089,7 +1075,6 @@ export class TranslationsComponent implements OnInit {
         return t ? Math.round(this.contentDone() / t * 100) : 0;
     }
 
-    /** Counts for the sections card, without opening the group list. */
     loadContentProgress(): void {
         this.http.get<{ total: number; translated: number; groups: PageGroup[] }>(
             `/api/Translations/content/groups/${this.locale}`).subscribe({
@@ -1103,15 +1088,10 @@ export class TranslationsComponent implements OnInit {
         });
     }
 
-    /** True for the database-backed groups listed under Website. */
     isContentGroup(group: string): boolean {
         return group === 'tags' || group === 'faq';
     }
 
-    /**
-     * Tags and FAQ are database rows, not catalog strings, but they appear as
-     * ordinary groups under Website so translators do not have to care.
-     */
     private appendContentGroups(): void {
         this.http.get<{ total: number; translated: number; groups: PageGroup[] }>(
             `/api/Translations/content/groups/${this.locale}`).subscribe({
@@ -1120,7 +1100,7 @@ export class TranslationsComponent implements OnInit {
                 this.contentGroups.set(extra);
                 this.contentTotal.set(r.total ?? 0);
                 this.contentDone.set(r.translated ?? 0);
-                // The backend orders groups by size, so these slot in by size too.
+
                 this.groups.update((g) => [
                     ...g.filter((x) => !this.isContentGroup(x.group)),
                     ...extra,
@@ -1143,10 +1123,6 @@ export class TranslationsComponent implements OnInit {
         return out;
     }
 
-     /**
-      * Shared by catalog strings and by tags/FAQ so the two cannot drift: untranslated
-      * last, and resume at the first one still to do.
-      */
     private installQueue(items: CatalogString[], startAt: number): void {
         items.sort((a, b) => Number(!a.approved) - Number(!b.approved));
         this.queue.set(items);
@@ -1240,7 +1216,6 @@ export class TranslationsComponent implements OnInit {
     startQueue(g: PageGroup, startAt = 0): void {
         if (this.isContentGroup(g.group)) { this.startContentQueue(g, startAt); return; }
 
-        // Must clear, or a catalog group opened after Tags/FAQ saves to the wrong endpoint.
         this.contentGroup.set(null);
         this.loading.set(true);
         this.activeGroup.set(g);
@@ -1256,9 +1231,6 @@ export class TranslationsComponent implements OnInit {
             });
     }
 
-    /// The strings endpoint hard-caps pageSize at 200, so a group can exceed one
-    /// page. Loop until every match is collected rather than silently truncating
-    /// the queue, which is what let Next dead-end and bounce back to the pages list.
     private async fetchAllStrings(params: Record<string, string | boolean>): Promise<CatalogString[]> {
         const pageSize = 200;
         const first = await firstValueFrom(
@@ -1304,7 +1276,6 @@ export class TranslationsComponent implements OnInit {
         this.drafts.update((d) => ({ ...d, [st.id]: value }));
     }
 
-    /** Copies the English text in, for terms that are identical. */
     useSource(st: CatalogString): void {
         this.setDraft(st, st.sourceText);
     }

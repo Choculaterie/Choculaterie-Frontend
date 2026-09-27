@@ -14,7 +14,7 @@ import { TicketReplyViewDialogComponent } from '../ticket-reply-view-dialog/tick
 @Component({
     selector: 'app-inbox-dialog',
     standalone: true,
-    imports: [TPipe, 
+    imports: [TPipe,
         MatDialogModule,
         MatButtonModule,
         MatTooltipModule,
@@ -137,7 +137,6 @@ export class InboxDialogComponent {
         return `${n.source}-${n.id}`;
     }
 
-    /** Map admin notification type to admin tab index */
     private notifTab(type: string): number {
         switch (type) {
             case 'tag_suggestion': return 5;
@@ -176,7 +175,6 @@ export class InboxDialogComponent {
             return;
         }
 
-        // User notification
         if (!n.isRead) {
             this.notificationsApi.postApiNotificationsIdRead(n.id as number).subscribe({
                 next: () => this.realtime.markUserNotificationRead(n.id),
