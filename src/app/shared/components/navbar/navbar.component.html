@@ -106,7 +106,11 @@
         <mat-divider />
         <button mat-menu-item (click)="logout()" class="logout-item">
             <img src="/icons/ui/power.svg" alt="" aria-hidden="true" matMenuItemIcon class="mc-icon" />
+            @if (session.isImpersonating()) {
+            <span>{{ 'Back to' | t }} {{ session.impersonator()?.username }}</span>
+            } @else {
             <span>{{ 'Logout' | t }}</span>
+            }
         </button>
     </mat-menu>
     } @else {

@@ -5,6 +5,7 @@ import type { LoginResponse, OwnProfileResponse } from '../../api/generated.sche
 const TOKEN_KEY = 'auth_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
 const USER_KEY = 'auth_user';
+const IMPERSONATOR_KEY = 'auth_impersonator';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -15,6 +16,10 @@ export class SessionService {
     readonly profile = this._profile.asReadonly();
     readonly isAuthenticated = computed(() => !!this._user());
 
+    private _impersonating = signal(!!this.loadImpersonator());
+    readonly isImpersonating = this._impersonating.asReadonly();
+    readonly impersonator = computed(() => this.loadImpersonator());
+
     constructor(private router: Router) { }
 
     isAdminOrMod(): boolean {
@@ -22,13 +27,35 @@ export class SessionService {
         return role === 'admin' || role === 'mod';
     }
 
-    setSession(response: LoginResponse | Omit<LoginResponse, 'filePath'>): void {
+    setSession(response: LoginResponse | Omit<LoginResponse, 'filePath'>, keepImpersonator = false): void {
         const session: LoginResponse = { filePath: null, ...response };
         localStorage.setItem(TOKEN_KEY, session.token);
         localStorage.setItem(REFRESH_TOKEN_KEY, session.refreshToken);
         localStorage.setItem(USER_KEY, JSON.stringify(session));
+        if (!keepImpersonator) {
+            localStorage.removeItem(IMPERSONATOR_KEY);
+            this._impersonating.set(false);
+        }
         this._user.set(session);
         this._profile.set(null);
+    }
+
+    beginImpersonation(response: LoginResponse | Omit<LoginResponse, 'filePath'>): void {
+        const current = this._user();
+        if (current && !localStorage.getItem(IMPERSONATOR_KEY)) {
+            localStorage.setItem(IMPERSONATOR_KEY, JSON.stringify(current));
+        }
+        this.setSession(response, true);
+        this._impersonating.set(true);
+    }
+
+    stopImpersonation(): LoginResponse | null {
+        const previous = this.loadImpersonator();
+        if (!previous) return null;
+        localStorage.removeItem(IMPERSONATOR_KEY);
+        this._impersonating.set(false);
+        this.setSession(previous);
+        return previous;
     }
 
     setProfile(profile: OwnProfileResponse): void {
@@ -44,12 +71,28 @@ export class SessionService {
     }
 
     clear(redirect = true): void {
+        const restored = this.stopImpersonation();
+        if (restored) {
+            if (redirect) this.router.navigate(['/admin']);
+            return;
+        }
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(REFRESH_TOKEN_KEY);
         localStorage.removeItem(USER_KEY);
+        localStorage.removeItem(IMPERSONATOR_KEY);
+        this._impersonating.set(false);
         this._user.set(null);
         this._profile.set(null);
         if (redirect) this.router.navigate(['/auth/login']);
+    }
+
+    private loadImpersonator(): LoginResponse | null {
+        try {
+            const raw = localStorage.getItem(IMPERSONATOR_KEY);
+            return raw ? (JSON.parse(raw) as LoginResponse) : null;
+        } catch {
+            return null;
+        }
     }
 
     private loadUser(): LoginResponse | null {

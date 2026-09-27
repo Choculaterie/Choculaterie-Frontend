@@ -682,7 +682,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             if (ok) {
                 this.adminApi.postApiAdminUsersLoginAs({ userId: user.id }).subscribe({
                     next: (res) => {
-                        this.session.setSession(res);
+                        this.session.beginImpersonation(res);
                         this.router.navigate(['/users', user.username]);
                         this.toast.success(ADMIN.loggedInAs(user.username));
                     },
