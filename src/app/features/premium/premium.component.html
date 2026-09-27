@@ -7,8 +7,8 @@
         <p>{{ 'Support the project and unlock extra perks.' | t }}</p>
     </header>
 
-    @if (subscription()?.isPremium) {
-    <mat-card appearance="outlined" class="status-card">
+    @if (!loadingSubscription() && subscription()?.isPremium) {
+    <mat-card appearance="outlined" class="status-card settle-in">
         <mat-card-content>
             <img src="/premium.png" alt="" aria-hidden="true" class="mc-icon premium-icon" />
             <div>
@@ -50,7 +50,8 @@
                     <span class="feature-with-info">{{ 'Automatic cloud sync' | t }}
                         <img src="/icons/ui/!!.svg" alt="" aria-hidden="true" class="mc-icon info-point"
                             [matTooltip]="'Pick which worlds sync by marking them as favourite with the star in the mod. Only favourited worlds upload automatically.' | t"
-                            matTooltipTouchGestures="on" />
+                            matTooltipTouchGestures="on" draggable="false"
+                            (contextmenu)="$event.preventDefault()" />
                     </span>
                 </td>
                 <td><img src="/icons/letters/X.svg" alt="No" class="mc-icon cross-icon" /></td>
@@ -61,7 +62,8 @@
                     <span class="feature-with-info">{{ 'Version history per world' | t }}
                         <img src="/icons/ui/!!.svg" alt="" aria-hidden="true" class="mc-icon info-point"
                             [matTooltip]="'Premium keeps earlier backups of each world, one per day over the last three days, so you can roll back to how it was on a previous day. Free keeps only the current one.' | t"
-                            matTooltipTouchGestures="on" />
+                            matTooltipTouchGestures="on" draggable="false"
+                            (contextmenu)="$event.preventDefault()" />
                     </span>
                 </td>
                 <td><img src="/icons/letters/X.svg" alt="No" class="mc-icon cross-icon" /></td>
@@ -75,8 +77,8 @@
         </tbody>
     </table>
 
-    @if (!subscription()?.isPremium) {
-    <div class="pay-options">
+    @if (!loadingSubscription() && !subscription()?.isPremium) {
+    <div class="pay-options settle-in">
         <button mat-flat-button color="primary" class="subscribe-btn" [disabled]="checkingOut()" (click)="subscribe()">
             {{ (checkingOut() ? 'Redirecting…' : 'Subscribe with card') | t }}
         </button>

@@ -1000,3 +1000,8 @@ html:not([data-theme]) img[src*='icons/'] {
 }
 
 .tab-hidden { display: none !important; }
+
+.mat-mdc-dialog-actions {
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+}
