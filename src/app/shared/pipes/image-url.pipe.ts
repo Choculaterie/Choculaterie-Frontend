@@ -11,11 +11,17 @@ export function schematicImageUrl(filePath: string | null | undefined): string {
     return `${environment.apiBasePath}/images/schematics/${encodePathSegments(filePath)}`;
 }
 
+export function userImageUrl(filePath: string | null | undefined): string {
+    if (!filePath) return '';
+    if (filePath.startsWith('http')) return filePath;
+    const relative = filePath.startsWith('users/') ? filePath.slice('users/'.length) : filePath;
+    return `${environment.apiBasePath}/images/users/${encodePathSegments(relative)}`;
+}
+
 @Pipe({ name: 'userImg', standalone: true })
 export class UserImgPipe implements PipeTransform {
     transform(filePath: string | null | undefined): string {
-        if (!filePath) return '';
-        return `${environment.apiBasePath}/images/users/${encodePathSegments(filePath)}`;
+        return userImageUrl(filePath);
     }
 }
 

@@ -16,8 +16,11 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { AdminService } from '../../api/admin';
+import { BillingService } from '../../api/billing';
+import type { AdminUserBilling } from '../../api/billing';
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { PremiumHistoryDialogComponent } from './premium-history-dialog.component';
 import { UserImgPipe } from '../../shared/pipes/image-url.pipe';
 import { NumberFormatPipe } from '../../shared/pipes/number-format.pipe';
 import type { AdminUserDetailResponse } from '../../api/generated.schemas';
@@ -59,6 +62,12 @@ export type AdminUserDialogResult = 'deleted' | null;
         <a [routerLink]="['/users', u.username]" mat-dialog-close class="username-link">{{ u.username }}</a>
         @if (u.badge != null) {
         <img src="/icons/ui/start.svg" alt="" aria-hidden="true" class="badge-icon" [matTooltip]="badgeLabel(u.badge)" />
+        }
+        @if (billing(); as b) {
+        <img [src]="b.isPremium ? '/premium.png' : '/free.png'" alt="" aria-hidden="true" class="plan-icon"
+            [matTooltip]="b.isPremium
+                ? (('Premium until' | t) + ' ' + (b.premiumUntil | date:'mediumDate'))
+                : ('Free plan' | t)" />
         }
     </div>
     <button mat-icon-button mat-dialog-close class="close-btn">
@@ -192,6 +201,8 @@ export type AdminUserDialogResult = 'deleted' | null;
             <input matInput type="number" [value]="editQuota()"
                 (input)="editQuota.set(+$any($event.target).value)" min="0" step="0.5" />
         </mat-form-field>
+
+        <button mat-stroked-button (click)="openPremium()">{{ 'Manage premium' | t }}</button>
     </div>
 
     <mat-divider class="section-div" />
@@ -281,11 +292,13 @@ export type AdminUserDialogResult = 'deleted' | null;
         .note-field textarea { resize: vertical; }
         .table-scroll { overflow-x: auto; width: 100%; }
         .compact-table .mat-mdc-cell, .compact-table .mat-mdc-header-cell { padding: 4px 8px; font-size: 0.85rem; }
+        .plan-icon { width: 22px; height: 22px; flex-shrink: 0; }
     `],
 })
 export class AdminUserDialogComponent {
     constructor() {
         this.loadBadges();
+        this.loadBilling();
     }
 
     private adminApi = inject(AdminService);
@@ -303,6 +316,44 @@ export class AdminUserDialogComponent {
     readonly editQuota = signal<number>(Number(this.u.storageQuotaGb));
     readonly editNote = signal<string>(this.u.adminNote ?? '');
 
+    private billingApi = inject(BillingService);
+    readonly billing = signal<AdminUserBilling | null>(null);
+    readonly loadingBilling = signal(false);
+
+    private loadBilling(): void {
+        this.loadingBilling.set(true);
+        this.billingApi.adminGetUserBilling(this.u.id).subscribe({
+            next: (b) => { this.billing.set(b); this.loadingBilling.set(false); },
+            error: () => this.loadingBilling.set(false),
+        });
+    }
+
+    
+    openPremium(): void {
+        const ref = this.confirmDlg
+            .open(PremiumHistoryDialogComponent, {
+                data: { userId: this.u.id, username: this.u.username, billing: this.billing() },
+                width: '90vw',
+                maxWidth: '820px',
+                maxHeight: '88vh',
+                enterAnimationDuration: 0,
+                exitAnimationDuration: 0,
+                backdropClass: 'dlg-stacked-backdrop',
+            });
+
+        ref.afterOpened().subscribe(() => this.dialogRef.addPanelClass('dlg-hidden'));
+
+        ref.afterClosed().subscribe((result) => {
+            if (result === 'back') {
+                this.dialogRef.removePanelClass('dlg-hidden');
+                this.loadBilling();
+                return;
+            }
+            this.dialogRef.close();
+        });
+    }
+
+    
     readonly badges = Object.entries(Badge).filter(([, v]) => typeof v === 'number') as [string, number][];
     readonly badgeLabels = BADGE_LABELS;
 

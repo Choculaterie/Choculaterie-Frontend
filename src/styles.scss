@@ -949,3 +949,11 @@ html:not([data-theme]) img[src*='icons/'] {
   flex-wrap: wrap;
   row-gap: 0.5rem;
 }
+
+.dlg-hidden {
+  visibility: hidden;
+}
+
+.dlg-stacked-backdrop {
+  background: transparent;
+}

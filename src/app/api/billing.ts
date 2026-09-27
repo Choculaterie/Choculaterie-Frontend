@@ -46,6 +46,27 @@ export interface MoneroInvoice {
     premiumUntil: string | null;
 }
 
+export interface AdminPremiumGrant {
+    id: string;
+    source: string;
+    days: number;
+    createdAt: string;
+    revokedAt: string | null;
+    grantedByUserId: string | null;
+    reason: string | null;
+}
+
+export interface AdminUserBilling {
+    isPremium: boolean;
+    premiumUntil: string | null;
+    subscription: BillingSubscription | null;
+    grants: AdminPremiumGrant[];
+    payments: {
+        id: string; provider: string; eventType: string; amountCents: number | null;
+        currency: string | null; grantedDays: number; providerRef: string | null; processedAt: string;
+    }[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class BillingService {
     private http = inject(HttpClient);
@@ -64,6 +85,18 @@ export class BillingService {
 
     resumeSubscription(): Observable<{ message: string }> {
         return this.http.post<{ message: string }>('/api/Billing/resume', null);
+    }
+
+    adminGetUserBilling(userId: string): Observable<AdminUserBilling> {
+        return this.http.get<AdminUserBilling>(`/api/Admin/users/${userId}/billing`);
+    }
+
+    adminGrantPremium(userId: string, months: number, reason: string | null): Observable<AdminPremiumGrant> {
+        return this.http.post<AdminPremiumGrant>(`/api/Admin/users/${userId}/premium`, { months, reason });
+    }
+
+    adminRevokeGrant(grantId: string): Observable<{ message: string }> {
+        return this.http.delete<{ message: string }>(`/api/Admin/premium-grants/${grantId}`);
     }
 
     getMoneroPlans(): Observable<MoneroPlan[]> {
