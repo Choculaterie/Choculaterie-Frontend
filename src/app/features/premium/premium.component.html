@@ -76,8 +76,119 @@
     </table>
 
     @if (!subscription()?.isPremium) {
-    <button mat-flat-button color="primary" class="subscribe-btn" [disabled]="checkingOut()" (click)="subscribe()">
-        {{ (checkingOut() ? 'Redirecting…' : 'Subscribe with card') | t }}
-    </button>
+    <div class="pay-options">
+        <button mat-flat-button color="primary" class="subscribe-btn" [disabled]="checkingOut()" (click)="subscribe()">
+            {{ (checkingOut() ? 'Redirecting…' : 'Subscribe with card') | t }}
+        </button>
+        <button mat-stroked-button class="crypto-btn" (click)="toggleCrypto()">
+            {{ (showCrypto() ? 'Hide Monero payment' : 'Pay with Monero (XMR)') | t }}
+        </button>
+    </div>
+
+    @if (showCrypto()) {
+    <mat-card appearance="outlined" class="crypto-card" #cryptoSection>
+        <mat-card-content>
+            @if (!invoice()) {
+            <header class="crypto-head">
+                <h2>{{ 'Pay with Monero' | t }}</h2>
+                <span class="crypto-tag">{{ discountLabel() }}</span>
+            </header>
+            <p class="crypto-intro">{{ 'Prepaid, you cannot be refunded.' | t }}</p>
+
+            <div class="plan-grid">
+                @for (plan of plans(); track plan.months) {
+                <button type="button" class="plan" [class.selected]="selectedMonths() === plan.months"
+                    [attr.aria-pressed]="selectedMonths() === plan.months" (click)="selectMonths(plan.months)">
+                    <span class="plan-months">{{ plan.months }} {{ (plan.months === 1 ? 'month' : 'months') | t }}</span>
+                    <span class="plan-price">{{ price(plan.usdCents) }}</span>
+                    <span class="plan-was">{{ price(plan.listUsdCents) }}</span>
+                </button>
+                }
+            </div>
+
+            <button mat-flat-button color="primary" class="crypto-continue"
+                [disabled]="creatingInvoice() || !plans().length" (click)="createInvoice()">
+                @if (creatingInvoice()) {
+                <img src="loading.gif" alt="" aria-hidden="true" class="btn-loader" />
+                {{ 'Getting the current rate' | t }}
+                } @else if (selectedPlan(); as p) {
+                {{ 'Continue' | t }} &middot; {{ price(p.usdCents) }}
+                } @else {
+                {{ 'Continue' | t }}
+                }
+            </button>
+            } @else if (invoice()!.isPaid) {
+            <div class="invoice-paid">
+                <img src="/premium.png" alt="" aria-hidden="true" class="mc-icon paid-icon" />
+                <div>
+                    <strong>{{ 'Payment confirmed' | t }}</strong>
+                    @if (invoice()!.premiumUntil) {
+                    <p>{{ 'Premium is active until' | t }} {{ invoice()!.premiumUntil | date:'longDate' }}</p>
+                    }
+                </div>
+            </div>
+            <button mat-flat-button color="primary" class="crypto-continue" (click)="cancelInvoice()">{{ 'Done' | t }}</button>
+            } @else {
+            <header class="crypto-head">
+                <h2>{{ 'Send' | t }} {{ invoice()!.xmr }} XMR</h2>
+                <span class="crypto-tag">{{ invoice()!.months }} {{ (invoice()!.months === 1 ? 'month' : 'months') | t }} &middot; {{ price(invoice()!.usdCents) }}</span>
+            </header>
+            <p class="crypto-intro">{{ 'This price is held for' | t }} {{ minutesLeft() }} {{ 'minutes.' | t }} {{ 'Send the exact amount to the address below.' | t }}</p>
+
+            <div class="invoice-body">
+                <div class="qr-panel">
+                    @if (qr()) {
+                    <img class="invoice-qr" [src]="qr()" alt="{{ 'Monero payment QR code' | t }}" />
+                    } @else {
+                    <div class="invoice-qr qr-placeholder"></div>
+                    }
+                </div>
+
+                <div class="invoice-fields">
+                    <div class="field">
+                        <label>{{ 'Amount' | t }}</label>
+                        <div class="copy-row">
+                            <code>{{ invoice()!.xmr }} XMR</code>
+                            <button mat-icon-button [matTooltip]="'Copy' | t" (click)="copy(invoice()!.xmr, 'Amount')">
+                                <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="mc-icon" />
+                            </button>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>{{ 'Address' | t }}</label>
+                        <div class="copy-row">
+                            <code class="address">{{ invoice()!.address }}</code>
+                            <button mat-icon-button [matTooltip]="'Copy' | t" (click)="copy(invoice()!.address, 'Address')">
+                                <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="mc-icon" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="invoice-status" [class.seen]="invoice()!.receivedAtomic > 0">
+                <div class="status-row">
+                    <img src="loading.gif" alt="" aria-hidden="true" class="status-loader" />
+                    @if (invoice()!.receivedAtomic === 0) {
+                    <span>{{ 'Waiting for your payment' | t }}</span>
+                    } @else {
+                    <span>{{ 'Payment received, confirming on the network' | t }}
+                        ({{ invoice()!.confirmations }}/{{ invoice()!.confirmationsShown }})</span>
+                    }
+                </div>
+                @if (invoice()!.receivedAtomic > 0) {
+                <mat-progress-bar mode="determinate" [value]="confirmProgress()"></mat-progress-bar>
+                }
+                <p class="status-note">{{ 'Premium activates at the first confirmation, usually within a couple of minutes. You can close this page and it will still activate.' | t }}</p>
+                @if (invoice()!.status === 'Underpaid') {
+                <p class="status-warn">{{ 'Less than the full amount arrived. Contact support and we will sort it out.' | t }}</p>
+                }
+            </div>
+
+            <button mat-stroked-button class="invoice-cancel" (click)="cancelInvoice()">{{ 'Back' | t }}</button>
+            }
+        </mat-card-content>
+    </mat-card>
+    }
     }
 </div>

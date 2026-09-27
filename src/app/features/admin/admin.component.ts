@@ -489,7 +489,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         if (idx) params.set('tab', String(idx)); else params.delete('tab');
         params.delete('page');
         // Drop ticketId when leaving tickets tab via manual click
-        if (idx !== 8) params.delete('ticketId');
+        if (idx !== 9) params.delete('ticketId');
         const qs = params.toString();
         this.location.replaceState(window.location.pathname + (qs ? '?' + qs : ''));
 
@@ -512,15 +512,15 @@ export class AdminComponent implements OnInit, OnDestroy {
         switch (idx) {
             case 0: this.usersPage.set(0); this.loadedTabs.delete(0); break;
             case 1: this.schematicsPage.set(0); this.loadedTabs.delete(1); break;
-            case 4: this.storagePage.set(0); this.loadedTabs.delete(4); break;
-            case 8: this.ticketsPage.set(0); this.loadedTabs.delete(8); break;
-            case 9: this.serverLogsPage.set(0); this.loadedTabs.delete(9); break;
+            case 5: this.storagePage.set(0); this.loadedTabs.delete(5); break;
+            case 9: this.ticketsPage.set(0); this.loadedTabs.delete(9); break;
+            case 10: this.serverLogsPage.set(0); this.loadedTabs.delete(10); break;
         }
     }
 
     private syncLiveLogs(idx: number, prevIdx: number): void {
-        if (idx === 9) this.adminLogsService.connect();
-        else if (prevIdx === 9) this.adminLogsService.disconnect();
+        if (idx === 10) this.adminLogsService.connect();
+        else if (prevIdx === 10) this.adminLogsService.disconnect();
     }
 
     private scrollActiveTabIntoView(): void {

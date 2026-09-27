@@ -748,7 +748,11 @@
                             @if (sub?.subscription?.cancelAtPeriodEnd) {
                             <p>{{ 'Your subscription will not renew.' | t }}</p>
                             } @else if (sub?.premiumUntil) {
-                            <p>{{ 'Renews or ends on' | t }} {{ sub!.premiumUntil | date:'longDate' }}</p>
+                            @if (sub?.subscription?.provider === 'Stripe' && sub?.subscription?.status === 'Active') {
+                            <p>{{ 'Renews on' | t }} {{ sub!.premiumUntil | date:'longDate' }}</p>
+                            } @else {
+                            <p>{{ 'Ends on' | t }} {{ sub!.premiumUntil | date:'longDate' }}</p>
+                            }
                             }
                         </div>
                         @if (sub?.subscription?.provider === 'Stripe' && !sub?.subscription?.cancelAtPeriodEnd) {

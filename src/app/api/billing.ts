@@ -17,6 +17,35 @@ export interface OwnSubscriptionResponse {
     subscription: BillingSubscription | null;
 }
 
+export interface MoneroPlan {
+    months: number;
+    usdCents: number;
+    listUsdCents: number;
+    discountPercent: number;
+}
+
+export interface MoneroInvoice {
+    id: string;
+    months: number;
+    usdCents: number;
+    xmr: string;
+    atomicXmr: number;
+    usdPerXmr: number;
+    address: string;
+    paymentUri: string;
+    status: 'Pending' | 'Confirming' | 'Paid' | 'Expired' | 'Underpaid';
+    receivedXmr: string;
+    receivedAtomic: number;
+    confirmations: number;
+    confirmationsToGrant: number;
+    confirmationsShown: number;
+    createdAt: string;
+    expiresAt: string;
+    paidAt: string | null;
+    isPaid: boolean;
+    premiumUntil: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class BillingService {
     private http = inject(HttpClient);
@@ -35,6 +64,18 @@ export class BillingService {
 
     resumeSubscription(): Observable<{ message: string }> {
         return this.http.post<{ message: string }>('/api/Billing/resume', null);
+    }
+
+    getMoneroPlans(): Observable<MoneroPlan[]> {
+        return this.http.get<MoneroPlan[]>('/api/Billing/monero/plans');
+    }
+
+    createMoneroInvoice(months: number): Observable<MoneroInvoice> {
+        return this.http.post<MoneroInvoice>('/api/Billing/monero/invoice', { months });
+    }
+
+    getMoneroInvoice(id: string): Observable<MoneroInvoice> {
+        return this.http.get<MoneroInvoice>(`/api/Billing/monero/invoice/${id}`);
     }
 
     adminResetPremiumForTesting(userId: string): Observable<{ message: string; cancelledSubscriptions: string[] }> {
