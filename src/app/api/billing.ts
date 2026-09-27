@@ -77,9 +77,4 @@ export class BillingService {
     getMoneroInvoice(id: string): Observable<MoneroInvoice> {
         return this.http.get<MoneroInvoice>(`/api/Billing/monero/invoice/${id}`);
     }
-
-    adminResetPremiumForTesting(userId: string): Observable<{ message: string; cancelledSubscriptions: string[] }> {
-        return this.http.post<{ message: string; cancelledSubscriptions: string[] }>(
-            `/api/Admin/users/${userId}/premium/reset-for-testing`, null);
-    }
 }

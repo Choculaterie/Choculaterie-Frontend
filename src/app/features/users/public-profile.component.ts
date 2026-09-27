@@ -136,17 +136,6 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
 
     readonly isAdminRoleOnly = computed(() => this.session.user()?.role?.toLowerCase() === 'admin');
 
-    resetPremiumForTesting(): void {
-        const userId = this.ownProfile()?.id;
-        if (!userId) return;
-        this.billingApi.adminResetPremiumForTesting(userId).subscribe({
-            next: () => {
-                this.toast.success('Premium reset for testing.');
-                this.billingApi.getSubscription().subscribe({ next: (s) => this.subscription.set(s) });
-            },
-            error: (err) => this.toast.error(err?.error?.message ?? 'Reset failed.'),
-        });
-    }
     isPremiumBadge(badge: unknown): boolean { return resolveBadge(badge) === Badge.Premium; }
 
     onBadgeClick(badge: unknown): void {

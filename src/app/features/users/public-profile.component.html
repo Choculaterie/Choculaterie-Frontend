@@ -747,7 +747,8 @@
                             }
                             }
                         </div>
-                        @if (sub?.subscription?.provider === 'Stripe' && !sub?.subscription?.cancelAtPeriodEnd) {
+                        @if (sub?.subscription?.provider === 'Stripe' && !sub?.subscription?.cancelAtPeriodEnd
+                        && sub?.subscription?.status !== 'Canceled') {
                         <button mat-stroked-button class="premium-action" [disabled]="cancellingSubscription()"
                             (click)="cancelSubscription()">
                             {{ 'Cancel subscription' | t }}
@@ -848,8 +849,3 @@
     }
 </div>
 
-@if (isAdminRoleOnly() && isOwnProfile()) {
-<button mat-stroked-button class="admin-test-fab" (click)="resetPremiumForTesting()">
-    {{ 'Reset Premium (testing)' | t }}
-</button>
-}
