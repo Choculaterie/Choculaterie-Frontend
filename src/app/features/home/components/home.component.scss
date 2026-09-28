@@ -245,6 +245,60 @@
     }
 }
 
+.support-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.support-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 40px;
+    padding: 0 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font: var(--mat-sys-label-large);
+    color: var(--mat-sys-on-surface);
+    border: 1px solid transparent;
+    transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.support-btn-icon {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    image-rendering: pixelated;
+}
+
+.kofi-btn {
+    background: color-mix(in srgb, var(--mat-sys-tertiary) 16%, transparent);
+    border-color: color-mix(in srgb, var(--mat-sys-tertiary) 45%, transparent);
+    color: var(--mat-sys-on-surface);
+
+    .support-btn-icon {
+        color: var(--mat-sys-tertiary);
+    }
+
+    &:hover {
+        background: color-mix(in srgb, var(--mat-sys-tertiary) 26%, transparent);
+        border-color: var(--mat-sys-tertiary);
+    }
+}
+
+.premium-btn {
+    background: color-mix(in srgb, var(--mat-sys-primary) 16%, transparent);
+    border-color: color-mix(in srgb, var(--mat-sys-primary) 45%, transparent);
+
+    &:hover {
+        background: color-mix(in srgb, var(--mat-sys-primary) 26%, transparent);
+        border-color: var(--mat-sys-primary);
+    }
+}
+
 .donation-section {
     margin: 2rem 0 1rem;
     padding: 1.5rem;
@@ -278,19 +332,4 @@
         justify-content: center;
     }
 
-    .kofi-btn {
-        display: inline-block;
-        border-radius: 8px;
-        overflow: hidden;
-        transition: opacity 0.15s;
-
-        &:hover {
-            opacity: 0.85;
-        }
-
-        img {
-            display: block;
-            border: none;
-        }
-    }
 }
