@@ -102,7 +102,7 @@ export const PROFILE = {
     coverImageFailed: 'Cover image update failed.',
     socialLinksUpdated: 'Social links updated.',
     socialLinksFailed: 'Failed to update social links.',
-    imageTooLarge: 'Image must be under 5 MB.',
+    imageTooLarge: (limitMb: number) => `Image must be under ${limitMb} MB.`,
     imageFormatNotAllowed: 'Only JPEG, PNG, or WebP images are allowed.',
     noSchematicsYet: 'No schematics yet',
     uploadFirstSchematic: 'Upload your first schematic to see it here.',

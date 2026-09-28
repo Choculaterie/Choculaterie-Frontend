@@ -63,6 +63,9 @@ import {
 } from '@ng-icons/simple-icons';
 import { matfMinecraftColored } from '@ng-icons/material-file-icons/colored';
 
+const MAX_IMAGE_MB = 15;
+const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
+
 @Component({
     selector: 'app-public-profile',
     standalone: true,
@@ -920,7 +923,7 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     }
 
     private handleAvatarFile(file: File): void {
-        if (file.size > 5 * 1024 * 1024) { this.toast.error(PROFILE.imageTooLarge); return; }
+        if (file.size > MAX_IMAGE_BYTES) { this.toast.error(PROFILE.imageTooLarge(MAX_IMAGE_MB)); return; }
         if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { this.toast.error(PROFILE.imageFormatNotAllowed); return; }
         const dialogRef = this.dialog.open(ImageCropperDialogComponent, {
             data: { imageFile: file, aspectRatio: 1, roundCropper: true, format: 'png' } as CropperDialogData, width: '450px',
@@ -964,7 +967,7 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     }
 
     private handleCoverFile(file: File): void {
-        if (file.size > 10 * 1024 * 1024) { this.toast.error(PROFILE.imageTooLarge); return; }
+        if (file.size > MAX_IMAGE_BYTES) { this.toast.error(PROFILE.imageTooLarge(MAX_IMAGE_MB)); return; }
         if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { this.toast.error(PROFILE.imageFormatNotAllowed); return; }
         const dialogRef = this.dialog.open(ImageCropperDialogComponent, {
             data: { imageFile: file, aspectRatio: 5, roundCropper: false, format: 'webp' } as CropperDialogData, width: '600px',
