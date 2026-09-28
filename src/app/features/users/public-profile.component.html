@@ -543,8 +543,8 @@
                             <p>{{ mc.instructions ?? ('Enter this code in the Minecraft server:' | t) }}</p>
                         </div>
                         <div class="code-row">
-                            <code class="code-value" style="font-family: 'Minecraft'">/link {{ mc.code }}</code>
-                            <button mat-icon-button (click)="copyLinkCode(mc.code)" [matTooltip]="'Copy command' | t">
+                            <code class="code-value" style="font-family: 'Minecraft'">{{ mc.code }}</code>
+                            <button mat-icon-button (click)="copyText(mc.code)" [matTooltip]="'Copy code' | t">
                                 <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
                             </button>
                         </div>
@@ -607,8 +607,8 @@
                             <p>{{ dc.instructions ?? ('Use this code with the Discord bot:' | t) }}</p>
                         </div>
                         <div class="code-row">
-                            <code class="code-value" style="font-family: 'Minecraft'">/link {{ dc.code }}</code>
-                            <button mat-icon-button (click)="copyLinkCode(dc.code)" [matTooltip]="'Copy command' | t">
+                            <code class="code-value" style="font-family: 'Minecraft'">{{ dc.code }}</code>
+                            <button mat-icon-button (click)="copyText(dc.code)" [matTooltip]="'Copy code' | t">
                                 <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
                             </button>
                         </div>

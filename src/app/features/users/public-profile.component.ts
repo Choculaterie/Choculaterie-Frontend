@@ -1038,16 +1038,9 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         });
     }
 
-    copyLinkCode(code: string): void {
-        navigator.clipboard.writeText(`/link ${code}`).then(
-            () => this.toast.success(PROFILE.copiedLinkCommand),
-            () => this.toast.error(PROFILE.failedToCopy),
-        );
-    }
-
     copyText(text: string): void {
         navigator.clipboard.writeText(text).then(
-            () => this.toast.success(PROFILE.copiedLinkCommand),
+            () => this.toast.success(PROFILE.copiedToClipboard),
             () => this.toast.error(PROFILE.failedToCopy),
         );
     }

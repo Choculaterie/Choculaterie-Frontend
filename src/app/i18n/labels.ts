@@ -76,7 +76,7 @@ export const PROFILE = {
     securityKeyRegFailed: 'Security key registration was cancelled or failed.',
     failedToStartReg: 'Failed to start registration.',
     registrationFailed: 'Registration failed.',
-    copiedLinkCommand: 'Copied /link command to clipboard.',
+    copiedToClipboard: 'Copied to clipboard.',
     failedToCopy: 'Failed to copy to clipboard.',
     mcLinked: (username: string) => `Minecraft linked to ${username}!`,
     mcUnlinked: 'Minecraft account unlinked.',
