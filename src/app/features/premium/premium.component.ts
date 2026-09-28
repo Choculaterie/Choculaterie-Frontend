@@ -12,6 +12,8 @@ import { ToastService } from '../../core/services/toast.service';
 import { BillingService, MoneroInvoice, MoneroPlan, OwnSubscriptionResponse } from '../../api/billing';
 import { toDataURL } from 'qrcode';
 
+const CHECKOUT_HOP_KEY = 'premium-checkout-hop';
+
 @Component({
     selector: 'app-premium',
     standalone: true,
@@ -87,14 +89,31 @@ export class PremiumComponent implements OnInit, OnDestroy {
     }
 
     goBack(): void {
+        if (this.consumeCheckoutHop()) {
+            this.router.navigateByUrl('/');
+            return;
+        }
         this.location.back();
+    }
+
+    private consumeCheckoutHop(): boolean {
+        try {
+            if (sessionStorage.getItem(CHECKOUT_HOP_KEY) === null) return false;
+            sessionStorage.removeItem(CHECKOUT_HOP_KEY);
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     subscribe(): void {
         if (!this.requireLogin()) return;
         this.checkingOut.set(true);
         this.billing.createStripeCheckout().subscribe({
-            next: (res) => { window.location.href = res.url; },
+            next: (res) => {
+                try { sessionStorage.setItem(CHECKOUT_HOP_KEY, '1'); } catch { void 0; }
+                window.location.href = res.url;
+            },
             error: (err) => {
                 this.checkingOut.set(false);
                 this.toast.error(err?.error?.message || 'Could not start checkout. Please try again.');
