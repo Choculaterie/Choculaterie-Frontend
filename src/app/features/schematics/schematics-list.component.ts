@@ -410,7 +410,8 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     }
 
     private readonly MAX_FILES = 10;
-    private readonly MAX_FILE_SIZE = 5 * 1024 * 1024;
+    private readonly MAX_FILE_SIZE = 15 * 1024 * 1024;
+    private readonly MAX_FILE_SIZE_MB = 15;
 
     onPicturesSelected(event: Event): void {
         const scrollY = window.scrollY;
@@ -448,7 +449,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     private addPictureFiles(newFiles: File[]): void {
         const oversized = newFiles.filter(f => f.size > this.MAX_FILE_SIZE);
         if (oversized.length) {
-            this.toast.error(`${oversized.length} file(s) exceed the 5 MB limit and were skipped.`);
+            this.toast.error(`${oversized.length} file(s) exceed the ${this.MAX_FILE_SIZE_MB} MB limit and were skipped.`);
         }
         const valid = newFiles.filter(f => f.size <= this.MAX_FILE_SIZE);
         const total = this.pictureFiles.length + valid.length;
@@ -465,7 +466,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     private addLitematicFiles(newFiles: File[]): void {
         const oversized = newFiles.filter(f => f.size > this.MAX_FILE_SIZE);
         if (oversized.length) {
-            this.toast.error(`${oversized.length} file(s) exceed the 5 MB limit and were skipped.`);
+            this.toast.error(`${oversized.length} file(s) exceed the ${this.MAX_FILE_SIZE_MB} MB limit and were skipped.`);
         }
         const valid = newFiles.filter(f => f.size <= this.MAX_FILE_SIZE);
         const total = this.litematicFiles.length + valid.length;

@@ -177,8 +177,8 @@ export const SCHEMATICS = {
     atLeastOneLitematic: 'At least 1 litematic file is required.',
     maxFilesAllowed: (max: number, current: number, tried: number) =>
         `Maximum ${max} files allowed. You have ${current}, tried to add ${tried}.`,
-    filesExceedLimit: (count: number) =>
-        `${count} file(s) exceed the 5 MB limit and were skipped.`,
+    filesExceedLimit: (count: number, limitMb: number) =>
+        `${count} file(s) exceed the ${limitMb} MB limit and were skipped.`,
 };
 
 export const MODS = {

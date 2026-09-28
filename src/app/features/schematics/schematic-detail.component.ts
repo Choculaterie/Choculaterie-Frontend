@@ -162,7 +162,8 @@ export class SchematicDetailComponent implements OnInit {
     });
 
     private readonly MAX_FILES = 10;
-    private readonly MAX_FILE_SIZE = 5 * 1024 * 1024;
+    private readonly MAX_FILE_SIZE = 15 * 1024 * 1024;
+    private readonly MAX_FILE_SIZE_MB = 15;
 
     readonly editPictureItems = signal<(
         | { type: 'existing'; pic: SchematicPictureResponse }
@@ -505,7 +506,7 @@ export class SchematicDetailComponent implements OnInit {
     private addEditPictureFiles(newFiles: File[]): void {
         const oversized = newFiles.filter(f => f.size > this.MAX_FILE_SIZE);
         if (oversized.length) {
-            this.toast.error(`${oversized.length} file(s) exceed the 5 MB limit and were skipped.`);
+            this.toast.error(`${oversized.length} file(s) exceed the ${this.MAX_FILE_SIZE_MB} MB limit and were skipped.`);
         }
         const valid = newFiles.filter(f => f.size <= this.MAX_FILE_SIZE);
         const currentCount = this.editPictureItems().length;
@@ -526,7 +527,7 @@ export class SchematicDetailComponent implements OnInit {
     private addEditLitematicFiles(newFiles: File[]): void {
         const oversized = newFiles.filter(f => f.size > this.MAX_FILE_SIZE);
         if (oversized.length) {
-            this.toast.error(`${oversized.length} file(s) exceed the 5 MB limit and were skipped.`);
+            this.toast.error(`${oversized.length} file(s) exceed the ${this.MAX_FILE_SIZE_MB} MB limit and were skipped.`);
         }
         const valid = newFiles.filter(f => f.size <= this.MAX_FILE_SIZE);
         const currentCount = this.editFileItems().length;
