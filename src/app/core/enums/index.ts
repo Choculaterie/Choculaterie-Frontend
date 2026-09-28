@@ -2,3 +2,4 @@ export { Role, ROLE_LABELS } from './role.enum';
 export { Status, STATUS_LABELS } from './status.enum';
 export { Badge, BADGE_LABELS, BADGE_ICONS, resolveBadge } from './badge.enum';
 export { Visibility } from './visibility.enum';
+export { ADMIN_TAB, type AdminTab } from './admin-tab';

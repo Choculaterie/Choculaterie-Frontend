@@ -10,6 +10,7 @@ import { AdminService } from '../../../api/admin';
 import { NotificationsService } from '../../../api/notifications';
 import { ThemeService } from '../../../core/services/theme.service';
 import { TicketReplyViewDialogComponent } from '../ticket-reply-view-dialog/ticket-reply-view-dialog.component';
+import { ADMIN_TAB } from '../../../core/enums';
 
 @Component({
     selector: 'app-inbox-dialog',
@@ -139,11 +140,11 @@ export class InboxDialogComponent {
 
     private notifTab(type: string): number {
         switch (type) {
-            case 'tag_suggestion': return 5;
-            case 'schematic_deleted': return 1;
-            case 'contact_ticket': return 8;
-            case 'server_error': return 9;
-            default: return 0;
+            case 'tag_suggestion': return ADMIN_TAB.tags;
+            case 'schematic_deleted': return ADMIN_TAB.schematics;
+            case 'contact_ticket': return ADMIN_TAB.tickets;
+            case 'server_error': return ADMIN_TAB.serverLogs;
+            default: return ADMIN_TAB.users;
         }
     }
 

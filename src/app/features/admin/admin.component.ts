@@ -42,7 +42,7 @@ import { NumberFormatPipe } from '../../shared/pipes/number-format.pipe';
 import { ContentTranslationsDialogComponent, type ContentTranslationsData } from './content-translations-dialog.component';
 import { AdminTicketDialogComponent, AdminTicketDialogData, AdminTicketDialogResult } from './admin-ticket-dialog.component';
 import { AdminUserDialogComponent } from './admin-user-dialog.component';
-import { Role, ROLE_LABELS, Status, STATUS_LABELS, Visibility, Badge, BADGE_LABELS, BADGE_ICONS, resolveBadge } from '../../core/enums';
+import { Role, ROLE_LABELS, Status, STATUS_LABELS, Visibility, Badge, BADGE_LABELS, BADGE_ICONS, resolveBadge, ADMIN_TAB } from '../../core/enums';
 import { translateText } from '../../core/i18n/translation.store';
 import { ADMIN, DIALOGS, COMMON, PLUGINS } from '../../i18n/labels';
 
@@ -385,21 +385,21 @@ export class AdminComponent implements OnInit, OnDestroy {
                 if (!isNaN(pageParam) && pageParam > 1) {
                     const zeroIdx = pageParam - 1;
                     switch (tab) {
-                        case 0: this.usersPage.set(zeroIdx); break;
-                        case 1: this.schematicsPage.set(zeroIdx); break;
-                        case 5: this.storagePage.set(zeroIdx); break;
-                        case 9: this.ticketsPage.set(zeroIdx); break;
-                        case 10: this.serverLogsPage.set(zeroIdx); break;
+                        case ADMIN_TAB.users: this.usersPage.set(zeroIdx); break;
+                        case ADMIN_TAB.schematics: this.schematicsPage.set(zeroIdx); break;
+                        case ADMIN_TAB.storage: this.storagePage.set(zeroIdx); break;
+                        case ADMIN_TAB.tickets: this.ticketsPage.set(zeroIdx); break;
+                        case ADMIN_TAB.serverLogs: this.serverLogsPage.set(zeroIdx); break;
                     }
                 }
 
                 const userId = params['userId'];
-                if (userId && tab === 0) {
+                if (userId && tab === ADMIN_TAB.users) {
                     this.autoOpenUserDetail(userId);
                 }
 
                 const ticketId = params['ticketId'];
-                if (ticketId != null && ticketId !== '' && tab === 9) {
+                if (ticketId != null && ticketId !== '' && tab === ADMIN_TAB.tickets) {
                     if (this.openedTicketId !== ticketId) {
                         this.openedTicketId = ticketId;
                         this.openTicketById(ticketId);
@@ -473,7 +473,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         if (idx) params.set('tab', String(idx)); else params.delete('tab');
         params.delete('page');
 
-        if (idx !== 9) params.delete('ticketId');
+        if (idx !== ADMIN_TAB.tickets) params.delete('ticketId');
         const qs = params.toString();
         this.location.replaceState(window.location.pathname + (qs ? '?' + qs : ''));
 
@@ -493,17 +493,17 @@ export class AdminComponent implements OnInit, OnDestroy {
 
     private resetTabPaging(idx: number): void {
         switch (idx) {
-            case 0: this.usersPage.set(0); this.loadedTabs.delete(0); break;
-            case 1: this.schematicsPage.set(0); this.loadedTabs.delete(1); break;
-            case 5: this.storagePage.set(0); this.loadedTabs.delete(5); break;
-            case 9: this.ticketsPage.set(0); this.loadedTabs.delete(9); break;
-            case 10: this.serverLogsPage.set(0); this.loadedTabs.delete(10); break;
+            case ADMIN_TAB.users: this.usersPage.set(0); this.loadedTabs.delete(ADMIN_TAB.users); break;
+            case ADMIN_TAB.schematics: this.schematicsPage.set(0); this.loadedTabs.delete(ADMIN_TAB.schematics); break;
+            case ADMIN_TAB.storage: this.storagePage.set(0); this.loadedTabs.delete(ADMIN_TAB.storage); break;
+            case ADMIN_TAB.tickets: this.ticketsPage.set(0); this.loadedTabs.delete(ADMIN_TAB.tickets); break;
+            case ADMIN_TAB.serverLogs: this.serverLogsPage.set(0); this.loadedTabs.delete(ADMIN_TAB.serverLogs); break;
         }
     }
 
     private syncLiveLogs(idx: number, prevIdx: number): void {
-        if (idx === 10) this.adminLogsService.connect();
-        else if (prevIdx === 10) this.adminLogsService.disconnect();
+        if (idx === ADMIN_TAB.serverLogs) this.adminLogsService.connect();
+        else if (prevIdx === ADMIN_TAB.serverLogs) this.adminLogsService.disconnect();
     }
 
     private scrollActiveTabIntoView(): void {
@@ -534,7 +534,7 @@ export class AdminComponent implements OnInit, OnDestroy {
                 });
                 ref.afterClosed().subscribe((result: AdminTicketDialogResult | undefined) => {
                     this.openedTicketId = null;
-                    this.router.navigate([], { queryParams: { tab: 9, ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
+                    this.router.navigate([], { queryParams: { tab: ADMIN_TAB.tickets, ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
                     if (result?.deleted) {
                         this.tickets.update(list => list.filter(x => x.id !== full.id));
                     } else if (result?.updated) {
@@ -545,7 +545,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             error: (err) => {
                 this.openedTicketId = null;
                 this.toast.error(err.error?.detail ?? ADMIN.failed);
-                this.router.navigate([], { queryParams: { tab: 9, ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
+                this.router.navigate([], { queryParams: { tab: ADMIN_TAB.tickets, ticketId: null }, queryParamsHandling: 'merge', replaceUrl: true });
             },
         });
     }
@@ -554,17 +554,17 @@ export class AdminComponent implements OnInit, OnDestroy {
         if (this.loadedTabs.has(idx)) return;
         this.loadedTabs.add(idx);
         switch (idx) {
-            case 0: this.loadUsers(); break;
-            case 1: this.loadSchematics(); break;
-            case 2: this.loadLiveMessages(); break;
-            case 3: this.loadModMessages(); break;
-            case 4: this.loadPlugins(); break;
-            case 5: this.loadStorage(); break;
-            case 6: this.loadTags(); this.loadTagSuggestions(); break;
-            case 7: this.loadVersions(); break;
-            case 8: this.loadAdminFaqs(); break;
-            case 9: this.loadTickets(); break;
-            case 10: this.loadServerLogs(); break;
+            case ADMIN_TAB.users: this.loadUsers(); break;
+            case ADMIN_TAB.schematics: this.loadSchematics(); break;
+            case ADMIN_TAB.liveMessages: this.loadLiveMessages(); break;
+            case ADMIN_TAB.modMessages: this.loadModMessages(); break;
+            case ADMIN_TAB.plugins: this.loadPlugins(); break;
+            case ADMIN_TAB.storage: this.loadStorage(); break;
+            case ADMIN_TAB.tags: this.loadTags(); this.loadTagSuggestions(); break;
+            case ADMIN_TAB.versions: this.loadVersions(); break;
+            case ADMIN_TAB.faq: this.loadAdminFaqs(); break;
+            case ADMIN_TAB.tickets: this.loadTickets(); break;
+            case ADMIN_TAB.serverLogs: this.loadServerLogs(); break;
         }
     }
 
@@ -1416,7 +1416,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             return;
         }
         this.openedTicketId = null;
-       this.router.navigate([], { queryParams: { tab: 9, ticketId: t.id }, queryParamsHandling: 'merge', replaceUrl: true });
+       this.router.navigate([], { queryParams: { tab: ADMIN_TAB.tickets, ticketId: t.id }, queryParamsHandling: 'merge', replaceUrl: true });
     }
 
     closeTicket(): void { this.selectedTicket.set(null); }
