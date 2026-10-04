@@ -508,7 +508,9 @@ html:not([data-theme]) img[src*='icons/'] {
 }
 
 .mat-mdc-form-field-icon-prefix>img.mc-icon,
-.mat-mdc-form-field-icon-suffix>img.mc-icon {
+.mat-mdc-form-field-icon-suffix>img.mc-icon,
+.mat-mdc-form-field-icon-prefix>svg.mc-icon,
+.mat-mdc-form-field-icon-suffix>svg.mc-icon {
   padding: 0 12px;
   box-sizing: content-box;
 }

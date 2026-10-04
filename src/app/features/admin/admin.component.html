@@ -12,7 +12,7 @@
                     <mat-card-header>
                         <mat-card-title class="detail-header">
                             <button mat-icon-button (click)="closeUserDetail()" [matTooltip]="'Back to list' | t">
-                                <mat-icon>arrow_back</mat-icon>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M9,5h3v1h-3zM9,6h3v1h-3zM9,7h3v1h-3zM5,8h7v1h-7zM5,9h7v1h-7zM5,10h7v1h-7zM2,11h25v1h-25zM2,12h25v1h-25zM2,13h25v1h-25zM5,14h7v1h-7zM5,15h7v1h-7zM5,16h7v1h-7zM5,17h7v1h-7zM9,18h3v1h-3zM9,19h3v1h-3zM9,20h3v1h-3z" /><path fill="var(--mc-icon-shadow)" d="M12,8h4v1h-4zM12,9h4v1h-4zM12,10h4v1h-4zM12,14h18v1h-18zM12,15h18v1h-18zM12,16h18v1h-18zM12,17h18v1h-18zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM12,21h4v1h-4zM12,22h4v1h-4zM12,23h4v1h-4z" /></svg>
                             </button>
                             <div class="detail-user-info">
                                 @if (u.filePath) {
@@ -124,16 +124,16 @@
                                     <mat-option [value]="b[0]">{{ badgeLabels[b[1]] | t }}</mat-option>
                                     }
                                 </mat-select>
-                                <mat-icon matPrefix>workspace_premium</mat-icon>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" matPrefix class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M12,4h4v1h-4zM12,5h4v1h-4zM12,6h4v1h-4zM12,7h4v1h-4zM12,8h4v1h-4zM12,9h4v1h-4zM2,10h25v1h-25zM2,11h25v1h-25zM2,12h25v1h-25zM5,13h18v1h-18zM5,14h18v1h-18zM5,15h18v1h-18zM9,16h11v1h-11zM9,17h11v1h-11zM9,18h11v1h-11zM5,19h7v1h-7zM16,19h7v1h-7zM5,20h7v1h-7zM16,20h7v1h-7zM5,21h7v1h-7zM16,21h7v1h-7zM5,22h4v1h-4zM20,22h3v1h-3zM5,23h4v1h-4zM20,23h3v1h-3zM5,24h4v1h-4zM20,24h3v1h-3z" /><path fill="var(--mc-icon-shadow)" d="M16,7h4v1h-4zM16,8h4v1h-4zM16,9h4v1h-4zM23,13h7v1h-7zM23,14h7v1h-7zM23,15h7v1h-7zM20,16h7v1h-7zM20,17h7v1h-7zM20,18h7v1h-7zM12,19h4v1h-4zM12,20h4v1h-4zM12,21h4v1h-4zM9,22h7v1h-7zM23,22h4v1h-4zM9,23h7v1h-7zM23,23h4v1h-4zM9,24h7v1h-7zM23,24h4v1h-4zM9,25h3v1h-3zM23,25h4v1h-4zM9,26h3v1h-3zM23,26h4v1h-4zM9,27h3v1h-3zM23,27h4v1h-4z" /></svg>
                             </mat-form-field>
-                            <button mat-stroked-button (click)="saveBadge()"><mat-icon>save</mat-icon> <span>{{ 'Save badge' | t }}</span></button>
+                            <button mat-stroked-button (click)="saveBadge()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" matButtonIcon class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M22,4h4v1h-4zM22,5h4v1h-4zM22,6h4v1h-4zM18,7h8v1h-8zM18,8h8v1h-8zM18,9h8v1h-8zM18,10h4v1h-4zM18,11h4v1h-4zM18,12h4v1h-4zM2,13h4v1h-4zM14,13h8v1h-8zM2,14h4v1h-4zM14,14h8v1h-8zM2,15h4v1h-4zM14,15h8v1h-8zM2,16h8v1h-8zM14,16h4v1h-4zM2,17h8v1h-8zM14,17h4v1h-4zM2,18h8v1h-8zM14,18h4v1h-4zM6,19h12v1h-12zM6,20h12v1h-12zM6,21h12v1h-12zM10,22h4v1h-4zM10,23h4v1h-4zM10,24h4v1h-4z" /><path fill="var(--mc-icon-shadow)" d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM22,13h4v1h-4zM22,14h4v1h-4zM22,15h4v1h-4zM18,16h8v1h-8zM18,17h8v1h-8zM18,18h8v1h-8zM18,19h4v1h-4zM18,20h4v1h-4zM18,21h4v1h-4zM14,22h8v1h-8zM14,23h8v1h-8zM14,24h8v1h-8zM14,25h4v1h-4zM14,26h4v1h-4zM14,27h4v1h-4z" /></svg> <span>{{ 'Save badge' | t }}</span></button>
 
                             <mat-form-field appearance="outline" class="compact-input">
                                 <mat-label>{{ 'Quota (GB)' | t }}</mat-label>
                                 <input matInput type="number" [value]="editQuota()"
                                     (input)="editQuota.set(+$any($event.target).value)" min="0" step="0.5" />
                             </mat-form-field>
-                            <button mat-stroked-button (click)="saveQuota()"><mat-icon>save</mat-icon> <span>{{ 'Save quota' | t }}</span></button>
+                            <button mat-stroked-button (click)="saveQuota()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" matButtonIcon class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M22,4h4v1h-4zM22,5h4v1h-4zM22,6h4v1h-4zM18,7h8v1h-8zM18,8h8v1h-8zM18,9h8v1h-8zM18,10h4v1h-4zM18,11h4v1h-4zM18,12h4v1h-4zM2,13h4v1h-4zM14,13h8v1h-8zM2,14h4v1h-4zM14,14h8v1h-8zM2,15h4v1h-4zM14,15h8v1h-8zM2,16h8v1h-8zM14,16h4v1h-4zM2,17h8v1h-8zM14,17h4v1h-4zM2,18h8v1h-8zM14,18h4v1h-4zM6,19h12v1h-12zM6,20h12v1h-12zM6,21h12v1h-12zM10,22h4v1h-4zM10,23h4v1h-4zM10,24h4v1h-4z" /><path fill="var(--mc-icon-shadow)" d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM22,13h4v1h-4zM22,14h4v1h-4zM22,15h4v1h-4zM18,16h8v1h-8zM18,17h8v1h-8zM18,18h8v1h-8zM18,19h4v1h-4zM18,20h4v1h-4zM18,21h4v1h-4zM14,22h8v1h-8zM14,23h8v1h-8zM14,24h8v1h-8zM14,25h4v1h-4zM14,26h4v1h-4zM14,27h4v1h-4z" /></svg> <span>{{ 'Save quota' | t }}</span></button>
                         </div>
 
                         @if (u.schematics.length > 0) {
@@ -1021,7 +1021,7 @@
                         <p class="ticket-body">{{ t.description }}</p>
                         @if (t.contact) {
                         <div class="ticket-contact">
-                            <mat-icon>contact_mail</mat-icon>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M2,7h25v1h-25zM2,8h25v1h-25zM2,9h25v1h-25zM2,10h7v1h-7zM20,10h7v1h-7zM2,11h7v1h-7zM20,11h7v1h-7zM2,12h7v1h-7zM20,12h7v1h-7zM2,13h3v1h-3zM9,13h3v1h-3zM16,13h4v1h-4zM23,13h4v1h-4zM2,14h3v1h-3zM9,14h3v1h-3zM16,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM9,15h3v1h-3zM16,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM12,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM12,17h4v1h-4zM23,17h4v1h-4zM2,18h3v1h-3zM12,18h4v1h-4zM23,18h4v1h-4zM2,19h3v1h-3zM23,19h4v1h-4zM2,20h3v1h-3zM23,20h4v1h-4zM2,21h3v1h-3zM23,21h4v1h-4zM2,22h25v1h-25zM2,23h25v1h-25zM2,24h25v1h-25z" /><path fill="var(--mc-icon-shadow)" d="M9,10h11v1h-11zM27,10h3v1h-3zM9,11h11v1h-11zM27,11h3v1h-3zM9,12h11v1h-11zM27,12h3v1h-3zM5,13h4v1h-4zM27,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM20,16h3v1h-3zM27,16h3v1h-3zM5,17h4v1h-4zM20,17h3v1h-3zM27,17h3v1h-3zM5,18h4v1h-4zM20,18h3v1h-3zM27,18h3v1h-3zM5,19h4v1h-4zM16,19h4v1h-4zM27,19h3v1h-3zM5,20h4v1h-4zM16,20h4v1h-4zM27,20h3v1h-3zM5,21h4v1h-4zM16,21h4v1h-4zM27,21h3v1h-3zM27,22h3v1h-3zM27,23h3v1h-3zM27,24h3v1h-3zM5,25h25v1h-25zM5,26h25v1h-25zM5,27h25v1h-25z" /></svg>
                             <span>{{ t.contact }}</span>
                         </div>
                         }
@@ -1037,7 +1037,7 @@
                     </mat-card-content>
                     <mat-card-actions>
                         <button mat-stroked-button (click)="closeTicket()">
-                            <mat-icon>arrow_back</mat-icon> <span>{{ 'Back to list' | t }}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" matButtonIcon class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M9,5h3v1h-3zM9,6h3v1h-3zM9,7h3v1h-3zM5,8h7v1h-7zM5,9h7v1h-7zM5,10h7v1h-7zM2,11h25v1h-25zM2,12h25v1h-25zM2,13h25v1h-25zM5,14h7v1h-7zM5,15h7v1h-7zM5,16h7v1h-7zM5,17h7v1h-7zM9,18h3v1h-3zM9,19h3v1h-3zM9,20h3v1h-3z" /><path fill="var(--mc-icon-shadow)" d="M12,8h4v1h-4zM12,9h4v1h-4zM12,10h4v1h-4zM12,14h18v1h-18zM12,15h18v1h-18zM12,16h18v1h-18zM12,17h18v1h-18zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM12,21h4v1h-4zM12,22h4v1h-4zM12,23h4v1h-4z" /></svg> <span>{{ 'Back to list' | t }}</span>
                         </button>
                         <button mat-stroked-button color="warn" (click)="deleteTicket(t)">
                             <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" matButtonIcon

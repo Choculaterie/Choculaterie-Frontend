@@ -1,17 +1,12 @@
-import { Component, input, computed } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
+import { Component, input } from '@angular/core';
 
 @Component({
     selector: 'app-empty-state',
     standalone: true,
-    imports: [MatIconModule],
+    imports: [],
     template: `
         <div class="empty-state">
-            @if (isSvgIcon()) {
-                <img [src]="icon()" alt="" aria-hidden="true" class="empty-icon" />
-            } @else {
-                <mat-icon>{{ icon() }}</mat-icon>
-            }
+            <img [src]="icon()" alt="" aria-hidden="true" class="empty-icon" />
             <h3>{{ title() }}</h3>
             @if (subtitle()) {
                 <p>{{ subtitle() }}</p>
@@ -24,10 +19,6 @@ import { MatIconModule } from '@angular/material/icon';
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; padding: 3rem; gap: 0.5rem; text-align: center;
         }
-        mat-icon {
-            font-size: 64px; width: 64px; height: 64px;
-            color: var(--mat-sys-on-surface-variant); opacity: 0.5;
-        }
         .empty-icon {
             width: 64px; height: 64px;
             opacity: 0.5;
@@ -37,8 +28,7 @@ import { MatIconModule } from '@angular/material/icon';
     `],
 })
 export class EmptyStateComponent {
-    icon = input('inbox');
+    icon = input('/icons/ui/question_mark!.svg');
     title = input('Nothing here');
     subtitle = input('');
-    isSvgIcon = computed(() => this.icon().endsWith('.svg'));
 }
