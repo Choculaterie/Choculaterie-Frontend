@@ -220,6 +220,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly usersTotalCount = signal(0);
     readonly loadingUsers = signal(true);
     readonly newestOnlyUsers = signal(false);
+    readonly premiumOnlyUsers = signal(false);
     readonly usersPage = signal(0);
     readonly usersPageSize = signal(25);
     readonly usersSort = signal('date');
@@ -577,6 +578,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             sort: this.usersSort(),
             direction: this.usersDirection(),
             newestOnly: this.newestOnlyUsers() || undefined,
+            premiumOnly: this.premiumOnlyUsers() || undefined,
         }).subscribe({
             next: (r) => {
                 this.users.set(r.items);

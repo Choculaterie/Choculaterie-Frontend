@@ -1063,6 +1063,7 @@ search?: string;
 sort?: string;
 direction?: string;
 newestOnly?: boolean;
+premiumOnly?: boolean;
 };
 
 export type GetApiAdminSchematicsParams = {

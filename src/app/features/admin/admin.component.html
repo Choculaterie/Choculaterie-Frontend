@@ -201,6 +201,13 @@
                                 alt="" aria-hidden="true" class="mc-icon" />
                             <span style="transform: translateY(1px); display: inline-block;">{{ 'Newest only' | t }}</span>
                         </button>
+                        <button mat-stroked-button class="newest-toggle"
+                            (click)="premiumOnlyUsers.set(!premiumOnlyUsers()); searchUsers()"
+                            >
+                            <img [src]="premiumOnlyUsers() ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
+                                alt="" aria-hidden="true" class="mc-icon" />
+                            <span style="transform: translateY(1px); display: inline-block;">{{ 'Premium only' | t }}</span>
+                        </button>
                         <button mat-stroked-button (click)="usersSearch = ''; searchUsers()">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
                                 width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
