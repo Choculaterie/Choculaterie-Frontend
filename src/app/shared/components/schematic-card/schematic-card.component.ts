@@ -1,3 +1,4 @@
+import { EmojifyPipe } from '../../pipes/emojify.pipe';
 import { Component, input, inject, computed, signal, effect } from '@angular/core';
 import { TPipe } from '../../../core/i18n/t.pipe';
 import { Router, RouterLink } from '@angular/router';
@@ -17,7 +18,7 @@ import { environment } from '../../../environments/environment';
 @Component({
     selector: 'app-schematic-card',
     standalone: true,
-    imports: [TPipe, 
+    imports: [EmojifyPipe, TPipe, 
         RouterLink,
         DatePipe,
         MatCardModule,

@@ -168,7 +168,7 @@
                         <div class="mod-card-info">
                             <span class="mod-name">{{ mod.name }}</span>
                             @if (mod.description) {
-                            <span class="mod-desc">{{ mod.description }}</span>
+                            <span class="mod-desc">{{ mod.description | emojify }}</span>
                             }
                         </div>
                     </div>

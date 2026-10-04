@@ -1,3 +1,4 @@
+import { EmojifyPipe } from '../../shared/pipes/emojify.pipe';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { Router, RouterLink } from '@angular/router';
@@ -41,7 +42,7 @@ interface ModSummary {
 @Component({
     selector: 'app-mods',
     standalone: true,
-    imports: [TPipe,
+    imports: [EmojifyPipe, TPipe,
         FormsModule,
         RouterLink,
         MatCardModule,

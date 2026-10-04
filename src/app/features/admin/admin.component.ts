@@ -1,3 +1,4 @@
+import { EmojifyPipe } from '../../shared/pipes/emojify.pipe';
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect, viewChild, ElementRef } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { DatePipe, Location } from '@angular/common';
@@ -59,7 +60,7 @@ export interface ServerLogEntryResponse {
 @Component({
     selector: 'app-admin',
     standalone: true,
-    imports: [TPipe,
+    imports: [EmojifyPipe, TPipe,
         FormsModule,
         ReactiveFormsModule,
         RouterLink,

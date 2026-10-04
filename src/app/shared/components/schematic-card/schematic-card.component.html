@@ -21,7 +21,7 @@
             <span class="card-title">{{ schematic().name }}</span>
             <p class="card-author"><span>{{ 'by' | t }}</span>&nbsp;<app-user-link [username]="schematic().username" /></p>
             @if (schematic().description) {
-            <p class="card-desc">{{ schematic().description }}</p>
+            <p class="card-desc">{{ schematic().description | emojify }}</p>
             }
             <div class="card-meta">
                 <span [matTooltip]="'Downloads' | t"><img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" /> {{ schematic().downloadCount
