@@ -1,3 +1,4 @@
+import { translateText } from '../../core/i18n/translation.store';
 import { Component, OnInit, DestroyRef, inject, signal, computed, effect, type Signal } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -545,9 +546,9 @@ export class SchematicDetailComponent implements OnInit {
         const totalPics = this.editPictureItems().length;
         const totalFiles = this.editFileItems().length;
         if (totalPics < 1) {
-            this.editFileError.set('At least 1 picture is required.');
+            this.editFileError.set(translateText('At least 1 picture is required.'));
         } else if (totalFiles < 1) {
-            this.editFileError.set('At least 1 litematic file is required.');
+            this.editFileError.set(translateText('At least 1 litematic file is required.'));
         } else {
             this.editFileError.set('');
         }

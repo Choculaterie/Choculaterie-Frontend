@@ -1,3 +1,4 @@
+import { translateText } from '../../../core/i18n/translation.store';
 import {
     Component, ElementRef, ViewChild,
     inject, signal, output,
@@ -30,7 +31,7 @@ export class CaptchaComponent {
         this.ctx = ref.nativeElement.getContext('2d');
         if (!this.ctx) {
             this.phase.set('error');
-            this.errorMsg.set('Your browser is blocking canvas rendering, which this check needs.');
+            this.errorMsg.set(translateText('Your browser is blocking canvas rendering, which this check needs.'));
             return;
         }
         this.draw();
@@ -107,7 +108,7 @@ export class CaptchaComponent {
             },
             error: () => {
                 this.phase.set('error');
-                this.errorMsg.set('Failed to load captcha. Please retry.');
+                this.errorMsg.set(translateText('Failed to load captcha. Please retry.'));
             },
         });
     }

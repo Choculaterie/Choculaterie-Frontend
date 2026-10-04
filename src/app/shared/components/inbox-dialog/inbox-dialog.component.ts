@@ -29,15 +29,15 @@ import { ADMIN_TAB } from '../../../core/enums';
     <div class="title-right">
         @if (hasAnyUnread()) {
         <button mat-icon-button (click)="markAllRead()" [matTooltip]="'Mark all read' | t" class="check-icon-btn check-gray" [style.filter]="theme.isDark() ? 'none' : 'invert(1)'">
-            <img src="/icons/ui/check.svg" alt="Mark all read">
+            <img src="/icons/ui/check.svg" [alt]="'Mark all read' | t">
         </button>
         } @else if (items().length > 0) {
         <button mat-icon-button (click)="markAllUnread()" [matTooltip]="'Mark all unread' | t" class="check-icon-btn" [style.filter]="theme.isDark() ? 'none' : 'invert(1)'">
-            <img src="/icons/ui/check.svg" alt="Mark all unread">
+            <img src="/icons/ui/check.svg" [alt]="'Mark all unread' | t">
         </button>
         }
         <button mat-icon-button mat-dialog-close>
-            <img src="/icons/letters/X.svg" alt="Close">
+            <img src="/icons/letters/X.svg" [alt]="'Close' | t">
         </button>
     </div>
 </div>
@@ -45,7 +45,7 @@ import { ADMIN_TAB } from '../../../core/enums';
 <mat-dialog-content class="inbox-dlg-content">
     @if (items().length === 0) {
     <div class="inbox-empty">
-        <img src="/icons/communication/mail.svg" alt="No notifications" class="empty-icon">
+        <img src="/icons/communication/mail.svg" [alt]="'No notifications' | t" class="empty-icon">
         <p>{{ 'No notifications' | t }}</p>
     </div>
     } @else {
@@ -62,7 +62,7 @@ import { ADMIN_TAB } from '../../../core/enums';
         </button>
         <button mat-icon-button class="inbox-action-btn inbox-delete-btn" (click)="deleteNotification(n, $event)"
             [matTooltip]="'Delete' | t">
-            <img src="/icons/fantasy/skull.svg" alt="Delete" style="width: 18px; height: 18px;">
+            <img src="/icons/fantasy/skull.svg" [alt]="'Delete' | t" style="width: 18px; height: 18px;">
         </button>
     </div>
     }

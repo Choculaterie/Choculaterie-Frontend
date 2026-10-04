@@ -13,7 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
         <h1>404</h1>
         <p>{{ "The page you're looking for doesn't exist or has been moved." | t }}</p>
         <a mat-flat-button routerLink="/">
-            <img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" matButtonIcon class="mc-icon" /> Back to Home
+            <img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" matButtonIcon class="mc-icon" /> {{ 'Back to Home' | t }}
         </a>
     </div>
     `,

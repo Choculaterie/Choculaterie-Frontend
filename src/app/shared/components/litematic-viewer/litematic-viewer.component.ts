@@ -1,3 +1,4 @@
+import { translateText } from '../../../core/i18n/translation.store';
 import {
     Component,
     ElementRef,
@@ -53,7 +54,7 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
     @ViewChild('maxYTrack') maxYTrackRef?: ElementRef<HTMLElement>;
 
     readonly loading = signal(true);
-    readonly loadingStatus = signal('Loading resource pack…');
+    readonly loadingStatus = signal(translateText('Loading resource pack…'));
     readonly error = signal('');
     readonly isDiffMode = signal(false);
     readonly diffSummary = signal<{ added: number; removed: number } | null>(null);
@@ -172,7 +173,7 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
         try {
             if (hasDiff) {
                 this.isDiffMode.set(true);
-                this.loadingStatus.set('Diffing against previous commit…');
+                this.loadingStatus.set(translateText('Diffing against previous commit…'));
                 const diffViewer = new DiffViewer(canvas, {
                     resourcePacks: { vanilla: () => this.fetchResourcePack() },
                     onStats: (stats) => {
@@ -187,7 +188,7 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
                 await diffViewer.loadDiff(beforeBytes, new Uint8Array(this.data.fileData));
                 if (this.destroyed) return;
             } else {
-                this.loadingStatus.set('Loading resource pack…');
+                this.loadingStatus.set(translateText('Loading resource pack…'));
                 let onReady!: () => void;
                 const ready = new Promise<void>(resolve => { onReady = resolve; });
                 const renderer = new SchematicRenderer(canvas, {}, {
@@ -209,7 +210,7 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
                 await ready;
                 if (this.destroyed) return;
 
-                this.loadingStatus.set('Building 3D structure…');
+                this.loadingStatus.set(translateText('Building 3D structure…'));
                 await renderer.schematicManager!.loadSchematic(this.schematicId, this.data.fileData);
                 if (this.destroyed) return;
 
@@ -241,7 +242,7 @@ export class LitematicViewerComponent implements AfterViewInit, OnDestroy {
             setTimeout(() => this.attachDragListeners());
         } catch (e) {
             console.error('Litematic viewer init error:', e);
-            this.error.set('Failed to parse litematic file.');
+            this.error.set(translateText('Failed to parse litematic file.'));
             this.loading.set(false);
         }
     }

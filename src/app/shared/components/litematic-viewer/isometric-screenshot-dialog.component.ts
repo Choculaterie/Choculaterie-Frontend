@@ -1,3 +1,4 @@
+import { translateText } from '../../../core/i18n/translation.store';
 import {
     Component,
     Inject,
@@ -87,7 +88,7 @@ export interface IsometricScreenshotData {
         @if (!loading() && !error()) {
         <div class="screenshot-controls">
             <div class="slider-group">
-                <label>Yaw: {{ yawRounded() }}°</label>
+                <label>{{ 'Yaw:' | t }} {{ yawRounded() }}°</label>
                 <div #yawTrack class="slider-track-wrap">
                     <mat-slider [min]="-180" [max]="180" [step]="1" discrete>
                         <input matSliderThumb [value]="yaw()" (valueChange)="onYawChange($event)" />
@@ -95,7 +96,7 @@ export interface IsometricScreenshotData {
                 </div>
             </div>
             <div class="slider-group">
-                <label>Pitch: {{ pitchRounded() }}°</label>
+                <label>{{ 'Pitch:' | t }} {{ pitchRounded() }}°</label>
                 <div #pitchTrack class="slider-track-wrap">
                     <mat-slider [min]="-90" [max]="90" [step]="1" discrete>
                         <input matSliderThumb [value]="pitch()" (valueChange)="onPitchChange($event)" />
@@ -132,7 +133,7 @@ export interface IsometricScreenshotData {
                 <button mat-stroked-button type="button" (click)="cancel()">{{ 'Cancel' | t }}</button>
                 <button mat-flat-button type="button" (click)="confirm()">
                     <img [src]="resolvedMode() === 'download' ? '/icons/arrows/arrow_down.svg' : '/icons/ui/check.svg'" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
-                    {{ resolvedMode() === 'download' ? 'Download' : 'Use' }}
+                    {{ (resolvedMode() === 'download' ? 'Download' : 'Use') | t }}
                 </button>
             </div>
         </div>
@@ -344,7 +345,7 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
     readonly yawRounded = computed(() => Math.round(this.yaw()));
     readonly pitchRounded = computed(() => Math.round(this.pitch()));
     readonly loading = signal(true);
-    readonly loadingStatus = signal('Loading resource pack…');
+    readonly loadingStatus = signal(translateText('Loading resource pack…'));
     readonly error = signal('');
     readonly isFlippedH = signal(false);
     readonly isFlippedV = signal(false);
@@ -822,13 +823,13 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
         try {
             const source = this.resolveSource();
             if (!source) {
-                this.error.set('No schematic file.');
+                this.error.set(translateText('No schematic file.'));
                 this.loading.set(false);
                 return;
             }
 
             const canvas = this.previewCanvasRef.nativeElement;
-            this.loadingStatus.set('Loading resource pack…');
+            this.loadingStatus.set(translateText('Loading resource pack…'));
             const embed = this.isEmbed();
 
             let onReady!: () => void;
@@ -856,7 +857,7 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
                 await renderer.renderManager?.setBackgroundMode('transparent');
             }
 
-            this.loadingStatus.set('Building 3D structure…');
+            this.loadingStatus.set(translateText('Building 3D structure…'));
             await renderer.schematicManager!.loadSchematic(this.schematicId, source.fileData);
             if (this.destroyed) return;
 
@@ -869,7 +870,7 @@ export class IsometricScreenshotDialogComponent implements AfterViewInit, OnDest
             setTimeout(() => this.attachDragListeners());
         } catch (e) {
             console.error('Screenshot init error:', e);
-            this.error.set('Failed to generate screenshot.');
+            this.error.set(translateText('Failed to generate screenshot.'));
             this.loading.set(false);
         }
     }

@@ -62,11 +62,11 @@ export interface AdminTicketDialogResult {
             {{ ticket().username }}
         </a>
         } @else {
-        <span class="meta-chip muted"><img src="/icons/ui/smile.svg" alt="" aria-hidden="true" class="mc-icon" /> Anonymous</span>
+        <span class="meta-chip muted"><img src="/icons/ui/smile.svg" alt="" aria-hidden="true" class="mc-icon" /> {{ 'Anonymous' | t }}</span>
         }
         <span class="meta-chip"><img src="/icons/misc/clock.svg" alt="" aria-hidden="true" class="mc-icon" /> {{ ticket().createdAt | date:'medium' }}</span>
         @if (!ticket().isRead) {
-        <span class="meta-chip unread-chip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M2,7h25v1h-25zM2,8h25v1h-25zM2,9h25v1h-25zM2,10h7v1h-7zM20,10h7v1h-7zM2,11h7v1h-7zM20,11h7v1h-7zM2,12h7v1h-7zM20,12h7v1h-7zM2,13h3v1h-3zM9,13h3v1h-3zM16,13h4v1h-4zM23,13h4v1h-4zM2,14h3v1h-3zM9,14h3v1h-3zM16,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM9,15h3v1h-3zM16,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM12,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM12,17h4v1h-4zM23,17h4v1h-4zM2,18h3v1h-3zM12,18h4v1h-4zM23,18h4v1h-4zM2,19h3v1h-3zM23,19h4v1h-4zM2,20h3v1h-3zM23,20h4v1h-4zM2,21h3v1h-3zM23,21h4v1h-4zM2,22h25v1h-25zM2,23h25v1h-25zM2,24h25v1h-25z" /><path fill="var(--mc-icon-shadow)" d="M9,10h11v1h-11zM27,10h3v1h-3zM9,11h11v1h-11zM27,11h3v1h-3zM9,12h11v1h-11zM27,12h3v1h-3zM5,13h4v1h-4zM27,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM20,16h3v1h-3zM27,16h3v1h-3zM5,17h4v1h-4zM20,17h3v1h-3zM27,17h3v1h-3zM5,18h4v1h-4zM20,18h3v1h-3zM27,18h3v1h-3zM5,19h4v1h-4zM16,19h4v1h-4zM27,19h3v1h-3zM5,20h4v1h-4zM16,20h4v1h-4zM27,20h3v1h-3zM5,21h4v1h-4zM16,21h4v1h-4zM27,21h3v1h-3zM27,22h3v1h-3zM27,23h3v1h-3zM27,24h3v1h-3zM5,25h25v1h-25zM5,26h25v1h-25zM5,27h25v1h-25z" /></svg> Unread</span>
+        <span class="meta-chip unread-chip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M2,7h25v1h-25zM2,8h25v1h-25zM2,9h25v1h-25zM2,10h7v1h-7zM20,10h7v1h-7zM2,11h7v1h-7zM20,11h7v1h-7zM2,12h7v1h-7zM20,12h7v1h-7zM2,13h3v1h-3zM9,13h3v1h-3zM16,13h4v1h-4zM23,13h4v1h-4zM2,14h3v1h-3zM9,14h3v1h-3zM16,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM9,15h3v1h-3zM16,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM12,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM12,17h4v1h-4zM23,17h4v1h-4zM2,18h3v1h-3zM12,18h4v1h-4zM23,18h4v1h-4zM2,19h3v1h-3zM23,19h4v1h-4zM2,20h3v1h-3zM23,20h4v1h-4zM2,21h3v1h-3zM23,21h4v1h-4zM2,22h25v1h-25zM2,23h25v1h-25zM2,24h25v1h-25z" /><path fill="var(--mc-icon-shadow)" d="M9,10h11v1h-11zM27,10h3v1h-3zM9,11h11v1h-11zM27,11h3v1h-3zM9,12h11v1h-11zM27,12h3v1h-3zM5,13h4v1h-4zM27,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM20,16h3v1h-3zM27,16h3v1h-3zM5,17h4v1h-4zM20,17h3v1h-3zM27,17h3v1h-3zM5,18h4v1h-4zM20,18h3v1h-3zM27,18h3v1h-3zM5,19h4v1h-4zM16,19h4v1h-4zM27,19h3v1h-3zM5,20h4v1h-4zM16,20h4v1h-4zM27,20h3v1h-3zM5,21h4v1h-4zM16,21h4v1h-4zM27,21h3v1h-3zM27,22h3v1h-3zM27,23h3v1h-3zM27,24h3v1h-3zM5,25h25v1h-25zM5,26h25v1h-25zM5,27h25v1h-25z" /></svg> {{ 'Unread' | t }}</span>
         }
         @if (ticket().adminReply) {
         <span class="meta-chip meta-chip-text muted">{{ 'Replied' | t }}</span>
@@ -94,7 +94,7 @@ export interface AdminTicketDialogResult {
         <div class="ticket-images">
             @for (path of ticket().imagePaths; track path) {
             <a [href]="path | ticketImg" target="_blank" rel="noopener">
-                <img [src]="path | ticketImg" class="ticket-thumb" alt="attachment" />
+                <img [src]="path | ticketImg" class="ticket-thumb" [alt]="'Attachment' | t" />
             </a>
             }
         </div>
@@ -142,8 +142,8 @@ export interface AdminTicketDialogResult {
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-    <button mat-stroked-button color="warn" (click)="deleteTicket()">Delete</button>
-    <button mat-stroked-button mat-dialog-close>Close</button>
+    <button mat-stroked-button color="warn" (click)="deleteTicket()">{{ 'Delete' | t }}</button>
+    <button mat-stroked-button mat-dialog-close>{{ 'Close' | t }}</button>
 </mat-dialog-actions>
     `,
     styles: [`

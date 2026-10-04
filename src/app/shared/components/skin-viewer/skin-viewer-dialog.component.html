@@ -7,7 +7,7 @@
         <div class="canvas-wrap">
             @if (loading()) {
             <div class="overlay">
-                <img src="loading.gif" alt="Loading…" class="loading-gif" />
+                <img src="loading.gif" [alt]="'Loading…' | t" class="loading-gif" />
             </div>
             }
             @if (!loading() && error()) {

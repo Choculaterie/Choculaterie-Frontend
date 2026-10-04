@@ -16,7 +16,7 @@ export interface TicketReplyViewData {
 <div mat-dialog-title class="title-row">
     <span>{{ 'Ticket reply' | t }}</span>
     <button mat-icon-button mat-dialog-close>
-        <img src="/icons/letters/X.svg" alt="Close">
+        <img src="/icons/letters/X.svg" [alt]="'Close' | t">
     </button>
 </div>
 <mat-dialog-content>

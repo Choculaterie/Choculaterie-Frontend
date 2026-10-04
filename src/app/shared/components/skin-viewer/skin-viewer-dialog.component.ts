@@ -1,3 +1,4 @@
+import { translateText } from '../../../core/i18n/translation.store';
 import {
     Component,
     ElementRef,
@@ -108,7 +109,7 @@ export class SkinViewerDialogComponent implements AfterViewInit, OnDestroy {
                 .toPromise();
 
             if (!session) {
-                this.error.set('Failed to fetch skin data.');
+                this.error.set(translateText('Failed to fetch skin data.'));
                 this.loading.set(false);
                 return;
             }
@@ -117,7 +118,7 @@ export class SkinViewerDialogComponent implements AfterViewInit, OnDestroy {
 
             const texturesProp = session.properties?.find(p => p.name === 'textures');
             if (!texturesProp) {
-                this.error.set('No skin data found for this player.');
+                this.error.set(translateText('No skin data found for this player.'));
                 this.loading.set(false);
                 return;
             }
@@ -126,7 +127,7 @@ export class SkinViewerDialogComponent implements AfterViewInit, OnDestroy {
             let skinUrl: string = texturesJson?.textures?.SKIN?.url;
 
             if (!skinUrl) {
-                this.error.set('No skin found for this player.');
+                this.error.set(translateText('No skin found for this player.'));
                 this.loading.set(false);
                 return;
             }
@@ -144,7 +145,7 @@ export class SkinViewerDialogComponent implements AfterViewInit, OnDestroy {
             if (status === 404) {
                 this.error.set(`Player "${username}" not found.`);
             } else {
-                this.error.set('Failed to load skin. Please try again.');
+                this.error.set(translateText('Failed to load skin. Please try again.'));
             }
             this.loading.set(false);
         }

@@ -1029,7 +1029,7 @@
                         <div class="ticket-images">
                             @for (img of t.imagePaths; track img) {
                             <a [href]="img" target="_blank">
-                                <img [src]="img" class="ticket-thumb" alt="attachment" />
+                                <img [src]="img" class="ticket-thumb" [alt]="'Attachment' | t" />
                             </a>
                             }
                         </div>

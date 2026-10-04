@@ -42,8 +42,8 @@
             </tr>
             <tr>
                 <td>{{ 'Manual upload and download' | t }}</td>
-                <td><img src="/icons/ui/check.svg" alt="Yes" class="mc-icon check-icon" /></td>
-                <td><img src="/icons/ui/check.svg" alt="Yes" class="mc-icon check-icon" /></td>
+                <td><img src="/icons/ui/check.svg" [alt]="'Yes' | t" class="mc-icon check-icon" /></td>
+                <td><img src="/icons/ui/check.svg" [alt]="'Yes' | t" class="mc-icon check-icon" /></td>
             </tr>
             <tr>
                 <td>
@@ -54,8 +54,8 @@
                             (contextmenu)="$event.preventDefault()" />
                     </span>
                 </td>
-                <td><img src="/icons/letters/X.svg" alt="No" class="mc-icon cross-icon" /></td>
-                <td><img src="/icons/ui/check.svg" alt="Yes" class="mc-icon check-icon" /></td>
+                <td><img src="/icons/letters/X.svg" [alt]="'No' | t" class="mc-icon cross-icon" /></td>
+                <td><img src="/icons/ui/check.svg" [alt]="'Yes' | t" class="mc-icon check-icon" /></td>
             </tr>
             <tr>
                 <td>
@@ -66,13 +66,13 @@
                             (contextmenu)="$event.preventDefault()" />
                     </span>
                 </td>
-                <td><img src="/icons/letters/X.svg" alt="No" class="mc-icon cross-icon" /></td>
-                <td><img src="/icons/ui/check.svg" alt="Yes" class="mc-icon check-icon" /></td>
+                <td><img src="/icons/letters/X.svg" [alt]="'No' | t" class="mc-icon cross-icon" /></td>
+                <td><img src="/icons/ui/check.svg" [alt]="'Yes' | t" class="mc-icon check-icon" /></td>
             </tr>
             <tr>
                 <td>{{ 'Premium badge on your profile' | t }}</td>
-                <td><img src="/icons/letters/X.svg" alt="No" class="mc-icon cross-icon" /></td>
-                <td><img src="/icons/ui/check.svg" alt="Yes" class="mc-icon check-icon" /></td>
+                <td><img src="/icons/letters/X.svg" [alt]="'No' | t" class="mc-icon cross-icon" /></td>
+                <td><img src="/icons/ui/check.svg" [alt]="'Yes' | t" class="mc-icon check-icon" /></td>
             </tr>
         </tbody>
     </table>

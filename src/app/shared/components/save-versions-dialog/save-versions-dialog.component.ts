@@ -1,3 +1,4 @@
+import { translateText } from '../../../core/i18n/translation.store';
 import { Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -119,7 +120,7 @@ export class SaveVersionsDialogComponent {
     constructor() {
         this.http.get<SaveVersionResponse[]>(`/api/SaveManager/${this.data.saveId}/versions`).subscribe({
             next: (list) => { this.versions.set(list); this.loading.set(false); },
-            error: () => { this.error.set('Could not load version history.'); this.loading.set(false); },
+            error: () => { this.error.set(translateText('Could not load version history.')); this.loading.set(false); },
         });
     }
 
@@ -136,7 +137,7 @@ export class SaveVersionsDialogComponent {
                 document.body.removeChild(a);
                 this.busyId.set('');
             },
-            error: () => { this.error.set('Could not start that download.'); this.busyId.set(''); },
+            error: () => { this.error.set(translateText('Could not start that download.')); this.busyId.set(''); },
         });
     }
 }

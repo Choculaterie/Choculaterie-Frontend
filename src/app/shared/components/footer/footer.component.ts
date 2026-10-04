@@ -20,7 +20,7 @@ import { simpleGithub, simpleDiscord } from '@ng-icons/simple-icons';
                 <a href="https://discord.gg/choculaterie" target="_blank" rel="noopener" aria-label="Discord">
                     <ng-icon name="simpleDiscord" size="18" /> Discord
                 </a>
-                <a href="https://status.choculaterie.com/" target="_blank" rel="noopener" aria-label="Status">
+                <a href="https://status.choculaterie.com/" target="_blank" rel="noopener" [attr.aria-label]="'Status' | t">
                     <img src="/icons/data/graph_up.svg" alt="" aria-hidden="true" class="mc-icon status-icon" /> {{ 'Status' | t }}
                 </a>
             </div>

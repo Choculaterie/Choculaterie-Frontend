@@ -26,7 +26,7 @@ import { ToastService } from '../../../core/services/toast.service';
             <p class="dialog-hint">{{ 'Suggest a tag you\'d like to see added. An admin will review it before it becomes available.' | t }}</p>
             <mat-form-field appearance="outline" class="full-width">
                 <mat-label>{{ 'Tag name' | t }}</mat-label>
-                <input matInput [formControl]="nameCtrl" placeholder="e.g. oak log"
+                <input matInput [formControl]="nameCtrl" [placeholder]="'e.g. oak log' | t"
                     (keydown.enter)="submit()" autocomplete="off" maxlength="30" />
                 <mat-hint>{{ 'Lowercase letters, numbers, spaces, hyphens and underscores only' | t }}</mat-hint>
                 @if (nameCtrl.hasError('pattern')) {

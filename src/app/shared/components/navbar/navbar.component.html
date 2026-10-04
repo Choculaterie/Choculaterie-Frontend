@@ -49,7 +49,7 @@
         <span class="username">{{ session.user()?.username }}</span>
         <span class="avatar-wrap">
             @if (session.profile()?.filePath || session.user()?.filePath) {
-            <app-skeleton-img [src]="(session.profile()?.filePath ?? session.user()!.filePath!) | userImg" alt="avatar"
+            <app-skeleton-img [src]="(session.profile()?.filePath ?? session.user()!.filePath!) | userImg" [alt]="'Avatar' | t"
                 height="24px" borderRadius="50%" />
             } @else {
             <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" class="mc-icon" />

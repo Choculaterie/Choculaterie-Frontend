@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
+import { TPipe } from '../../../core/i18n/t.pipe';
 
 const STORAGE_KEY = 'chocu-title-spotlight-dismissed-eternal-angler';
 const PROMO_KEY = 'eternal-angler';
@@ -8,10 +9,10 @@ const PROMO_KEY = 'eternal-angler';
 @Component({
     selector: 'app-title-spotlight',
     standalone: true,
-    imports: [MatButtonModule],
+    imports: [MatButtonModule, TPipe],
     template: `
         @if (visible()) {
-            <aside class="title-spotlight" aria-label="Community title spotlight">
+            <aside class="title-spotlight" [attr.aria-label]="'Community title spotlight' | t">
                 <a
                     class="title-spotlight__link"
                     href="https://store.steampowered.com/app/4378770/Eternal_Angler/"
@@ -24,24 +25,24 @@ const PROMO_KEY = 'eternal-angler';
                         src="/assets/spotlight/eternal-angler.png"
                         width="600"
                         height="900"
-                        alt="Eternal Angler on Steam"
+                        [alt]="'Eternal Angler on Steam' | t"
                         loading="lazy"
                         decoding="async"
                     />
                     <span class="title-spotlight__copy">
-                        <span class="title-spotlight__kicker">Community pick</span>
+                        <span class="title-spotlight__kicker">{{ 'Community pick' | t }}</span>
                         <span class="title-spotlight__name">Eternal Angler</span>
                         <span class="title-spotlight__meta">
-                            A surreal multiplayer fishing game where you catch strange creatures hidden across fragmented dimensions.
+                            {{ 'A surreal multiplayer fishing game where you catch strange creatures hidden across fragmented dimensions.' | t }}
                         </span>
                     </span>
-                    <span class="title-spotlight__cta">View on Steam</span>
+                    <span class="title-spotlight__cta">{{ 'View on Steam' | t }}</span>
                 </a>
                 <button
                     mat-icon-button
                     type="button"
                     class="title-spotlight__dismiss"
-                    aria-label="Dismiss"
+                    [attr.aria-label]="'Dismiss' | t"
                     (click)="dismiss($event)"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"

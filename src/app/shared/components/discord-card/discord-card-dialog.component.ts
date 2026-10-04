@@ -43,7 +43,7 @@ interface DiscordCardResponse {
                 <ng-icon name="simpleDiscord" size="20" />
                 <h2>{{ 'Discord' | t }}</h2>
                 <span class="dc-spacer"></span>
-                <button mat-icon-button mat-dialog-close aria-label="Close">
+                <button mat-icon-button mat-dialog-close [attr.aria-label]="'Close' | t">
                     <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
                 </button>
             </div>
@@ -164,7 +164,7 @@ export class DiscordCardDialogComponent implements OnInit {
                     this.loading.set(false);
                 },
                 error: () => {
-                    this.error.set('Could not load this Discord profile.');
+                    this.error.set(translateText('Could not load this Discord profile.'));
                     this.loading.set(false);
                 },
             });

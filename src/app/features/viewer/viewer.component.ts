@@ -1,3 +1,4 @@
+import { translateText } from '../../core/i18n/translation.store';
 import {
     Component,
     OnInit,
@@ -85,7 +86,7 @@ export class ViewerComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         const url = this.route.snapshot.queryParamMap.get('url');
         if (!url) {
-            this.errorMsg.set('No file URL provided.');
+            this.errorMsg.set(translateText('No file URL provided.'));
             this.state.set('error');
             return;
         }
@@ -104,7 +105,7 @@ export class ViewerComponent implements OnInit, OnDestroy {
                 setTimeout(() => this.mountViewer());
             })
             .catch(() => {
-                this.errorMsg.set('Failed to load litematic file.');
+                this.errorMsg.set(translateText('Failed to load litematic file.'));
                 this.state.set('error');
             });
     }
