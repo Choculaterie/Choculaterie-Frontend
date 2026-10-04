@@ -1,5 +1,5 @@
 import { translateText } from '../../core/i18n/translation.store';
-import { Component, OnInit, DestroyRef, inject, signal, computed, effect, type Signal } from '@angular/core';
+import { Component, OnInit, DestroyRef, ElementRef, inject, signal, computed, effect, viewChildren, type Signal } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs';
@@ -713,6 +713,42 @@ export class SchematicDetailComponent implements OnInit {
                 });
             }
         });
+    }
+
+    private readonly blockListEls = viewChildren<ElementRef<HTMLElement>>('blockList');
+    private blockListObserver: ResizeObserver | null = null;
+    readonly blockListHeights = signal<Record<string, { collapsed: number; full: number }>>({});
+    readonly expandedBlockLists = signal<Record<string, boolean>>({});
+
+    private readonly watchBlockLists = effect(() => {
+        const els = this.blockListEls();
+        if (typeof ResizeObserver === 'undefined') return;
+        this.blockListObserver ??= new ResizeObserver(entries =>
+            this.measureBlockLists(entries.map(e => e.target as HTMLElement)));
+        this.blockListObserver.disconnect();
+        for (const el of els) this.blockListObserver.observe(el.nativeElement);
+    });
+    private readonly stopBlockListObserver = this.destroyRef.onDestroy(() => this.blockListObserver?.disconnect());
+
+    private measureBlockLists(els: HTMLElement[]): void {
+        const next = { ...this.blockListHeights() };
+        for (const el of els) {
+            const id = el.dataset['fileId'];
+            if (!id) continue;
+            const rowTops = [...new Set([...el.children].map(c => (c as HTMLElement).offsetTop))].sort((a, b) => a - b);
+            if (rowTops.length <= 3) {
+                delete next[id];
+                continue;
+            }
+            const rowGap = parseFloat(getComputedStyle(el).rowGap) || 0;
+            next[id] = { collapsed: rowTops[3] - rowTops[0] - rowGap, full: el.scrollHeight };
+        }
+        this.blockListHeights.set(next);
+    }
+
+    toggleBlockList(id: string | number): void {
+        const key = String(id);
+        this.expandedBlockLists.update(m => ({ ...m, [key]: !m[key] }));
     }
 
     parseBlockList(blockList: string): { name: string; count: string }[] {

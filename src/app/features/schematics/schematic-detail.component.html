@@ -507,7 +507,10 @@
                     </button>
                 </div>
                 @if (f.blockList) {
-                <div class="block-list">
+                @let blockHeights = blockListHeights()['' + f.id];
+                @let blocksExpanded = !!expandedBlockLists()['' + f.id];
+                <div class="block-list" #blockList [attr.data-file-id]="f.id"
+                    [style.max-height.px]="blockHeights ? (blocksExpanded ? blockHeights.full : blockHeights.collapsed) : null">
                     @for (block of parseBlockList(f.blockList); track block.name) {
                     <span class="block-chip">
                         @if (getBlockIconUrl(block.name); as iconUrl) {
@@ -520,6 +523,14 @@
                     </span>
                     }
                 </div>
+                @if (blockHeights) {
+                <button type="button" class="block-list-toggle" (click)="toggleBlockList(f.id)"
+                    [attr.aria-expanded]="blocksExpanded"
+                    [attr.aria-label]="(blocksExpanded ? 'Show fewer blocks' : 'Show all blocks') | t"
+                    [matTooltip]="(blocksExpanded ? 'Collapse' : 'Expand') | t">
+                    <img src="/icons/arrows/tild_full_down.svg" alt="" aria-hidden="true" class="mc-icon expand-arrow" />
+                </button>
+                }
                 }
             </mat-card-content>
         </mat-card>

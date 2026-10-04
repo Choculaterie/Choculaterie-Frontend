@@ -17,9 +17,11 @@
         } @else {
         <mat-accordion multi>
             @for (faq of faqs(); track faq.id) {
-            <mat-expansion-panel>
+            <mat-expansion-panel hideToggle #panel>
                 <mat-expansion-panel-header>
                     <mat-panel-title>{{ faq.question }}</mat-panel-title>
+                    <img src="/icons/arrows/tild_full_down.svg" alt="" aria-hidden="true" class="mc-icon expand-arrow"
+                        [class.expanded]="panel.expanded" [matTooltip]="(panel.expanded ? 'Collapse' : 'Expand') | t" />
                 </mat-expansion-panel-header>
                 <p class="faq-answer">{{ faq.answer }}</p>
             </mat-expansion-panel>

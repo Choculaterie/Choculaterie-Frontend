@@ -219,7 +219,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly users = signal<AdminUserResponse[]>([]);
     readonly usersTotalCount = signal(0);
     readonly loadingUsers = signal(true);
-    readonly newestOnlyUsers = signal(false);
     readonly premiumOnlyUsers = signal(false);
     readonly usersPage = signal(0);
     readonly usersPageSize = signal(25);
@@ -577,7 +576,6 @@ export class AdminComponent implements OnInit, OnDestroy {
             search: this.usersSearch || undefined,
             sort: this.usersSort(),
             direction: this.usersDirection(),
-            newestOnly: this.newestOnlyUsers() || undefined,
             premiumOnly: this.premiumOnlyUsers() || undefined,
         }).subscribe({
             next: (r) => {

@@ -396,6 +396,36 @@ $shimmer: linear-gradient(90deg,
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
+    overflow: hidden;
+    transition: max-height 0.2s linear;
+}
+
+.block-list-toggle {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 0.25rem;
+    padding: 0.25rem 0;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+
+    &:hover {
+        background: var(--mat-sys-surface-container-high);
+    }
+
+    .expand-arrow {
+        width: 20px;
+        height: 20px;
+        transition: transform 0.2s;
+        transform-origin: center 43.75%;
+    }
+
+    &[aria-expanded='true'] .expand-arrow {
+        transform: rotate(180deg) translateY(1px);
+    }
 }
 
 .block-chip {

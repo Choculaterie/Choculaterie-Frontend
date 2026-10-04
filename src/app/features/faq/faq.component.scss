@@ -26,8 +26,29 @@
         border: 1px solid var(--mat-sys-outline-variant);
         border-radius: 8px !important;
         overflow: hidden;
-        margin-bottom: 6px;
+        margin: 0 0 6px;
         background: var(--mat-sys-surface-container-low);
+
+        &.mat-expansion-panel-spacing {
+            margin: 0 0 6px;
+        }
+
+        ::ng-deep .mat-expansion-panel-content-wrapper {
+            transition-duration: 200ms;
+            transition-timing-function: linear;
+        }
+    }
+
+    .expand-arrow {
+        width: 20px;
+        height: 20px;
+        margin-left: 12px;
+        transition: transform 0.2s;
+        transform-origin: center 43.75%;
+
+        &.expanded {
+            transform: rotate(180deg) translateY(1px);
+        }
     }
 
     mat-expansion-panel-header {
