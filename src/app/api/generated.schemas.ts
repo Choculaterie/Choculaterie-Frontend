@@ -1357,3 +1357,66 @@ export type PutApiUsersMeCoverImageBody = {
   file?: IFormFile;
 };
 
+
+export interface PromotionResponse {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  id: number | string;
+  key: string;
+  kicker: string;
+  title: string;
+  description: string;
+  linkUrl: string;
+  /** @nullable */
+  imagePath: string | null;
+  /** @nullable */
+  imageAlt: string | null;
+  ctaText: string;
+  isActive: boolean;
+  updatedAt: string;
+}
+
+export interface AdminPromotionResponse {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  id: number | string;
+  key: string;
+  kicker: string;
+  title: string;
+  description: string;
+  linkUrl: string;
+  /** @nullable */
+  imagePath: string | null;
+  /** @nullable */
+  imageAlt: string | null;
+  ctaText: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  clicks: number | string;
+}
+
+export type PostApiAdminPromotionsBody = {
+  Key?: string;
+  Kicker?: string;
+  Title?: string;
+  Description?: string;
+  LinkUrl?: string;
+  ImageAlt?: string;
+  CtaText?: string;
+  IsActive?: boolean;
+  Image?: Blob;
+  RemoveImage?: boolean;
+};
+
+export type PutApiAdminPromotionsIdBody = {
+  Key?: string;
+  Kicker?: string;
+  Title?: string;
+  Description?: string;
+  LinkUrl?: string;
+  ImageAlt?: string;
+  CtaText?: string;
+  IsActive?: boolean;
+  Image?: Blob;
+  RemoveImage?: boolean;
+};

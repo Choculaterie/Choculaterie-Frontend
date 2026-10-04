@@ -2,41 +2,49 @@ import { Component, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { TPipe } from '../../../core/i18n/t.pipe';
+import type { PromotionResponse } from '../../../api/generated.schemas';
+import { PromoImgPipe } from '../../pipes/image-url.pipe';
 
-const STORAGE_KEY = 'chocu-title-spotlight-dismissed-eternal-angler';
-const PROMO_KEY = 'eternal-angler';
+
+const DISMISSED_PREFIX = 'chocu-title-spotlight-dismissed-';
 
 @Component({
     selector: 'app-title-spotlight',
     standalone: true,
-    imports: [MatButtonModule, TPipe],
+    imports: [MatButtonModule, TPipe, PromoImgPipe],
     template: `
-        @if (visible()) {
+        @if (promo(); as p) {
             <aside class="title-spotlight" [attr.aria-label]="'Community title spotlight' | t">
                 <a
                     class="title-spotlight__link"
-                    href="https://store.steampowered.com/app/4378770/Eternal_Angler/"
+                    [href]="p.linkUrl"
                     target="_blank"
                     rel="noopener noreferrer"
                     (click)="trackClick()"
                 >
+                    @if (p.imagePath) {
                     <img
                         class="title-spotlight__art"
-                        src="/assets/spotlight/eternal-angler.png"
+                        [src]="p.imagePath | promoImg"
                         width="600"
                         height="900"
-                        [alt]="'Eternal Angler on Steam' | t"
+                        [alt]="p.imageAlt ?? p.title"
                         loading="lazy"
                         decoding="async"
                     />
+                    }
                     <span class="title-spotlight__copy">
-                        <span class="title-spotlight__kicker">{{ 'Community pick' | t }}</span>
-                        <span class="title-spotlight__name">Eternal Angler</span>
-                        <span class="title-spotlight__meta">
-                            {{ 'A surreal multiplayer fishing game where you catch strange creatures hidden across fragmented dimensions.' | t }}
-                        </span>
+                        @if (p.kicker) {
+                        <span class="title-spotlight__kicker">{{ p.kicker }}</span>
+                        }
+                        <span class="title-spotlight__name">{{ p.title }}</span>
+                        @if (p.description) {
+                        <span class="title-spotlight__meta">{{ p.description }}</span>
+                        }
                     </span>
-                    <span class="title-spotlight__cta">{{ 'View on Steam' | t }}</span>
+                    @if (p.ctaText) {
+                    <span class="title-spotlight__cta">{{ p.ctaText }}</span>
+                    }
                 </a>
                 <button
                     mat-icon-button
@@ -176,26 +184,36 @@ const PROMO_KEY = 'eternal-angler';
     `],
 })
 export class TitleSpotlightComponent {
-    readonly visible = signal(!this.isDismissed());
+    readonly promo = signal<PromotionResponse | null>(null);
 
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient) {
+        this.http.get<PromotionResponse | null>('/api/Promo/active').subscribe({
+            next: (p) => this.promo.set(p && !this.isDismissed(p.key) ? p : null),
+            error: () => { },
+        });
+    }
 
     trackClick(): void {
-        this.http.post(`/api/Promo/${PROMO_KEY}/click`, {}).subscribe({ error: () => { } });
+        const p = this.promo();
+        if (!p) return;
+        this.http.post(`/api/Promo/${encodeURIComponent(p.key)}/click`, {}).subscribe({ error: () => { } });
     }
 
     dismiss(event: Event): void {
         event.preventDefault();
         event.stopPropagation();
-        try {
-            localStorage.setItem(STORAGE_KEY, '1');
-        } catch { }
-        this.visible.set(false);
+        const p = this.promo();
+        if (p) {
+            try {
+                localStorage.setItem(DISMISSED_PREFIX + p.key, '1');
+            } catch { }
+        }
+        this.promo.set(null);
     }
 
-    private isDismissed(): boolean {
+    private isDismissed(key: string): boolean {
         try {
-            return localStorage.getItem(STORAGE_KEY) === '1';
+            return localStorage.getItem(DISMISSED_PREFIX + key) === '1';
         } catch {
             return false;
         }

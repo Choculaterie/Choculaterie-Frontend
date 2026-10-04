@@ -62,7 +62,10 @@ import type {
   ModMessageResponse,
   PostApiAdminModulesBody,
   StorageStatsResponse,
-  TagSuggestionResponse
+  TagSuggestionResponse,
+  AdminPromotionResponse,
+  PostApiAdminPromotionsBody,
+  PutApiAdminPromotionsIdBody
 } from './generated.schemas';
 
 
@@ -806,6 +809,198 @@ export class AdminService {
 
     return this.http.delete<TData>(
       `/api/Admin/live-messages/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ getApiAdminPromotions<TData = AdminPromotionResponse[]>( options?: HttpClientBodyOptions): Observable<TData>;
+ getApiAdminPromotions<TData = AdminPromotionResponse[]>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ getApiAdminPromotions<TData = AdminPromotionResponse[]>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  getApiAdminPromotions<TData = AdminPromotionResponse[]>(
+     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/Admin/promotions`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/Admin/promotions`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/Admin/promotions`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ postApiAdminPromotions<TData = AdminPromotionResponse>(postApiAdminPromotionsBody: PostApiAdminPromotionsBody, options?: HttpClientBodyOptions): Observable<TData>;
+ postApiAdminPromotions<TData = AdminPromotionResponse>(postApiAdminPromotionsBody: PostApiAdminPromotionsBody, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ postApiAdminPromotions<TData = AdminPromotionResponse>(postApiAdminPromotionsBody: PostApiAdminPromotionsBody, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  postApiAdminPromotions<TData = AdminPromotionResponse>(
+    postApiAdminPromotionsBody: PostApiAdminPromotionsBody, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {const formData = new FormData();
+if(postApiAdminPromotionsBody.Key !== undefined) {
+ formData.append(`Key`, postApiAdminPromotionsBody.Key);
+ }
+if(postApiAdminPromotionsBody.Kicker !== undefined) {
+ formData.append(`Kicker`, postApiAdminPromotionsBody.Kicker);
+ }
+if(postApiAdminPromotionsBody.Title !== undefined) {
+ formData.append(`Title`, postApiAdminPromotionsBody.Title);
+ }
+if(postApiAdminPromotionsBody.Description !== undefined) {
+ formData.append(`Description`, postApiAdminPromotionsBody.Description);
+ }
+if(postApiAdminPromotionsBody.LinkUrl !== undefined) {
+ formData.append(`LinkUrl`, postApiAdminPromotionsBody.LinkUrl);
+ }
+if(postApiAdminPromotionsBody.ImageAlt !== undefined) {
+ formData.append(`ImageAlt`, postApiAdminPromotionsBody.ImageAlt);
+ }
+if(postApiAdminPromotionsBody.CtaText !== undefined) {
+ formData.append(`CtaText`, postApiAdminPromotionsBody.CtaText);
+ }
+if(postApiAdminPromotionsBody.IsActive !== undefined) {
+ formData.append(`IsActive`, postApiAdminPromotionsBody.IsActive.toString());
+ }
+if(postApiAdminPromotionsBody.Image !== undefined) {
+ formData.append(`Image`, postApiAdminPromotionsBody.Image);
+ }
+if(postApiAdminPromotionsBody.RemoveImage !== undefined) {
+ formData.append(`RemoveImage`, postApiAdminPromotionsBody.RemoveImage.toString());
+ }
+
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/Admin/promotions`,
+      formData,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/Admin/promotions`,
+      formData,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/Admin/promotions`,
+      formData,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ putApiAdminPromotionsId<TData = AdminPromotionResponse>(id: number,
+    putApiAdminPromotionsIdBody: PutApiAdminPromotionsIdBody, options?: HttpClientBodyOptions): Observable<TData>;
+ putApiAdminPromotionsId<TData = AdminPromotionResponse>(id: number,
+    putApiAdminPromotionsIdBody: PutApiAdminPromotionsIdBody, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ putApiAdminPromotionsId<TData = AdminPromotionResponse>(id: number,
+    putApiAdminPromotionsIdBody: PutApiAdminPromotionsIdBody, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  putApiAdminPromotionsId<TData = AdminPromotionResponse>(
+    id: number,
+    putApiAdminPromotionsIdBody: PutApiAdminPromotionsIdBody, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {const formData = new FormData();
+if(putApiAdminPromotionsIdBody.Key !== undefined) {
+ formData.append(`Key`, putApiAdminPromotionsIdBody.Key);
+ }
+if(putApiAdminPromotionsIdBody.Kicker !== undefined) {
+ formData.append(`Kicker`, putApiAdminPromotionsIdBody.Kicker);
+ }
+if(putApiAdminPromotionsIdBody.Title !== undefined) {
+ formData.append(`Title`, putApiAdminPromotionsIdBody.Title);
+ }
+if(putApiAdminPromotionsIdBody.Description !== undefined) {
+ formData.append(`Description`, putApiAdminPromotionsIdBody.Description);
+ }
+if(putApiAdminPromotionsIdBody.LinkUrl !== undefined) {
+ formData.append(`LinkUrl`, putApiAdminPromotionsIdBody.LinkUrl);
+ }
+if(putApiAdminPromotionsIdBody.ImageAlt !== undefined) {
+ formData.append(`ImageAlt`, putApiAdminPromotionsIdBody.ImageAlt);
+ }
+if(putApiAdminPromotionsIdBody.CtaText !== undefined) {
+ formData.append(`CtaText`, putApiAdminPromotionsIdBody.CtaText);
+ }
+if(putApiAdminPromotionsIdBody.IsActive !== undefined) {
+ formData.append(`IsActive`, putApiAdminPromotionsIdBody.IsActive.toString());
+ }
+if(putApiAdminPromotionsIdBody.Image !== undefined) {
+ formData.append(`Image`, putApiAdminPromotionsIdBody.Image);
+ }
+if(putApiAdminPromotionsIdBody.RemoveImage !== undefined) {
+ formData.append(`RemoveImage`, putApiAdminPromotionsIdBody.RemoveImage.toString());
+ }
+
+    if (options?.observe === 'events') {
+      return this.http.put<TData>(
+      `/api/Admin/promotions/${id}`,
+      formData,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.put<TData>(
+      `/api/Admin/promotions/${id}`,
+      formData,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.put<TData>(
+      `/api/Admin/promotions/${id}`,
+      formData,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+ deleteApiAdminPromotionsId<TData = unknown>(id: number, options?: HttpClientBodyOptions): Observable<TData>;
+ deleteApiAdminPromotionsId<TData = unknown>(id: number, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ deleteApiAdminPromotionsId<TData = unknown>(id: number, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  deleteApiAdminPromotionsId<TData = unknown>(
+    id: number, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.delete<TData>(
+      `/api/Admin/promotions/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.delete<TData>(
+      `/api/Admin/promotions/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.delete<TData>(
+      `/api/Admin/promotions/${id}`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }
@@ -1897,6 +2092,10 @@ export type GetApiAdminLiveMessagesClientResult = NonNullable<LiveMessageRespons
 export type PostApiAdminLiveMessagesClientResult = NonNullable<LiveMessageResponse>
 export type PutApiAdminLiveMessagesIdClientResult = NonNullable<LiveMessageResponse>
 export type DeleteApiAdminLiveMessagesIdClientResult = NonNullable<unknown>
+export type GetApiAdminPromotionsClientResult = NonNullable<AdminPromotionResponse[]>
+export type PostApiAdminPromotionsClientResult = NonNullable<AdminPromotionResponse>
+export type PutApiAdminPromotionsIdClientResult = NonNullable<AdminPromotionResponse>
+export type DeleteApiAdminPromotionsIdClientResult = NonNullable<unknown>
 export type GetApiAdminModMessagesClientResult = NonNullable<ModMessageResponse[]>
 export type PostApiAdminModMessagesClientResult = NonNullable<ModMessageResponse>
 export type PostApiAdminModMessagesIdToggleClientResult = NonNullable<unknown>

@@ -29,7 +29,7 @@ import { FaqService } from '../../api/faq';
 import { SessionService } from '../../core/services/session.service';
 import { ToastService } from '../../core/services/toast.service';
 import { RealtimeService } from '../../core/services/realtime.service';
-import type { AdminUserResponse, AdminSchematicResponse, AdminUserDetailResponse, AdminUserSchematicResponse, LiveMessageResponse, ModMessageResponse, StorageStatsResponse, UserStorageResponse, AllowedTagResponse, AllowedVersionResponse, TagSuggestionResponse, AdminNotificationResponse, FaqResponse, ContactTicketResponse } from '../../api/generated.schemas';
+import type { AdminUserResponse, AdminSchematicResponse, AdminUserDetailResponse, AdminUserSchematicResponse, LiveMessageResponse, ModMessageResponse, AdminPromotionResponse, PutApiAdminPromotionsIdBody, StorageStatsResponse, UserStorageResponse, AllowedTagResponse, AllowedVersionResponse, TagSuggestionResponse, AdminNotificationResponse, FaqResponse, ContactTicketResponse } from '../../api/generated.schemas';
 import type { GetApiAdminTicketsParams, GetApiAdminServerLogsParams } from '../../api/generated.schemas';
 import { AdminLogsService } from './services/admin-logs.service';
 import { AdminPlugin, AdminPluginsService } from './services/admin-plugins.service';
@@ -37,7 +37,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { UserLinkComponent } from '../../shared/components/user-link/user-link.component';
-import { UserImgPipe, TicketImgPipe } from '../../shared/pipes/image-url.pipe';
+import { UserImgPipe, TicketImgPipe, PromoImgPipe, promotionImageUrl } from '../../shared/pipes/image-url.pipe';
 import { NumberFormatPipe } from '../../shared/pipes/number-format.pipe';
 import { ContentTranslationsDialogComponent, type ContentTranslationsData } from './content-translations-dialog.component';
 import { AdminTicketDialogComponent, AdminTicketDialogData, AdminTicketDialogResult } from './admin-ticket-dialog.component';
@@ -85,6 +85,7 @@ export interface ServerLogEntryResponse {
         EmptyStateComponent,
         UserLinkComponent,
         UserImgPipe,
+        PromoImgPipe,
         NumberFormatPipe,
     ],
     templateUrl: './admin.component.html',
@@ -250,6 +251,27 @@ export class AdminComponent implements OnInit, OnDestroy {
     liveMessageForm = this.fb.nonNullable.group({
         message: ['', [Validators.required, Validators.maxLength(2000)]],
         type: ['Info', Validators.required],
+    });
+
+    readonly promotions = signal<AdminPromotionResponse[]>([]);
+    readonly loadingPromotions = signal(true);
+    readonly editingPromotionId = signal<number | null>(null);
+    promotionColumns = ['image', 'title', 'key', 'clicks', 'active', 'actions'];
+    private readonly emptyPromotion = {
+        key: '', kicker: '', title: '', description: '', linkUrl: '', imageAlt: '', ctaText: '', isActive: false,
+    };
+    readonly promotionImageFile = signal<File | null>(null);
+    readonly promotionImagePreview = signal<string | null>(null);
+    readonly promotionRemoveImage = signal(false);
+    promotionForm = this.fb.nonNullable.group({
+        key: ['', [Validators.required, Validators.maxLength(100), Validators.pattern(/^[A-Za-z0-9_-]+$/)]],
+        kicker: ['', Validators.maxLength(100)],
+        title: ['', [Validators.required, Validators.maxLength(100)]],
+        description: ['', Validators.maxLength(500)],
+        linkUrl: ['', [Validators.required, Validators.maxLength(500), Validators.pattern(/^https?:\/\/\S+$/)]],
+        imageAlt: ['', Validators.maxLength(200)],
+        ctaText: ['', Validators.maxLength(50)],
+        isActive: [false],
     });
 
     readonly modMessages = signal<ModMessageResponse[]>([]);
@@ -558,6 +580,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             case ADMIN_TAB.schematics: this.loadSchematics(); break;
             case ADMIN_TAB.liveMessages: this.loadLiveMessages(); break;
             case ADMIN_TAB.modMessages: this.loadModMessages(); break;
+            case ADMIN_TAB.promotions: this.loadPromotions(); break;
             case ADMIN_TAB.plugins: this.loadPlugins(); break;
             case ADMIN_TAB.storage: this.loadStorage(); break;
             case ADMIN_TAB.tags: this.loadTags(); this.loadTagSuggestions(); break;
@@ -983,6 +1006,104 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.adminApi.deleteApiAdminLiveMessagesId(m.id as any).subscribe({
             next: () => {
                 this.liveMessages.update(list => list.filter(x => x.id !== m.id));
+                this.toast.success(ADMIN.deleted);
+            },
+            error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+        });
+    }
+
+    loadPromotions(): void {
+        this.loadingPromotions.set(true);
+        this.adminApi.getApiAdminPromotions().subscribe({
+            next: (p) => { this.promotions.set(p); this.loadingPromotions.set(false); },
+            error: () => this.loadingPromotions.set(false),
+        });
+    }
+
+    private promotionBody(v: typeof this.emptyPromotion): PutApiAdminPromotionsIdBody {
+        return {
+            Key: v.key, Kicker: v.kicker, Title: v.title, Description: v.description, LinkUrl: v.linkUrl,
+            ImageAlt: v.imageAlt, CtaText: v.ctaText, IsActive: v.isActive,
+        };
+    }
+
+    onPromotionImageSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0] ?? null;
+        input.value = '';
+        if (!file) return;
+        this.promotionImageFile.set(file);
+        this.promotionImagePreview.set(URL.createObjectURL(file));
+        this.promotionRemoveImage.set(false);
+    }
+
+    clearPromotionImage(): void {
+        this.promotionImageFile.set(null);
+        this.promotionImagePreview.set(null);
+        this.promotionRemoveImage.set(true);
+    }
+
+    savePromotion(): void {
+        if (this.promotionForm.invalid) return;
+        const body: PutApiAdminPromotionsIdBody = {
+            ...this.promotionBody(this.promotionForm.getRawValue()),
+            Image: this.promotionImageFile() ?? undefined,
+            RemoveImage: this.promotionRemoveImage() || undefined,
+        };
+        const id = this.editingPromotionId();
+        const request$ = id
+            ? this.adminApi.putApiAdminPromotionsId(id, body)
+            : this.adminApi.postApiAdminPromotions(body);
+        request$.subscribe({
+            next: (saved) => {
+                this.promotions.update(list => id
+                    ? list.map(x => (x.id as any) === id ? saved : x)
+                    : [saved, ...list]);
+                this.cancelPromotionEdit();
+                this.toast.success(id ? ADMIN.promotionUpdated : ADMIN.promotionCreated);
+            },
+            error: (err) => this.toast.error(err.error?.message ?? err.error?.detail ?? ADMIN.failed),
+        });
+    }
+
+    editPromotion(p: AdminPromotionResponse): void {
+        this.editingPromotionId.set(p.id as any);
+        this.promotionForm.setValue({
+            key: p.key, kicker: p.kicker, title: p.title, description: p.description, linkUrl: p.linkUrl,
+            imageAlt: p.imageAlt ?? '', ctaText: p.ctaText, isActive: p.isActive,
+        });
+        this.promotionImageFile.set(null);
+        this.promotionImagePreview.set(p.imagePath ? promotionImageUrl(p.imagePath) : null);
+        this.promotionRemoveImage.set(false);
+    }
+
+    cancelPromotionEdit(): void {
+        this.editingPromotionId.set(null);
+        this.promotionForm.reset(this.emptyPromotion);
+        this.promotionImageFile.set(null);
+        this.promotionImagePreview.set(null);
+        this.promotionRemoveImage.set(false);
+    }
+
+    togglePromotion(p: AdminPromotionResponse): void {
+        const body = this.promotionBody({
+            key: p.key, kicker: p.kicker, title: p.title, description: p.description, linkUrl: p.linkUrl,
+            imageAlt: p.imageAlt ?? '', ctaText: p.ctaText, isActive: !p.isActive,
+        });
+        this.adminApi.putApiAdminPromotionsId(p.id as any, body).subscribe({
+            next: (saved) => {
+                this.promotions.update(list => list.map(x => x.id === p.id ? saved : x));
+                this.toast.success(saved.isActive ? ADMIN.promotionEnabled : ADMIN.promotionDisabled);
+            },
+            error: (err) => this.toast.error(err.error?.message ?? err.error?.detail ?? ADMIN.failed),
+        });
+    }
+
+    deletePromotion(p: AdminPromotionResponse): void {
+        this.adminApi.deleteApiAdminPromotionsId(p.id as any).subscribe({
+            next: () => {
+                this.promotions.update(list => list.filter(x => x.id !== p.id));
+                if (this.editingPromotionId() === (p.id as any)) this.cancelPromotionEdit();
                 this.toast.success(ADMIN.deleted);
             },
             error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),

@@ -379,8 +379,11 @@
                             <input matInput type="email" formControlName="email" />
                             <img matPrefix src="/icons/communication/mail.svg" alt="" aria-hidden="true"
                                 class="mc-icon" />
-                            @if (emailChecking()) { <img src="loading.gif" alt="" matSuffix class="btn-loading-gif" /> }
-                            <mat-hint>{{ 'Changing email requires a verification code' | t }}</mat-hint>
+                            @if (emailChecking()) { <img src="loading.gif" alt="" matSuffix class="btn-loading-gif" /> } @else {
+                            <img matSuffix src="/icons/ui/!!.svg" alt="" aria-hidden="true" class="mc-icon field-info"
+                                [matTooltip]="'Changing email requires a verification code' | t" matTooltipTouchGestures="on" draggable="false"
+                                (contextmenu)="$event.preventDefault()" />
+                            }
                             <mat-error>
                                 @if (emailForm.get('email')?.hasError('required')) { <span>{{ 'Email is required' | t }}</span>
                                 }

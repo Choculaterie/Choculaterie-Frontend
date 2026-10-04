@@ -3,13 +3,14 @@ export const ADMIN_TAB = {
     schematics: 1,
     liveMessages: 2,
     modMessages: 3,
-    plugins: 4,
-    storage: 5,
-    tags: 6,
-    versions: 7,
-    faq: 8,
-    tickets: 9,
-    serverLogs: 10,
+    promotions: 4,
+    plugins: 5,
+    storage: 6,
+    tags: 7,
+    versions: 8,
+    faq: 9,
+    tickets: 10,
+    serverLogs: 11,
 } as const;
 
 export type AdminTab = (typeof ADMIN_TAB)[keyof typeof ADMIN_TAB];

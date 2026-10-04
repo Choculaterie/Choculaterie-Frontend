@@ -18,6 +18,20 @@ export function userImageUrl(filePath: string | null | undefined): string {
     return `${environment.apiBasePath}/images/users/${encodePathSegments(relative)}`;
 }
 
+export function promotionImageUrl(path: string | null | undefined): string {
+    if (!path) return '';
+    if (path.startsWith('http') || path.startsWith('/')) return path;
+    const relative = path.startsWith('promotions/') ? path.slice('promotions/'.length) : path;
+    return `${environment.apiBasePath}/images/promotions/${encodePathSegments(relative)}`;
+}
+
+@Pipe({ name: 'promoImg', standalone: true })
+export class PromoImgPipe implements PipeTransform {
+    transform(path: string | null | undefined): string {
+        return promotionImageUrl(path);
+    }
+}
+
 @Pipe({ name: 'userImg', standalone: true })
 export class UserImgPipe implements PipeTransform {
     transform(filePath: string | null | undefined): string {

@@ -959,3 +959,15 @@ html:not([data-theme]) img[src*='icons/'] {
 .dlg-stacked-backdrop {
   background: transparent;
 }
+
+.field-info {
+  width: 18px;
+  height: 18px;
+  cursor: help;
+  opacity: 0.7;
+  touch-action: manipulation;
+
+  &:hover {
+    opacity: 1;
+  }
+}

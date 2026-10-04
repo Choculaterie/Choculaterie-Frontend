@@ -91,7 +91,9 @@
                 <mat-label>{{ 'Your contact (optional)' | t }}</mat-label>
                 <input matInput formControlName="contact" [placeholder]="'email or Discord' | t"
                     maxlength="200" />
-                <mat-hint>{{ 'So I can reply to you' | t }}</mat-hint>
+                <img matSuffix src="/icons/ui/!!.svg" alt="" aria-hidden="true" class="mc-icon field-info"
+                    [matTooltip]="'So I can reply to you' | t" matTooltipTouchGestures="on" draggable="false"
+                    (contextmenu)="$event.preventDefault()" />
             </mat-form-field>
 
             <div class="attachments">
