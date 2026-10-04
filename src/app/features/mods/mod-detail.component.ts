@@ -27,6 +27,7 @@ import { DropZoneDirective } from '../../shared/directives/drop-zone.directive';
 import { MODS, DIALOGS, COMMON } from '../../i18n/labels';
 import { sortVersionsDesc } from '../../shared/utils/version-sort';
 import { parseModJar } from '../../shared/utils/parse-mod-jar';
+import { dependencyLabel, dependencyOptions, formatModVersion, modLabel, parseDependencies, pickDependency, resolveDependencyMods } from '../../shared/utils/mod-dependencies';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -72,9 +73,10 @@ export class ModDetailComponent implements OnInit {
     readonly formLoading = signal(false);
     readonly editingMod = signal<ModListItemResponse | null>(null);
 
-    displayedColumns = ['description', 'releaseType', 'gameVersion', 'platform', 'downloads', 'actions'];
+    displayedColumns = ['modVersion', 'description', 'releaseType', 'gameVersion', 'platform', 'downloads', 'actions'];
 
     formTitle = '';
+    formModVersion = '';
     formDesc = '';
     formRelease = 'Stable';
     formVersions: string[] = [];
@@ -84,47 +86,11 @@ export class ModDetailComponent implements OnInit {
     formImage: File | null = null;
     readonly imagePreview = signal<string | null>(null);
     readonly allowedVersions = signal<AllowedVersionResponse[]>([]);
-    availableDependencyTitles(): string[] {
-        const titles = new Set(this.allMods().map(m => m.title));
-        titles.delete(this.modName);
-        for (const d of this.formDependencies) titles.add(d);
-        return [...titles].sort((a, b) => a.localeCompare(b));
-    }
+    readonly dependencyLabel = dependencyLabel;
+    readonly formatModVersion = formatModVersion;
 
-    private parseDependencies(raw: string | null | undefined): string[] {
-        if (!raw?.trim()) return [];
-        return raw.split(',').map(s => s.trim()).filter(Boolean);
-    }
-
-    private gameVersionsOf(mod: ModListItemResponse): string[] {
-        return mod.gameVersion.split(',').map(s => s.trim()).filter(Boolean);
-    }
-
-    private resolveDependencyMods(mod: ModListItemResponse): ModListItemResponse[] {
-        const titles = this.parseDependencies(mod.dependencies);
-        if (!titles.length) return [];
-        const wanted = new Set(this.gameVersionsOf(mod));
-        const out: ModListItemResponse[] = [];
-        for (const title of titles) {
-            const candidates = this.allMods().filter(
-                m => m.title.localeCompare(title, undefined, { sensitivity: 'accent' }) === 0
-                    || m.title.toLowerCase() === title.toLowerCase(),
-            );
-            if (!candidates.length) continue;
-            const score = (c: ModListItemResponse): number => {
-                const versions = this.gameVersionsOf(c);
-                const versionHit = versions.some(v => wanted.has(v)) ? 2 : 0;
-                const platformHit = c.platform === mod.platform ? 1 : 0;
-                return versionHit + platformHit;
-            };
-            candidates.sort((a, b) => {
-                const ds = score(b) - score(a);
-                if (ds !== 0) return ds;
-                return Number(b.id) - Number(a.id);
-            });
-            out.push(candidates[0]);
-        }
-        return out;
+    availableDependencies(): string[] {
+        return dependencyOptions(this.allMods(), this.modName, this.formDependencies);
     }
 
     isAdmin(): boolean {
@@ -174,12 +140,12 @@ export class ModDetailComponent implements OnInit {
     }
 
     downloadMod(mod: ModListItemResponse): void {
-        const depMods = this.resolveDependencyMods(mod);
+        const depMods = resolveDependencyMods(mod, this.allMods());
         if (!depMods.length) {
             this.startDownloads([mod]);
             return;
         }
-        const names = depMods.map(d => d.title).join(', ');
+        const names = depMods.map(modLabel).join(', ');
         this.dialog.open(ConfirmDialogComponent, {
             data: {
                 title: MODS.downloadDepsTitle,
@@ -216,11 +182,12 @@ export class ModDetailComponent implements OnInit {
     private populateForm(mod: ModListItemResponse): void {
         this.editingMod.set(mod);
         this.formTitle = mod.title;
+        this.formModVersion = mod.modVersion ?? '';
         this.formDesc = mod.description;
         this.formRelease = mod.releaseType;
         this.formVersions = mod.gameVersion.split(',').map(v => v.trim()).filter(Boolean);
         this.formPlatform = mod.platform;
-        this.formDependencies = this.parseDependencies(mod.dependencies);
+        this.formDependencies = parseDependencies(mod.dependencies);
         this.showForm.set(true);
         this.scrollToForm();
     }
@@ -228,7 +195,7 @@ export class ModDetailComponent implements OnInit {
     createMod(): void {
         this.formLoading.set(true);
         this.modsApi.postApiMods({
-            Title: this.formTitle || this.modName, Description: this.formDesc,
+            Title: this.formTitle || this.modName, ModVersion: this.formModVersion.trim(), Description: this.formDesc,
             ReleaseType: this.formRelease, GameVersion: this.formVersions.join(', '), Platform: this.formPlatform,
             Dependencies: this.formDependencies.join(', '),
             File: this.formFile as any, Image: this.formImage as any,
@@ -244,7 +211,7 @@ export class ModDetailComponent implements OnInit {
         this.modsApi.putApiModsId(
             mod.id as any,
             {
-                Title: this.formTitle || this.modName, Description: this.formDesc,
+                Title: this.formTitle || this.modName, ModVersion: this.formModVersion.trim(), Description: this.formDesc,
                 ReleaseType: this.formRelease, GameVersion: this.formVersions.join(', '), Platform: this.formPlatform,
                 Dependencies: this.formDependencies.join(', '),
                 File: this.formFile as any, Image: this.formImage as any,
@@ -278,6 +245,7 @@ export class ModDetailComponent implements OnInit {
         this.showForm.set(false);
         this.formLoading.set(false);
         this.formTitle = '';
+        this.formModVersion = '';
         this.formDesc = '';
         this.formRelease = 'Stable';
         this.formVersions = [];
@@ -311,7 +279,13 @@ export class ModDetailComponent implements OnInit {
         if (parsed.platform) {
             this.formPlatform = parsed.platform;
         }
-        this.formDependencies = [...parsed.dependencyTitles, ...parsed.unresolvedDependencies];
+        this.formDependencies = [
+            ...parsed.dependencyTitles.map(t => pickDependency(this.allMods(), t, this.formVersions, this.formPlatform)),
+            ...parsed.unresolvedDependencies,
+        ];
+        if (parsed.version) {
+            this.formModVersion = parsed.version;
+        }
         if (!this.editingMod()) {
             if (parsed.name && (!this.formTitle || this.formTitle === this.modName)) {
                 this.formTitle = parsed.name;

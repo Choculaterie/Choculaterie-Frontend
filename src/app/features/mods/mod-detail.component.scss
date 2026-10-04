@@ -63,7 +63,7 @@
 
 .skeleton-table-row {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 0.7fr 2fr 1fr 1fr 1fr 1fr 1fr;
     gap: 1rem;
     align-items: center;
     padding: 0.75rem 1rem;
@@ -86,8 +86,17 @@
     background-size: 200% 100%;
 }
 
+.sk-modversion {
+    width: 60%;
+}
+
 .sk-desc {
     width: 70%;
+}
+
+.mod-version-cell {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
 .sk-version {

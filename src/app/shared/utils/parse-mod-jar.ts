@@ -21,6 +21,7 @@ const BUILTIN_DEP_IDS = new Set([
 export interface ParsedModJar {
     modId: string | null;
     name: string | null;
+    version: string | null;
     description: string | null;
     platform: string | null;
     gameVersions: string[];
@@ -77,6 +78,7 @@ export async function parseModJar(file: File, options: ParseModJarOptions): Prom
         return {
             modId: meta.id ?? null,
             name: meta.name ?? null,
+            version: meta.version && !meta.version.includes('${') ? meta.version : null,
             description: meta.description ?? null,
             platform,
             gameVersions,
@@ -93,6 +95,7 @@ export async function parseModJar(file: File, options: ParseModJarOptions): Prom
 interface FabricModJson {
     id?: string;
     name?: string;
+    version?: string;
     description?: string;
     icon?: string;
     depends?: Record<string, string | string[]>;

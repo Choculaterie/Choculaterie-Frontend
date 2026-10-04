@@ -33,6 +33,10 @@
                     <input matInput [(ngModel)]="formTitle" [placeholder]="'My Awesome Mod' | t" />
                 </mat-form-field>
                 <mat-form-field appearance="outline" class="full-width form-span">
+                    <mat-label>{{ 'Mod Version' | t }}</mat-label>
+                    <input matInput [(ngModel)]="formModVersion" placeholder="1.0.0" maxlength="50" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width form-span">
                     <mat-label>{{ 'Description' | t }}</mat-label>
                     <textarea matInput [(ngModel)]="formDesc" rows="2"></textarea>
                 </mat-form-field>
@@ -67,8 +71,8 @@
                 <mat-form-field appearance="outline">
                     <mat-label>{{ 'Dependencies' | t }}</mat-label>
                     <mat-select [(ngModel)]="formDependencies" multiple panelClass="game-versions-panel">
-                        @for (title of availableDependencyTitles(); track title) {
-                        <mat-option [value]="title">{{ title }}</mat-option>
+                        @for (dep of availableDependencies(); track dep) {
+                        <mat-option [value]="dep">{{ dependencyLabel(dep) }}</mat-option>
                         }
                     </mat-select>
                 </mat-form-field>

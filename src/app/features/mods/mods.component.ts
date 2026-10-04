@@ -26,6 +26,7 @@ import { environment } from '../../environments/environment';
 import { MODS } from '../../i18n/labels';
 import { compareVersions, sortVersionsDesc } from '../../shared/utils/version-sort';
 import { parseModJar } from '../../shared/utils/parse-mod-jar';
+import { dependencyLabel, dependencyOptions, pickDependency } from '../../shared/utils/mod-dependencies';
 
 interface ModSummary {
     name: string;
@@ -77,6 +78,7 @@ export class ModsComponent implements OnInit {
     readonly allowedVersions = signal<AllowedVersionResponse[]>([]);
 
     formTitle = '';
+    formModVersion = '';
     formDesc = '';
     formRelease = 'Stable';
     formVersions: string[] = [];
@@ -85,12 +87,10 @@ export class ModsComponent implements OnInit {
     formFile: File | null = null;
     formImage: File | null = null;
     readonly imagePreview = signal<string | null>(null);
-    availableDependencyTitles(): string[] {
-        const titles = new Set(this.mods().map(m => m.title));
-        const current = this.formTitle.trim();
-        if (current) titles.delete(current);
-        for (const d of this.formDependencies) titles.add(d);
-        return [...titles].sort((a, b) => a.localeCompare(b));
+    readonly dependencyLabel = dependencyLabel;
+
+    availableDependencies(): string[] {
+        return dependencyOptions(this.mods(), this.formTitle.trim(), this.formDependencies);
     }
 
     isAdmin(): boolean {
@@ -160,6 +160,7 @@ export class ModsComponent implements OnInit {
     cancelCreate(): void {
         this.showCreateForm.set(false);
         this.formTitle = '';
+        this.formModVersion = '';
         this.formDesc = '';
         this.formRelease = 'Stable';
         this.formVersions = [];
@@ -175,7 +176,7 @@ export class ModsComponent implements OnInit {
         if (!title) return;
         this.formLoading.set(true);
         this.modsApi.postApiMods({
-            Title: title, Description: this.formDesc,
+            Title: title, ModVersion: this.formModVersion.trim(), Description: this.formDesc,
             ReleaseType: this.formRelease, GameVersion: this.formVersions.join(', '), Platform: this.formPlatform,
             Dependencies: this.formDependencies.join(', '),
             File: this.formFile as any, Image: this.formImage as any,
@@ -216,7 +217,13 @@ export class ModsComponent implements OnInit {
         if (parsed.platform) {
             this.formPlatform = parsed.platform;
         }
-        this.formDependencies = [...parsed.dependencyTitles, ...parsed.unresolvedDependencies];
+        this.formDependencies = [
+            ...parsed.dependencyTitles.map(t => pickDependency(this.mods(), t, this.formVersions, this.formPlatform)),
+            ...parsed.unresolvedDependencies,
+        ];
+        if (parsed.version) {
+            this.formModVersion = parsed.version;
+        }
         if (parsed.name && !this.formTitle.trim()) {
             this.formTitle = parsed.name;
         }

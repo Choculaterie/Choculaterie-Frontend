@@ -605,6 +605,8 @@ export interface ModListItemResponse {
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   id: number | string;
   title: string;
+  /** @nullable */
+  modVersion: string | null;
   description: string;
   releaseType: string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
@@ -1199,6 +1201,7 @@ export type PostApiGitReposRepoIdReleasesBody = {
 
 export type PostApiModsBody = {
   Title?: string;
+  ModVersion?: string;
   Description?: string;
   ReleaseType?: string;
   GameVersion?: string;
@@ -1210,6 +1213,7 @@ export type PostApiModsBody = {
 
 export type PutApiModsIdBody = {
   Title?: string;
+  ModVersion?: string;
   Description?: string;
   ReleaseType?: string;
   GameVersion?: string;

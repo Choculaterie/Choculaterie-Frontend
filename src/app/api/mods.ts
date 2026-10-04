@@ -117,6 +117,9 @@ export class ModsService {
 if(postApiModsBody.Title !== undefined) {
  formData.append(`Title`, postApiModsBody.Title);
  }
+if(postApiModsBody.ModVersion !== undefined) {
+ formData.append(`ModVersion`, postApiModsBody.ModVersion);
+ }
 if(postApiModsBody.Description !== undefined) {
  formData.append(`Description`, postApiModsBody.Description);
  }
@@ -208,6 +211,9 @@ if(postApiModsBody.Image !== undefined) {
     putApiModsIdBody: PutApiModsIdBody, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {const formData = new FormData();
 if(putApiModsIdBody.Title !== undefined) {
  formData.append(`Title`, putApiModsIdBody.Title);
+ }
+if(putApiModsIdBody.ModVersion !== undefined) {
+ formData.append(`ModVersion`, putApiModsIdBody.ModVersion);
  }
 if(putApiModsIdBody.Description !== undefined) {
  formData.append(`Description`, putApiModsIdBody.Description);
