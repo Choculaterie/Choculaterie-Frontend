@@ -1,3 +1,4 @@
+import { OpaqueBoundsDirective, type OpaqueBounds } from '../../directives/opaque-bounds.directive';
 import { HttpClient } from '@angular/common/http';
 import { filter } from 'rxjs/operators';
 import { persistLocale, getLocale } from '../../../core/i18n/locale';
@@ -26,7 +27,7 @@ import { SkeletonImgComponent } from '../skeleton-img/skeleton-img.component';
 @Component({
     selector: 'app-navbar',
     standalone: true,
-    imports: [
+    imports: [OpaqueBoundsDirective, 
         RouterLink,
         RouterLinkActive,
         MatToolbarModule,
@@ -43,6 +44,7 @@ import { SkeletonImgComponent } from '../skeleton-img/skeleton-img.component';
     styleUrl: './navbar.component.scss',
 })
 export class NavbarComponent implements OnInit {
+    readonly logoBounds = signal<OpaqueBounds | null>(null);
     private http = inject(HttpClient);
     readonly locales = signal<{ code: string; label: string }[]>([]);
 

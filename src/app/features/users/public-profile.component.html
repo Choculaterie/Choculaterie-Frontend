@@ -737,7 +737,8 @@
                         @if (!loadingSubscription()) {
                         @let sub = subscription();
                         @if (sub?.isPremium) {
-                        <img src="/premium.png" alt="" aria-hidden="true" class="mc-icon premium-icon" />
+                        <img src="/premium.png" alt="" aria-hidden="true" class="mc-icon premium-icon" draggable="false"
+                            [matTooltip]="('Art by' | t) + ' @soller'" matTooltipPosition="below" matTooltipTouchGestures="on" />
                         <div class="premium-text">
                             <strong>{{ 'Premium active' | t }}</strong>
                             @if (sub?.subscription?.cancelAtPeriodEnd) {
@@ -764,7 +765,8 @@
                         </button>
                         }
                         } @else {
-                        <img src="/free.png" alt="" aria-hidden="true" class="mc-icon premium-icon" />
+                        <img src="/free.png" alt="" aria-hidden="true" class="mc-icon premium-icon" draggable="false"
+                            [matTooltip]="('Art by' | t) + ' @soller'" matTooltipPosition="below" matTooltipTouchGestures="on" />
                         <div class="premium-text">
                             <strong>{{ 'Free plan' | t }}</strong>
                             <p>{{ 'Upgrade to support the project and unlock extra perks.' | t }}</p>

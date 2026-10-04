@@ -160,7 +160,7 @@
                     <div class="mod-card-header">
                         @if (mod.imagePath) {
                         <app-skeleton-img [src]="mod.imagePath" [alt]="mod.name" height="48px" borderRadius="8px"
-                            class="mod-icon" />
+                            class="mod-icon" [matTooltip]="('Art by' | t) + ' @soller'" matTooltipPosition="below" matTooltipTouchGestures="on" />
                         } @else {
                         <div class="mod-icon-placeholder"><img src="/icons/ui/hashtag.svg" alt="" aria-hidden="true"
                                 class="mc-icon" /></div>

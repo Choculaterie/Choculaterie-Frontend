@@ -971,3 +971,19 @@ html:not([data-theme]) img[src*='icons/'] {
     opacity: 1;
   }
 }
+
+.art-credit {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  pointer-events: none;
+
+  > img {
+    pointer-events: none;
+  }
+}
+
+.art-credit__hit {
+  position: absolute;
+  pointer-events: auto;
+}

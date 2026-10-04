@@ -1,6 +1,14 @@
 <mat-toolbar class="navbar">
     <a routerLink="/" class="brand">
-        <img src="server_logo.png" alt="Choculaterie" class="brand-logo" />
+        <span class="art-credit">
+            <img src="server_logo.png" alt="Choculaterie" class="brand-logo" draggable="false" appOpaqueBounds
+                (opaqueBounds)="logoBounds.set($event)" />
+            @if (logoBounds(); as b) {
+            <span class="art-credit__hit" [style.left.%]="b.left" [style.top.%]="b.top" [style.width.%]="b.width"
+                [style.height.%]="b.height" [matTooltip]="('Art by' | t) + ' @soller'" matTooltipPosition="below"
+                matTooltipTouchGestures="on"></span>
+            }
+        </span>
         <span class="brand-text">Choculaterie</span>
     </a>
 

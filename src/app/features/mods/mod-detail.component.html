@@ -7,7 +7,7 @@
             <h1 class="page-title">
                 @if (modImage(); as img) {
                 <app-skeleton-img [src]="img | modFile" [alt]="modName" height="28px" borderRadius="6px"
-                    class="page-title-img" />
+                    class="page-title-img" [matTooltip]="('Art by' | t) + ' @soller'" matTooltipPosition="below" matTooltipTouchGestures="on" />
                 } @else if (loading()) {
                 <div class="page-title-img-skeleton"></div>
                 }

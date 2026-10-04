@@ -10,7 +10,8 @@
     @if (!loadingSubscription() && subscription()?.isPremium) {
     <mat-card appearance="outlined" class="status-card settle-in">
         <mat-card-content>
-            <img src="/premium.png" alt="" aria-hidden="true" class="mc-icon premium-icon" />
+            <img src="/premium.png" alt="" aria-hidden="true" class="mc-icon premium-icon" draggable="false"
+                [matTooltip]="('Art by' | t) + ' @soller'" matTooltipPosition="below" matTooltipTouchGestures="on" />
             <div>
                 <strong>{{ 'You\'re Premium' | t }}</strong>
                 @if (subscription()?.premiumUntil) {
@@ -121,7 +122,8 @@
             </button>
             } @else if (invoice()!.isPaid) {
             <div class="invoice-paid">
-                <img src="/premium.png" alt="" aria-hidden="true" class="mc-icon paid-icon" />
+                <img src="/premium.png" alt="" aria-hidden="true" class="mc-icon paid-icon" draggable="false"
+                    [matTooltip]="('Art by' | t) + ' @soller'" matTooltipPosition="below" matTooltipTouchGestures="on" />
                 <div>
                     <strong>{{ 'Payment confirmed' | t }}</strong>
                     @if (invoice()!.premiumUntil) {

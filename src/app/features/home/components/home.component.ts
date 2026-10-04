@@ -1,3 +1,5 @@
+import { OpaqueBoundsDirective, type OpaqueBounds } from '../../../shared/directives/opaque-bounds.directive';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect, Injector, ElementRef, ViewChild, afterNextRender } from '@angular/core';
 import { TPipe } from '../../../core/i18n/t.pipe';
 import { Router, RouterLink } from '@angular/router';
@@ -15,7 +17,7 @@ import { SessionService } from '../../../core/services/session.service';
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [TPipe, 
+    imports: [OpaqueBoundsDirective, TPipe, MatTooltipModule, 
         RouterLink,
         MatCardModule,
         MatButtonModule,
@@ -26,6 +28,8 @@ import { SessionService } from '../../../core/services/session.service';
     styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit, OnDestroy {
+    readonly ghastBounds = signal<OpaqueBounds | null>(null);
+    readonly logoBounds = signal<OpaqueBounds | null>(null);
     private schematicsApi = inject(SchematicsService);
     private statsApi = inject(StatsService);
     private realtime = inject(RealtimeService);

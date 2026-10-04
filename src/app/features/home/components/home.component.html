@@ -1,8 +1,24 @@
 <div class="home-page">
 
     <section class="hero">
-        <img src="choculat_ghast.gif" alt="" class="hero-ghast" aria-hidden="true" />
-        <img src="server_logo.png" alt="Choculaterie" class="hero-logo" />
+        <span class="hero-ghast art-credit">
+            <img src="choculat_ghast.gif" alt="" aria-hidden="true" draggable="false" appOpaqueBounds
+                (opaqueBounds)="ghastBounds.set($event)" />
+            @if (ghastBounds(); as b) {
+            <span class="art-credit__hit" [style.left.%]="b.left" [style.top.%]="b.top" [style.width.%]="b.width"
+                [style.height.%]="b.height" [matTooltip]="('Art by' | t) + ' @choculat'" matTooltipPosition="below"
+                matTooltipTouchGestures="on"></span>
+            }
+        </span>
+        <span class="art-credit">
+            <img src="server_logo.png" alt="Choculaterie" class="hero-logo" draggable="false" appOpaqueBounds
+                (opaqueBounds)="logoBounds.set($event)" />
+            @if (logoBounds(); as b) {
+            <span class="art-credit__hit" [style.left.%]="b.left" [style.top.%]="b.top" [style.width.%]="b.width"
+                [style.height.%]="b.height" [matTooltip]="('Art by' | t) + ' @soller'" matTooltipPosition="below"
+                matTooltipTouchGestures="on"></span>
+            }
+        </span>
         <h1>Choculaterie</h1>
         <p class="hero-sub">{{ 'Discover, share, and download Minecraft schematics!' | t }}</p>
         <div class="hero-actions">
@@ -115,7 +131,8 @@
                 <span>{{ 'Buy me a coffee' | t }}</span>
             </a>
             <a routerLink="/premium" class="support-btn premium-btn">
-                <img src="/premium.png" alt="" aria-hidden="true" class="support-btn-icon" />
+                <img src="/premium.png" alt="" aria-hidden="true" class="support-btn-icon" draggable="false"
+                    [matTooltip]="('Art by' | t) + ' @soller'" matTooltipPosition="below" matTooltipTouchGestures="on" />
                 <span>{{ 'Get Premium' | t }}</span>
             </a>
         </div>
