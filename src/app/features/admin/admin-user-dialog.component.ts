@@ -94,7 +94,7 @@ export type AdminUserDialogResult = 'deleted' | null;
                 }
             </span>
         </div>
-        <div class="detail-item"><span class="detail-label">{{ 'Role' | t }}</span><span class="detail-value">{{ u.role }}</span></div>
+        <div class="detail-item"><span class="detail-label">{{ 'Role' | t }}</span><span class="detail-value">{{ user().role }}</span></div>
         <div class="detail-item"><span class="detail-label">{{ 'Status' | t }}</span><span class="detail-value">{{ u.status }}</span></div>
         <div class="detail-item"><span class="detail-label">{{ 'Registered' | t }}</span><span class="detail-value">{{ u.registrationDate | date:'medium' }}</span></div>
         <div class="detail-item"><span class="detail-label">{{ 'Reports' | t }}</span><span class="detail-value">{{ u.reportCount }}</span></div>
@@ -403,13 +403,16 @@ export class AdminUserDialogComponent {
         }
 
         forkJoin([
-            this.http.put(`/api/Translations/admin/user-badges/${this.u.id}`, { badges: grants }),
+            this.http.put<{ count: number; role: string }>(`/api/Translations/admin/user-badges/${this.u.id}`, { badges: grants }),
             this.adminApi.postApiAdminUsersIdQuota(this.u.id, { quotaGb: newQuota }),
             this.adminApi.postApiAdminUsersIdNote(this.u.id, { note: newNote }),
         ]).subscribe({
-            next: () => {
+            next: ([badgeResult]) => {
                 const first = this.editBadges()[0];
-                this.user.update(prev => ({ ...prev, badge: first != null ? String(first) : null, storageQuotaGb: newQuota, adminNote: newNote }));
+                this.user.update(prev => ({
+                    ...prev, badge: first != null ? String(first) : null, storageQuotaGb: newQuota, adminNote: newNote,
+                    role: badgeResult?.role ?? prev.role,
+                }));
                 this.toast.success(ADMIN.changesSaved);
             },
             error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),

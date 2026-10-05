@@ -662,19 +662,6 @@ export class AdminComponent implements OnInit, OnDestroy {
 
     displaySchematicSuggestion = (val: any): string => val?.label ?? val ?? '';
 
-    changeRole(user: AdminUserResponse, role: string): void {
-        const oldRole = user.role;
-        this.adminApi.postApiAdminUsersIdRole(user.id, { role }).subscribe({
-            next: () => {
-                this.users.update(list => list.map(u => u.id === user.id ? { ...u, role } : u));
-                this.toast.success(ADMIN.roleChanged(role), {
-                    onUndo: () => this.changeRole({ ...user, role } as AdminUserResponse, oldRole),
-                });
-            },
-            error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failedToChangeRole),
-        });
-    }
-
     changeStatus(user: AdminUserResponse, status: string): void {
         const oldStatus = user.status;
         this.adminApi.postApiAdminUsersIdStatus(user.id, { status, suspensionEndDate: null }).subscribe({

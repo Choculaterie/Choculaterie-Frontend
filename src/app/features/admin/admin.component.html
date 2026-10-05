@@ -237,12 +237,7 @@
                         <ng-container matColumnDef="role">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'Role' | t }}</th>
                             <td mat-cell *matCellDef="let u">
-                                <mat-select [value]="u.role" (selectionChange)="changeRole(u, $event.value)"
-                                    class="inline-select">
-                                    @for (r of roles; track r) {
-                                    <mat-option [value]="r">{{ roleLabels[r] | t }}</mat-option>
-                                    }
-                                </mat-select>
+                                {{ (roleLabels[u.role] ?? u.role) | t }}
                             </td>
                         </ng-container>
                         <ng-container matColumnDef="status">
