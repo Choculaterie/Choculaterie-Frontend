@@ -1178,3 +1178,11 @@ button img.mc-icon--fixed-white {
         background: color-mix(in srgb, var(--mat-sys-primary) 20%, transparent);
     }
 }
+
+.page-container > :not(.profile-skeleton) {
+    animation: settle-in 220ms ease-out both;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+    }
+}

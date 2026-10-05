@@ -726,3 +726,11 @@ $shimmer: linear-gradient(90deg,
         opacity: 1;
     }
 }
+
+.page-container > :not(.skeleton-page):not(.error-banner) {
+    animation: settle-in 220ms ease-out both;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+    }
+}

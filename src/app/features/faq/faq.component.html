@@ -15,7 +15,7 @@
         } @else if (faqs().length === 0) {
         <p class="empty-msg">{{ 'No questions yet, check back soon!' | t }}</p>
         } @else {
-        <mat-accordion multi>
+        <mat-accordion multi class="settle-in">
             @for (faq of faqs(); track faq.id) {
             <mat-expansion-panel hideToggle #panel>
                 <mat-expansion-panel-header>

@@ -101,7 +101,7 @@
             }
         </div>
         } @else {
-        <div class="schematic-grid" #schematicGrid>
+        <div class="schematic-grid settle-in" #schematicGrid>
             @for (s of latestSchematics(); track s.id; let i = $index) {
             <app-schematic-card [schematic]="s" [priority]="i < 6 ? 'high' : 'low'" />
             } @empty {

@@ -201,7 +201,7 @@
                     [title]="(isOwnProfile() ? 'No schematics yet' : 'No schematics') | t"
                     [subtitle]="(isOwnProfile() ? 'Upload your first schematic to see it here.' : 'This user hasn\'t published any schematics yet') | t" />
                 } @else {
-                <div class="schematic-grid" #schematicGrid>
+                <div class="schematic-grid settle-in" #schematicGrid>
                     @for (s of pagedSchematics(); track s.id) {
                     <app-schematic-card [schematic]="s" />
                     }
@@ -662,7 +662,7 @@
                 } @else if (securityKeys().length === 0) {
                 <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No security keys' | t" [subtitle]="'Add a security key for extra account protection.' | t" />
                 } @else {
-                <div class="table-scroll">
+                <div class="table-scroll settle-in">
                     <table mat-table [dataSource]="securityKeys()" class="full-width keys-table">
                         <ng-container matColumnDef="keyName">
                             <th mat-header-cell *matHeaderCellDef>{{ 'Name' | t }}</th>
@@ -784,7 +784,7 @@
                 } @else if (saves().length === 0) {
                 <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No saves' | t" [subtitle]="'Your Minecraft world saves will appear here.' | t" />
                 } @else {
-                <div class="table-scroll">
+                <div class="table-scroll settle-in">
                     <table mat-table [dataSource]="saves()" class="full-width saves-table">
                         <ng-container matColumnDef="worldName">
                             <th mat-header-cell *matHeaderCellDef>{{ 'World' | t }}</th>

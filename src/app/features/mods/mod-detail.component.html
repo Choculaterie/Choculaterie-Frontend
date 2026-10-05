@@ -168,7 +168,7 @@
     } @else if (versions().length === 0) {
     <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No versions' | t" [subtitle]="'This mod has no versions yet.' | t" />
     } @else {
-    <div class="table-scroll">
+    <div class="table-scroll settle-in">
         <table mat-table [dataSource]="versions()" class="mod-table">
             <ng-container matColumnDef="modVersion">
                 <th mat-header-cell *matHeaderCellDef>{{ 'Version' | t }}</th>

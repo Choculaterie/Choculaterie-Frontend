@@ -152,7 +152,7 @@
     } @else if (modSummaries().length === 0) {
     <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No mods available' | t" [subtitle]="'Check back later for mod releases' | t" />
     } @else {
-    <div class="mod-grid">
+    <div class="mod-grid settle-in">
         @for (mod of modSummaries(); track mod.name) {
         <a class="card-link" [routerLink]="['/mods', mod.name]">
             <mat-card class="mod-card" appearance="outlined">

@@ -18,6 +18,10 @@ import { Component, input } from '@angular/core';
         .empty-state {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; padding: 3rem; gap: 0.5rem; text-align: center;
+            animation: settle-in 220ms ease-out both;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .empty-state { animation: none; }
         }
         .empty-icon {
             width: 64px; height: 64px;

@@ -218,7 +218,7 @@
                 } @else if (users().length === 0) {
                 <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No users found' | t" />
                 } @else {
-                <div class="table-scroll">
+                <div class="table-scroll settle-in">
                     <table mat-table [dataSource]="users()" matSort (matSortChange)="onUsersSort($event)"
                         [matSortActive]="usersSort() === 'date' ? 'registrationDate' : usersSort() === 'reports' ? 'reportCount' : usersSort()"
                         [matSortDirection]="usersDirection()" class="full-width">
@@ -343,7 +343,7 @@
                 } @else if (schematics().length === 0) {
                 <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No schematics found' | t" />
                 } @else {
-                <div class="table-scroll">
+                <div class="table-scroll settle-in">
                     <table mat-table [dataSource]="schematics()" matSort (matSortChange)="onSchematicsSort($event)"
                         [matSortActive]="schematicsSort() === 'date' ? 'publishDate' : schematicsSort() === 'author' ? 'username' : schematicsSort() === 'reports' ? 'reportCount' : schematicsSort()"
                         [matSortDirection]="schematicsDirection()" class="full-width">
@@ -450,7 +450,7 @@
                 } @else if (liveMessages().length === 0) {
                 <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No live messages' | t" />
                 } @else {
-                <div class="table-scroll">
+                <div class="table-scroll settle-in">
                     <table mat-table [dataSource]="liveMessages()" class="full-width">
                         <ng-container matColumnDef="message">
                             <th mat-header-cell *matHeaderCellDef>{{ 'Message' | t }}</th>
@@ -520,7 +520,7 @@
                 } @else if (modMessages().length === 0) {
                 <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No mod messages' | t" />
                 } @else {
-                <div class="table-scroll">
+                <div class="table-scroll settle-in">
                     <table mat-table [dataSource]="modMessages()" class="full-width">
                         <ng-container matColumnDef="message">
                             <th mat-header-cell *matHeaderCellDef>{{ 'Message' | t }}</th>
@@ -640,7 +640,7 @@
                 } @else if (promotions().length === 0) {
                 <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No promotions' | t" />
                 } @else {
-                <div class="table-scroll">
+                <div class="table-scroll settle-in">
                     <table mat-table [dataSource]="promotions()" class="full-width">
                         <ng-container matColumnDef="image">
                             <th mat-header-cell *matHeaderCellDef></th>
@@ -1192,7 +1192,7 @@
                 } @else if (tickets().length === 0) {
                 <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No tickets' | t" [subtitle]="'No contact messages yet' | t" />
                 } @else {
-                <div class="table-scroll">
+                <div class="table-scroll settle-in">
                 <table mat-table [dataSource]="tickets()" class="full-width">
                     <ng-container matColumnDef="title">
                         <th mat-header-cell *matHeaderCellDef>{{ 'Subject' | t }}</th>
@@ -1267,7 +1267,7 @@
                 } @else if (serverLogs().length === 0) {
                 <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No logged errors' | t" [subtitle]="'Errors and crashes will appear here' | t" />
                 } @else {
-                <div class="table-scroll">
+                <div class="table-scroll settle-in">
                 <table mat-table [dataSource]="serverLogs()" class="full-width">
                     <ng-container matColumnDef="source">
                         <th mat-header-cell *matHeaderCellDef>{{ 'Source' | t }}</th>
