@@ -12,12 +12,32 @@
         <mat-card-content>
             <img src="/premium.png" alt="" aria-hidden="true" class="mc-icon premium-icon" draggable="false"
                 [matTooltip]="('Art by' | t) + ' @soller'" matTooltipPosition="below" matTooltipTouchGestures="on" />
+            @let sub = subscription();
             <div>
                 <strong>{{ 'You\'re Premium' | t }}</strong>
-                @if (subscription()?.premiumUntil) {
-                <p>{{ 'Active until' | t }} {{ subscription()!.premiumUntil | date:'longDate' }}</p>
+                @if (sub?.subscription?.cancelAtPeriodEnd) {
+                <p>{{ 'Your subscription will not renew.' | t }}</p>
+                } @else if (sub?.premiumUntil) {
+                @if (sub?.subscription?.provider === 'Stripe' && sub?.subscription?.status === 'Active') {
+                <p>{{ 'Renews on' | t }} {{ sub!.premiumUntil | date:'longDate' }}</p>
+                } @else {
+                <p>{{ 'Ends on' | t }} {{ sub!.premiumUntil | date:'longDate' }}</p>
+                }
                 }
             </div>
+            @if (sub?.subscription?.provider === 'Stripe' && !sub?.subscription?.cancelAtPeriodEnd
+            && sub?.subscription?.status !== 'Canceled') {
+            <button mat-stroked-button class="status-action" [disabled]="subscriptionActions.cancelling()"
+                (click)="cancelSubscription()">
+                {{ 'Cancel subscription' | t }}
+            </button>
+            } @else if (sub?.subscription?.provider === 'Stripe' && sub?.subscription?.cancelAtPeriodEnd
+            && sub?.subscription?.status !== 'Canceled') {
+            <button mat-flat-button color="primary" class="status-action"
+                [disabled]="subscriptionActions.resuming()" (click)="resumeSubscription()">
+                {{ 'Renew' | t }}
+            </button>
+            }
         </mat-card-content>
     </mat-card>
     }

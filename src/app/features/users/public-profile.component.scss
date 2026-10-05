@@ -1186,3 +1186,13 @@ button img.mc-icon--fixed-white {
         animation: none;
     }
 }
+
+.profile-tabs ::ng-deep .mat-mdc-tab-labels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+
+    .mat-mdc-tab {
+        min-width: 0;
+        padding: 0 8px;
+    }
+}

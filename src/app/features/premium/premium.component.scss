@@ -43,6 +43,11 @@
             height: 50px;
         }
 
+        .status-action {
+            flex: none;
+            margin-left: auto;
+        }
+
         p {
             margin: 0.25rem 0 0;
             color: var(--mat-sys-on-surface-variant);

@@ -1,7 +1,7 @@
 <div class="page-container">
     <h1>{{ 'Admin Panel' | t }}</h1>
 
-    <mat-tab-group dynamicHeight disablePagination [selectedIndex]="selectedTab()"
+    <mat-tab-group dynamicHeight disablePagination class="admin-tabs" [selectedIndex]="selectedTab()"
         (selectedTabChange)="onTabChange($event)">
 
         <mat-tab [label]="'Users' | t">
@@ -951,9 +951,6 @@
                     <ng-container matColumnDef="actions">
                         <th mat-header-cell *matHeaderCellDef></th>
                         <td mat-cell *matCellDef="let t">
-                            <button mat-icon-button (click)="translateTag(t)" [matTooltip]="'Translate' | t">
-                                <img src="/icons/ui/info.svg" alt="" aria-hidden="true" class="mc-icon" />
-                            </button>
                             <button mat-icon-button color="warn" (click)="deleteTag(t)" [matTooltip]="'Delete' | t">
                                 <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
                             </button>
@@ -1061,9 +1058,11 @@
                 <mat-accordion multi class="faq-accordion">
                     @for (f of adminFaqs(); track f.id) {
                     @if (editingFaqId() === +f.id) {
-                    <mat-expansion-panel expanded>
+                    <mat-expansion-panel expanded hideToggle #editPanel>
                         <mat-expansion-panel-header>
                             <mat-panel-title>{{ 'Editing…' | t }}</mat-panel-title>
+                            <img src="/icons/arrows/tild_full_down.svg" alt="" aria-hidden="true" class="mc-icon expand-arrow"
+                                [class.expanded]="editPanel.expanded" [matTooltip]="(editPanel.expanded ? 'Collapse' : 'Expand') | t" />
                         </mat-expansion-panel-header>
                         <form [formGroup]="faqEditForm" (ngSubmit)="saveEditFaq(f)" class="faq-create-form">
                             <mat-form-field appearance="outline">
@@ -1086,14 +1085,15 @@
                         </form>
                     </mat-expansion-panel>
                     } @else {
-                    <mat-expansion-panel>
+                    <mat-expansion-panel hideToggle #faqPanel>
                         <mat-expansion-panel-header>
                             <mat-panel-title>{{ f.question }}</mat-panel-title>
                             <mat-panel-description>{{ 'Order:' | t }} {{ f.order }}</mat-panel-description>
+                            <img src="/icons/arrows/tild_full_down.svg" alt="" aria-hidden="true" class="mc-icon expand-arrow"
+                                [class.expanded]="faqPanel.expanded" [matTooltip]="(faqPanel.expanded ? 'Collapse' : 'Expand') | t" />
                         </mat-expansion-panel-header>
                         <p class="faq-answer">{{ f.answer }}</p>
                         <mat-action-row>
-                            <button mat-stroked-button (click)="translateFaq(f)">{{ 'Translate' | t }}</button>
                             <button mat-stroked-button color="primary" (click)="startEditFaq(f)">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
                                     width="18" height="18" matButtonIcon class="mc-icon"

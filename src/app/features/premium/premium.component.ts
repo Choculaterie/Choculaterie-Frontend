@@ -1,3 +1,4 @@
+import { SubscriptionActionsService } from '../../core/services/subscription-actions.service';
 import { Component, ElementRef, Injector, OnDestroy, OnInit, afterNextRender, inject, signal, computed, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -27,6 +28,7 @@ const CHECKOUT_HOP_KEY = 'premium-checkout-hop';
 export class PremiumComponent implements OnInit, OnDestroy {
     private session = inject(SessionService);
     private billing = inject(BillingService);
+    readonly subscriptionActions = inject(SubscriptionActionsService);
     private toast = inject(ToastService);
     private router = inject(Router);
     private location = inject(Location);
@@ -223,5 +225,13 @@ export class PremiumComponent implements OnInit, OnDestroy {
         if (this.clockTimer) clearInterval(this.clockTimer);
         this.pollTimer = undefined;
         this.clockTimer = undefined;
+    }
+
+    cancelSubscription(): void {
+        this.subscriptionActions.cancel().subscribe((s) => { if (s) this.subscription.set(s); });
+    }
+
+    resumeSubscription(): void {
+        this.subscriptionActions.resume().subscribe((s) => { if (s) this.subscription.set(s); });
     }
 }

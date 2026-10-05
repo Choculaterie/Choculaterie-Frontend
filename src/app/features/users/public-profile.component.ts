@@ -1,3 +1,4 @@
+import { SubscriptionActionsService } from '../../core/services/subscription-actions.service';
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect, Injector, ElementRef, ViewChild, afterNextRender } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -323,7 +324,7 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
 
     readonly subscription = signal<OwnSubscriptionResponse | null>(null);
     readonly loadingSubscription = signal(true);
-    readonly cancellingSubscription = signal(false);
+    readonly cancellingSubscription = inject(SubscriptionActionsService).cancelling;
 
     readonly resetStep = signal<'request' | 'confirm'>('request');
     private _emailSpamTimer: ReturnType<typeof setTimeout> | null = null;
@@ -515,70 +516,15 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         }, 2000);
     }
 
-    readonly resumingSubscription = signal(false);
+    private subscriptionActions = inject(SubscriptionActionsService);
+    readonly resumingSubscription = this.subscriptionActions.resuming;
 
     resumeSubscription(): void {
-        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-            data: {
-                title: 'Renew Premium subscription?',
-                message: 'Here is what happens if you renew:',
-                bullets: [
-                    'Billing continues as normal, so you will be charged again next month.',
-                    'You keep every Premium perk without interruption.',
-                    'You can cancel again at any time.',
-                ],
-                confirmText: 'Renew subscription',
-                cancelText: 'Not now',
-            } as ConfirmDialogData,
-        });
-        dialogRef.afterClosed().subscribe((confirmed) => {
-            if (!confirmed) return;
-            this.resumingSubscription.set(true);
-            this.billingApi.resumeSubscription().subscribe({
-                next: () => {
-                    this.resumingSubscription.set(false);
-                    this.toast.success('Your subscription will renew as normal.');
-                    this.billingApi.getSubscription().subscribe({ next: (s) => this.subscription.set(s) });
-                },
-                error: (err) => {
-                    this.resumingSubscription.set(false);
-                    this.toast.error(err?.error?.message ?? 'Could not renew your subscription.');
-                },
-            });
-        });
+        this.subscriptionActions.resume().subscribe((s) => { if (s) this.subscription.set(s); });
     }
 
     cancelSubscription(): void {
-        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-            data: {
-                title: 'Cancel Premium subscription?',
-                message: 'Here is what happens if you cancel:',
-                bullets: [
-                    'You keep every Premium perk until the end of your current billing period.',
-                    'You will not be charged again after that.',
-                    'Your worlds and files are never deleted.',
-                    'You can resubscribe at any time.',
-                ],
-                confirmText: 'Cancel subscription',
-                cancelText: 'Keep subscription',
-                warn: true,
-            } as ConfirmDialogData,
-        });
-        dialogRef.afterClosed().subscribe((confirmed) => {
-            if (!confirmed) return;
-            this.cancellingSubscription.set(true);
-            this.billingApi.cancelSubscription().subscribe({
-                next: () => {
-                    this.cancellingSubscription.set(false);
-                    this.toast.success('Your subscription will end at the end of the current period.');
-                    this.billingApi.getSubscription().subscribe({ next: (s) => this.subscription.set(s) });
-                },
-                error: (err) => {
-                    this.cancellingSubscription.set(false);
-                    this.toast.error(err?.error?.message ?? 'Could not cancel your subscription.');
-                },
-            });
-        });
+        this.subscriptionActions.cancel().subscribe((s) => { if (s) this.subscription.set(s); });
     }
 
     private applyOwnProfile(p: OwnProfileResponse): void {
