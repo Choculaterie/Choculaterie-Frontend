@@ -98,7 +98,9 @@ interface HistoryRow {
                     @if (r.grant; as g) {
                     <button mat-button [disabled]="revoking() === g.id" (click)="revoke(g)">{{ 'Revoke' | t }}</button>
                     } @else if (r.kind === 'Granted' && r.source !== 'Admin') {
-                    <span class="muted paid" [matTooltip]="'Paid time cannot be revoked. Refund in Stripe instead.' | t">{{ 'paid' | t }}</span>
+                    <span class="muted paid" [matTooltip]="(r.source === 'Monero'
+                        ? 'Paid time cannot be revoked. Monero payments can only be refunded manually from the Choculaterie wallet.'
+                        : 'Paid time cannot be revoked. Refund in Stripe instead.') | t">{{ 'paid' | t }}</span>
                     }
                 </td>
             </tr>
