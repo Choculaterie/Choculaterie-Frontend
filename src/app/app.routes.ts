@@ -53,6 +53,16 @@ export const routes: Routes = [
         redirectTo: 'not-found',
     },
     {
+        path: 'videos',
+        loadComponent: () =>
+            import('./features/videos/videos.component').then((m) => m.VideosComponent),
+    },
+    {
+        path: 'videos/:id',
+        loadComponent: () =>
+            import('./features/videos/video-watch.component').then((m) => m.VideoWatchComponent),
+    },
+    {
         path: 'premium',
         loadComponent: () =>
             import('./features/premium/premium.component').then((m) => m.PremiumComponent),

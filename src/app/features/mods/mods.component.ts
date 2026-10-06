@@ -1,3 +1,6 @@
+import { FilePickDirective } from '../../shared/directives/file-pick.directive';
+import { MediaSkeletonDirective } from '../../shared/directives/media-skeleton.directive';
+import { scrollIntoViewSoon, scrollBackTo } from '../../shared/utils/scroll';
 import { EmojifyPipe } from '../../shared/pipes/emojify.pipe';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
@@ -42,7 +45,7 @@ interface ModSummary {
 @Component({
     selector: 'app-mods',
     standalone: true,
-    imports: [EmojifyPipe, TPipe,
+    imports: [FilePickDirective, MediaSkeletonDirective, EmojifyPipe, TPipe,
         FormsModule,
         RouterLink,
         MatCardModule,
@@ -152,10 +155,12 @@ export class ModsComponent implements OnInit {
     }
 
     toggleCreate(): void {
-        this.showCreateForm.update(v => !v);
         if (this.showCreateForm()) {
-            setTimeout(() => document.querySelector('.form-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+            this.cancelCreate();
+            return;
         }
+        this.showCreateForm.set(true);
+        scrollIntoViewSoon('.form-card');
     }
 
     cancelCreate(): void {
@@ -170,6 +175,7 @@ export class ModsComponent implements OnInit {
         this.formFile = null;
         this.formImage = null;
         this.imagePreview.set(null);
+        scrollBackTo('.page-header');
     }
 
     createMod(): void {

@@ -1,3 +1,6 @@
+import { FilePickDirective } from '../../shared/directives/file-pick.directive';
+import { MediaSkeletonDirective } from '../../shared/directives/media-skeleton.directive';
+import { scrollIntoViewSoon, scrollBackTo } from '../../shared/utils/scroll';
 import { EmojifyPipe } from '../../shared/pipes/emojify.pipe';
 import { Component, OnInit, inject, signal, Injector, afterNextRender } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
@@ -34,7 +37,7 @@ import { environment } from '../../environments/environment';
 @Component({
     selector: 'app-mod-detail',
     standalone: true,
-    imports: [EmojifyPipe, TPipe, 
+    imports: [FilePickDirective, MediaSkeletonDirective, EmojifyPipe, TPipe, 
         FormsModule,
         RouterLink,
         MatCardModule,
@@ -242,6 +245,7 @@ export class ModDetailComponent implements OnInit {
     }
 
     resetForm(): void {
+        if (this.showForm()) scrollBackTo('.page-header');
         this.editingMod.set(null);
         this.showForm.set(false);
         this.formLoading.set(false);

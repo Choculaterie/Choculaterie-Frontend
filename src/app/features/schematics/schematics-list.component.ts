@@ -1,3 +1,6 @@
+import { FilePickDirective } from '../../shared/directives/file-pick.directive';
+import { MediaSkeletonDirective } from '../../shared/directives/media-skeleton.directive';
+import { scrollIntoViewSoon, scrollBackTo } from '../../shared/utils/scroll';
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect, Injector, ElementRef, ViewChild, afterNextRender } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
@@ -34,7 +37,7 @@ import { DropZoneDirective } from '../../shared/directives/drop-zone.directive';
 @Component({
     selector: 'app-schematics-list',
     standalone: true,
-    imports: [TPipe,
+    imports: [FilePickDirective, MediaSkeletonDirective, TPipe,
         FormsModule,
         ReactiveFormsModule,
         MatFormFieldModule,
@@ -384,7 +387,29 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
             this.router.navigate(['/auth/register']);
             return;
         }
-        this.showCreate.set(!this.showCreate());
+        if (this.showCreate()) {
+            this.cancelCreate();
+            return;
+        }
+        this.showCreate.set(true);
+        scrollIntoViewSoon('.schematic-form-card');
+    }
+
+    cancelCreate(): void {
+        this.clearCreateForm();
+        this.showCreate.set(false);
+        scrollBackTo('.page-header');
+    }
+
+    private clearCreateForm(): void {
+        this.selectedAuthorId.set(null);
+        this.createTagList.set([]);
+        this.createVersionList.set([]);
+        this.createForm.reset({ name: '', authorName: '', description: '', tags: [], versions: [], schematicType: 'Redstone', visibility: 'Public', downloadLinkMediaFire: '', youtubeLink: '' });
+        this.pictureFiles = [];
+        this.litematicFiles = [];
+        this.picturePreviews.set([]);
+        this.coverIndex.set(0);
     }
 
     clearFilters(): void {
@@ -429,6 +454,17 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         this.addLitematicFiles(newFiles);
         input.value = '';
         setTimeout(() => window.scrollTo({ top: scrollY, behavior: 'instant' as ScrollBehavior }), 0);
+    }
+
+    onPageFilesDropped(files: File[]): void {
+        if (!this.session.isAuthenticated()) {
+            this.router.navigate(['/auth/register']);
+            return;
+        }
+        const wasOpen = this.showCreate();
+        this.showCreate.set(true);
+        setTimeout(() => this.onFilesDropped(files), wasOpen ? 0 : 50);
+        scrollIntoViewSoon('.schematic-form-card', { onlyIfHidden: wasOpen });
     }
 
     onFilesDropped(files: File[]): void {
@@ -525,12 +561,23 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         this.regeneratePreviews();
     }
 
+    private previewUrls = new Map<File, string>();
+
     private regeneratePreviews(): void {
-        const previews: string[] = [];
-        for (const f of this.pictureFiles) {
-            previews.push(URL.createObjectURL(f));
+        for (const [file, url] of this.previewUrls) {
+            if (!this.pictureFiles.includes(file)) {
+                URL.revokeObjectURL(url);
+                this.previewUrls.delete(file);
+            }
         }
-        this.picturePreviews.set(previews);
+        this.picturePreviews.set(this.pictureFiles.map(f => {
+            let url = this.previewUrls.get(f);
+            if (!url) {
+                url = URL.createObjectURL(f);
+                this.previewUrls.set(f, url);
+            }
+            return url;
+        }));
     }
 
     submitCreate(): void {

@@ -1,3 +1,5 @@
+import { FilePickDirective } from '../../shared/directives/file-pick.directive';
+import { MediaSkeletonDirective } from '../../shared/directives/media-skeleton.directive';
 import { translateText } from '../../core/i18n/translation.store';
 import { Component, OnInit, DestroyRef, ElementRef, inject, signal, computed, effect, viewChildren, type Signal } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
@@ -49,7 +51,7 @@ import { getLocale } from '../../core/i18n/locale';
 @Component({
     selector: 'app-schematic-detail',
     standalone: true,
-    imports: [TPipe,
+    imports: [FilePickDirective, MediaSkeletonDirective, TPipe,
         RouterLink,
         DatePipe,
         ReactiveFormsModule,
@@ -717,14 +719,23 @@ export class SchematicDetailComponent implements OnInit {
 
     private readonly blockListEls = viewChildren<ElementRef<HTMLElement>>('blockList');
     private blockListObserver: ResizeObserver | null = null;
+    private readonly blockListWidths = new WeakMap<HTMLElement, number>();
     readonly blockListHeights = signal<Record<string, { collapsed: number; full: number }>>({});
     readonly expandedBlockLists = signal<Record<string, boolean>>({});
 
     private readonly watchBlockLists = effect(() => {
         const els = this.blockListEls();
         if (typeof ResizeObserver === 'undefined') return;
-        this.blockListObserver ??= new ResizeObserver(entries =>
-            this.measureBlockLists(entries.map(e => e.target as HTMLElement)));
+        this.blockListObserver ??= new ResizeObserver(entries => {
+            const resized = entries.filter(e => {
+                const el = e.target as HTMLElement;
+                const width = Math.round(e.contentRect.width);
+                if (this.blockListWidths.get(el) === width) return false;
+                this.blockListWidths.set(el, width);
+                return true;
+            });
+            if (resized.length) this.measureBlockLists(resized.map(e => e.target as HTMLElement));
+        });
         this.blockListObserver.disconnect();
         for (const el of els) this.blockListObserver.observe(el.nativeElement);
     });
@@ -748,6 +759,9 @@ export class SchematicDetailComponent implements OnInit {
 
     toggleBlockList(id: string | number): void {
         const key = String(id);
+        const el = this.blockListEls().find(e => e.nativeElement.dataset['fileId'] === key)?.nativeElement;
+        const current = this.blockListHeights()[key];
+        if (el && current) this.blockListHeights.update(h => ({ ...h, [key]: { ...current, full: el.scrollHeight } }));
         this.expandedBlockLists.update(m => ({ ...m, [key]: !m[key] }));
     }
 

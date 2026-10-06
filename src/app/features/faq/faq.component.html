@@ -107,12 +107,12 @@
                     </svg>
                     <span>{{ 'Attach images' | t }} ({{ imageFiles.length }}/5)</span>
                 </button>
-                <input #imgInput type="file" accept="image/*" multiple hidden (change)="onImageChange($event)" />
+                <input #imgInput type="file" appFilePick accept="image/*" multiple hidden (change)="onImageChange($event)" />
                 @if (imagePreviews().length) {
                 <div class="preview-grid">
                     @for (preview of imagePreviews(); track preview; let i = $index) {
                     <div class="preview-item" [class.cover]="true">
-                        <img [src]="preview" [alt]="imageFiles[i]?.name" style="cursor:pointer" />
+                        <img appMediaSkeleton [src]="preview" [alt]="imageFiles[i]?.name" style="cursor:pointer" />
                         <div class="preview-actions">
                             <button mat-icon-button type="button" (click)="removeImage(i)" [matTooltip]="'Remove' | t">
                                 <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />

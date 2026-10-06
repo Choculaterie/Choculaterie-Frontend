@@ -117,6 +117,35 @@ function buildMeta(title, description, image, type = 'website') {
     ].join('\n  ');
 }
 
+function buildVideoMeta(title, description, video) {
+    const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    const base = `${PUBLIC_API_URL}${video.mediaBase ?? `/media/videos/${video.id}`}`;
+    const stream = `${base}/video.mp4`;
+    const thumb = video.hasThumbnail
+        ? `${base}/thumbnail/${new Date(video.updatedAt ?? 0).getTime()}`
+        : FALLBACK_IMAGE;
+    const tags = [
+        `<meta property="og:title" content="${esc(title)}" />`,
+        `<meta property="og:description" content="${esc(description)}" />`,
+        `<meta property="og:type" content="video.other" />`,
+        `<meta property="og:site_name" content="${esc(SITE_NAME)}" />`,
+        `<meta property="og:url" content="${esc(`${SITE_URL}/videos/${video.id}`)}" />`,
+        `<meta property="og:image" content="${esc(thumb)}" />`,
+        `<meta property="og:video" content="${esc(stream)}" />`,
+        `<meta property="og:video:secure_url" content="${esc(stream)}" />`,
+        `<meta property="og:video:type" content="video/mp4" />`,
+        `<meta name="twitter:card" content="player" />`,
+        `<meta name="twitter:title" content="${esc(title)}" />`,
+        `<meta name="twitter:image" content="${esc(thumb)}" />`,
+        `<meta name="twitter:player:stream" content="${esc(stream)}" />`,
+    ];
+    if (video.width && video.height) {
+        tags.push(`<meta property="og:video:width" content="${video.width}" />`);
+        tags.push(`<meta property="og:video:height" content="${video.height}" />`);
+    }
+    return tags.join('\n  ');
+}
+
 const ROUTE_TITLES = {
     '': SITE_NAME,
     'schematics': 'Schematics',
@@ -127,6 +156,7 @@ const ROUTE_TITLES = {
     'admin': 'Admin',
     'viewer': 'Viewer',
     'save-manager': 'Save manager',
+    'videos': 'Videos',
     'not-found': 'Not found',
 };
 
@@ -160,6 +190,16 @@ async function resolveMeta(urlPath, isCrawler) {
                 ? (fp.startsWith('http') ? fp : `${PUBLIC_API_URL}/images/users/${fp}`)
                 : null;
             return { title, metaBlock: buildMeta(title, description, image, 'profile') };
+        }
+    }
+
+    const videoMatch = urlPath.match(/^\/videos\/([A-Za-z0-9]{1,16})\/?$/);
+    if (videoMatch) {
+        const data = await apiGet(`/api/Videos/${videoMatch[1]}`);
+        if (data) {
+            const title = `${data.title} · ${SITE_NAME}`;
+            const description = (data.description ?? '').trim().substring(0, 200) || `A video on ${SITE_NAME}.`;
+            return { title, metaBlock: buildVideoMeta(title, description, data) };
         }
     }
 

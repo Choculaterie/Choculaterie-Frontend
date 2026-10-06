@@ -1,0 +1,31 @@
+export interface PixelIcon {
+    main: string;
+    shadow: string;
+}
+
+export const PLAYER_ICONS = {
+    play: {
+        main: 'M3,5h7v1h-7zM3,6h7v1h-7zM3,7h7v1h-7zM3,8h13v1h-13zM3,9h13v1h-13zM3,10h13v1h-13zM3,11h19v1h-19zM3,12h19v1h-19zM3,13h19v1h-19zM3,14h13v1h-13zM3,15h13v1h-13zM3,16h13v1h-13zM3,17h13v1h-13zM3,18h7v1h-7zM3,19h7v1h-7zM3,20h7v1h-7z',
+        shadow: 'M16,14h13v1h-13zM16,15h13v1h-13zM16,16h13v1h-13zM16,17h13v1h-13zM10,18h12v1h-12zM10,19h12v1h-12zM10,20h12v1h-12zM10,21h6v1h-6zM10,22h6v1h-6zM10,23h6v1h-6z',
+    },
+    pause: {
+        main: 'M3,2h7v1h-7zM16,2h6v1h-6zM3,3h7v1h-7zM16,3h6v1h-6zM3,4h7v1h-7zM16,4h6v1h-6zM3,5h7v1h-7zM16,5h6v1h-6zM3,6h7v1h-7zM16,6h6v1h-6zM3,7h7v1h-7zM16,7h6v1h-6zM3,8h7v1h-7zM16,8h6v1h-6zM3,9h7v1h-7zM16,9h6v1h-6zM3,10h7v1h-7zM16,10h6v1h-6zM3,11h7v1h-7zM16,11h6v1h-6zM3,12h7v1h-7zM16,12h6v1h-6zM3,13h7v1h-7zM16,13h6v1h-6zM3,14h7v1h-7zM16,14h6v1h-6zM3,15h7v1h-7zM16,15h6v1h-6zM3,16h7v1h-7zM16,16h6v1h-6zM3,17h7v1h-7zM16,17h6v1h-6zM3,18h7v1h-7zM16,18h6v1h-6zM3,19h7v1h-7zM16,19h6v1h-6zM3,20h7v1h-7zM16,20h6v1h-6zM3,21h7v1h-7zM16,21h6v1h-6zM3,22h7v1h-7zM16,22h6v1h-6zM3,23h7v1h-7zM16,23h6v1h-6z',
+        shadow: 'M10,5h6v1h-6zM22,5h7v1h-7zM10,6h6v1h-6zM22,6h7v1h-7zM10,7h6v1h-6zM22,7h7v1h-7zM10,8h6v1h-6zM22,8h7v1h-7zM10,9h6v1h-6zM22,9h7v1h-7zM10,10h6v1h-6zM22,10h7v1h-7zM10,11h6v1h-6zM22,11h7v1h-7zM10,12h6v1h-6zM22,12h7v1h-7zM10,13h6v1h-6zM22,13h7v1h-7zM10,14h6v1h-6zM22,14h7v1h-7zM10,15h6v1h-6zM22,15h7v1h-7zM10,16h6v1h-6zM22,16h7v1h-7zM10,17h6v1h-6zM22,17h7v1h-7zM10,18h6v1h-6zM22,18h7v1h-7zM10,19h6v1h-6zM22,19h7v1h-7zM10,20h6v1h-6zM22,20h7v1h-7zM10,21h6v1h-6zM22,21h7v1h-7zM10,22h6v1h-6zM22,22h7v1h-7zM10,23h6v1h-6zM22,23h7v1h-7zM10,24h6v1h-6zM22,24h7v1h-7zM10,25h6v1h-6zM22,25h7v1h-7zM10,26h6v1h-6zM22,26h7v1h-7z',
+    },
+    volume: {
+        main: 'M11,4h10v1h-10zM11,5h10v1h-10zM11,6h10v1h-10zM11,7h14v1h-14zM11,8h14v1h-14zM11,9h14v1h-14zM11,10h5v1h-5zM21,10h4v1h-4zM11,11h5v1h-5zM21,11h4v1h-4zM11,12h5v1h-5zM21,12h4v1h-4zM11,13h5v1h-5zM11,14h5v1h-5zM11,15h5v1h-5zM11,16h5v1h-5zM11,17h5v1h-5zM11,18h5v1h-5zM2,19h14v1h-14zM2,20h14v1h-14zM2,21h14v1h-14zM2,22h14v1h-14zM2,23h14v1h-14zM2,24h14v1h-14z',
+        shadow: 'M16,10h5v1h-5zM25,10h5v1h-5zM16,11h5v1h-5zM25,11h5v1h-5zM16,12h5v1h-5zM25,12h5v1h-5zM16,13h5v1h-5zM25,13h5v1h-5zM16,14h5v1h-5zM25,14h5v1h-5zM16,15h5v1h-5zM25,15h5v1h-5zM16,16h5v1h-5zM16,17h5v1h-5zM16,18h5v1h-5zM16,19h5v1h-5zM16,20h5v1h-5zM16,21h5v1h-5zM16,22h5v1h-5zM16,23h5v1h-5zM16,24h5v1h-5zM7,25h14v1h-14zM7,26h14v1h-14zM7,27h14v1h-14z',
+    },
+    fullscreen: {
+        main: 'M2,5h23v1h-23zM2,6h23v1h-23zM2,7h23v1h-23zM2,8h5v1h-5zM21,8h4v1h-4zM2,9h5v1h-5zM21,9h4v1h-4zM2,10h5v1h-5zM21,10h4v1h-4zM2,11h5v1h-5zM21,11h4v1h-4zM2,12h5v1h-5zM21,12h4v1h-4zM2,13h5v1h-5zM21,13h4v1h-4zM2,14h5v1h-5zM21,14h4v1h-4zM2,15h5v1h-5zM21,15h4v1h-4zM2,16h5v1h-5zM21,16h4v1h-4zM2,17h5v1h-5zM21,17h4v1h-4zM2,18h23v1h-23zM2,19h23v1h-23zM2,20h23v1h-23z',
+        shadow: 'M7,8h14v1h-14zM25,8h5v1h-5zM7,9h14v1h-14zM25,9h5v1h-5zM7,10h14v1h-14zM25,10h5v1h-5zM7,11h4v1h-4zM25,11h5v1h-5zM7,12h4v1h-4zM25,12h5v1h-5zM7,13h4v1h-4zM25,13h5v1h-5zM7,14h4v1h-4zM25,14h5v1h-5zM7,15h4v1h-4zM25,15h5v1h-5zM7,16h4v1h-4zM25,16h5v1h-5zM7,17h4v1h-4zM25,17h5v1h-5zM25,18h5v1h-5zM25,19h5v1h-5zM25,20h5v1h-5zM7,21h23v1h-23zM7,22h23v1h-23zM7,23h23v1h-23z',
+    },
+    muted: {
+        main: 'M2,14h25v1h-25zM2,15h25v1h-25zM2,16h25v1h-25zM2,17h25v1h-25z',
+        shadow: 'M5,18h25v1h-25zM5,19h25v1h-25zM5,20h25v1h-25z',
+    },
+    exitFullscreen: {
+        main: 'M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z',
+        shadow: 'M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z',
+    },
+} satisfies Record<string, PixelIcon>;

@@ -31,7 +31,7 @@ export class App implements OnInit {
 
   private readonly siteName = 'Choculaterie';
 
-  private readonly selfTitledRoutes = new Set(['schematics', 'users', 'qs']);
+  private readonly selfTitledRoutes = new Set(['schematics', 'users', 'qs', 'videos']);
 
   readonly announcements = this.realtime.announcements;
 

@@ -236,6 +236,9 @@ export const ADMIN = {
     liveMessageCreated: 'Live message created.',
     liveMessageUpdated: 'Live message updated.',
     promotionCreated: 'Promotion created.',
+    videoUploaded: 'Video uploaded, processing started.',
+    videoUpdated: 'Video updated.',
+    deleteVideoTitle: 'Delete this video?',
     promotionUpdated: 'Promotion updated.',
     promotionEnabled: 'Promotion turned on.',
     promotionDisabled: 'Promotion turned off.',
@@ -352,6 +355,7 @@ export const PAGE_TITLES = {
     faq: 'FAQ',
     admin: 'Admin',
     translations: 'Translations',
+    videos: 'Videos',
 };
 
 export const PAGINATOR = {

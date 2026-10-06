@@ -1,3 +1,12 @@
+import { FilePickDirective } from '../../shared/directives/file-pick.directive';
+import { MediaSkeletonDirective } from '../../shared/directives/media-skeleton.directive';
+import { HttpClient } from '@angular/common/http';
+import { PagedList } from './paged-list';
+import { scrollIntoViewSoon, scrollBackTo } from '../../shared/utils/scroll';
+import { TabLinksDirective } from '../../shared/directives/tab-links.directive';
+import { DropZoneDirective } from '../../shared/directives/drop-zone.directive';
+import { firstValueFrom } from 'rxjs';
+import { VideosService, AdminVideoResponse, videoThumbnailUrl, formatDuration } from '../../core/services/videos.service';
 import { EmojifyPipe } from '../../shared/pipes/emojify.pipe';
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect, viewChild, ElementRef } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
@@ -59,7 +68,7 @@ export interface ServerLogEntryResponse {
 @Component({
     selector: 'app-admin',
     standalone: true,
-    imports: [EmojifyPipe, TPipe,
+    imports: [FilePickDirective, MediaSkeletonDirective, TabLinksDirective, DropZoneDirective, EmojifyPipe, TPipe,
         FormsModule,
         ReactiveFormsModule,
         RouterLink,
@@ -103,16 +112,14 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly adminLogsService = inject(AdminLogsService);
     private pluginsApi = inject(AdminPluginsService);
     readonly plugins = signal<AdminPlugin[]>([]);
+    readonly loadingPlugins = signal(false);
     readonly pluginDragging = signal(false);
     readonly pluginUploading = signal(false);
     readonly pluginErrors = signal<string[]>([]);
     readonly pluginColumns = ['name', 'id', 'version', 'kind', 'hosts', 'actions'];
 
     loadPlugins(): void {
-        this.pluginsApi.list().subscribe({
-            next: list => this.plugins.set(list),
-            error: () => this.toast.error(PLUGINS.failedToLoad),
-        });
+        this.pluginsPager.load();
     }
 
     onPluginDragOver(event: DragEvent): void {
@@ -260,6 +267,8 @@ export class AdminComponent implements OnInit, OnDestroy {
     private readonly emptyPromotion = {
         key: '', kicker: '', title: '', description: '', linkUrl: '', imageAlt: '', ctaText: '', isActive: false,
     };
+    readonly adminTab = ADMIN_TAB;
+    readonly showPromotionForm = signal(false);
     readonly promotionImageFile = signal<File | null>(null);
     readonly promotionImagePreview = signal<string | null>(null);
     readonly promotionRemoveImage = signal(false);
@@ -415,6 +424,12 @@ export class AdminComponent implements OnInit, OnDestroy {
                     }
                 }
 
+                const editVideoId = params['editVideo'];
+                if (editVideoId && tab === ADMIN_TAB.videos) {
+                    this.pendingEditVideoId = editVideoId;
+                    if (this.adminVideos().length) this.applyPendingVideoEdit();
+                }
+
                 const userId = params['userId'];
                 if (userId && tab === ADMIN_TAB.users) {
                     this.autoOpenUserDetail(userId);
@@ -461,6 +476,7 @@ export class AdminComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.autoSubs.forEach(s => s.unsubscribe());
+        if (this.videoPoll) clearInterval(this.videoPoll);
         this.adminLogsService.disconnect();
     }
 
@@ -588,6 +604,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             case ADMIN_TAB.faq: this.loadAdminFaqs(); break;
             case ADMIN_TAB.tickets: this.loadTickets(); break;
             case ADMIN_TAB.serverLogs: this.loadServerLogs(); break;
+            case ADMIN_TAB.videos: this.loadVideos(); break;
         }
     }
 
@@ -937,11 +954,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     loadLiveMessages(): void {
-        this.loadingLiveMessages.set(true);
-        this.adminApi.getApiAdminLiveMessages().subscribe({
-            next: (m) => { this.liveMessages.set(m); this.loadingLiveMessages.set(false); },
-            error: () => this.loadingLiveMessages.set(false),
-        });
+        this.liveMessagesPager.load();
     }
 
     createLiveMessage(): void {
@@ -1000,11 +1013,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     loadPromotions(): void {
-        this.loadingPromotions.set(true);
-        this.adminApi.getApiAdminPromotions().subscribe({
-            next: (p) => { this.promotions.set(p); this.loadingPromotions.set(false); },
-            error: () => this.loadingPromotions.set(false),
-        });
+        this.promotionsPager.load();
     }
 
     private promotionBody(v: typeof this.emptyPromotion): PutApiAdminPromotionsIdBody {
@@ -1046,14 +1055,43 @@ export class AdminComponent implements OnInit, OnDestroy {
                 this.promotions.update(list => id
                     ? list.map(x => (x.id as any) === id ? saved : x)
                     : [saved, ...list]);
-                this.cancelPromotionEdit();
+                this.closePromotionForm();
                 this.toast.success(id ? ADMIN.promotionUpdated : ADMIN.promotionCreated);
             },
             error: (err) => this.toast.error(err.error?.message ?? err.error?.detail ?? ADMIN.failed),
         });
     }
 
+    togglePromotionForm(): void {
+        if (this.showPromotionForm()) this.closePromotionForm();
+        else this.openPromotionForm();
+    }
+
+    private openPromotionForm(): void {
+        this.cancelPromotionEdit();
+        this.showPromotionForm.set(true);
+        scrollIntoViewSoon('.promotion-form-card');
+    }
+
+    closePromotionForm(): void {
+        this.showPromotionForm.set(false);
+        this.cancelPromotionEdit();
+        scrollBackTo('.promotion-toolbar');
+    }
+
+    onPromotionFilesDropped(files: File[]): void {
+        const image = files.find(f => f.type.startsWith('image/'));
+        if (!image) return;
+        if (!this.showPromotionForm()) this.openPromotionForm();
+        else scrollIntoViewSoon('.promotion-form-card', { onlyIfHidden: true });
+        this.promotionImageFile.set(image);
+        this.promotionImagePreview.set(URL.createObjectURL(image));
+        this.promotionRemoveImage.set(false);
+    }
+
     editPromotion(p: AdminPromotionResponse): void {
+        this.showPromotionForm.set(true);
+        scrollIntoViewSoon('.promotion-form-card');
         this.editingPromotionId.set(p.id as any);
         this.promotionForm.setValue({
             key: p.key, kicker: p.kicker, title: p.title, description: p.description, linkUrl: p.linkUrl,
@@ -1086,6 +1124,261 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
+    private videosApi = inject(VideosService);
+    readonly adminVideos = signal<AdminVideoResponse[]>([]);
+    readonly loadingVideos = signal(true);
+    readonly editingVideoId = signal<string | null>(null);
+    readonly videoFile = signal<File | null>(null);
+    readonly videoThumbFile = signal<File | null>(null);
+    readonly videoThumbPreview = signal<string | null>(null);
+    private removeVideoThumb = false;
+    readonly videoUploadProgress = signal<number | null>(null);
+    readonly videoUploading = signal(false);
+    readonly videoThumb = videoThumbnailUrl;
+    readonly formatDuration = formatDuration;
+    videoColumns = ['thumb', 'title', 'status', 'visibility', 'duration', 'views', 'date', 'actions'];
+    videoForm = this.fb.nonNullable.group({
+        title: ['', [Validators.required, Validators.maxLength(200)]],
+        description: ['', Validators.maxLength(5000)],
+        visibility: ['Public'],
+    });
+    readonly showVideoForm = signal(false);
+    readonly videoPreviewUrl = signal<string | null>(null);
+    private pendingEditVideoId: string | null = null;
+    readonly videoVisibilityFilter = signal('');
+    readonly videoStatusFilter = signal('');
+    readonly videoSort = signal<'date' | 'views' | 'duration' | 'title'>('date');
+    readonly videoSortAsc = signal(false);
+    readonly videoSuggestions = signal<string[]>([]);
+    private videoSuggestTimer: ReturnType<typeof setTimeout> | null = null;
+    readonly showVideoDefaults = signal(false);
+    private readonly videoDefaultsKey = 'chocu-video-defaults';
+    videoDefaultTitle = '';
+    videoDefaultDescription = '';
+    private videoPoll: ReturnType<typeof setInterval> | null = null;
+
+    private loadVideoDefaults(): void {
+        try {
+            const saved = JSON.parse(localStorage.getItem(this.videoDefaultsKey) ?? '{}');
+            this.videoDefaultTitle = saved.title ?? '';
+            this.videoDefaultDescription = saved.description ?? '';
+        } catch { }
+    }
+
+    saveVideoDefaults(): void {
+        try {
+            localStorage.setItem(this.videoDefaultsKey, JSON.stringify({
+                title: this.videoDefaultTitle, description: this.videoDefaultDescription,
+            }));
+            this.toast.success(ADMIN.changesSaved);
+            this.showVideoDefaults.set(false);
+        } catch {
+            this.toast.error(ADMIN.failed);
+        }
+    }
+
+    toggleVideoDefaults(): void {
+        const open = !this.showVideoDefaults();
+        this.showVideoDefaults.set(open);
+        if (open && this.showVideoForm()) {
+            this.showVideoForm.set(false);
+            this.clearVideoForm();
+        }
+    }
+
+    toggleVideoForm(): void {
+        this.showVideoDefaults.set(false);
+        if (this.showVideoForm()) this.cancelVideoForm();
+        else this.openNewVideo();
+    }
+
+    private openNewVideo(): void {
+        this.clearVideoForm();
+        this.showVideoForm.set(true);
+        scrollIntoViewSoon('.video-form-card');
+    }
+
+    cancelVideoForm(): void {
+        this.showVideoForm.set(false);
+        this.clearVideoForm();
+        scrollBackTo('.video-toolbar');
+    }
+
+    onVideoFilesDropped(files: File[]): void {
+        const video = files.find(f => f.type.startsWith('video/') || !f.type.startsWith('image/'));
+        const image = files.find(f => f.type.startsWith('image/'));
+        if (!this.showVideoForm()) this.openNewVideo();
+        else scrollIntoViewSoon('.video-form-card', { onlyIfHidden: true });
+        if (video && !this.editingVideoId()) this.setVideoFile(video);
+        if (image) {
+            this.videoThumbFile.set(image);
+            this.videoThumbPreview.set(URL.createObjectURL(image));
+            this.removeVideoThumb = false;
+        }
+    }
+
+    clearVideoFilters(): void {
+        this.videosPager.search.set('');
+        this.videoSuggestions.set([]);
+        this.videoVisibilityFilter.set('');
+        this.videoStatusFilter.set('');
+        this.videoSort.set('date');
+        this.videoSortAsc.set(false);
+        this.videosPager.reload();
+    }
+
+    private applyPendingVideoEdit(): void {
+        const id = this.pendingEditVideoId;
+        const v = id ? this.adminVideos().find(x => x.id === id) : null;
+        if (!v) return;
+        this.pendingEditVideoId = null;
+        this.editVideo(v);
+        this.router.navigate([], { queryParams: { editVideo: null }, queryParamsHandling: 'merge', replaceUrl: true });
+    }
+
+    loadVideos(): void {
+        if (!this.videoDefaultTitle && !this.videoDefaultDescription) this.loadVideoDefaults();
+        this.videosPager.load();
+    }
+
+    onVideoSearchInput(value: string): void {
+        this.videosPager.search.set(value);
+        if (this.videoSuggestTimer) clearTimeout(this.videoSuggestTimer);
+        const q = value.trim();
+        if (q.length < 2) { this.videoSuggestions.set([]); return; }
+        this.videoSuggestTimer = setTimeout(() => {
+            this.videosApi.suggest(q).subscribe({ next: (s) => this.videoSuggestions.set(s), error: () => { } });
+        }, 250);
+    }
+
+    private syncVideoPolling(): void {
+        const busy = this.adminVideos().some(v => v.status === 'Processing');
+        if (busy && !this.videoPoll) this.videoPoll = setInterval(() => this.loadVideos(), 3000);
+        if (!busy && this.videoPoll) { clearInterval(this.videoPoll); this.videoPoll = null; }
+    }
+
+    onVideoFileSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0] ?? null;
+        input.value = '';
+        if (file) this.setVideoFile(file);
+    }
+
+    private setVideoFile(file: File): void {
+        this.videoFile.set(file);
+        const old = this.videoPreviewUrl();
+        if (old) URL.revokeObjectURL(old);
+        this.videoPreviewUrl.set(URL.createObjectURL(file));
+        if (!this.videoForm.controls.title.value.trim()) {
+            this.videoForm.controls.title.setValue(file.name.replace(/\.[^.]+$/, ''));
+        }
+    }
+
+    onVideoThumbSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0] ?? null;
+        input.value = '';
+        if (!file) return;
+        this.videoThumbFile.set(file);
+        this.videoThumbPreview.set(URL.createObjectURL(file));
+        this.removeVideoThumb = false;
+    }
+
+    clearVideoFile(): void {
+        const old = this.videoPreviewUrl();
+        if (old) URL.revokeObjectURL(old);
+        this.videoPreviewUrl.set(null);
+        this.videoFile.set(null);
+    }
+
+    clearVideoThumb(): void {
+        this.videoThumbFile.set(null);
+        this.videoThumbPreview.set(null);
+        this.removeVideoThumb = !!this.editingVideoId();
+    }
+
+    clearVideoForm(): void {
+        this.editingVideoId.set(null);
+        this.videoForm.reset({ title: this.videoDefaultTitle, description: this.videoDefaultDescription, visibility: 'Public' });
+        this.clearVideoFile();
+        this.clearVideoThumb();
+        this.videoUploadProgress.set(null);
+        this.removeVideoThumb = false;
+    }
+
+    editVideo(v: AdminVideoResponse): void {
+        this.editingVideoId.set(v.id);
+        this.removeVideoThumb = false;
+        this.showVideoForm.set(true);
+        scrollIntoViewSoon('.video-form-card');
+        this.videoForm.setValue({ title: v.title, description: v.description, visibility: v.visibility });
+        this.videoFile.set(null);
+        this.videoThumbFile.set(null);
+        this.videoThumbPreview.set(this.videoThumb(v));
+    }
+
+    async saveVideo(): Promise<void> {
+        if (this.videoForm.invalid) return;
+        const { title, description, visibility } = this.videoForm.getRawValue();
+        const editing = this.editingVideoId();
+        const thumb = this.videoThumbFile();
+        this.videoUploading.set(true);
+        try {
+            let id = editing;
+            if (editing) {
+                const updated = await firstValueFrom(this.videosApi.update(editing, title, description, visibility));
+                this.adminVideos.update(list => list.map(x => x.id === updated.id ? updated : x));
+            } else {
+                const file = this.videoFile();
+                if (!file) return;
+                this.videoUploadProgress.set(0);
+                const created = await this.videosApi.upload(file, title, description, visibility,
+                    (sent, total) => this.videoUploadProgress.set(Math.floor(sent / total * 100)));
+                id = created.id;
+            }
+            if (thumb && id) {
+                const withThumb = await firstValueFrom(this.videosApi.setThumbnail(id, thumb));
+                this.adminVideos.update(list => list.map(x => x.id === withThumb.id ? withThumb : x));
+            } else if (editing && this.removeVideoThumb) {
+                const restored = await firstValueFrom(this.videosApi.removeThumbnail(editing));
+                this.adminVideos.update(list => list.map(x => x.id === restored.id ? restored : x));
+            }
+            this.removeVideoThumb = false;
+            this.toast.success(editing ? ADMIN.videoUpdated : ADMIN.videoUploaded);
+            this.clearVideoForm();
+            this.showVideoForm.set(false);
+            this.loadVideos();
+        } catch (err: any) {
+            this.toast.error(err?.error?.message ?? ADMIN.failed);
+        } finally {
+            this.videoUploading.set(false);
+            this.videoUploadProgress.set(null);
+        }
+    }
+
+    copyVideoLink(v: AdminVideoResponse): void {
+        navigator.clipboard.writeText(`${location.origin}/videos/${v.id}`).then(
+            () => this.toast.success(ADMIN.copied),
+            () => this.toast.error(ADMIN.failed),
+        );
+    }
+
+    deleteVideo(v: AdminVideoResponse): void {
+        this.dialog.open(ConfirmDialogComponent, {
+            data: { title: ADMIN.deleteVideoTitle, message: v.title, confirmText: COMMON.delete, warn: true } as ConfirmDialogData,
+        }).afterClosed().subscribe((ok) => {
+            if (!ok) return;
+            this.videosApi.delete(v.id).subscribe({
+                next: () => {
+                    this.adminVideos.update(list => list.filter(x => x.id !== v.id));
+                    if (this.editingVideoId() === v.id) this.clearVideoForm();
+                    this.toast.success(ADMIN.deleted);
+                },
+                error: (err) => this.toast.error(err.error?.message ?? ADMIN.failed),
+            });
+        });
+    }
+
     deletePromotion(p: AdminPromotionResponse): void {
         this.adminApi.deleteApiAdminPromotionsId(p.id as any).subscribe({
             next: () => {
@@ -1098,11 +1391,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     loadModMessages(): void {
-        this.loadingModMessages.set(true);
-        this.adminApi.getApiAdminModMessages().subscribe({
-            next: (m) => { this.modMessages.set(m); this.loadingModMessages.set(false); },
-            error: () => this.loadingModMessages.set(false),
-        });
+        this.modMessagesPager.load();
     }
 
     createModMessage(): void {
@@ -1194,21 +1483,12 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly tags = signal<AllowedTagResponse[]>([]);
     readonly loadingTags = signal(true);
     tagColumns = ['name', 'actions'];
-    readonly tagSearch = signal('');
-    readonly filteredTags = computed(() => {
-        const q = this.tagSearch().toLowerCase();
-        return q ? this.tags().filter(t => t.name.toLowerCase().includes(q)) : this.tags();
-    });
     tagForm = this.fb.nonNullable.group({
         name: ['', Validators.required],
     });
 
     loadTags(): void {
-        this.loadingTags.set(true);
-        this.adminApi.getApiAdminTags().subscribe({
-            next: (t) => { this.tags.set(t); this.loadingTags.set(false); },
-            error: () => this.loadingTags.set(false),
-        });
+        this.tagsPager.load();
     }
 
     createTag(): void {
@@ -1244,21 +1524,12 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly versions = signal<AllowedVersionResponse[]>([]);
     readonly loadingVersions = signal(true);
     versionColumns = ['name', 'actions'];
-    readonly versionSearch = signal('');
-    readonly filteredVersions = computed(() => {
-        const q = this.versionSearch().toLowerCase();
-        return q ? this.versions().filter(v => v.name.toLowerCase().includes(q)) : this.versions();
-    });
     versionForm = this.fb.nonNullable.group({
         name: ['', Validators.required],
     });
 
     loadVersions(): void {
-        this.loadingVersions.set(true);
-        this.adminApi.getApiAdminVersions().subscribe({
-            next: (v) => { this.versions.set(v); this.loadingVersions.set(false); },
-            error: () => this.loadingVersions.set(false),
-        });
+        this.versionsPager.load();
     }
 
     createVersion(): void {
@@ -1298,11 +1569,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     tagSuggestionColumns = ['suggestedName', 'username', 'createdAt', 'actions'];
 
     loadTagSuggestions(): void {
-        this.loadingTagSuggestions.set(true);
-        this.adminApi.getApiAdminTagSuggestions().subscribe({
-            next: (s) => { this.tagSuggestions.set(s); this.loadingTagSuggestions.set(false); },
-            error: () => this.loadingTagSuggestions.set(false),
-        });
+        this.tagSuggestionsPager.load();
     }
 
     startAccept(s: TagSuggestionResponse): void {
@@ -1410,11 +1677,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     });
 
     loadAdminFaqs(): void {
-        this.loadingAdminFaqs.set(true);
-        this.faqService.getApiFaq().subscribe({
-            next: (f) => { this.adminFaqs.set(f); this.loadingAdminFaqs.set(false); },
-            error: () => this.loadingAdminFaqs.set(false),
-        });
+        this.faqsPager.load();
     }
 
     createFaq(): void {
@@ -1623,4 +1886,22 @@ export class AdminComponent implements OnInit, OnDestroy {
             error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
         });
     }
+    private readonly http = inject(HttpClient);
+    readonly liveMessagesPager = new PagedList<LiveMessageResponse>(this.http, '/api/Admin/live-messages/paged', this.liveMessages, this.loadingLiveMessages);
+    readonly modMessagesPager = new PagedList<ModMessageResponse>(this.http, '/api/Admin/mod-messages/paged', this.modMessages, this.loadingModMessages);
+    readonly promotionsPager = new PagedList<AdminPromotionResponse>(this.http, '/api/Admin/promotions/paged', this.promotions, this.loadingPromotions);
+    readonly pluginsPager = new PagedList<AdminPlugin>(this.http, '/api/Plugins/paged', this.plugins, this.loadingPlugins);
+    readonly tagsPager = new PagedList<AllowedTagResponse>(this.http, '/api/Admin/tags/paged', this.tags, this.loadingTags);
+    readonly tagSuggestionsPager = new PagedList<TagSuggestionResponse>(this.http, '/api/Admin/tag-suggestions/paged', this.tagSuggestions, this.loadingTagSuggestions);
+    readonly versionsPager = new PagedList<AllowedVersionResponse>(this.http, '/api/Admin/versions/paged', this.versions, this.loadingVersions);
+    readonly faqsPager = new PagedList<FaqResponse>(this.http, '/api/Admin/faq/paged', this.adminFaqs, this.loadingAdminFaqs);
+    readonly videosPager = new PagedList<AdminVideoResponse>(this.http, '/api/Videos/admin', this.adminVideos, this.loadingVideos,
+        () => ({
+            visibility: this.videoVisibilityFilter(),
+            status: this.videoStatusFilter(),
+            sort: this.videoSort(),
+            direction: this.videoSortAsc() ? 'asc' : 'desc',
+        }),
+        () => { this.syncVideoPolling(); this.applyPendingVideoEdit(); });
+
 }

@@ -189,7 +189,7 @@
         </div>
     </div>
 
-    <mat-tab-group dynamicHeight disablePagination class="profile-tabs" [selectedIndex]="selectedTab()"
+    <mat-tab-group appTabLinks dynamicHeight disablePagination class="profile-tabs" [selectedIndex]="selectedTab()"
         (selectedTabChange)="onTabChange($event.index)">
 
         <mat-tab [label]="'Schematics' | t">

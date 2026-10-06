@@ -8,6 +8,8 @@ import { ToastService } from '../../core/services/toast.service';
 export class DropZoneDirective implements OnInit, OnDestroy {
     @Input() accept = '';
     @Input() fullPage = false;
+    @Input() unknownTypeIcon = '';
+    @Input() dropDisabled = false;
     @Output() filesDrop = new EventEmitter<File[]>();
 
     private el = inject(ElementRef);
@@ -40,8 +42,9 @@ export class DropZoneDirective implements OnInit, OnDestroy {
     }
 
     private onHtmlEnter(e: DragEvent): void {
+        if (this.dropDisabled) return;
         e.preventDefault();
-        this.showFpOverlay();
+        this.showFpOverlay(e);
     }
 
     private onHtmlLeave(e: DragEvent): void {
@@ -50,6 +53,7 @@ export class DropZoneDirective implements OnInit, OnDestroy {
     }
 
     private onHtmlDrop(e: DragEvent): void {
+        if (this.dropDisabled) return;
         e.preventDefault();
         this.removeFpOverlay();
         this.processFiles(e);
@@ -71,7 +75,12 @@ export class DropZoneDirective implements OnInit, OnDestroy {
 
     private processFiles(e: DragEvent): void {
         const files = Array.from(e.dataTransfer?.files ?? []);
-        if (!files.length) return;
+        if (!files.length) {
+            if (Array.from(e.dataTransfer?.types ?? []).includes('Files')) {
+                this.toast.error('Your browser did not hand over the dropped file. Use the button to pick it instead.');
+            }
+            return;
+        }
         if (this.accept) {
             const { valid, invalid } = this.filterFiles(files);
             if (invalid.length) this.toast.error(`Unsupported file format: ${invalid.map(f => f.name).join(', ')}`);
@@ -102,10 +111,15 @@ export class DropZoneDirective implements OnInit, OnDestroy {
         });
     }
 
-    private showFpOverlay(): void {
+    private showFpOverlay(e?: DragEvent): void {
         if (this.fpOverlay) return;
 
+        const items = Array.from(e?.dataTransfer?.items ?? []).filter(i => i.kind === 'file');
+        const iconSrc = items.some(i => i.type.startsWith('video/')) ? '/icons/arrows/tild_full_right.svg'
+            : this.unknownTypeIcon && items.some(i => !i.type) ? this.unknownTypeIcon
+            : '/icons/arrows/arrow_up.svg';
         this.fpOverlay = this.renderer.createElement('div');
+        this.renderer.setStyle(this.fpOverlay, 'animation', 'overlay-fade-in 0.15s ease-out both');
         this.renderer.setStyle(this.fpOverlay, 'position', 'fixed');
         this.renderer.setStyle(this.fpOverlay, 'inset', '0');
         this.renderer.setStyle(this.fpOverlay, 'z-index', '9999');
@@ -134,7 +148,8 @@ export class DropZoneDirective implements OnInit, OnDestroy {
         this.renderer.appendChild(frame, badge);
 
         const icon = this.renderer.createElement('img');
-        this.renderer.setAttribute(icon, 'src', '/icons/arrows/arrow_up.svg');
+        this.renderer.setAttribute(icon, 'src', iconSrc);
+        this.renderer.setStyle(icon, 'transform', 'translate(1px, 1px)');
         this.renderer.setAttribute(icon, 'alt', '');
         this.renderer.setAttribute(icon, 'aria-hidden', 'true');
         this.renderer.addClass(icon, 'mc-icon');
@@ -146,10 +161,12 @@ export class DropZoneDirective implements OnInit, OnDestroy {
     }
 
     private removeFpOverlay(): void {
-        if (!this.fpOverlay) return;
-        if (document.body.contains(this.fpOverlay)) {
-            this.renderer.removeChild(document.body, this.fpOverlay);
-        }
+        const overlay = this.fpOverlay;
+        if (!overlay) return;
         this.fpOverlay = null;
+        this.renderer.setStyle(overlay, 'animation', 'overlay-fade-out 0.15s ease-in both');
+        setTimeout(() => {
+            if (document.body.contains(overlay)) this.renderer.removeChild(document.body, overlay);
+        }, 150);
     }
 }

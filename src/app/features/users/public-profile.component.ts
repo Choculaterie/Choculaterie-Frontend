@@ -1,3 +1,4 @@
+import { TabLinksDirective } from '../../shared/directives/tab-links.directive';
 import { SubscriptionActionsService } from '../../core/services/subscription-actions.service';
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect, Injector, ElementRef, ViewChild, afterNextRender } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
@@ -70,7 +71,7 @@ const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 @Component({
     selector: 'app-public-profile',
     standalone: true,
-    imports: [TPipe,
+    imports: [TabLinksDirective, TPipe,
         DatePipe,
         RouterLink,
         FormsModule,

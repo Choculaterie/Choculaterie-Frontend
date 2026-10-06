@@ -1,3 +1,5 @@
+import { FilePickDirective } from '../../shared/directives/file-pick.directive';
+import { MediaSkeletonDirective } from '../../shared/directives/media-skeleton.directive';
 import {
     Component, OnInit, ViewChild, signal, inject,
 } from '@angular/core';
@@ -24,7 +26,7 @@ import { getLocale } from '../../core/i18n/locale';
 @Component({
     selector: 'app-faq',
     standalone: true,
-    imports: [TPipe,
+    imports: [FilePickDirective, MediaSkeletonDirective, TPipe,
         ReactiveFormsModule,
         MatExpansionModule,
         MatButtonModule,

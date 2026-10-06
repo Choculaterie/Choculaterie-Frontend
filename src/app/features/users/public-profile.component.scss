@@ -74,6 +74,7 @@ $sk: linear-gradient(90deg,
     display: flex;
     background: rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(6px);
+    animation: overlay-fade-in 0.15s ease-out both;
 }
 
 .split-half {

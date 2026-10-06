@@ -1009,3 +1009,52 @@ html:not([data-theme]) img[src*='icons/'] {
     animation: none;
   }
 }
+
+@keyframes overlay-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes overlay-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.form-card,
+.edit-card,
+.page-header,
+.video-toolbar {
+  scroll-margin-top: 80px;
+}
+
+.media-loading {
+  animation: shimmer 1.5s infinite;
+  background: linear-gradient(90deg,
+      var(--mat-sys-surface-variant) 25%,
+      var(--mat-sys-surface-container-highest) 50%,
+      var(--mat-sys-surface-variant) 75%) !important;
+  background-size: 200% 100% !important;
+
+  > img,
+  > video {
+    visibility: hidden;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.file-picking::after {
+  content: '';
+  flex: 0 0 120px;
+  height: 80px;
+  border-radius: 8px;
+  animation: shimmer 1.5s infinite;
+  background: linear-gradient(90deg,
+      var(--mat-sys-surface-variant) 25%,
+      var(--mat-sys-surface-container-highest) 50%,
+      var(--mat-sys-surface-variant) 75%);
+  background-size: 200% 100%;
+}

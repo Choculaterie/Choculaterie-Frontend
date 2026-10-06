@@ -398,6 +398,11 @@ $shimmer: linear-gradient(90deg,
     gap: 0.4rem;
     overflow: hidden;
     transition: max-height 0.2s linear;
+
+    &.folded {
+        -webkit-mask-image: linear-gradient(#000 60%, transparent);
+        mask-image: linear-gradient(#000 60%, transparent);
+    }
 }
 
 .block-list-toggle {
