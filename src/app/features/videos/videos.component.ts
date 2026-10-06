@@ -157,7 +157,10 @@ export class VideosComponent implements OnInit {
     readonly previewProgress = signal(0);
     readonly previewTime = signal(0);
 
+    private readonly canHover = typeof matchMedia === 'function' && matchMedia('(hover: hover)').matches;
+
     enterPreview(id: string): void {
+        if (!this.canHover) return;
         this.previewTime.set(0);
         this.previewProgress.set(0);
         this.previewId.set(id);

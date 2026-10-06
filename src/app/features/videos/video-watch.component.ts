@@ -28,7 +28,7 @@ import { VideosService, VideoResponse, videoStreamUrl, videoThumbnailUrl } from 
             <div class="player skeleton"></div>
             } @else if (video(); as v) {
             <div class="settle-in">
-                <app-video-player class="player" [src]="stream(v)" [poster]="thumb(v)" />
+                <app-video-player class="player" [src]="stream(v)" [poster]="thumb(v)" [title]="v.title" />
                 <div class="title-row">
                     <div>
                         <h1 class="title">{{ v.title }}</h1>
@@ -69,6 +69,7 @@ import { VideosService, VideoResponse, videoStreamUrl, videoThumbnailUrl } from 
     styles: [`
         .watch { max-width: 1100px; }
         .back-btn { margin-top: -40px; }
+        @media (max-width: 600px) { .back-btn { margin-top: -16px; } }
         .player { display: block; margin-top: 0.5rem; }
         .player.skeleton {
             width: 100%;

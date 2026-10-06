@@ -1172,18 +1172,30 @@ export class AdminComponent implements OnInit, OnDestroy {
             }));
             this.toast.success(ADMIN.changesSaved);
             this.showVideoDefaults.set(false);
+            scrollBackTo('.video-toolbar');
         } catch {
             this.toast.error(ADMIN.failed);
         }
     }
 
     toggleVideoDefaults(): void {
-        const open = !this.showVideoDefaults();
-        this.showVideoDefaults.set(open);
-        if (open && this.showVideoForm()) {
+        if (this.showVideoDefaults()) {
+            this.cancelVideoDefaults();
+            return;
+        }
+        if (this.showVideoForm()) {
             this.showVideoForm.set(false);
             this.clearVideoForm();
         }
+        this.loadVideoDefaults();
+        this.showVideoDefaults.set(true);
+        scrollIntoViewSoon('.video-defaults-card');
+    }
+
+    cancelVideoDefaults(): void {
+        this.loadVideoDefaults();
+        this.showVideoDefaults.set(false);
+        scrollBackTo('.video-toolbar');
     }
 
     toggleVideoForm(): void {

@@ -1058,3 +1058,19 @@ html:not([data-theme]) img[src*='icons/'] {
       var(--mat-sys-surface-variant) 75%);
   background-size: 200% 100%;
 }
+
+.mat-mdc-tab-group .mat-mdc-tab.mdc-tab {
+  height: auto;
+  min-height: var(--mat-tab-container-height, 48px);
+  padding-block: 6px;
+}
+
+.mat-mdc-tab .mdc-tab__text-label {
+  white-space: normal;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.mat-mdc-paginator-range-label {
+  white-space: nowrap;
+}

@@ -12,8 +12,8 @@ import { formatDuration } from '../../../core/services/videos.service';
         <div #shell class="player" tabindex="0" [class.idle]="idle()" [class.paused]="!playing()"
             (mousemove)="poke()" (mouseleave)="hideSoon()" (keydown)="onKey($event)">
             <video #video [src]="src()" [attr.poster]="poster()" preload="metadata" playsinline
-                (click)="onVideoClick()" (dblclick)="onVideoDblClick()"
-                (play)="playing.set(true); ended.set(false); poke()" (pause)="playing.set(false); idle.set(false)"
+                (click)="onVideoClick($event)" (dblclick)="onVideoDblClick()"
+                (play)="playing.set(true); ended.set(false); poke(); setMediaSession()" (pause)="playing.set(false); idle.set(false)"
                 (timeupdate)="onTime()" (loadedmetadata)="onTime()" (durationchange)="onTime()"
                 (progress)="onTime()" (volumechange)="onVolume()" (waiting)="buffering.set(true)"
                 (playing)="buffering.set(false)" (canplay)="buffering.set(false)" (ended)="playing.set(false); ended.set(true); idle.set(false)"></video>
@@ -175,11 +175,19 @@ import { formatDuration } from '../../../core/services/videos.service';
         .time:hover { background: rgba(255, 255, 255, 0.15); }
         .spacer { flex: 1; }
         @media (max-width: 500px) { .volume { display: none; } }
+        @media (hover: none) {
+            .ctl { width: 40px; height: 40px; padding: 8px; }
+            .seek { padding: 10px 0; }
+            .seek-track { height: 5px; }
+            .seek-thumb { transform: translateY(-50%) scale(1); }
+            .time { padding: 6px 8px; }
+        }
     `],
 })
 export class VideoPlayerComponent implements OnDestroy {
     readonly src = input.required<string>();
     readonly poster = input<string | null>(null);
+    readonly title = input<string>('');
 
     private readonly video = viewChild.required<ElementRef<HTMLVideoElement>>('video');
     private readonly shell = viewChild.required<ElementRef<HTMLElement>>('shell');
@@ -213,7 +221,12 @@ export class VideoPlayerComponent implements OnDestroy {
         if (this.clickTimer) clearTimeout(this.clickTimer);
     }
 
-    onVideoClick(): void {
+    onVideoClick(event?: MouseEvent): void {
+        const touch = (event as PointerEvent | undefined)?.pointerType === 'touch';
+        if (touch && this.playing() && this.idle()) {
+            this.poke();
+            return;
+        }
         if (this.clickTimer) return;
         this.clickTimer = setTimeout(() => {
             this.clickTimer = null;
@@ -261,13 +274,42 @@ export class VideoPlayerComponent implements OnDestroy {
     }
 
     toggleFullscreen(): void {
-        if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
-        else this.shell().nativeElement.requestFullscreen?.().catch(() => { });
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(() => { });
+            return;
+        }
+        const shell = this.shell().nativeElement;
+        const video = this.video().nativeElement as HTMLVideoElement & { webkitEnterFullscreen?: () => void };
+        if (shell.requestFullscreen) {
+            shell.requestFullscreen().then(() => this.lockOrientation(video)).catch(() => { });
+        } else {
+            video.webkitEnterFullscreen?.();
+        }
+    }
+
+    setMediaSession(): void {
+        if (!('mediaSession' in navigator)) return;
+        const artwork = this.poster() ? [{ src: new URL(this.poster()!, location.href).href, sizes: '1280x720', type: 'image/jpeg' }] : [];
+        navigator.mediaSession.metadata = new MediaMetadata({ title: this.title(), artist: 'Choculaterie', artwork });
+        const v = this.video().nativeElement;
+        navigator.mediaSession.setActionHandler('play', () => v.play().catch(() => { }));
+        navigator.mediaSession.setActionHandler('pause', () => v.pause());
+        navigator.mediaSession.setActionHandler('seekbackward', () => { v.currentTime = Math.max(0, v.currentTime - 10); });
+        navigator.mediaSession.setActionHandler('seekforward', () => { v.currentTime = Math.min(v.duration || 0, v.currentTime + 10); });
+        navigator.mediaSession.setActionHandler('seekto', (d) => { if (d.seekTime != null) v.currentTime = d.seekTime; });
+    }
+
+    private lockOrientation(video: HTMLVideoElement): void {
+        const orientation = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> };
+        if (!orientation?.lock || !video.videoWidth || video.videoWidth <= video.videoHeight) return;
+        orientation.lock('landscape').catch(() => { });
     }
 
     @HostListener('document:fullscreenchange')
     onFullscreenChange(): void {
-        this.fullscreen.set(document.fullscreenElement === this.shell().nativeElement);
+        const active = document.fullscreenElement === this.shell().nativeElement;
+        this.fullscreen.set(active);
+        if (!active) screen.orientation?.unlock?.();
     }
 
     onTime(): void {

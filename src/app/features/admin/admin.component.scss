@@ -888,3 +888,25 @@ mat-accordion .faq-answer {
 }
 
 .promo-form .preview-actions .spacer { flex: 1; }
+
+@media (max-width: 900px) {
+    .video-filters {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+
+        .filter-search { grid-column: 1 / -1; }
+        .filter-sm { min-width: 0; }
+    }
+}
+
+@media (max-width: 600px) {
+    .video-toolbar > button { flex: 1; }
+
+
+    .video-table .video-title-cell {
+        max-width: none;
+        min-width: 150px;
+        overflow-wrap: break-word;
+    }
+}

@@ -558,7 +558,7 @@
                 </div>
 
                 @if (showVideoDefaults()) {
-                <mat-card appearance="outlined" class="form-card settle-in">
+                <mat-card appearance="outlined" class="form-card settle-in video-defaults-card">
                     <mat-card-header><mat-card-title>{{ 'Defaults for new videos' | t }}</mat-card-title></mat-card-header>
                     <mat-card-content>
                         <div class="promo-form">
@@ -572,6 +572,7 @@
                             </mat-form-field>
                             <div class="promo-span promo-actions">
                                 <span class="spacer"></span>
+                                <button mat-stroked-button type="button" (click)="cancelVideoDefaults()">{{ 'Cancel' | t }}</button>
                                 <button mat-flat-button type="button" (click)="saveVideoDefaults()">{{ 'Save' | t }}</button>
                             </div>
                         </div>
@@ -676,7 +677,7 @@
                 <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No videos' | t" />
                 } @else {
                 <div class="table-scroll settle-in">
-                    <table mat-table [dataSource]="adminVideos()" class="full-width">
+                    <table mat-table [dataSource]="adminVideos()" class="full-width video-table">
                         <ng-container matColumnDef="thumb">
                             <th mat-header-cell *matHeaderCellDef></th>
                             <td mat-cell *matCellDef="let v">
@@ -847,7 +848,7 @@
                 <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No promotions' | t" />
                 } @else {
                 <div class="table-scroll settle-in">
-                    <table mat-table [dataSource]="promotions()" class="full-width">
+                    <table mat-table [dataSource]="promotions()" class="full-width promo-table">
                         <ng-container matColumnDef="image">
                             <th mat-header-cell *matHeaderCellDef></th>
                             <td mat-cell *matCellDef="let p">
