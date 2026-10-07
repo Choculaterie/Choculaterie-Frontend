@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, booleanAttribute, input } from '@angular/core';
 import { TPipe } from '../../../core/i18n/t.pipe';
 
 @Component({
@@ -6,7 +6,7 @@ import { TPipe } from '../../../core/i18n/t.pipe';
     standalone: true,
     imports: [TPipe, ],
     template: `
-        <div class="loading-container">
+        <div class="loading-container" [class.bare]="bare()">
             <img src="loading.gif" [alt]="'Loading…' | t" class="loading-gif"
                  [style.width.px]="diameter()" [style.height.px]="diameter()" />
             @if (message()) {
@@ -19,6 +19,7 @@ import { TPipe } from '../../../core/i18n/t.pipe';
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; padding: 3rem; gap: 1rem;
         }
+        .loading-container.bare { padding: 0; }
         .loading-gif {
             object-fit: contain;
         }
@@ -30,4 +31,5 @@ import { TPipe } from '../../../core/i18n/t.pipe';
 export class LoadingSpinnerComponent {
     diameter = input(48);
     message = input('');
+    bare = input(false, { transform: booleanAttribute });
 }

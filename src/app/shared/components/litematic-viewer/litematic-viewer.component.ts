@@ -9,6 +9,7 @@ import {
     signal,
 } from '@angular/core';
 import { TPipe } from '../../../core/i18n/t.pipe';
+import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
 import { HttpClient } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -36,7 +37,7 @@ export interface LitematicViewerData {
 @Component({
     selector: 'app-litematic-viewer',
     standalone: true,
-    imports: [TPipe,
+    imports: [TPipe, LoadingSpinnerComponent,
         MatDialogModule,
         MatButtonModule,
         MatIconModule,

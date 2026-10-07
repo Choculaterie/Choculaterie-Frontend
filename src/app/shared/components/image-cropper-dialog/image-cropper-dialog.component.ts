@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { TPipe } from '../../../core/i18n/t.pipe';
+import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ImageCropperComponent, ImageCroppedEvent, OutputFormat } from 'ngx-image-cropper';
@@ -19,12 +20,12 @@ export interface CropperDialogResult {
 @Component({
     selector: 'app-image-cropper-dialog',
     standalone: true,
-    imports: [TPipe, MatDialogModule, MatButtonModule, ImageCropperComponent],
+    imports: [TPipe, LoadingSpinnerComponent, MatDialogModule, MatButtonModule, ImageCropperComponent],
     template: `
     <h2 mat-dialog-title>{{ 'Crop Image' | t }}</h2>
     <mat-dialog-content>
         @if (!imageLoaded()) {
-            <img src="loading.gif" alt="" style="width:40px;height:40px;object-fit:contain" />
+            <app-loading-spinner [diameter]="40" />
         }
         <image-cropper
             [imageFile]="data.imageFile"

@@ -25,7 +25,7 @@
     <div class="viewer-body">
         @if (loading()) {
         <div class="loading-overlay">
-            <img src="loading.gif" alt="" aria-hidden="true" class="loading-gif" />
+            <app-loading-spinner bare />
             <p>{{ loadingStatus() }}</p>
         </div>
         }

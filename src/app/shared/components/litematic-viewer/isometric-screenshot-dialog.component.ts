@@ -13,6 +13,7 @@ import {
     AfterViewInit,
 } from '@angular/core';
 import { TPipe } from '../../../core/i18n/t.pipe';
+import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -32,7 +33,7 @@ export interface IsometricScreenshotData {
 @Component({
     selector: 'app-isometric-screenshot-dialog',
     standalone: true,
-    imports: [TPipe,
+    imports: [TPipe, LoadingSpinnerComponent,
         MatDialogModule,
         MatButtonModule,
         MatIconModule,
@@ -60,7 +61,7 @@ export interface IsometricScreenshotData {
         <div class="screenshot-body">
             @if (loading()) {
             <div class="loading-overlay">
-                <img src="loading.gif" alt="" aria-hidden="true" class="loading-gif" />
+                <app-loading-spinner bare />
                 <p>{{ loadingStatus() }}</p>
             </div>
             }
@@ -215,7 +216,6 @@ export interface IsometricScreenshotData {
             justify-content: center;
             gap: 1rem;
             color: rgba(255, 255, 255, 0.8);
-            .loading-gif { width: 48px; height: 48px; object-fit: contain; }
             z-index: 1;
             p { margin: 0; font-size: 0.9rem; }
         }

@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal, effect, ViewChild, ViewContainerRef, Injector } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
+import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,7 +13,7 @@ import { LitematicViewerComponent, type LitematicViewerData } from '../../shared
 @Component({
     selector: 'app-short-url-redirect',
     standalone: true,
-    imports: [TPipe, MatIconModule],
+    imports: [TPipe, LoadingSpinnerComponent, MatIconModule],
     styles: [`
         :host {
             display: flex;
@@ -50,8 +51,7 @@ import { LitematicViewerComponent, type LitematicViewerData } from '../../shared
     template: `
         @if (state() === 'loading') {
             <div class="state-overlay">
-                <img src="loading.gif" alt="" aria-hidden="true" style="width:48px;height:48px;object-fit:contain" />
-                <span>{{ 'Loading…' | t }}</span>
+                <app-loading-spinner [message]="'Loading…' | t" bare />
             </div>
         } @else if (state() === 'error') {
             <div class="state-overlay">

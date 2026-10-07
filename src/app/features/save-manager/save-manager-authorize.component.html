@@ -2,8 +2,7 @@
 
     @if (state() === 'loading') {
     <div class="state-center">
-        <img src="loading.gif" alt="" aria-hidden="true" style="width:48px;height:48px;object-fit:contain" />
-        <p>{{ 'Loading authorization request…' | t }}</p>
+        <app-loading-spinner [message]="'Loading authorization request…' | t" bare />
     </div>
     }
 
