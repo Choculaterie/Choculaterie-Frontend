@@ -11,12 +11,13 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AdminService } from '../../api/admin';
+import { BillingService } from '../../api/billing';
 import { ToastService } from '../../core/services/toast.service';
 import { TicketImgPipe, UserImgPipe } from '../../shared/pipes/image-url.pipe';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import type { ContactTicketResponse } from '../../api/generated.schemas';
 import { MatDialog } from '@angular/material/dialog';
-import { AdminUserDialogComponent } from './admin-user-dialog.component';
+import { AdminUserDialogComponent, loadAdminUserDialogData } from './admin-user-dialog.component';
 
 export interface AdminTicketDialogData {
     ticket: ContactTicketResponse;
@@ -272,6 +273,7 @@ export interface AdminTicketDialogResult {
 })
 export class AdminTicketDialogComponent {
     private adminApi = inject(AdminService);
+    private billingApi = inject(BillingService);
     private toast = inject(ToastService);
     private confirmDialog = inject(MatDialog);
     private dialogRef = inject(MatDialogRef<AdminTicketDialogComponent>);
@@ -328,7 +330,7 @@ export class AdminTicketDialogComponent {
     openUserDetail(): void {
         const t = this.ticket();
         if (!t.userId) return;
-        this.adminApi.getApiAdminUsersId(t.userId as string).subscribe({
+        loadAdminUserDialogData(this.adminApi, this.billingApi, t.userId as string).subscribe({
             next: (u) => {
                 this.confirmDialog.open(AdminUserDialogComponent, {
                     data: u,

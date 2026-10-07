@@ -33,6 +33,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Subject, debounceTime, switchMap, of, forkJoin, map, Subscription } from 'rxjs';
 import { AdminService } from '../../api/admin';
+import { BillingService } from '../../api/billing';
 import { UserBrowseService } from '../../api/user-browse';
 import { SchematicsService } from '../../api/schematics';
 import { FaqService } from '../../api/faq';
@@ -50,7 +51,7 @@ import { UserLinkComponent } from '../../shared/components/user-link/user-link.c
 import { UserImgPipe, TicketImgPipe, PromoImgPipe, promotionImageUrl } from '../../shared/pipes/image-url.pipe';
 import { NumberFormatPipe } from '../../shared/pipes/number-format.pipe';
 import { AdminTicketDialogComponent, AdminTicketDialogData, AdminTicketDialogResult } from './admin-ticket-dialog.component';
-import { AdminUserDialogComponent } from './admin-user-dialog.component';
+import { AdminUserDialogComponent, loadAdminUserDialogData } from './admin-user-dialog.component';
 import { Role, ROLE_LABELS, Status, STATUS_LABELS, Visibility, Badge, BADGE_LABELS, BADGE_ICONS, resolveBadge, ADMIN_TAB } from '../../core/enums';
 import { translateText } from '../../core/i18n/translation.store';
 import { ADMIN, DIALOGS, COMMON, PLUGINS } from '../../i18n/labels';
@@ -102,6 +103,7 @@ export interface ServerLogEntryResponse {
 })
 export class AdminComponent implements OnInit, OnDestroy {
     private adminApi = inject(AdminService);
+    private billingApi = inject(BillingService);
     private userBrowseApi = inject(UserBrowseService);
     private schematicsApi = inject(SchematicsService);
     private faqService = inject(FaqService);
@@ -482,7 +484,7 @@ export class AdminComponent implements OnInit, OnDestroy {
 
     private autoOpenUserDetail(userId: string): void {
         this.loadingUserDetail.set(true);
-        this.adminApi.getApiAdminUsersId(userId).subscribe({
+        loadAdminUserDialogData(this.adminApi, this.billingApi, userId).subscribe({
             next: (u) => {
                 this.loadingUserDetail.set(false);
                 const ref = this.dialog.open(AdminUserDialogComponent, {
@@ -722,7 +724,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     openUserDetail(user: AdminUserResponse): void {
         this.loadingUserDetail.set(true);
         this.setQueryParam('userId', String(user.id));
-        this.adminApi.getApiAdminUsersId(user.id).subscribe({
+        loadAdminUserDialogData(this.adminApi, this.billingApi, user.id).subscribe({
             next: (u) => {
                 this.loadingUserDetail.set(false);
                 const ref = this.dialog.open(AdminUserDialogComponent, {

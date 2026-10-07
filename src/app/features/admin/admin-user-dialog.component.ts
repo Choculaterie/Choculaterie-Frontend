@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal, computed } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
@@ -28,6 +28,15 @@ import { Badge, BADGE_LABELS, resolveBadge } from '../../core/enums';
 import { translateText } from '../../core/i18n/translation.store';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { ADMIN, COMMON } from '../../i18n/labels';
+
+export type AdminUserDialogData = AdminUserDetailResponse & { billing?: AdminUserBilling | null };
+
+export function loadAdminUserDialogData(adminApi: AdminService, billingApi: BillingService, userId: string): Observable<AdminUserDialogData> {
+    return forkJoin({
+        user: adminApi.getApiAdminUsersId(userId),
+        billing: billingApi.adminGetUserBilling(userId).pipe(catchError(() => of(null))),
+    }).pipe(map(({ user, billing }) => ({ ...user, billing })));
+}
 
 export type AdminUserDialogResult = 'deleted' | null;
 
@@ -68,6 +77,8 @@ export type AdminUserDialogResult = 'deleted' | null;
             [matTooltip]="b.isPremium
                 ? (('Premium until' | t) + ' ' + (b.premiumUntil | date:'mediumDate'))
                 : ('Free plan' | t)" />
+        } @else if (loadingBilling()) {
+        <span class="plan-icon plan-skeleton media-loading" aria-hidden="true"></span>
         }
     </div>
     <button mat-icon-button mat-dialog-close class="close-btn">
@@ -293,19 +304,20 @@ export type AdminUserDialogResult = 'deleted' | null;
         .table-scroll { overflow-x: auto; width: 100%; }
         .compact-table .mat-mdc-cell, .compact-table .mat-mdc-header-cell { padding: 4px 8px; font-size: 0.85rem; }
         .plan-icon { width: 22px; height: 22px; flex-shrink: 0; }
+        .plan-skeleton { display: inline-block; border-radius: 4px; }
     `],
 })
 export class AdminUserDialogComponent {
     constructor() {
         this.loadBadges();
-        this.loadBilling();
+        if (this.u.billing === undefined) this.loadBilling();
     }
 
     private adminApi = inject(AdminService);
     private toast = inject(ToastService);
     private confirmDlg = inject(MatDialog);
     readonly dialogRef = inject(MatDialogRef<AdminUserDialogComponent>);
-    readonly u = inject<AdminUserDetailResponse>(MAT_DIALOG_DATA);
+    readonly u = inject<AdminUserDialogData>(MAT_DIALOG_DATA);
 
     readonly user = signal<AdminUserDetailResponse>({ ...this.u });
     private http = inject(HttpClient);
@@ -317,7 +329,7 @@ export class AdminUserDialogComponent {
     readonly editNote = signal<string>(this.u.adminNote ?? '');
 
     private billingApi = inject(BillingService);
-    readonly billing = signal<AdminUserBilling | null>(null);
+    readonly billing = signal<AdminUserBilling | null>(this.u.billing ?? null);
     readonly loadingBilling = signal(false);
 
     private loadBilling(): void {
