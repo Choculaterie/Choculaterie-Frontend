@@ -1,6 +1,6 @@
 import { SubscriptionActionsService } from '../../core/services/subscription-actions.service';
 import { Component, ElementRef, Injector, OnDestroy, OnInit, afterNextRender, inject, signal, computed, viewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { MatCardModule } from '@angular/material/card';
@@ -31,6 +31,7 @@ export class PremiumComponent implements OnInit, OnDestroy {
     readonly subscriptionActions = inject(SubscriptionActionsService);
     private toast = inject(ToastService);
     private router = inject(Router);
+    private route = inject(ActivatedRoute);
     private location = inject(Location);
     private injector = inject(Injector);
 
@@ -45,10 +46,14 @@ export class PremiumComponent implements OnInit, OnDestroy {
     readonly invoice = signal<MoneroInvoice | null>(null);
     readonly qr = signal<string | null>(null);
     readonly creatingInvoice = signal(false);
+    readonly confirmingCheckout = signal(false);
+    readonly celebrating = signal<'stripe' | 'monero' | null>(null);
     readonly now = signal(Date.now());
 
     private pollTimer?: ReturnType<typeof setInterval>;
     private clockTimer?: ReturnType<typeof setInterval>;
+    private checkoutTimer?: ReturnType<typeof setTimeout>;
+    private celebrateTimer?: ReturnType<typeof setTimeout>;
 
     readonly confirmProgress = computed(() => {
         const i = this.invoice();
@@ -78,16 +83,57 @@ export class PremiumComponent implements OnInit, OnDestroy {
             error: () => this.plans.set([]),
         });
 
+        const fromCheckout = this.route.snapshot.queryParamMap.get('checkout') === 'success';
+        if (fromCheckout) {
+            this.router.navigate([], { queryParams: { checkout: null }, queryParamsHandling: 'merge', replaceUrl: true });
+        }
+
         if (!this.isAuthenticated()) return;
         this.loadingSubscription.set(true);
         this.billing.getSubscription().subscribe({
-            next: (s) => { this.subscription.set(s); this.loadingSubscription.set(false); },
+            next: (s) => {
+                this.subscription.set(s);
+                this.loadingSubscription.set(false);
+                if (fromCheckout) this.awaitCheckoutGrant(s, 15);
+            },
             error: () => this.loadingSubscription.set(false),
         });
     }
 
     ngOnDestroy(): void {
         this.stopPolling();
+        clearTimeout(this.checkoutTimer);
+        clearTimeout(this.celebrateTimer);
+    }
+
+    private awaitCheckoutGrant(s: OwnSubscriptionResponse | null, attemptsLeft: number): void {
+        if (s?.isPremium) {
+            this.confirmingCheckout.set(false);
+            this.toast.success('Payment confirmed. Premium is active.');
+            this.celebrate('stripe');
+            return;
+        }
+        if (attemptsLeft <= 0) {
+            this.confirmingCheckout.set(false);
+            this.toast.info('Your payment is still being processed. Premium will activate shortly.');
+            return;
+        }
+        this.confirmingCheckout.set(true);
+        this.checkoutTimer = setTimeout(() => {
+            this.billing.getSubscription().subscribe({
+                next: (next) => { this.subscription.set(next); this.awaitCheckoutGrant(next, attemptsLeft - 1); },
+                error: () => this.awaitCheckoutGrant(null, attemptsLeft - 1),
+            });
+        }, 2000);
+    }
+
+    celebrate(source: 'stripe' | 'monero'): void {
+        clearTimeout(this.celebrateTimer);
+        this.celebrating.set(null);
+        requestAnimationFrame(() => {
+            this.celebrating.set(source);
+            this.celebrateTimer = setTimeout(() => this.celebrating.set(null), 4000);
+        });
     }
 
     goBack(): void {
@@ -198,7 +244,13 @@ export class PremiumComponent implements OnInit, OnDestroy {
 
         if (inv.isPaid && !previous?.isPaid) {
             this.stopPolling();
+            this.subscription.update((s) => ({ ...s, subscription: s?.subscription ?? null, isPremium: true, premiumUntil: inv.premiumUntil ?? s?.premiumUntil ?? null }));
+            this.showCrypto.set(false);
+            this.invoice.set(null);
+            this.qr.set(null);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             this.toast.success('Payment confirmed. Premium is active.');
+            this.celebrate('monero');
             this.billing.getSubscription().subscribe({
                 next: (s) => this.subscription.set(s),
                 error: () => { },

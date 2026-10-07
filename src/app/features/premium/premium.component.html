@@ -7,6 +7,15 @@
         <p>{{ 'Support the project and unlock extra perks.' | t }}</p>
     </header>
 
+    @if (confirmingCheckout()) {
+    <mat-card appearance="outlined" class="status-card confirming-card settle-in">
+        <mat-card-content>
+            <img src="loading.gif" alt="" aria-hidden="true" class="status-loader" />
+            <span>{{ 'Confirming your payment' | t }}</span>
+        </mat-card-content>
+    </mat-card>
+    }
+
     @if (!loadingSubscription() && subscription()?.isPremium) {
     <mat-card appearance="outlined" class="status-card settle-in">
         <mat-card-content>
@@ -140,18 +149,6 @@
                 {{ 'Continue' | t }}
                 }
             </button>
-            } @else if (invoice()!.isPaid) {
-            <div class="invoice-paid">
-                <img src="/premium.png" alt="" aria-hidden="true" class="mc-icon paid-icon" draggable="false"
-                    [matTooltip]="('Art by' | t) + ' @soller'" matTooltipPosition="below" matTooltipTouchGestures="on" />
-                <div>
-                    <strong>{{ 'Payment confirmed' | t }}</strong>
-                    @if (invoice()!.premiumUntil) {
-                    <p>{{ 'Premium is active until' | t }} {{ invoice()!.premiumUntil | date:'longDate' }}</p>
-                    }
-                </div>
-            </div>
-            <button mat-flat-button color="primary" class="crypto-continue" (click)="cancelInvoice()">{{ 'Done' | t }}</button>
             } @else {
             <header class="crypto-head">
                 <h2>{{ 'Send' | t }} {{ invoice()!.xmr }} XMR</h2>
@@ -216,3 +213,7 @@
     }
     }
 </div>
+
+@if (celebrating(); as source) {
+<div class="celebration" [attr.data-source]="source" aria-hidden="true"></div>
+}

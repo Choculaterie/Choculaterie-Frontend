@@ -368,21 +368,22 @@
     }
 }
 
-.invoice-paid {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-    margin-bottom: 1.25rem;
+.confirming-card mat-card-content {
+    gap: 0.75rem;
 
-    .paid-icon {
-        width: 40px;
-        height: 40px;
-    }
-
-    p {
-        margin: 0.15rem 0 0;
-        opacity: 0.8;
+    .status-loader {
+        width: 20px;
+        height: 20px;
+        flex: 0 0 auto;
     }
 }
 
-
+.celebration {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
