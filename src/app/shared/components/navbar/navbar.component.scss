@@ -189,6 +189,10 @@
 .premium-item {
     color: var(--mat-sys-primary);
 
+    svg {
+        transform: translate(1px, 1px);
+    }
+
     span {
         color: var(--mat-sys-primary);
         font-weight: 500;

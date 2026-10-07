@@ -15,7 +15,7 @@ import { VideosService, VideoResponse, videoThumbnailUrl, videoStreamUrl, format
         <div class="page-container">
             <div class="page-header">
                 <h1 class="page-title">
-                    <img src="/icons/media/forward.svg" alt="" aria-hidden="true" class="mc-icon" style="transform: translateY(-2px);" />
+                    <img src="/icons/arrows/tild_full_right.svg" alt="" aria-hidden="true" class="mc-icon" style="transform: translateY(-2px);" />
                     <span>{{ 'Videos' | t }}</span>
                 </h1>
             </div>
