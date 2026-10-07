@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { LitematicViewerComponent, type LitematicViewerData } from '../../shared/components/litematic-viewer/litematic-viewer.component';
@@ -19,7 +18,7 @@ import { LitematicViewerComponent, type LitematicViewerData } from '../../shared
 @Component({
     selector: 'app-viewer',
     standalone: true,
-    imports: [TPipe, MatProgressBarModule, MatIconModule],
+    imports: [TPipe, MatIconModule],
     styles: [`
         :host {
             display: flex;
@@ -57,7 +56,7 @@ import { LitematicViewerComponent, type LitematicViewerData } from '../../shared
     template: `
         @if (state() === 'loading') {
             <div class="state-overlay">
-                <mat-progress-bar mode="indeterminate" style="width:240px" />
+                <img src="loading.gif" alt="" aria-hidden="true" style="width:48px;height:48px;object-fit:contain" />
                 <span>{{ 'Loading…' | t }}</span>
             </div>
         } @else if (state() === 'error') {

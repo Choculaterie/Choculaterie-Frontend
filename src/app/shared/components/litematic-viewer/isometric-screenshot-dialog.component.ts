@@ -16,7 +16,6 @@ import { TPipe } from '../../../core/i18n/t.pipe';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSliderModule } from '@angular/material/slider';
 import { SchematicRenderer } from 'schematic-renderer';
@@ -37,7 +36,6 @@ export interface IsometricScreenshotData {
         MatDialogModule,
         MatButtonModule,
         MatIconModule,
-        MatProgressBarModule,
         MatTooltipModule,
         MatSliderModule,
     ],
@@ -62,7 +60,7 @@ export interface IsometricScreenshotData {
         <div class="screenshot-body">
             @if (loading()) {
             <div class="loading-overlay">
-                <mat-progress-bar mode="indeterminate" />
+                <img src="loading.gif" alt="" aria-hidden="true" class="loading-gif" />
                 <p>{{ loadingStatus() }}</p>
             </div>
             }
@@ -217,7 +215,7 @@ export interface IsometricScreenshotData {
             justify-content: center;
             gap: 1rem;
             color: rgba(255, 255, 255, 0.8);
-            mat-progress-bar { width: 60%; max-width: 320px; }
+            .loading-gif { width: 48px; height: 48px; object-fit: contain; }
             z-index: 1;
             p { margin: 0; font-size: 0.9rem; }
         }

@@ -13,7 +13,6 @@ import { HttpClient } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SchematicRenderer, DiffViewer } from 'schematic-renderer';
@@ -41,7 +40,6 @@ export interface LitematicViewerData {
         MatDialogModule,
         MatButtonModule,
         MatIconModule,
-        MatProgressBarModule,
         MatSliderModule,
         MatTooltipModule,
     ],

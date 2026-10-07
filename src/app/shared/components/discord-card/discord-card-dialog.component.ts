@@ -3,7 +3,6 @@ import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { simpleDiscord } from '@ng-icons/simple-icons';
 import { TPipe } from '../../../core/i18n/t.pipe';
@@ -35,7 +34,7 @@ interface DiscordCardResponse {
 @Component({
     selector: 'app-discord-card-dialog',
     standalone: true,
-    imports: [TPipe, DatePipe, MatDialogModule, MatButtonModule, MatProgressBarModule, NgIconComponent],
+    imports: [TPipe, DatePipe, MatDialogModule, MatButtonModule, NgIconComponent],
     viewProviders: [provideIcons({ simpleDiscord })],
     template: `
         <div class="dc-card">
@@ -49,7 +48,7 @@ interface DiscordCardResponse {
             </div>
 
             @if (loading()) {
-            <mat-progress-bar mode="indeterminate" />
+            <div style="display:flex;justify-content:center;padding:1.5rem 0"><img src="loading.gif" alt="" aria-hidden="true" style="width:48px;height:48px;object-fit:contain" /></div>
             } @else if (error()) {
             <p class="dc-error">{{ error() }}</p>
             } @else if (card(); as c) {

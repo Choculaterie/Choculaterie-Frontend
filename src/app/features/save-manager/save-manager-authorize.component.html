@@ -2,7 +2,7 @@
 
     @if (state() === 'loading') {
     <div class="state-center">
-        <mat-spinner diameter="48" />
+        <img src="loading.gif" alt="" aria-hidden="true" style="width:48px;height:48px;object-fit:contain" />
         <p>{{ 'Loading authorization request…' | t }}</p>
     </div>
     }
@@ -71,7 +71,7 @@
 
             <div class="auth-actions">
                 <button mat-flat-button color="primary" [disabled]="actionLoading()" (click)="approve()">
-                    @if (actionLoading()) { <mat-spinner diameter="18" /> } @else { <span>{{ 'Approve' | t }}</span> }
+                    @if (actionLoading()) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else { <span>{{ 'Approve' | t }}</span> }
                 </button>
                 <button mat-stroked-button [disabled]="actionLoading()" (click)="cancel()">{{ 'Deny' | t }}</button>
             </div>

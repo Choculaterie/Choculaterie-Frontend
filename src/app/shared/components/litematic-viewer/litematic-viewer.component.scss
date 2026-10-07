@@ -112,9 +112,10 @@
     gap: 1rem;
     color: rgba(255, 255, 255, 0.8);
 
-    mat-progress-bar {
-        width: 60%;
-        max-width: 320px;
+    .loading-gif {
+        width: 48px;
+        height: 48px;
+        object-fit: contain;
     }
 
     z-index: 1;
