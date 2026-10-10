@@ -870,6 +870,8 @@ export interface SchematicDetailResponse {
   tags: string[];
   versions: string[];
   isModule?: boolean;
+  /** @nullable */
+  downloadToken?: string | null;
 }
 
 export interface SchematicListResponse {

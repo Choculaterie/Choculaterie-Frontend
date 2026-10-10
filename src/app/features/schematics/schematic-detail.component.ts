@@ -306,7 +306,11 @@ export class SchematicDetailComponent implements OnInit {
     downloadSingleFile(file: SchematicFileResponse): void {
         const s = this.schematic()!;
         this.browserDownload(
-            `${environment.apiBasePath}/api/Schematics/${s.id}/download/${Number(file.id)}`, file.name);
+            `${environment.apiBasePath}/api/Schematics/${s.id}/download/${Number(file.id)}${this.downloadTokenPath(s)}`, file.name);
+    }
+
+    private downloadTokenPath(s: SchematicDetailResponse): string {
+        return s.downloadToken ? `/s/${s.downloadToken}` : '';
     }
 
     private browserDownload(url: string, fileName: string): void {
@@ -319,7 +323,7 @@ export class SchematicDetailComponent implements OnInit {
     }
 
     private downloadAllAsZip(s: SchematicDetailResponse): void {
-        this.browserDownload(`${environment.apiBasePath}/api/Schematics/${s.id}/download`, `${s.name}.zip`);
+        this.browserDownload(`${environment.apiBasePath}/api/Schematics/${s.id}/download${this.downloadTokenPath(s)}`, `${s.name}.zip`);
         this.toast.success(SCHEMATICS.downloadStarted);
     }
 
