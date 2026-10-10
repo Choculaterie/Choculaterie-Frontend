@@ -853,7 +853,7 @@ export class SchematicDetailComponent implements OnInit {
 
     viewIn3D(file: SchematicFileResponse): void {
         const s = this.schematic()!;
-        this.schematicsApi.getApiSchematicsIdDownloadFileId<Blob>(s.id, Number(file.id), {
+        this.schematicsApi.getApiSchematicsIdFileFileId<Blob>(s.id, Number(file.id), {
             responseType: 'blob',
         } as any).subscribe({
             next: (blob) => {
@@ -883,7 +883,7 @@ export class SchematicDetailComponent implements OnInit {
 
     generatePicture(file: SchematicFileResponse): void {
         const s = this.schematic()!;
-        this.schematicsApi.getApiSchematicsIdDownloadFileId<Blob>(s.id, Number(file.id), {
+        this.schematicsApi.getApiSchematicsIdFileFileId<Blob>(s.id, Number(file.id), {
             responseType: 'blob',
         } as any).subscribe({
             next: (blob) => {
@@ -902,7 +902,7 @@ export class SchematicDetailComponent implements OnInit {
     generatePictureForItem(item: { type: 'existing'; file: SchematicFileResponse } | { type: 'new'; file: File }): void {
         if (item.type === 'existing') {
             const s = this.schematic()!;
-            this.schematicsApi.getApiSchematicsIdDownloadFileId<Blob>(s.id, Number(item.file.id), {
+            this.schematicsApi.getApiSchematicsIdFileFileId<Blob>(s.id, Number(item.file.id), {
                 responseType: 'blob',
             } as any).subscribe({
                 next: (blob) => {

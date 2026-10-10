@@ -534,6 +534,40 @@ if(putApiSchematicsIdBody.Visibility !== undefined) {
       }
     );
   }
+ getApiSchematicsIdFileFileId<TData = unknown>(id: string,
+    fileId: number, options?: HttpClientBodyOptions): Observable<TData>;
+ getApiSchematicsIdFileFileId<TData = unknown>(id: string,
+    fileId: number, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ getApiSchematicsIdFileFileId<TData = unknown>(id: string,
+    fileId: number, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  getApiSchematicsIdFileFileId<TData = unknown>(
+    id: string,
+    fileId: number, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/Schematics/${id}/file/${fileId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/Schematics/${id}/file/${fileId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/Schematics/${id}/file/${fileId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
  getApiSchematicsSearchNames<TData = string[]>(params?: GetApiSchematicsSearchNamesParams, options?: HttpClientBodyOptions): Observable<TData>;
  getApiSchematicsSearchNames<TData = string[]>(params?: GetApiSchematicsSearchNamesParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
  getApiSchematicsSearchNames<TData = string[]>(params?: GetApiSchematicsSearchNamesParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
