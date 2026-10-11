@@ -288,16 +288,16 @@ $shimmer: linear-gradient(90deg,
         font-size: 0.9rem;
 
         mat-icon,
-        img.mc-icon {
+        mat-icon {
             font-size: 18px;
-            width: 18px;
-            height: 18px;
+            width: var(--icon-size);
+            height: var(--icon-size);
             color: var(--mat-sys-primary);
         }
 
-        svg.detail-icon {
-            width: 18px;
-            height: 18px;
+        mat-icon.detail-icon {
+            width: var(--icon-size);
+            height: var(--icon-size);
             flex-shrink: 0;
             color: var(--mat-sys-primary);
         }
@@ -422,14 +422,15 @@ $shimmer: linear-gradient(90deg,
     }
 
     .expand-arrow {
-        width: 20px;
-        height: 20px;
+        width: var(--icon-size);
+        height: var(--icon-size);
         transition: transform 0.2s;
-        transform-origin: center 43.75%;
+        transform-origin: center;
     }
 
     &[aria-expanded='true'] .expand-arrow {
-        transform: rotate(180deg) translateY(1px);
+        transform: rotate(180deg);
+            --mc-shadow-dir: -1;
     }
 }
 
@@ -446,8 +447,9 @@ $shimmer: linear-gradient(90deg,
 
 .block-icon {
     font-size: 14px;
-    width: 14px;
-    height: 14px;
+    --icon-size: 24px;
+    width: var(--icon-size);
+    height: var(--icon-size);
     color: var(--mat-sys-primary);
 }
 

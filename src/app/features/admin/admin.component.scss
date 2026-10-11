@@ -16,8 +16,9 @@ h1 {
     --mdc-outlined-button-hover-outline-color: transparent;
 
     img {
-        width: 18px;
-        height: 18px;
+        --icon-size: 24px;
+        width: var(--icon-size);
+        height: var(--icon-size);
         flex-shrink: 0;
         margin-right: 4px;
     }
@@ -226,8 +227,9 @@ a {
 
 .detail-avatar-icon {
     font-size: 48px;
-    width: 48px;
-    height: 48px;
+    --icon-size: 60px;
+    width: var(--icon-size);
+    height: var(--icon-size);
     color: var(--mat-sys-on-surface-variant);
 }
 
@@ -236,8 +238,9 @@ a {
 }
 
 .badge-icon {
-    width: 20px;
-    height: 20px;
+    --icon-size: 24px;
+    width: var(--icon-size);
+    height: var(--icon-size);
     vertical-align: middle;
     margin-left: 0.25rem;
 }
@@ -319,6 +322,7 @@ a {
 .copy-btn {
     --mdc-icon-button-state-layer-size: 28px;
     --mdc-icon-button-icon-size: 16px;
+    font-size: inherit;
     width: 28px !important;
     height: 28px !important;
     padding: 0 !important;
@@ -335,8 +339,9 @@ a {
     }
 
     .copy-icon {
-        width: 16px;
-        height: 16px;
+        --icon-size: calc(var(--mc-em) * 1.5);
+        width: var(--icon-size);
+        height: var(--icon-size);
         flex-shrink: 0;
     }
 }
@@ -494,14 +499,15 @@ mat-accordion mat-expansion-panel {
     }
 
     .expand-arrow {
-        width: 20px;
-        height: 20px;
+        width: var(--icon-size);
+        height: var(--icon-size);
         margin-left: 12px;
         transition: transform 0.2s;
-        transform-origin: center 43.75%;
+        transform-origin: center;
 
         &.expanded {
-            transform: rotate(180deg) translateY(1px);
+            transform: rotate(180deg);
+            --mc-shadow-dir: -1;
         }
     }
 }
@@ -538,9 +544,9 @@ mat-accordion .faq-answer {
     opacity: 0.8;
     margin-bottom: 1rem;
 
-    svg.mc-icon {
-        width: 18px;
-        height: 18px;
+    mat-icon {
+        width: var(--icon-size);
+        height: var(--icon-size);
     }
 }
 

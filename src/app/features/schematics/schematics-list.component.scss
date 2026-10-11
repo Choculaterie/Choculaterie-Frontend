@@ -19,8 +19,9 @@
     --mdc-outlined-button-hover-outline-color: transparent;
 
     img {
-        width: 18px;
-        height: 18px;
+        --icon-size: 24px;
+        width: var(--icon-size);
+        height: var(--icon-size);
         flex-shrink: 0;
         margin-right: 4px;
     }
@@ -35,7 +36,7 @@
         border-radius: 50%;
 
         .mat-icon,
-        img.mc-icon {
+        mat-icon {
             margin: 0;
         }
     }
@@ -48,9 +49,9 @@
     font: var(--mat-sys-headline-medium);
     margin: 0;
 
-    img.mc-icon {
-        width: 28px;
-        height: 28px;
+    mat-icon {
+        width: var(--icon-size);
+        height: var(--icon-size);
     }
 }
 
@@ -82,8 +83,8 @@
 .suggestion-icon {
     margin-right: 8px;
     font-size: 20px;
-    width: 20px;
-    height: 20px;
+    width: var(--icon-size);
+    height: var(--icon-size);
     vertical-align: middle;
     color: var(--mat-sys-on-surface-variant);
 }

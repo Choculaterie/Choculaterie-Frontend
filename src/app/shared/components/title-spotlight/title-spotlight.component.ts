@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { TPipe } from '../../../core/i18n/t.pipe';
 import type { PromotionResponse } from '../../../api/generated.schemas';
 import { PromoImgPipe } from '../../pipes/image-url.pipe';
+import { MatIconModule } from '@angular/material/icon';
 
 
 const DISMISSED_PREFIX = 'chocu-title-spotlight-dismissed-';
@@ -11,7 +12,7 @@ const DISMISSED_PREFIX = 'chocu-title-spotlight-dismissed-';
 @Component({
     selector: 'app-title-spotlight',
     standalone: true,
-    imports: [MatButtonModule, TPipe, PromoImgPipe],
+    imports: [MatIconModule, MatButtonModule, TPipe, PromoImgPipe],
     template: `
         @if (promo(); as p) {
             <aside class="title-spotlight" [attr.aria-label]="'Community title spotlight' | t">
@@ -53,13 +54,7 @@ const DISMISSED_PREFIX = 'chocu-title-spotlight-dismissed-';
                     [attr.aria-label]="'Dismiss' | t"
                     (click)="dismiss($event)"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
-                        class="mc-icon" aria-hidden="true">
-                        <path fill="currentColor"
-                            d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
-                        <path fill="var(--mc-icon-shadow)"
-                            d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
-                    </svg>
+                    <mat-icon svgIcon="mc:letters/X"></mat-icon>
                 </button>
             </aside>
         }
@@ -158,12 +153,11 @@ const DISMISSED_PREFIX = 'chocu-title-spotlight-dismissed-';
             color: var(--mat-sys-on-surface);
         }
 
-        /* Match navbar mat-icon-button mc glyphs (24px + shadow optical bias). */
         .title-spotlight__dismiss .mc-icon {
-            width: 24px;
-            height: 24px;
+            --icon-size: 36px;
+            width: var(--icon-size);
+            height: var(--icon-size);
             display: block;
-            transform: translate(1px, 1px);
         }
 
         @media (max-width: 600px) {

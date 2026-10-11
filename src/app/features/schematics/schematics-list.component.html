@@ -1,12 +1,10 @@
 <div class="page-container" appDropZone [fullPage]="true" accept="image/*,.litematic"
     unknownTypeIcon="/icons/weapons/pickaxe.svg" (filesDrop)="onPageFilesDropped($event)">
     <div class="page-header">
-        <h1 class="page-title"><img src="/icons/weapons/pickaxe.svg" alt="" aria-hidden="true" class="mc-icon"
-                style="transform: translateY(-2px);" /> <span>{{ 'Schematics' | t }}</span></h1>
+        <h1 class="page-title"><mat-icon svgIcon="mc:weapons/pickaxe"></mat-icon> <span>{{ 'Schematics' | t }}</span></h1>
         <button mat-flat-button (click)="onUploadClick()"
             [matTooltip]="(showCreate() ? 'Cancel' : 'Upload Schematic') | t" class="upload-btn">
-            <img [src]="showCreate() ? '/icons/letters/X.svg' : '/icons/arrows/arrow_up.svg'" alt="" aria-hidden="true"
-                matButtonIcon class="mc-icon" />
+            <mat-icon [svgIcon]="showCreate() ? 'mc:letters/X' : 'mc:arrows/arrow_up'" matButtonIcon></mat-icon>
             <span class="upload-btn-label">{{ (showCreate() ? 'Cancel' : 'Upload Schematic') | t }}</span>
         </button>
     </div>
@@ -15,7 +13,7 @@
 
     @if (showUnverifiedBanner()) {
     <div class="unverified-banner">
-        <img src="/icons/ui/warning.svg" alt="" aria-hidden="true" class="mc-icon" />
+        <mat-icon svgIcon="mc:ui/warning"></mat-icon>
         <span>{{ 'Your Minecraft account is not linked. Schematics from unverified accounts are hidden by default.' | t }}</span>
         <a [routerLink]="ownProfilePath()" [queryParams]="{tab: 3, section: 'minecraft'}">{{ 'Link your account' | t }}</a>
     </div>
@@ -47,8 +45,7 @@
                             @for (tag of createTagList(); track tag) {
                             <mat-chip-row (removed)="removeCreateTag(tag)">
                                 {{ tag }}
-                                <button matChipRemove [attr.aria-label]="'Remove tag' | t"><img src="/icons/letters/X.svg" alt=""
-                                        aria-hidden="true" class="mc-icon" /></button>
+                                <button matChipRemove [attr.aria-label]="'Remove tag' | t"><mat-icon svgIcon="mc:letters/X"></mat-icon></button>
                             </mat-chip-row>
                             }
                             <input [matChipInputFor]="createTagChipGrid" [matChipInputSeparatorKeyCodes]="[]"
@@ -63,8 +60,7 @@
                             @if (filteredTags().length === 0 && tagInputValue().length > 0) {
                             <mat-option value="__suggest__">
                                 <span style="display:flex;align-items:center;gap:8px;">
-                                    <img src="/icons/weapons/pen.svg" alt="" aria-hidden="true" class="mc-icon"
-                                        style="transform: translate(-2px, -2px)" />
+                                    <mat-icon svgIcon="mc:weapons/pen"></mat-icon>
                                     <span>{{ 'Propose a new tag' | t }}</span>
                                 </span>
                             </mat-option>
@@ -77,8 +73,7 @@
                             @for (ver of createVersionList(); track ver) {
                             <mat-chip-row (removed)="removeCreateVersion(ver)">
                                 {{ ver }}
-                                <button matChipRemove [attr.aria-label]="'Remove version' | t"><img src="/icons/letters/X.svg" alt=""
-                                        aria-hidden="true" class="mc-icon" /></button>
+                                <button matChipRemove [attr.aria-label]="'Remove version' | t"><mat-icon svgIcon="mc:letters/X"></mat-icon></button>
                             </mat-chip-row>
                             }
                             <input [matChipInputFor]="createVersionChipGrid" [matChipInputSeparatorKeyCodes]="[]"
@@ -123,26 +118,14 @@
 
                 <div class="file-row">
                     <button mat-stroked-button type="button" (click)="pictureInput.click()">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
-                            width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
-                            <path fill="currentColor"
-                                d="M2,2h3v1h-3zM12,2h4v1h-4zM23,2h4v1h-4zM2,3h3v1h-3zM12,3h4v1h-4zM23,3h4v1h-4zM2,4h3v1h-3zM12,4h4v1h-4zM23,4h4v1h-4zM5,5h4v1h-4zM20,5h3v1h-3zM5,6h4v1h-4zM20,6h3v1h-3zM5,7h4v1h-4zM20,7h3v1h-3zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM9,14h3v1h-3zM16,14h4v1h-4zM9,15h3v1h-3zM16,15h4v1h-4zM9,16h3v1h-3zM16,16h4v1h-4zM9,17h3v1h-3zM16,17h4v1h-4zM5,18h4v1h-4zM20,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM2,21h3v1h-3zM12,21h4v1h-4zM23,21h4v1h-4zM2,22h3v1h-3zM12,22h4v1h-4zM23,22h4v1h-4zM2,23h3v1h-3zM12,23h4v1h-4zM23,23h4v1h-4z" />
-                            <path fill="var(--mc-icon-shadow)"
-                                d="M16,5h4v1h-4zM27,5h3v1h-3zM16,6h4v1h-4zM27,6h3v1h-3zM16,7h4v1h-4zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM27,17h3v1h-3zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM9,21h3v1h-3zM9,22h3v1h-3zM9,23h3v1h-3zM5,24h4v1h-4zM16,24h4v1h-4zM27,24h3v1h-3zM5,25h4v1h-4zM16,25h4v1h-4zM27,25h3v1h-3zM5,26h4v1h-4zM16,26h4v1h-4zM27,26h3v1h-3z" />
-                        </svg> <span>{{ 'Add Pictures' | t }}</span>
+                        <mat-icon svgIcon="mc:media/image" matButtonIcon></mat-icon> <span>{{ 'Add Pictures' | t }}</span>
                     </button>
-                    <input #pictureInput type="file" appFilePick accept="image/*" multiple hidden
+                    <input #pictureInput type="file" accept="image/*" multiple hidden
                         (change)="onPicturesSelected($event)" />
                     <button mat-stroked-button type="button" (click)="litematicInput.click()">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
-                            width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
-                            <path fill="currentColor"
-                                d="M8,2h13v1h-13zM8,3h13v1h-13zM8,4h13v1h-13zM18,5h6v1h-6zM18,6h6v1h-6zM18,7h6v1h-6zM18,8h9v1h-9zM18,9h9v1h-9zM18,10h9v1h-9zM14,11h4v1h-4zM24,11h3v1h-3zM14,12h4v1h-4zM24,12h3v1h-3zM14,13h4v1h-4zM24,13h3v1h-3zM11,14h3v1h-3zM24,14h3v1h-3zM11,15h3v1h-3zM24,15h3v1h-3zM11,16h3v1h-3zM24,16h3v1h-3zM11,17h3v1h-3zM24,17h3v1h-3zM8,18h3v1h-3zM24,18h3v1h-3zM8,19h3v1h-3zM24,19h3v1h-3zM8,20h3v1h-3zM24,20h3v1h-3zM5,21h3v1h-3zM5,22h3v1h-3zM5,23h3v1h-3zM2,24h3v1h-3zM2,25h3v1h-3zM2,26h3v1h-3z" />
-                            <path fill="var(--mc-icon-shadow)"
-                                d="M11,5h7v1h-7zM11,6h7v1h-7zM11,7h7v1h-7zM21,11h3v1h-3zM27,11h3v1h-3zM21,12h3v1h-3zM27,12h3v1h-3zM21,13h3v1h-3zM27,13h3v1h-3zM18,14h3v1h-3zM27,14h3v1h-3zM18,15h3v1h-3zM27,15h3v1h-3zM18,16h3v1h-3zM27,16h3v1h-3zM18,17h3v1h-3zM27,17h3v1h-3zM14,18h4v1h-4zM27,18h3v1h-3zM14,19h4v1h-4zM27,19h3v1h-3zM14,20h4v1h-4zM27,20h3v1h-3zM11,21h3v1h-3zM27,21h3v1h-3zM11,22h3v1h-3zM27,22h3v1h-3zM11,23h3v1h-3zM27,23h3v1h-3zM8,24h3v1h-3zM8,25h3v1h-3zM8,26h3v1h-3zM5,27h3v1h-3zM5,28h3v1h-3zM5,29h3v1h-3z" />
-                        </svg> <span>{{ 'Add Litematic Files' | t }}</span>
+                        <mat-icon svgIcon="mc:weapons/pickaxe" matButtonIcon></mat-icon> <span>{{ 'Add Litematic Files' | t }}</span>
                     </button>
-                    <input #litematicInput type="file" appFilePick accept=".litematic" multiple hidden
+                    <input #litematicInput type="file" accept=".litematic" multiple hidden
                         (change)="onLitematicsSelected($event)" />
                 </div>
 
@@ -157,11 +140,11 @@
                                 style="cursor:pointer" />
                             <div class="preview-actions">
                                 <button mat-icon-button type="button" (click)="removePicture(i)" [matTooltip]="'Remove' | t">
-                                    <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                    <mat-icon svgIcon="mc:letters/X"></mat-icon>
                                 </button>
                                 <span class="spacer"></span>
                                 <button mat-icon-button type="button" class="drag-handle" cdkDragHandle [matTooltip]="'Drag' | t">
-                                    <img src="/icons/letters/side.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                    <mat-icon svgIcon="mc:ui/drag"></mat-icon>
                                 </button>
                             </div>
                             @if (i === 0) {
@@ -179,28 +162,21 @@
                     <div class="file-list-preview" cdkDropList (cdkDropListDropped)="dropLitematic($event)">
                         @for (f of litematicFiles; track f.name; let i = $index) {
                         <div class="file-item" cdkDrag>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
-                                width="20" height="20" class="mc-icon" aria-hidden="true">
-                                <path fill="currentColor"
-                                    d="M8,2h13v1h-13zM8,3h13v1h-13zM8,4h13v1h-13zM18,5h6v1h-6zM18,6h6v1h-6zM18,7h6v1h-6zM18,8h9v1h-9zM18,9h9v1h-9zM18,10h9v1h-9zM14,11h4v1h-4zM24,11h3v1h-3zM14,12h4v1h-4zM24,12h3v1h-3zM14,13h4v1h-4zM24,13h3v1h-3zM11,14h3v1h-3zM24,14h3v1h-3zM11,15h3v1h-3zM24,15h3v1h-3zM11,16h3v1h-3zM24,16h3v1h-3zM11,17h3v1h-3zM24,17h3v1h-3zM8,18h3v1h-3zM24,18h3v1h-3zM8,19h3v1h-3zM24,19h3v1h-3zM8,20h3v1h-3zM24,20h3v1h-3zM5,21h3v1h-3zM5,22h3v1h-3zM5,23h3v1h-3zM2,24h3v1h-3zM2,25h3v1h-3zM2,26h3v1h-3z" />
-                                <path fill="var(--mc-icon-shadow)"
-                                    d="M11,5h7v1h-7zM11,6h7v1h-7zM11,7h7v1h-7zM21,11h3v1h-3zM27,11h3v1h-3zM21,12h3v1h-3zM27,12h3v1h-3zM21,13h3v1h-3zM27,13h3v1h-3zM18,14h3v1h-3zM27,14h3v1h-3zM18,15h3v1h-3zM27,15h3v1h-3zM18,16h3v1h-3zM27,16h3v1h-3zM18,17h3v1h-3zM27,17h3v1h-3zM14,18h4v1h-4zM27,18h3v1h-3zM14,19h4v1h-4zM27,19h3v1h-3zM14,20h4v1h-4zM27,20h3v1h-3zM11,21h3v1h-3zM27,21h3v1h-3zM11,22h3v1h-3zM27,22h3v1h-3zM11,23h3v1h-3zM27,23h3v1h-3zM8,24h3v1h-3zM8,25h3v1h-3zM8,26h3v1h-3zM5,27h3v1h-3zM5,28h3v1h-3zM5,29h3v1h-3z" />
-                            </svg>
+                            <mat-icon svgIcon="mc:weapons/pickaxe"></mat-icon>
                             <span class="file-name-text">{{ f.name.endsWith('.litematic') ? f.name.slice(0, -10) :
                                 f.name }}</span>
                             <span class="spacer"></span>
                             <button mat-icon-button type="button" (click)="generatePictureLocal(f)" [matTooltip]="'Generate picture' | t">
-                                <img src="/icons/ui/smile.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                <mat-icon svgIcon="mc:media/camera"></mat-icon>
                             </button>
                             <button mat-icon-button type="button" (click)="viewIn3DLocal(f)" [matTooltip]="'View in 3D' | t">
-                                <img src="/icons/weather/cloud.svg" alt="" aria-hidden="true" class="mc-icon"
-                                    style="transform: translateY(2px)" />
+                                <mat-icon svgIcon="mc:shapes/cube"></mat-icon>
                             </button>
                             <button mat-icon-button type="button" (click)="removeLitematic(i)" [matTooltip]="'Remove' | t">
-                                <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                <mat-icon svgIcon="mc:letters/X"></mat-icon>
                             </button>
                             <button mat-icon-button type="button" class="drag-handle" cdkDragHandle [matTooltip]="'Drag' | t">
-                                <img src="/icons/letters/side.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                <mat-icon svgIcon="mc:ui/drag"></mat-icon>
                             </button>
                         </div>
                         }
@@ -226,18 +202,16 @@
             <mat-label>{{ 'Search' | t }}</mat-label>
             <input matInput [(ngModel)]="search" (keyup.enter)="loadPage(1)" (ngModelChange)="onSearchInput($event)"
                 [matAutocomplete]="searchAuto" [placeholder]="'Search schematics...' | t" />
-            <img matPrefix src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" class="mc-icon" />
+            <mat-icon svgIcon="mc:ui/magnifying_glass" matPrefix></mat-icon>
             <mat-autocomplete #searchAuto="matAutocomplete" [displayWith]="displaySuggestion"
                 (optionSelected)="onSuggestionSelected($event)">
                 @for (s of searchSuggestions(); track s.label + s.type) {
                 <mat-option [value]="s">
                     <span style="display:flex;align-items:center;gap:8px;">
                         @if (s.type === 'user') {
-                        <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true"
-                            class="mc-icon suggestion-icon" />
+                        <mat-icon svgIcon="mc:people/guy" class="suggestion-icon"></mat-icon>
                         } @else {
-                        <img src="/icons/weapons/pickaxe.svg" alt="" aria-hidden="true"
-                            class="mc-icon suggestion-icon" />
+                        <mat-icon svgIcon="mc:weapons/pickaxe" class="suggestion-icon"></mat-icon>
                         }
                         {{ s.label }}
                     </span>
@@ -256,29 +230,16 @@
         </mat-form-field>
 
         <button mat-icon-button (click)="toggleDirection()" [matTooltip]="'Sort direction' | t">
-            <img [src]="direction === 'asc' ? '/icons/arrows/arrow_up.svg' : '/icons/arrows/arrow_down.svg'" alt=""
-                aria-hidden="true" class="mc-icon" />
+            <mat-icon [svgIcon]="direction === 'asc' ? 'mc:arrows/arrow_up' : 'mc:arrows/arrow_down'"></mat-icon>
         </button>
 
         <button mat-stroked-button (click)="clearFilters()" [matTooltip]="'Clear filters' | t">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
-                height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
-                <path fill="currentColor"
-                    d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
-                <path fill="var(--mc-icon-shadow)"
-                    d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
-            </svg> <span>{{ 'Clear' | t }}</span>
+            <mat-icon svgIcon="mc:letters/X" matButtonIcon></mat-icon> <span>{{ 'Clear' | t }}</span>
         </button>
 
         <button mat-stroked-button class="more-filters-btn" (click)="toggleFilters()"
             [class.active]="showAdvancedFilters() || hasActiveFilters()" [matTooltip]="'Toggle filters' | t">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
-                height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
-                <path fill="currentColor"
-                    d="M2,5h23v1h-23zM2,6h23v1h-23zM2,7h23v1h-23zM2,8h23v1h-23zM2,12h23v1h-23zM2,13h23v1h-23zM2,14h23v1h-23zM2,15h23v1h-23zM2,20h9v1h-9zM16,20h9v1h-9zM2,21h9v1h-9zM16,21h9v1h-9zM2,22h9v1h-9zM16,22h9v1h-9z" />
-                <path fill="var(--mc-icon-shadow)"
-                    d="M7,9h23v1h-23zM7,10h23v1h-23zM7,11h23v1h-23zM7,16h23v1h-23zM7,17h23v1h-23zM7,18h23v1h-23zM7,19h23v1h-23zM7,23h9v1h-9zM21,23h9v1h-9zM7,24h9v1h-9zM21,24h9v1h-9zM7,25h9v1h-9zM21,25h9v1h-9zM7,26h9v1h-9zM21,26h9v1h-9z" />
-            </svg> <span>{{ 'Filters' | t }}</span>
+            <mat-icon svgIcon="mc:ui/filter" matButtonIcon></mat-icon> <span>{{ 'Filters' | t }}</span>
         </button>
     </div>
 
@@ -314,9 +275,8 @@
             </mat-form-field>
 
             <button mat-stroked-button class="unverified-toggle" (click)="toggleIncludeUnverified()" [matTooltip]="'Show schematics from users without a linked Minecraft account' | t">
-                <img [src]="includeUnverified ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'" alt=""
-                    aria-hidden="true" class="mc-icon" />
-                <span style="transform: translateY(1px); display: inline-block;">{{ 'Unverified' | t }}</span>
+                <mat-icon [svgIcon]="includeUnverified ? 'mc:shapes/box_checked' : 'mc:shapes/box'"></mat-icon>
+                <span>{{ 'Unverified' | t }}</span>
             </button>
         </div>
     </div>
@@ -341,13 +301,7 @@
     <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No schematics found' | t" [subtitle]="'Try adjusting your search or filters' | t">
         @if (!includeUnverified) {
         <button mat-stroked-button (click)="toggleIncludeUnverified()" [matTooltip]="'Include schematics from unverified accounts' | t">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
-                height="18" matButtonIcon class="mc-icon mc-icon--draw" aria-hidden="true">
-                <path fill="currentColor"
-                    d="M13,1h3v1h-3zM13,2h3v1h-3zM13,3h3v1h-3zM10,4h3v1h-3zM16,4h3v1h-3zM10,5h3v1h-3zM16,5h3v1h-3zM10,6h3v1h-3zM16,6h3v1h-3zM10,7h3v1h-3zM16,7h3v1h-3zM10,8h3v1h-3zM16,8h3v1h-3zM10,9h3v1h-3zM16,9h3v1h-3zM7,10h3v1h-3zM13,10h3v1h-3zM19,10h3v1h-3zM7,11h3v1h-3zM13,11h3v1h-3zM19,11h3v1h-3zM7,12h3v1h-3zM13,12h3v1h-3zM19,12h3v1h-3zM7,13h3v1h-3zM13,13h3v1h-3zM19,13h3v1h-3zM7,14h3v1h-3zM13,14h3v1h-3zM19,14h3v1h-3zM7,15h3v1h-3zM13,15h3v1h-3zM19,15h3v1h-3zM4,16h3v1h-3zM13,16h3v1h-3zM22,16h3v1h-3zM4,17h3v1h-3zM13,17h3v1h-3zM22,17h3v1h-3zM4,18h3v1h-3zM13,18h3v1h-3zM22,18h3v1h-3zM4,19h3v1h-3zM22,19h3v1h-3zM4,20h3v1h-3zM22,20h3v1h-3zM4,21h3v1h-3zM22,21h3v1h-3zM1,22h3v1h-3zM13,22h3v1h-3zM25,22h3v1h-3zM1,23h3v1h-3zM13,23h3v1h-3zM25,23h3v1h-3zM1,24h3v1h-3zM13,24h3v1h-3zM25,24h3v1h-3zM1,25h27v1h-27zM1,26h27v1h-27zM1,27h27v1h-27z" />
-                <path fill="var(--mc-icon-shadow)"
-                    d="M13,7h3v1h-3zM19,7h3v1h-3zM13,8h3v1h-3zM19,8h3v1h-3zM13,9h3v1h-3zM19,9h3v1h-3zM10,13h3v1h-3zM16,13h3v1h-3zM22,13h3v1h-3zM10,14h3v1h-3zM16,14h3v1h-3zM22,14h3v1h-3zM10,15h3v1h-3zM16,15h3v1h-3zM22,15h3v1h-3zM10,16h3v1h-3zM16,16h3v1h-3zM10,17h3v1h-3zM16,17h3v1h-3zM10,18h3v1h-3zM16,18h3v1h-3zM7,19h3v1h-3zM16,19h3v1h-3zM25,19h3v1h-3zM7,20h3v1h-3zM16,20h3v1h-3zM25,20h3v1h-3zM7,21h3v1h-3zM16,21h3v1h-3zM25,21h3v1h-3zM7,22h3v1h-3zM7,23h3v1h-3zM7,24h3v1h-3zM28,25h3v1h-3zM28,26h3v1h-3zM28,27h3v1h-3zM4,28h27v1h-27zM4,29h27v1h-27zM4,30h27v1h-27z" />
-            </svg> <span>{{ 'Show unverified schematics' | t }}</span>
+            <mat-icon svgIcon="mc:ui/warning" matButtonIcon class="mc-icon--draw"></mat-icon> <span>{{ 'Show unverified schematics' | t }}</span>
         </button>
         }
     </app-empty-state>

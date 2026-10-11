@@ -1,5 +1,7 @@
 import { Directive, ElementRef, EventEmitter, HostListener, Input, Output, Renderer2, inject, OnDestroy, OnInit } from '@angular/core';
+import { MatIconRegistry } from '@angular/material/icon';
 import { ToastService } from '../../core/services/toast.service';
+import { toMcIcon } from '../pipes/mc-icon.pipe';
 
 @Directive({
     selector: '[appDropZone]',
@@ -15,6 +17,7 @@ export class DropZoneDirective implements OnInit, OnDestroy {
     private el = inject(ElementRef);
     private renderer = inject(Renderer2);
     private toast = inject(ToastService);
+    private icons = inject(MatIconRegistry);
 
     private fpOverlay: HTMLElement | null = null;
 
@@ -147,15 +150,15 @@ export class DropZoneDirective implements OnInit, OnDestroy {
         this.renderer.setStyle(badge, 'justify-content', 'center');
         this.renderer.appendChild(frame, badge);
 
-        const icon = this.renderer.createElement('img');
-        this.renderer.setAttribute(icon, 'src', iconSrc);
-        this.renderer.setStyle(icon, 'transform', 'translate(1px, 1px)');
-        this.renderer.setAttribute(icon, 'alt', '');
-        this.renderer.setAttribute(icon, 'aria-hidden', 'true');
-        this.renderer.addClass(icon, 'mc-icon');
-        this.renderer.setStyle(icon, 'width', '40px');
-        this.renderer.setStyle(icon, 'height', '40px');
-        this.renderer.appendChild(badge, icon);
+        this.icons.getNamedSvgIcon(toMcIcon(iconSrc).replace(/^mc:/, ''), 'mc').subscribe(svg => {
+            this.renderer.setAttribute(svg, 'aria-hidden', 'true');
+            this.renderer.setStyle(svg, 'width', '48px');
+            this.renderer.setStyle(svg, 'height', '48px');
+            this.renderer.setStyle(svg, 'color', 'var(--mat-sys-on-surface)');
+            this.renderer.setStyle(svg, 'filter', 'drop-shadow(4px 4px 0 var(--mc-icon-shadow))');
+            this.renderer.setStyle(svg, 'translate', '-2px -2px');
+            this.renderer.appendChild(badge, svg);
+        });
 
         this.renderer.appendChild(document.body, this.fpOverlay);
     }

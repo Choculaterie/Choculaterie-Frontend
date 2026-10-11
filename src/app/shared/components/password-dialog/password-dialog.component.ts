@@ -29,8 +29,7 @@ export interface PasswordDialogData {
                 <mat-label>{{ 'Password' | t }}</mat-label>
                 <input matInput type="password" [(ngModel)]="password" (keyup.enter)="submit()"
                     [disabled]="loading()" />
-                <img matPrefix src="/icons/weapons/swords.svg" alt="" aria-hidden="true" class="mc-icon"
-                    style="margin-right: 8px;" />
+                <mat-icon svgIcon="mc:ui/lock" matPrefix style="margin-right: 8px;"></mat-icon>
             </mat-form-field>
             @if (error()) {
             <p style="color: var(--mat-sys-error); font-size: 0.85rem; margin-top: -0.5rem;">{{ error() }}</p>

@@ -9,6 +9,7 @@ import { TPipe } from '../../../core/i18n/t.pipe';
 import { FileSizePipe } from '../../pipes/file-size.pipe';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
 import type { SaveVersionResponse } from '../../../api/generated.schemas';
+import { MatIconModule } from '@angular/material/icon';
 
 export interface SaveVersionsDialogData {
     saveId: string;
@@ -18,7 +19,7 @@ export interface SaveVersionsDialogData {
 @Component({
     selector: 'app-save-versions-dialog',
     standalone: true,
-    imports: [TPipe, DatePipe, FileSizePipe, MatDialogModule, MatButtonModule, MatTooltipModule, LoadingSpinnerComponent],
+    imports: [MatIconModule, TPipe, DatePipe, FileSizePipe, MatDialogModule, MatButtonModule, MatTooltipModule, LoadingSpinnerComponent],
     template: `
         <h2 mat-dialog-title>{{ 'Version history' | t }}</h2>
         <mat-dialog-content>
@@ -42,7 +43,7 @@ export interface SaveVersionsDialogData {
                         @if (busyId() === v.id) {
                         <img src="loading.gif" alt="" class="version-loading" />
                         } @else {
-                        <img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        <mat-icon svgIcon="mc:arrows/arrow_down"></mat-icon>
                         }
                     </button>
                 </li>

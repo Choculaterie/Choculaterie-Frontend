@@ -248,8 +248,9 @@ mat-chip {
         transform: scale(0.75);
     }
 
-    button img.mc-icon {
-        width: 24px;
-        height: 24px;
+    button mat-icon {
+        --icon-size: 36px;
+        width: var(--icon-size);
+        height: var(--icon-size);
     }
 }

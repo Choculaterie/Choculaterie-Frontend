@@ -47,7 +47,7 @@ export interface AdminTicketDialogResult {
 <div mat-dialog-title class="ticket-dlg-title">
     <span>{{ ticket().title }}</span>
     <button mat-icon-button mat-dialog-close class="close-btn">
-        <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+        <mat-icon svgIcon="mc:letters/X"></mat-icon>
     </button>
 </div>
 
@@ -58,16 +58,16 @@ export interface AdminTicketDialogResult {
             @if (ticket().userFilePath) {
             <img [src]="ticket().userFilePath | userImg" alt="" class="chip-avatar" />
             } @else {
-            <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" class="mc-icon" />
+            <mat-icon svgIcon="mc:people/guy"></mat-icon>
             }
             {{ ticket().username }}
         </a>
         } @else {
-        <span class="meta-chip muted"><img src="/icons/ui/smile.svg" alt="" aria-hidden="true" class="mc-icon" /> {{ 'Anonymous' | t }}</span>
+        <span class="meta-chip muted"><mat-icon svgIcon="mc:people/guy"></mat-icon> {{ 'Anonymous' | t }}</span>
         }
-        <span class="meta-chip"><img src="/icons/misc/clock.svg" alt="" aria-hidden="true" class="mc-icon" /> {{ ticket().createdAt | date:'medium' }}</span>
+        <span class="meta-chip"><mat-icon svgIcon="mc:misc/clock"></mat-icon> {{ ticket().createdAt | date:'medium' }}</span>
         @if (!ticket().isRead) {
-        <span class="meta-chip unread-chip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M2,7h25v1h-25zM2,8h25v1h-25zM2,9h25v1h-25zM2,10h7v1h-7zM20,10h7v1h-7zM2,11h7v1h-7zM20,11h7v1h-7zM2,12h7v1h-7zM20,12h7v1h-7zM2,13h3v1h-3zM9,13h3v1h-3zM16,13h4v1h-4zM23,13h4v1h-4zM2,14h3v1h-3zM9,14h3v1h-3zM16,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM9,15h3v1h-3zM16,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM12,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM12,17h4v1h-4zM23,17h4v1h-4zM2,18h3v1h-3zM12,18h4v1h-4zM23,18h4v1h-4zM2,19h3v1h-3zM23,19h4v1h-4zM2,20h3v1h-3zM23,20h4v1h-4zM2,21h3v1h-3zM23,21h4v1h-4zM2,22h25v1h-25zM2,23h25v1h-25zM2,24h25v1h-25z" /><path fill="var(--mc-icon-shadow)" d="M9,10h11v1h-11zM27,10h3v1h-3zM9,11h11v1h-11zM27,11h3v1h-3zM9,12h11v1h-11zM27,12h3v1h-3zM5,13h4v1h-4zM27,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM20,16h3v1h-3zM27,16h3v1h-3zM5,17h4v1h-4zM20,17h3v1h-3zM27,17h3v1h-3zM5,18h4v1h-4zM20,18h3v1h-3zM27,18h3v1h-3zM5,19h4v1h-4zM16,19h4v1h-4zM27,19h3v1h-3zM5,20h4v1h-4zM16,20h4v1h-4zM27,20h3v1h-3zM5,21h4v1h-4zM16,21h4v1h-4zM27,21h3v1h-3zM27,22h3v1h-3zM27,23h3v1h-3zM27,24h3v1h-3zM5,25h25v1h-25zM5,26h25v1h-25zM5,27h25v1h-25z" /></svg> {{ 'Unread' | t }}</span>
+        <span class="meta-chip unread-chip"><mat-icon svgIcon="mc:communication/mail"></mat-icon> {{ 'Unread' | t }}</span>
         }
         @if (ticket().adminReply) {
         <span class="meta-chip meta-chip-text muted">{{ 'Replied' | t }}</span>
@@ -87,7 +87,7 @@ export interface AdminTicketDialogResult {
         <p class="msg-body">{{ ticket().description }}</p>
         @if (ticket().contact) {
         <div class="ticket-contact">
-            <img src="/icons/arrows/tild_full_right.svg" alt="" aria-hidden="true" class="mc-icon" />
+            <mat-icon svgIcon="mc:arrows/tild_full_right"></mat-icon>
             <span>{{ ticket().contact }}</span>
         </div>
         }
@@ -131,9 +131,7 @@ export interface AdminTicketDialogResult {
         <div class="form-actions">
             <button mat-flat-button type="button" (click)="sendReply()"
                 [disabled]="sending() || !replyText.trim()">
-                <img [src]="sending() || !replyText.trim()
-                    ? '/icons/fantasy/potion_throw_disabled.svg'
-                    : '/icons/fantasy/potion_throw.svg'" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
+                <mat-icon svgIcon="mc:communication/send" matButtonIcon></mat-icon>
                 @if (sending()) { <span>{{ 'Sending...' | t }}</span> }
                 @else if (ticket().adminReply) { <span>{{ 'Update reply' | t }}</span> }
                 @else { <span>{{ 'Send reply' | t }}</span> }
@@ -175,7 +173,8 @@ export interface AdminTicketDialogResult {
             border-radius: 999px;
             background: var(--mat-sys-surface-container);
             font-size: 0.82rem;
-            svg.mc-icon { width: 15px; height: 15px; }
+            mat-icon {
+    width: var(--icon-size); height: var(--icon-size); }
         }
         .chip-avatar {
             width: 18px;

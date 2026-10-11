@@ -66,11 +66,11 @@ export type AdminUserDialogResult = 'deleted' | null;
         @if (u.filePath) {
         <img [src]="u.filePath | userImg" alt="" class="dlg-avatar" />
         } @else {
-        <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" class="mc-icon" style="width:32px;height:32px;" />
+        <mat-icon svgIcon="mc:people/guy" style="--icon-size: 32px;"></mat-icon>
         }
         <a [routerLink]="['/users', u.username]" mat-dialog-close class="username-link">{{ u.username }}</a>
         @if (u.badge != null) {
-        <img src="/icons/ui/start.svg" alt="" aria-hidden="true" class="badge-icon" [matTooltip]="badgeLabel(u.badge)" />
+        <mat-icon svgIcon="mc:ui/start" class="badge-icon" [matTooltip]="badgeLabel(u.badge)"></mat-icon>
         }
         @if (billing(); as b) {
         <img [src]="b.isPremium ? '/premium.png' : '/free.png'" alt="" aria-hidden="true" class="plan-icon"
@@ -82,7 +82,7 @@ export type AdminUserDialogResult = 'deleted' | null;
         }
     </div>
     <button mat-icon-button mat-dialog-close class="close-btn">
-        <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+        <mat-icon svgIcon="mc:letters/X"></mat-icon>
     </button>
 </div>
 
@@ -92,7 +92,7 @@ export type AdminUserDialogResult = 'deleted' | null;
         <div class="detail-item full-width"><span class="detail-label">{{ 'User ID' | t }}</span>
             <span class="detail-value"><span class="muted">{{ u.id }}</span>
                 <button mat-icon-button class="copy-btn" (click)="copy(u.id)" [matTooltip]="'Copy ID' | t">
-                    <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
+                    <mat-icon svgIcon="mc:ui/overlapping_sheets" class="copy-icon"></mat-icon>
                 </button>
             </span>
         </div>
@@ -100,7 +100,7 @@ export type AdminUserDialogResult = 'deleted' | null;
             <span class="detail-value">{{ u.email ?? '-' }}
                 @if (u.email) {
                 <button mat-icon-button class="copy-btn" (click)="copy(u.email)" [matTooltip]="'Copy email' | t">
-                    <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
+                    <mat-icon svgIcon="mc:ui/overlapping_sheets" class="copy-icon"></mat-icon>
                 </button>
                 }
             </span>
@@ -125,7 +125,7 @@ export type AdminUserDialogResult = 'deleted' | null;
                 @if (u.isMinecraftLinked) {
                 {{ u.minecraftUsername }} · <span class="muted">{{ u.minecraftUUID }}</span>
                 <button mat-icon-button class="copy-btn" (click)="copy(u.minecraftUUID)" [matTooltip]="'Copy UUID' | t">
-                    <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
+                    <mat-icon svgIcon="mc:ui/overlapping_sheets" class="copy-icon"></mat-icon>
                 </button>
                 } @else { <span class="muted">{{ 'Not linked' | t }}</span> }
             </span>
@@ -136,7 +136,7 @@ export type AdminUserDialogResult = 'deleted' | null;
                 @if (u.isDiscordLinked) {
                 {{ u.discordUsername }} · <span class="muted">{{ u.discordId }}</span>
                 <button mat-icon-button class="copy-btn" (click)="copy(u.discordId)" [matTooltip]="'Copy ID' | t">
-                    <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="copy-icon" />
+                    <mat-icon svgIcon="mc:ui/overlapping_sheets" class="copy-icon"></mat-icon>
                 </button>
                 } @else { <span class="muted">{{ 'Not linked' | t }}</span> }
             </span>
@@ -154,7 +154,7 @@ export type AdminUserDialogResult = 'deleted' | null;
                 @if (user().hasApiKey) {
                 {{ 'Active' | t }}
                 <button mat-icon-button color="warn" (click)="deleteApiKey()" [matTooltip]="'Revoke API key' | t">
-                    <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" />
+                    <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>
                 </button>
                 } @else { <span class="muted">{{ 'None' | t }}</span> }
             </span>
@@ -165,7 +165,7 @@ export type AdminUserDialogResult = 'deleted' | null;
                 @if (user().hasSaveKey) {
                 {{ 'Active' | t }}
                 <button mat-icon-button color="warn" (click)="deleteSaveKey()" [matTooltip]="'Revoke save key' | t">
-                    <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" />
+                    <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>
                 </button>
                 } @else { <span class="muted">{{ 'None' | t }}</span> }
             </span>
@@ -189,7 +189,7 @@ export type AdminUserDialogResult = 'deleted' | null;
                 <mat-option [value]="b[1]">{{ badgeLabels[b[1]] }}</mat-option>
                 }
             </mat-select>
-            <mat-icon matPrefix><img src="/icons/ui/start.svg" alt="" aria-hidden="true" style="width: 100%; height: 100%;" /></mat-icon>
+            <mat-icon svgIcon="mc:ui/start" matPrefix></mat-icon>
         </mat-form-field>
 
         @if (editBadges().includes(translatorBadge)) {
@@ -270,8 +270,10 @@ export type AdminUserDialogResult = 'deleted' | null;
         .title-info { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .close-btn { margin-right: -8px; flex-shrink: 0; }
         .dlg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-        .dlg-avatar-icon { font-size: 32px; width: 32px; height: 32px; }
-        .badge-icon { width: 18px; height: 18px; flex-shrink: 0; }
+        .dlg-avatar-icon { font-size: 32px; --icon-size: 48px;
+    width: var(--icon-size); height: var(--icon-size); }
+        .badge-icon { --icon-size: 24px;
+    width: var(--icon-size); height: var(--icon-size); flex-shrink: 0; }
         .username-link { color: inherit; text-decoration: none; &:hover { color: var(--mat-sys-primary); text-decoration: underline; } }
         .section-div { margin: 1rem 0 0.75rem; }
         .section-title { font-size: 0.85rem; font-weight: 600; text-transform: uppercase;
@@ -287,11 +289,13 @@ export type AdminUserDialogResult = 'deleted' | null;
         .copy-btn {
             --mdc-icon-button-state-layer-size: 28px;
             --mdc-icon-button-icon-size: 16px;
+            font-size: inherit;
             width: 28px !important; height: 28px !important; padding: 0 !important;
             display: inline-flex !important; align-items: center; justify-content: center;
             vertical-align: middle; flex-shrink: 0;
             .mat-icon { font-size: 16px; width: 16px; height: 16px; }
-            .copy-icon { width: 16px; height: 16px; flex-shrink: 0; }
+            .copy-icon { --icon-size: calc(var(--mc-em) * 1.5);
+    width: var(--icon-size); height: var(--icon-size); flex-shrink: 0; }
         }
 
         .key-active { color: var(--mat-sys-primary); font-size: 16px; width: 16px; height: 16px; flex-shrink: 0; }
@@ -303,7 +307,7 @@ export type AdminUserDialogResult = 'deleted' | null;
         .note-field textarea { resize: vertical; }
         .table-scroll { overflow-x: auto; width: 100%; }
         .compact-table .mat-mdc-cell, .compact-table .mat-mdc-header-cell { padding: 4px 8px; font-size: 0.85rem; }
-        .plan-icon { width: 22px; height: 22px; flex-shrink: 0; }
+        .plan-icon { --logo-size: 22px; width: 22px; height: 22px; flex-shrink: 0; }
         .plan-skeleton { display: inline-block; border-radius: 4px; }
     `],
 })

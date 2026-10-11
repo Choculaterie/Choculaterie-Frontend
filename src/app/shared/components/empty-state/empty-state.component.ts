@@ -1,12 +1,14 @@
 import { Component, input } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { McIconPipe } from '../../pipes/mc-icon.pipe';
 
 @Component({
     selector: 'app-empty-state',
     standalone: true,
-    imports: [],
+    imports: [MatIconModule, McIconPipe],
     template: `
         <div class="empty-state">
-            <img [src]="icon()" alt="" aria-hidden="true" class="empty-icon" />
+            <mat-icon [svgIcon]="icon() | mcIcon" class="empty-icon"></mat-icon>
             <h3>{{ title() }}</h3>
             @if (subtitle()) {
                 <p>{{ subtitle() }}</p>
@@ -24,7 +26,7 @@ import { Component, input } from '@angular/core';
             .empty-state { animation: none; }
         }
         .empty-icon {
-            width: 64px; height: 64px;
+            --icon-size: 84px;
             opacity: 0.5;
         }
         h3 { margin: 0; color: var(--mat-sys-on-surface); font: var(--mat-sys-title-medium); }

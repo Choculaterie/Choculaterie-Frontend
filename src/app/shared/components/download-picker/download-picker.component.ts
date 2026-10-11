@@ -22,14 +22,14 @@ export interface DownloadPickerData {
             <mat-nav-list>
                 @for (file of data.files; track file.id; let i = $index) {
                 <a mat-list-item [mat-dialog-close]="{ type: 'single', index: i }">
-                    <img src="/icons/weapons/pickaxe.svg" alt="" aria-hidden="true" matListItemIcon class="mc-icon" />
+                    <mat-icon svgIcon="mc:weapons/pickaxe" matListItemIcon></mat-icon>
                     <span matListItemTitle>{{ file.name }}</span>
                 </a>
                 }
                 @if (data.showZip !== false) {
                 <mat-divider />
                 <a mat-list-item [mat-dialog-close]="{ type: 'zip' }">
-                    <img src="/icons/arrows/tild_full_right.svg" alt="" aria-hidden="true" matListItemIcon class="mc-icon" />
+                    <mat-icon svgIcon="mc:arrows/tild_full_right" matListItemIcon></mat-icon>
                     <span matListItemTitle>{{ 'Download all as .zip' | t }}</span>
                 </a>
                 }

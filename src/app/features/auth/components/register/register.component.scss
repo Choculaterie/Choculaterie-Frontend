@@ -16,5 +16,6 @@ mat-card-content { display: flex; flex-direction: column; }
 .password-rules li {
   display: flex; align-items: center; gap: 0.35rem; padding: 0.15rem 0;
 }
-.password-rules li mat-icon { font-size: 18px; width: 18px; height: 18px; }
+.password-rules li mat-icon { font-size: 18px;
+    width: var(--icon-size); height: var(--icon-size); }
 .password-rules li.met { color: var(--mat-sys-primary); }

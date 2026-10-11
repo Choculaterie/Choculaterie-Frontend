@@ -1,4 +1,3 @@
-import { FilePickDirective } from '../../shared/directives/file-pick.directive';
 import { MediaSkeletonDirective } from '../../shared/directives/media-skeleton.directive';
 import { translateText } from '../../core/i18n/translation.store';
 import { Component, OnInit, DestroyRef, ElementRef, inject, signal, computed, effect, viewChildren, type Signal } from '@angular/core';
@@ -51,7 +50,7 @@ import { getLocale } from '../../core/i18n/locale';
 @Component({
     selector: 'app-schematic-detail',
     standalone: true,
-    imports: [FilePickDirective, MediaSkeletonDirective, TPipe,
+    imports: [MediaSkeletonDirective, TPipe,
         RouterLink,
         DatePipe,
         ReactiveFormsModule,

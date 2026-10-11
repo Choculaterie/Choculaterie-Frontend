@@ -1,4 +1,3 @@
-import { FilePickDirective } from '../../shared/directives/file-pick.directive';
 import { MediaSkeletonDirective } from '../../shared/directives/media-skeleton.directive';
 import { HttpClient } from '@angular/common/http';
 import { PagedList } from './paged-list';
@@ -55,6 +54,7 @@ import { AdminUserDialogComponent, loadAdminUserDialogData } from './admin-user-
 import { Role, ROLE_LABELS, Status, STATUS_LABELS, Visibility, Badge, BADGE_LABELS, BADGE_ICONS, resolveBadge, ADMIN_TAB } from '../../core/enums';
 import { translateText } from '../../core/i18n/translation.store';
 import { ADMIN, DIALOGS, COMMON, PLUGINS } from '../../i18n/labels';
+import { McIconPipe } from '../../shared/pipes/mc-icon.pipe';
 
 export interface ServerLogEntryResponse {
     id: number;
@@ -69,7 +69,7 @@ export interface ServerLogEntryResponse {
 @Component({
     selector: 'app-admin',
     standalone: true,
-    imports: [FilePickDirective, MediaSkeletonDirective, TabLinksDirective, DropZoneDirective, EmojifyPipe, TPipe,
+    imports: [McIconPipe, MediaSkeletonDirective, TabLinksDirective, DropZoneDirective, EmojifyPipe, TPipe,
         FormsModule,
         ReactiveFormsModule,
         RouterLink,

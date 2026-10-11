@@ -64,6 +64,8 @@ import {
     simpleFacebook, simpleX, simpleFirefoxbrowser,
 } from '@ng-icons/simple-icons';
 import { matfMinecraftColored } from '@ng-icons/material-file-icons/colored';
+import { MatIconModule } from '@angular/material/icon';
+import { McIconPipe } from '../../shared/pipes/mc-icon.pipe';
 
 const MAX_IMAGE_MB = 15;
 const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
@@ -71,7 +73,7 @@ const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 @Component({
     selector: 'app-public-profile',
     standalone: true,
-    imports: [TabLinksDirective, TPipe,
+    imports: [MatIconModule, McIconPipe, TabLinksDirective, TPipe,
         DatePipe,
         RouterLink,
         FormsModule,

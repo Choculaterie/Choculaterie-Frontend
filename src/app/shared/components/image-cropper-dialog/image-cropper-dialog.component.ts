@@ -4,6 +4,7 @@ import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.comp
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ImageCropperComponent, ImageCroppedEvent, OutputFormat } from 'ngx-image-cropper';
+import { MatIconModule } from '@angular/material/icon';
 
 export interface CropperDialogData {
     imageFile: File;
@@ -20,7 +21,7 @@ export interface CropperDialogResult {
 @Component({
     selector: 'app-image-cropper-dialog',
     standalone: true,
-    imports: [TPipe, LoadingSpinnerComponent, MatDialogModule, MatButtonModule, ImageCropperComponent],
+    imports: [MatIconModule, TPipe, LoadingSpinnerComponent, MatDialogModule, MatButtonModule, ImageCropperComponent],
     template: `
     <h2 mat-dialog-title>{{ 'Crop Image' | t }}</h2>
     <mat-dialog-content>
@@ -45,7 +46,7 @@ export interface CropperDialogResult {
     <mat-dialog-actions align="end">
         <button mat-stroked-button mat-dialog-close>{{ 'Cancel' | t }}</button>
         <button mat-flat-button [disabled]="!croppedBlob" (click)="confirm()">
-            <img src="/icons/ui/check.svg" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
+            <mat-icon svgIcon="mc:ui/check" matButtonIcon></mat-icon>
             <span>{{ 'Apply' | t }}</span>
         </button>
     </mat-dialog-actions>

@@ -12,20 +12,24 @@
                     <mat-card-header>
                         <mat-card-title class="detail-header">
                             <button mat-icon-button (click)="closeUserDetail()" [matTooltip]="'Back to list' | t">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M9,5h3v1h-3zM9,6h3v1h-3zM9,7h3v1h-3zM5,8h7v1h-7zM5,9h7v1h-7zM5,10h7v1h-7zM2,11h25v1h-25zM2,12h25v1h-25zM2,13h25v1h-25zM5,14h7v1h-7zM5,15h7v1h-7zM5,16h7v1h-7zM5,17h7v1h-7zM9,18h3v1h-3zM9,19h3v1h-3zM9,20h3v1h-3z" /><path fill="var(--mc-icon-shadow)" d="M12,8h4v1h-4zM12,9h4v1h-4zM12,10h4v1h-4zM12,14h18v1h-18zM12,15h18v1h-18zM12,16h18v1h-18zM12,17h18v1h-18zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM12,21h4v1h-4zM12,22h4v1h-4zM12,23h4v1h-4z" /></svg>
+                                <mat-icon svgIcon="mc:arrows/arrow_left"></mat-icon>
                             </button>
                             <div class="detail-user-info">
                                 @if (u.filePath) {
                                 <img [src]="u.filePath | userImg" alt="" class="detail-avatar" />
                                 } @else {
-                                <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" class="mc-icon"
-                                    style="width:48px;height:48px;" />
+                                <mat-icon svgIcon="mc:people/guy" style="--icon-size: 48px;"></mat-icon>
                                 }
                                 <div>
                                     <span class="detail-username">{{ u.username }}</span>
                                     @if (u.badge != null) {
+                                    @if (badgeIcon(u.badge).endsWith('.png')) {
                                     <img [src]="badgeIcon(u.badge)" alt="" aria-hidden="true" class="mc-icon badge-icon"
                                         [matTooltip]="badgeLabel(u.badge)" />
+                                    } @else {
+                                    <mat-icon [svgIcon]="badgeIcon(u.badge) | mcIcon" class="badge-icon"
+                                        [matTooltip]="badgeLabel(u.badge)" ></mat-icon>
+                                    }
                                     }
                                 </div>
                             </div>
@@ -35,13 +39,10 @@
                         <div class="detail-grid">
                             <div class="detail-item"><span class="detail-label">{{ 'User ID' | t }}</span> <span
                                     class="detail-value muted">{{ u.id }} <button mat-icon-button class="copy-btn"
-                                        (click)="copyToClipboard(u.id)" [matTooltip]="'Copy ID' | t"><img
-                                            src="/icons/shapes/form_1.svg" alt="" aria-hidden="true"
-                                            class="copy-icon" /></button></span></div>
+                                        (click)="copyToClipboard(u.id)" [matTooltip]="'Copy ID' | t"><mat-icon svgIcon="mc:ui/overlapping_sheets" class="copy-icon"></mat-icon></button></span></div>
                             <div class="detail-item"><span class="detail-label">{{ 'Email' | t }}</span> <span
                                     class="detail-value">{{ u.email ?? '-' }} @if (u.email) { <button mat-icon-button
-                                        class="copy-btn" (click)="copyToClipboard(u.email)" [matTooltip]="'Copy email' | t"><img src="/icons/shapes/form_1.svg" alt=""
-                                            aria-hidden="true" class="copy-icon" /></button> }</span>
+                                        class="copy-btn" (click)="copyToClipboard(u.email)" [matTooltip]="'Copy email' | t"><mat-icon svgIcon="mc:ui/overlapping_sheets" class="copy-icon"></mat-icon></button> }</span>
                             </div>
                             <div class="detail-item"><span class="detail-label">{{ 'Role' | t }}</span> <span
                                     class="detail-value">{{ u.role }}</span></div>
@@ -85,10 +86,9 @@
                                 <span class="detail-label">{{ 'API Key' | t }}</span>
                                 <span class="detail-value">
                                     @if (u.hasApiKey) {
-                                    <img src="/icons/ui/check.svg" alt="" aria-hidden="true"
-                                        class="mc-icon key-active" /> <span>{{ 'Active' | t }}</span>
+                                    <mat-icon svgIcon="mc:ui/check" class="key-active"></mat-icon> <span>{{ 'Active' | t }}</span>
                                     <button mat-icon-button color="warn" (click)="deleteApiKey()" [matTooltip]="'Revoke API key' | t">
-                                        <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                        <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>
                                     </button>
                                     } @else { <span class="muted">{{ 'None' | t }}</span> }
                                 </span>
@@ -97,10 +97,9 @@
                                 <span class="detail-label">{{ 'Save Key' | t }}</span>
                                 <span class="detail-value">
                                     @if (u.hasSaveKey) {
-                                    <img src="/icons/ui/check.svg" alt="" aria-hidden="true"
-                                        class="mc-icon key-active" /> <span>{{ 'Active' | t }}</span>
+                                    <mat-icon svgIcon="mc:ui/check" class="key-active"></mat-icon> <span>{{ 'Active' | t }}</span>
                                     <button mat-icon-button color="warn" (click)="deleteSaveKey()" [matTooltip]="'Revoke save key' | t">
-                                        <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                        <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>
                                     </button>
                                     } @else { <span class="muted">{{ 'None' | t }}</span> }
                                 </span>
@@ -124,16 +123,16 @@
                                     <mat-option [value]="b[0]">{{ badgeLabels[b[1]] | t }}</mat-option>
                                     }
                                 </mat-select>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" matPrefix class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M12,4h4v1h-4zM12,5h4v1h-4zM12,6h4v1h-4zM12,7h4v1h-4zM12,8h4v1h-4zM12,9h4v1h-4zM2,10h25v1h-25zM2,11h25v1h-25zM2,12h25v1h-25zM5,13h18v1h-18zM5,14h18v1h-18zM5,15h18v1h-18zM9,16h11v1h-11zM9,17h11v1h-11zM9,18h11v1h-11zM5,19h7v1h-7zM16,19h7v1h-7zM5,20h7v1h-7zM16,20h7v1h-7zM5,21h7v1h-7zM16,21h7v1h-7zM5,22h4v1h-4zM20,22h3v1h-3zM5,23h4v1h-4zM20,23h3v1h-3zM5,24h4v1h-4zM20,24h3v1h-3z" /><path fill="var(--mc-icon-shadow)" d="M16,7h4v1h-4zM16,8h4v1h-4zM16,9h4v1h-4zM23,13h7v1h-7zM23,14h7v1h-7zM23,15h7v1h-7zM20,16h7v1h-7zM20,17h7v1h-7zM20,18h7v1h-7zM12,19h4v1h-4zM12,20h4v1h-4zM12,21h4v1h-4zM9,22h7v1h-7zM23,22h4v1h-4zM9,23h7v1h-7zM23,23h4v1h-4zM9,24h7v1h-7zM23,24h4v1h-4zM9,25h3v1h-3zM23,25h4v1h-4zM9,26h3v1h-3zM23,26h4v1h-4zM9,27h3v1h-3zM23,27h4v1h-4z" /></svg>
+                                <mat-icon svgIcon="mc:ui/start" matPrefix></mat-icon>
                             </mat-form-field>
-                            <button mat-stroked-button (click)="saveBadge()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" matButtonIcon class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M22,4h4v1h-4zM22,5h4v1h-4zM22,6h4v1h-4zM18,7h8v1h-8zM18,8h8v1h-8zM18,9h8v1h-8zM18,10h4v1h-4zM18,11h4v1h-4zM18,12h4v1h-4zM2,13h4v1h-4zM14,13h8v1h-8zM2,14h4v1h-4zM14,14h8v1h-8zM2,15h4v1h-4zM14,15h8v1h-8zM2,16h8v1h-8zM14,16h4v1h-4zM2,17h8v1h-8zM14,17h4v1h-4zM2,18h8v1h-8zM14,18h4v1h-4zM6,19h12v1h-12zM6,20h12v1h-12zM6,21h12v1h-12zM10,22h4v1h-4zM10,23h4v1h-4zM10,24h4v1h-4z" /><path fill="var(--mc-icon-shadow)" d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM22,13h4v1h-4zM22,14h4v1h-4zM22,15h4v1h-4zM18,16h8v1h-8zM18,17h8v1h-8zM18,18h8v1h-8zM18,19h4v1h-4zM18,20h4v1h-4zM18,21h4v1h-4zM14,22h8v1h-8zM14,23h8v1h-8zM14,24h8v1h-8zM14,25h4v1h-4zM14,26h4v1h-4zM14,27h4v1h-4z" /></svg> <span>{{ 'Save badge' | t }}</span></button>
+                            <button mat-stroked-button (click)="saveBadge()"><mat-icon svgIcon="mc:ui/check" matButtonIcon></mat-icon> <span>{{ 'Save badge' | t }}</span></button>
 
                             <mat-form-field appearance="outline" class="compact-input">
                                 <mat-label>{{ 'Quota (GB)' | t }}</mat-label>
                                 <input matInput type="number" [value]="editQuota()"
                                     (input)="editQuota.set(+$any($event.target).value)" min="0" step="0.5" />
                             </mat-form-field>
-                            <button mat-stroked-button (click)="saveQuota()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" matButtonIcon class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M22,4h4v1h-4zM22,5h4v1h-4zM22,6h4v1h-4zM18,7h8v1h-8zM18,8h8v1h-8zM18,9h8v1h-8zM18,10h4v1h-4zM18,11h4v1h-4zM18,12h4v1h-4zM2,13h4v1h-4zM14,13h8v1h-8zM2,14h4v1h-4zM14,14h8v1h-8zM2,15h4v1h-4zM14,15h8v1h-8zM2,16h8v1h-8zM14,16h4v1h-4zM2,17h8v1h-8zM14,17h4v1h-4zM2,18h8v1h-8zM14,18h4v1h-4zM6,19h12v1h-12zM6,20h12v1h-12zM6,21h12v1h-12zM10,22h4v1h-4zM10,23h4v1h-4zM10,24h4v1h-4z" /><path fill="var(--mc-icon-shadow)" d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM22,13h4v1h-4zM22,14h4v1h-4zM22,15h4v1h-4zM18,16h8v1h-8zM18,17h8v1h-8zM18,18h8v1h-8zM18,19h4v1h-4zM18,20h4v1h-4zM18,21h4v1h-4zM14,22h8v1h-8zM14,23h8v1h-8zM14,24h8v1h-8zM14,25h4v1h-4zM14,26h4v1h-4zM14,27h4v1h-4z" /></svg> <span>{{ 'Save quota' | t }}</span></button>
+                            <button mat-stroked-button (click)="saveQuota()"><mat-icon svgIcon="mc:ui/check" matButtonIcon></mat-icon> <span>{{ 'Save quota' | t }}</span></button>
                         </div>
 
                         @if (u.schematics.length > 0) {
@@ -180,14 +179,13 @@
                         <mat-label>{{ 'Search users' | t }}</mat-label>
                         <input matInput [(ngModel)]="usersSearch" (keyup.enter)="searchUsers()"
                             (ngModelChange)="onUserSearchInput($event)" [matAutocomplete]="userSearchAuto" />
-                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                        <mat-icon svgIcon="mc:ui/magnifying_glass" matPrefix></mat-icon>
                         <mat-autocomplete #userSearchAuto="matAutocomplete"
                             (optionSelected)="onUserSuggestionSelected($event)">
                             @for (s of userSearchSuggestions(); track s) {
                             <mat-option [value]="s">
                                 <span style="display:flex;align-items:center;gap:8px;">
-                                    <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" class="mc-icon"
-                                        style="margin-right:8px;" /> {{ s }}
+                                    <mat-icon svgIcon="mc:people/guy" style="margin-right:8px;"></mat-icon> {{ s }}
                                 </span>
                             </mat-option>
                             }
@@ -197,18 +195,11 @@
                         <button mat-stroked-button class="newest-toggle"
                             (click)="premiumOnlyUsers.set(!premiumOnlyUsers()); searchUsers()"
                             >
-                            <img [src]="premiumOnlyUsers() ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
-                                alt="" aria-hidden="true" class="mc-icon" />
-                            <span style="transform: translateY(1px); display: inline-block;">{{ 'Premium only' | t }}</span>
+                            <mat-icon [svgIcon]="premiumOnlyUsers() ? 'mc:shapes/box_checked' : 'mc:shapes/box'"></mat-icon>
+                            <span>{{ 'Premium only' | t }}</span>
                         </button>
                         <button mat-stroked-button (click)="usersSearch = ''; searchUsers()">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
-                                width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
-                                <path fill="currentColor"
-                                    d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
-                                <path fill="var(--mc-icon-shadow)"
-                                    d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
-                            </svg> <span>{{ 'Clear' | t }}</span>
+                            <mat-icon svgIcon="mc:letters/X" matButtonIcon></mat-icon> <span>{{ 'Clear' | t }}</span>
                         </button>
                     </div>
                 </div>
@@ -264,15 +255,14 @@
                             <td mat-cell *matCellDef="let u">
                                 <button mat-icon-button [matTooltip]="'View details' | t"
                                     (click)="openUserDetail(u)">
-                                    <img src="/icons/math/infinite.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                    <mat-icon svgIcon="mc:ui/eye"></mat-icon>
                                 </button>
                                 <button mat-icon-button [matTooltip]="'Reset reports' | t"
                                     (click)="resetUserReports(u)" [disabled]="!u.reportCount" class="flag-btn">
-                                    <img src="/icons/ui/flag.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                    <mat-icon svgIcon="mc:ui/flag"></mat-icon>
                                 </button>
                                 <button mat-icon-button [matTooltip]="'Login as' | t" (click)="loginAs(u)">
-                                    <img src="/icons/arrows/symbol_arrow_right.svg" alt="" aria-hidden="true"
-                                        class="mc-icon" />
+                                    <mat-icon svgIcon="mc:arrows/symbol_arrow_right"></mat-icon>
                                 </button>
                             </td>
                         </ng-container>
@@ -299,7 +289,7 @@
                         <mat-label>{{ 'Search schematics' | t }}</mat-label>
                         <input matInput [(ngModel)]="schematicsSearch" (keyup.enter)="searchSchematics()"
                             (ngModelChange)="onSchematicSearchInput($event)" [matAutocomplete]="schematicSearchAuto" />
-                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                        <mat-icon svgIcon="mc:ui/magnifying_glass" matPrefix></mat-icon>
                         <mat-autocomplete #schematicSearchAuto="matAutocomplete"
                             [displayWith]="displaySchematicSuggestion"
                             (optionSelected)="onSchematicSuggestionSelected($event)">
@@ -307,11 +297,9 @@
                             <mat-option [value]="s">
                                 <span style="display:flex;align-items:center;gap:8px;">
                                     @if (s.type === 'user') {
-                                    <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" class="mc-icon"
-                                        style="margin-right:8px;" />
+                                    <mat-icon svgIcon="mc:people/guy" style="margin-right:8px;"></mat-icon>
                                     } @else {
-                                    <img src="/icons/weapons/pickaxe.svg" alt="" aria-hidden="true" class="mc-icon"
-                                        style="margin-right:8px;" />
+                                    <mat-icon svgIcon="mc:weapons/pickaxe" style="margin-right:8px;"></mat-icon>
                                     }
                                     {{ s.label }}
                                 </span>
@@ -321,13 +309,7 @@
                     </mat-form-field>
                     <div class="search-actions">
                         <button mat-stroked-button (click)="schematicsSearch = ''; searchSchematics()">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
-                                width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
-                                <path fill="currentColor"
-                                    d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
-                                <path fill="var(--mc-icon-shadow)"
-                                    d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
-                            </svg> <span>{{ 'Clear' | t }}</span>
+                            <mat-icon svgIcon="mc:letters/X" matButtonIcon></mat-icon> <span>{{ 'Clear' | t }}</span>
                         </button>
                     </div>
                 </div>
@@ -374,16 +356,15 @@
                             <td mat-cell *matCellDef="let s">
                                 <button mat-icon-button [matTooltip]="'Toggle status' | t"
                                     (click)="toggleSchematicStatus(s)">
-                                    <img [src]="s.status === 'active' ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
-                                        alt="" aria-hidden="true" class="mc-icon" />
+                                    <mat-icon [svgIcon]="s.status === 'active' ? 'mc:shapes/box_checked' : 'mc:shapes/box'"></mat-icon>
                                 </button>
                                 <button mat-icon-button [matTooltip]="'Reset reports' | t"
                                     (click)="resetSchematicReports(s)" [disabled]="!s.reportCount" class="flag-btn">
-                                    <img src="/icons/ui/flag.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                    <mat-icon svgIcon="mc:ui/flag"></mat-icon>
                                 </button>
                                 <button mat-icon-button color="warn" [matTooltip]="'Delete' | t"
                                     (click)="deleteSchematic(s)">
-                                    <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                    <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>
                                 </button>
                             </td>
                         </ng-container>
@@ -414,14 +395,10 @@
                     <mat-progress-bar mode="determinate" [value]="stats.diskUsagePercent"
                         [color]="+stats.diskUsagePercent > 90 ? 'warn' : 'primary'" />
                     <div class="disk-progress-footer">
-                        <span class="disk-footer-left"><img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true"
-                                class="mc-icon"
-                                style="width: 20px; height: 20px; transform: translateY(-2px);margin-right: 2px;" />
+                        <span class="disk-footer-left"><mat-icon svgIcon="mc:people/guy" style="margin-right: 2px;"></mat-icon>
                             <span>{{ stats.totalUsersWithSaves }} {{ 'users with saves' | t }}
                                 &middot; {{ stats.currentSaveUsageGb | numFmt }} {{ 'GB used' | t }}</span></span>
-                        <span class="disk-footer-right"><img src="/icons/ui/warning.svg" alt="" aria-hidden="true"
-                                class="mc-icon"
-                                style="width: 16px; height: 16px; transform: translateY(-2px);margin-right: 2px;" />
+                        <span class="disk-footer-right"><mat-icon svgIcon="mc:ui/warning" style="margin-right: 2px;"></mat-icon>
                             <span>{{ 'Max potential:' | t }} {{ stats.maxPotentialGb | numFmt }} GB &middot;
                                 {{ 'Free:' | t }} {{ stats.freeDiskGb | numFmt }} GB</span></span>
                     </div>
@@ -431,17 +408,11 @@
                     <mat-form-field appearance="outline" class="search-field">
                         <mat-label>{{ 'Search storage' | t }}</mat-label>
                         <input matInput [(ngModel)]="storageSearch" (keyup.enter)="searchStorage()" />
-                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                        <mat-icon svgIcon="mc:ui/magnifying_glass" matPrefix></mat-icon>
                     </mat-form-field>
                     <div class="search-actions">
                         <button mat-stroked-button (click)="storageSearch = ''; searchStorage()">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
-                                width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
-                                <path fill="currentColor"
-                                    d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
-                                <path fill="var(--mc-icon-shadow)"
-                                    d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
-                            </svg> <span>{{ 'Clear' | t }}</span>
+                            <mat-icon svgIcon="mc:letters/X" matButtonIcon></mat-icon> <span>{{ 'Clear' | t }}</span>
                         </button>
                     </div>
                 </div>
@@ -494,12 +465,11 @@
                 accept="video/*,image/*,.mkv,.mov,.avi,.flv,.wmv,.m4v,.ts,.mts,.3gp" (filesDrop)="onVideoFilesDropped($event)">
                 <div class="video-toolbar">
                     <button mat-stroked-button type="button" (click)="toggleVideoDefaults()">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18" height="18" matButtonIcon class="mc-icon" style="transform: translate(1px, 1px)" aria-hidden="true"><path fill="currentColor" d="M2,5h24v1h-24zM2,6h24v1h-24zM2,7h24v1h-24zM2,11h24v1h-24zM2,12h24v1h-24zM2,13h24v1h-24zM2,18h24v1h-24zM2,19h24v1h-24zM2,20h24v1h-24z" /><path fill="var(--mc-icon-shadow)" d="M6,8h24v1h-24zM6,9h24v1h-24zM6,10h24v1h-24zM6,14h24v1h-24zM6,15h24v1h-24zM6,16h24v1h-24zM6,17h24v1h-24zM6,21h24v1h-24zM6,22h24v1h-24zM6,23h24v1h-24z" /></svg>
+                        <mat-icon svgIcon="mc:ui/gear" matButtonIcon></mat-icon>
                         <span>{{ 'Defaults' | t }}</span>
                     </button>
                     <button mat-flat-button type="button" (click)="toggleVideoForm()" [disabled]="videoUploading()">
-                        <img [src]="showVideoForm() ? '/icons/letters/X.svg' : '/icons/arrows/arrow_up.svg'" alt=""
-                            aria-hidden="true" matButtonIcon class="mc-icon" />
+                        <mat-icon [svgIcon]="showVideoForm() ? 'mc:letters/X' : 'mc:math/plus'" matButtonIcon></mat-icon>
                         <span>{{ (showVideoForm() ? 'Cancel' : 'New Video') | t }}</span>
                     </button>
                 </div>
@@ -509,12 +479,12 @@
                         <mat-label>{{ 'Search' | t }}</mat-label>
                         <input matInput [ngModel]="videosPager.search()" (ngModelChange)="onVideoSearchInput($event)"
                             (keyup.enter)="videosPager.runSearch()" [matAutocomplete]="videoAuto" [placeholder]="'Search videos...' | t" />
-                        <img matPrefix src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        <mat-icon svgIcon="mc:ui/magnifying_glass" matPrefix></mat-icon>
                         <mat-autocomplete #videoAuto="matAutocomplete" (optionSelected)="videosPager.search.set($event.option.value); videosPager.reload()">
                             @for (s of videoSuggestions(); track s) {
                             <mat-option [value]="s">
                                 <span style="display:flex;align-items:center;gap:8px;">
-                                    <img src="/icons/arrows/tild_full_right.svg" alt="" aria-hidden="true" class="mc-icon suggestion-icon" /> {{ s }}
+                                    <mat-icon svgIcon="mc:arrows/tild_full_right" class="suggestion-icon"></mat-icon> {{ s }}
                                 </span>
                             </mat-option>
                             }
@@ -549,11 +519,10 @@
                         </mat-select>
                     </mat-form-field>
                     <button mat-icon-button (click)="videoSortAsc.set(!videoSortAsc()); videosPager.reload()" [matTooltip]="'Sort direction' | t">
-                        <img [src]="videoSortAsc() ? '/icons/arrows/arrow_up.svg' : '/icons/arrows/arrow_down.svg'" alt=""
-                            aria-hidden="true" class="mc-icon" />
+                        <mat-icon [svgIcon]="videoSortAsc() ? 'mc:arrows/arrow_up' : 'mc:arrows/arrow_down'"></mat-icon>
                     </button>
                     <button mat-stroked-button (click)="clearVideoFilters()">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)"> <path fill="currentColor" d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" /> <path fill="var(--mc-icon-shadow)" d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" /> </svg> <span>{{ 'Clear' | t }}</span>
+                        <mat-icon svgIcon="mc:letters/X" matButtonIcon></mat-icon> <span>{{ 'Clear' | t }}</span>
                     </button>
                 </div>
 
@@ -605,22 +574,16 @@
                             <div class="file-row promo-span">
                                 @if (!editingVideoId()) {
                                 <button mat-stroked-button type="button" (click)="videoFileInput.click()" [disabled]="videoUploading()">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18" height="18" matButtonIcon class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M3,5h7v1h-7zM3,6h7v1h-7zM3,7h7v1h-7zM3,8h13v1h-13zM3,9h13v1h-13zM3,10h13v1h-13zM3,11h19v1h-19zM3,12h19v1h-19zM3,13h19v1h-19zM3,14h13v1h-13zM3,15h13v1h-13zM3,16h13v1h-13zM3,17h13v1h-13zM3,18h7v1h-7zM3,19h7v1h-7zM3,20h7v1h-7z" /><path fill="var(--mc-icon-shadow)" d="M16,14h13v1h-13zM16,15h13v1h-13zM16,16h13v1h-13zM16,17h13v1h-13zM10,18h12v1h-12zM10,19h12v1h-12zM10,20h12v1h-12zM10,21h6v1h-6zM10,22h6v1h-6zM10,23h6v1h-6z" /></svg>
+                                    <mat-icon svgIcon="mc:arrows/tild_full_right_2" matButtonIcon></mat-icon>
                                     <span class="file-name-text">{{ videoFile()?.name ?? ('Add Video' | t) }}</span>
                                 </button>
-                                <input #videoFileInput type="file" appFilePick accept="video/*,.mkv,.mov,.avi,.flv,.wmv,.m4v,.ts,.mts,.3gp" hidden
+                                <input #videoFileInput type="file" accept="video/*,.mkv,.mov,.avi,.flv,.wmv,.m4v,.ts,.mts,.3gp" hidden
                                     (change)="onVideoFileSelected($event)" />
                                 }
                                 <button mat-stroked-button type="button" (click)="videoThumbInput.click()">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
-                                                    width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
-                                                    <path fill="currentColor"
-                                                    d="M2,2h3v1h-3zM12,2h4v1h-4zM23,2h4v1h-4zM2,3h3v1h-3zM12,3h4v1h-4zM23,3h4v1h-4zM2,4h3v1h-3zM12,4h4v1h-4zM23,4h4v1h-4zM5,5h4v1h-4zM20,5h3v1h-3zM5,6h4v1h-4zM20,6h3v1h-3zM5,7h4v1h-4zM20,7h3v1h-3zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM9,14h3v1h-3zM16,14h4v1h-4zM9,15h3v1h-3zM16,15h4v1h-4zM9,16h3v1h-3zM16,16h4v1h-4zM9,17h3v1h-3zM16,17h4v1h-4zM5,18h4v1h-4zM20,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM2,21h3v1h-3zM12,21h4v1h-4zM23,21h4v1h-4zM2,22h3v1h-3zM12,22h4v1h-4zM23,22h4v1h-4zM2,23h3v1h-3zM12,23h4v1h-4zM23,23h4v1h-4z" />
-                                                    <path fill="var(--mc-icon-shadow)"
-                                                    d="M16,5h4v1h-4zM27,5h3v1h-3zM16,6h4v1h-4zM27,6h3v1h-3zM16,7h4v1h-4zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM27,17h3v1h-3zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM9,21h3v1h-3zM9,22h3v1h-3zM9,23h3v1h-3zM5,24h4v1h-4zM16,24h4v1h-4zM27,24h3v1h-3zM5,25h4v1h-4zM16,25h4v1h-4zM27,25h3v1h-3zM5,26h4v1h-4zM16,26h4v1h-4zM27,26h3v1h-3z" />
-                                                    </svg> <span>{{ 'Add Thumbnail' | t }}</span>
+                                                <mat-icon svgIcon="mc:media/image" matButtonIcon></mat-icon> <span>{{ 'Add Thumbnail' | t }}</span>
                                                 </button>
-                                <input #videoThumbInput type="file" appFilePick accept="image/*" hidden (change)="onVideoThumbSelected($event)" />
+                                <input #videoThumbInput type="file" accept="image/*" hidden (change)="onVideoThumbSelected($event)" />
                             </div>
                             @if (videoPreviewUrl() || videoThumbPreview()) {
                             <div class="file-previews promo-span">
@@ -632,7 +595,7 @@
                                             <span class="preview-caption">{{ 'Video' | t }}</span>
                                             <span class="spacer"></span>
                                             <button mat-icon-button type="button" (click)="clearVideoFile()" [matTooltip]="'Remove' | t">
-                                                <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                                <mat-icon svgIcon="mc:letters/X"></mat-icon>
                                             </button>
                                         </div>
                                     </div>
@@ -644,7 +607,7 @@
                                             <span class="preview-caption">{{ 'Thumbnail' | t }}</span>
                                             <span class="spacer"></span>
                                             <button mat-icon-button type="button" (click)="clearVideoThumb()" [matTooltip]="'Remove' | t">
-                                                <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                                <mat-icon svgIcon="mc:letters/X"></mat-icon>
                                             </button>
                                         </div>
                                     </div>
@@ -723,14 +686,14 @@
                                 <div class="live-msg-actions">
                                     @if (v.status === 'Ready') {
                                     <button mat-icon-button (click)="copyVideoLink(v)" [matTooltip]="'Copy link' | t">
-                                        <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                        <mat-icon svgIcon="mc:ui/overlapping_sheets"></mat-icon>
                                     </button>
                                     }
                                     <button mat-icon-button (click)="editVideo(v)" [matTooltip]="'Edit' | t">
-                                        <img src="/icons/weapons/pen.svg" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
+                                        <mat-icon svgIcon="mc:weapons/pen" matButtonIcon></mat-icon>
                                     </button>
                                     <button mat-icon-button color="warn" (click)="deleteVideo(v)" [matTooltip]="'Delete' | t">
-                                        <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                        <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>
                                     </button>
                                 </div>
                             </td>
@@ -749,8 +712,7 @@
                 accept="image/*" (filesDrop)="onPromotionFilesDropped($event)">
                 <div class="video-toolbar promotion-toolbar">
                     <button mat-flat-button type="button" (click)="togglePromotionForm()">
-                        <img [src]="showPromotionForm() ? '/icons/letters/X.svg' : '/icons/arrows/arrow_up.svg'" alt=""
-                            aria-hidden="true" matButtonIcon class="mc-icon" />
+                        <mat-icon [svgIcon]="showPromotionForm() ? 'mc:letters/X' : 'mc:math/plus'" matButtonIcon></mat-icon>
                         <span>{{ (showPromotionForm() ? 'Cancel' : 'New Promotion') | t }}</span>
                     </button>
                 </div>
@@ -767,10 +729,7 @@
                             <mat-form-field appearance="outline">
                                 <mat-label>{{ 'Key' | t }}</mat-label>
                                 <input matInput formControlName="key" maxlength="100" placeholder="eternal-angler" />
-                                <img matSuffix src="/icons/ui/!!.svg" alt="" aria-hidden="true" class="mc-icon field-info"
-                                    [matTooltip]="'Used for click tracking and remembering dismissals' | t"
-                                    matTooltipTouchGestures="on" draggable="false"
-                                    (contextmenu)="$event.preventDefault()" />
+                                <mat-icon svgIcon="mc:ui/!!" matSuffix class="field-info" [matTooltip]="'Used for click tracking and remembering dismissals' | t" matTooltipTouchGestures="on" (contextmenu)="$event.preventDefault()"></mat-icon>
                             </mat-form-field>
                             <mat-form-field appearance="outline">
                                 <mat-label>{{ 'Kicker' | t }}</mat-label>
@@ -794,15 +753,9 @@
                             </mat-form-field>
                             <div class="file-row promo-span">
                                 <button mat-stroked-button type="button" (click)="promoImageInput.click()">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
-                                    width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
-                                    <path fill="currentColor"
-                                    d="M2,2h3v1h-3zM12,2h4v1h-4zM23,2h4v1h-4zM2,3h3v1h-3zM12,3h4v1h-4zM23,3h4v1h-4zM2,4h3v1h-3zM12,4h4v1h-4zM23,4h4v1h-4zM5,5h4v1h-4zM20,5h3v1h-3zM5,6h4v1h-4zM20,6h3v1h-3zM5,7h4v1h-4zM20,7h3v1h-3zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM9,14h3v1h-3zM16,14h4v1h-4zM9,15h3v1h-3zM16,15h4v1h-4zM9,16h3v1h-3zM16,16h4v1h-4zM9,17h3v1h-3zM16,17h4v1h-4zM5,18h4v1h-4zM20,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM2,21h3v1h-3zM12,21h4v1h-4zM23,21h4v1h-4zM2,22h3v1h-3zM12,22h4v1h-4zM23,22h4v1h-4zM2,23h3v1h-3zM12,23h4v1h-4zM23,23h4v1h-4z" />
-                                    <path fill="var(--mc-icon-shadow)"
-                                    d="M16,5h4v1h-4zM27,5h3v1h-3zM16,6h4v1h-4zM27,6h3v1h-3zM16,7h4v1h-4zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM27,17h3v1h-3zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM9,21h3v1h-3zM9,22h3v1h-3zM9,23h3v1h-3zM5,24h4v1h-4zM16,24h4v1h-4zM27,24h3v1h-3zM5,25h4v1h-4zM16,25h4v1h-4zM27,25h3v1h-3zM5,26h4v1h-4zM16,26h4v1h-4zM27,26h3v1h-3z" />
-                                    </svg> <span>{{ 'Add Picture' | t }}</span>
+                                <mat-icon svgIcon="mc:media/image" matButtonIcon></mat-icon> <span>{{ 'Add Picture' | t }}</span>
                                 </button>
-                                <input #promoImageInput type="file" appFilePick accept="image/*" hidden (change)="onPromotionImageSelected($event)" />
+                                <input #promoImageInput type="file" accept="image/*" hidden (change)="onPromotionImageSelected($event)" />
                             </div>
                             @if (promotionImagePreview(); as preview) {
                             <div class="file-previews promo-span">
@@ -812,7 +765,7 @@
                                         <img appMediaSkeleton [src]="preview" alt="" />
                                         <div class="preview-actions">
                                             <button mat-icon-button type="button" (click)="clearPromotionImage()" [matTooltip]="'Remove' | t">
-                                                <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                                <mat-icon svgIcon="mc:letters/X"></mat-icon>
                                             </button>
                                         </div>
                                     </div>
@@ -834,11 +787,11 @@
                     <mat-form-field appearance="outline" class="search-field">
                         <mat-label>{{ 'Search promotions' | t }}</mat-label>
                         <input matInput [ngModel]="promotionsPager.search()" (ngModelChange)="promotionsPager.search.set($event)" (keyup.enter)="promotionsPager.runSearch()" />
-                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                        <mat-icon svgIcon="mc:ui/magnifying_glass" matPrefix></mat-icon>
                     </mat-form-field>
                     <div class="search-actions">
                         <button mat-stroked-button (click)="promotionsPager.search.set(''); promotionsPager.reload()">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)"> <path fill="currentColor" d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" /> <path fill="var(--mc-icon-shadow)" d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" /> </svg> <span>{{ 'Clear' | t }}</span>
+                            <mat-icon svgIcon="mc:letters/X" matButtonIcon></mat-icon> <span>{{ 'Clear' | t }}</span>
                         </button>
                     </div>
                 </div>
@@ -877,8 +830,7 @@
                             <td mat-cell *matCellDef="let p">
                                 <button mat-icon-button (click)="togglePromotion(p)"
                                     [matTooltip]="(p.isActive ? 'Turn off' : 'Turn on') | t">
-                                    <img [src]="p.isActive ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
-                                        alt="" aria-hidden="true" class="mc-icon" />
+                                    <mat-icon [svgIcon]="p.isActive ? 'mc:shapes/box_checked' : 'mc:shapes/box'"></mat-icon>
                                 </button>
                             </td>
                         </ng-container>
@@ -887,10 +839,10 @@
                             <td mat-cell *matCellDef="let p">
                                 <div class="live-msg-actions">
                                     <button mat-icon-button (click)="editPromotion(p)" [matTooltip]="'Edit' | t">
-                                        <img src="/icons/weapons/pen.svg" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
+                                        <mat-icon svgIcon="mc:weapons/pen" matButtonIcon></mat-icon>
                                     </button>
                                     <button mat-icon-button color="warn" (click)="deletePromotion(p)" [matTooltip]="'Delete' | t">
-                                        <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                        <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>
                                     </button>
                                 </div>
                             </td>
@@ -926,11 +878,11 @@
                     <mat-form-field appearance="outline" class="search-field">
                         <mat-label>{{ 'Search plugins' | t }}</mat-label>
                         <input matInput [ngModel]="pluginsPager.search()" (ngModelChange)="pluginsPager.search.set($event)" (keyup.enter)="pluginsPager.runSearch()" />
-                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                        <mat-icon svgIcon="mc:ui/magnifying_glass" matPrefix></mat-icon>
                     </mat-form-field>
                     <div class="search-actions">
                         <button mat-stroked-button (click)="pluginsPager.search.set(''); pluginsPager.reload()">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)"> <path fill="currentColor" d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" /> <path fill="var(--mc-icon-shadow)" d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" /> </svg> <span>{{ 'Clear' | t }}</span>
+                            <mat-icon svgIcon="mc:letters/X" matButtonIcon></mat-icon> <span>{{ 'Clear' | t }}</span>
                         </button>
                     </div>
                 </div>
@@ -1015,11 +967,11 @@
                     <mat-form-field appearance="outline" class="search-field">
                         <mat-label>{{ 'Search messages' | t }}</mat-label>
                         <input matInput [ngModel]="liveMessagesPager.search()" (ngModelChange)="liveMessagesPager.search.set($event)" (keyup.enter)="liveMessagesPager.runSearch()" />
-                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                        <mat-icon svgIcon="mc:ui/magnifying_glass" matPrefix></mat-icon>
                     </mat-form-field>
                     <div class="search-actions">
                         <button mat-stroked-button (click)="liveMessagesPager.search.set(''); liveMessagesPager.reload()">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)"> <path fill="currentColor" d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" /> <path fill="var(--mc-icon-shadow)" d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" /> </svg> <span>{{ 'Clear' | t }}</span>
+                            <mat-icon svgIcon="mc:letters/X" matButtonIcon></mat-icon> <span>{{ 'Clear' | t }}</span>
                         </button>
                     </div>
                 </div>
@@ -1047,11 +999,10 @@
                             <td mat-cell *matCellDef="let m">
                                 <div class="live-msg-actions">
                                     <button mat-icon-button (click)="editLiveMessage(m)" [matTooltip]="'Edit' | t">
-                                        <img src="/icons/weapons/pen.svg" alt="" aria-hidden="true" matButtonIcon
-                                            class="mc-icon" />
+                                        <mat-icon svgIcon="mc:weapons/pen" matButtonIcon></mat-icon>
                                     </button>
                                     <button mat-icon-button color="warn" (click)="deleteLiveMessage(m)" [matTooltip]="'Delete' | t">
-                                        <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                        <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>
                                     </button>
                                 </div>
                             </td>
@@ -1087,7 +1038,7 @@
                                 </mat-form-field>
                                 <div class="live-msg-btns">
                                     <button mat-flat-button type="submit" [disabled]="modMessageForm.invalid"
-                                       >{{ 'Add' | t }}</button>
+                                       ><mat-icon svgIcon="mc:math/plus" matButtonIcon></mat-icon> <span>{{ 'Add' | t }}</span></button>
                                 </div>
                             </div>
                         </form>
@@ -1098,11 +1049,11 @@
                     <mat-form-field appearance="outline" class="search-field">
                         <mat-label>{{ 'Search messages' | t }}</mat-label>
                         <input matInput [ngModel]="modMessagesPager.search()" (ngModelChange)="modMessagesPager.search.set($event)" (keyup.enter)="modMessagesPager.runSearch()" />
-                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                        <mat-icon svgIcon="mc:ui/magnifying_glass" matPrefix></mat-icon>
                     </mat-form-field>
                     <div class="search-actions">
                         <button mat-stroked-button (click)="modMessagesPager.search.set(''); modMessagesPager.reload()">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)"> <path fill="currentColor" d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" /> <path fill="var(--mc-icon-shadow)" d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" /> </svg> <span>{{ 'Clear' | t }}</span>
+                            <mat-icon svgIcon="mc:letters/X" matButtonIcon></mat-icon> <span>{{ 'Clear' | t }}</span>
                         </button>
                     </div>
                 </div>
@@ -1125,8 +1076,7 @@
                             <th mat-header-cell *matHeaderCellDef>{{ 'Active' | t }}</th>
                             <td mat-cell *matCellDef="let m">
                                 <button mat-icon-button (click)="toggleModMessage(m)">
-                                    <img [src]="m.isActive ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
-                                        alt="" aria-hidden="true" class="mc-icon" />
+                                    <mat-icon [svgIcon]="m.isActive ? 'mc:shapes/box_checked' : 'mc:shapes/box'"></mat-icon>
                                 </button>
                             </td>
                         </ng-container>
@@ -1138,7 +1088,7 @@
                             <th mat-header-cell *matHeaderCellDef></th>
                             <td mat-cell *matCellDef="let m">
                                 <button mat-icon-button color="warn" (click)="deleteModMessage(m)">
-                                    <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                    <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>
                                 </button>
                             </td>
                         </ng-container>
@@ -1171,7 +1121,7 @@
                                     <input matInput type="number" formControlName="order" />
                                 </mat-form-field>
                                 <button mat-flat-button type="submit" [disabled]="faqCreateForm.invalid"
-                                   >{{ 'Add' | t }}</button>
+                                   ><mat-icon svgIcon="mc:math/plus" matButtonIcon></mat-icon> <span>{{ 'Add' | t }}</span></button>
                             </div>
                         </form>
                     </mat-card-content>
@@ -1181,11 +1131,11 @@
                     <mat-form-field appearance="outline" class="search-field">
                         <mat-label>{{ 'Search questions' | t }}</mat-label>
                         <input matInput [ngModel]="faqsPager.search()" (ngModelChange)="faqsPager.search.set($event)" (keyup.enter)="faqsPager.runSearch()" />
-                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                        <mat-icon svgIcon="mc:ui/magnifying_glass" matPrefix></mat-icon>
                     </mat-form-field>
                     <div class="search-actions">
                         <button mat-stroked-button (click)="faqsPager.search.set(''); faqsPager.reload()">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)"> <path fill="currentColor" d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" /> <path fill="var(--mc-icon-shadow)" d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" /> </svg> <span>{{ 'Clear' | t }}</span>
+                            <mat-icon svgIcon="mc:letters/X" matButtonIcon></mat-icon> <span>{{ 'Clear' | t }}</span>
                         </button>
                     </div>
                 </div>
@@ -1200,8 +1150,7 @@
                     <mat-expansion-panel expanded hideToggle #editPanel>
                         <mat-expansion-panel-header>
                             <mat-panel-title>{{ 'Editing…' | t }}</mat-panel-title>
-                            <img src="/icons/arrows/tild_full_down.svg" alt="" aria-hidden="true" class="mc-icon expand-arrow"
-                                [class.expanded]="editPanel.expanded" [matTooltip]="(editPanel.expanded ? 'Collapse' : 'Expand') | t" />
+                            <mat-icon svgIcon="mc:arrows/tild_full_down" class="expand-arrow" [class.expanded]="editPanel.expanded" [matTooltip]="(editPanel.expanded ? 'Collapse' : 'Expand') | t"></mat-icon>
                         </mat-expansion-panel-header>
                         <form [formGroup]="faqEditForm" (ngSubmit)="saveEditFaq(f)" class="faq-create-form">
                             <mat-form-field appearance="outline">
@@ -1228,30 +1177,15 @@
                         <mat-expansion-panel-header>
                             <mat-panel-title>{{ f.question }}</mat-panel-title>
                             <mat-panel-description>{{ 'Order:' | t }} {{ f.order }}</mat-panel-description>
-                            <img src="/icons/arrows/tild_full_down.svg" alt="" aria-hidden="true" class="mc-icon expand-arrow"
-                                [class.expanded]="faqPanel.expanded" [matTooltip]="(faqPanel.expanded ? 'Collapse' : 'Expand') | t" />
+                            <mat-icon svgIcon="mc:arrows/tild_full_down" class="expand-arrow" [class.expanded]="faqPanel.expanded" [matTooltip]="(faqPanel.expanded ? 'Collapse' : 'Expand') | t"></mat-icon>
                         </mat-expansion-panel-header>
                         <p class="faq-answer">{{ f.answer }}</p>
                         <mat-action-row>
                             <button mat-stroked-button color="primary" (click)="startEditFaq(f)">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
-                                    width="18" height="18" matButtonIcon class="mc-icon"
-                                    style="transform: translateY(1px)">
-                                    <path fill="currentColor"
-                                        d="M9,4h3v1h-3zM9,5h3v1h-3zM9,6h3v1h-3zM5,7h4v1h-4zM12,7h4v1h-4zM5,8h4v1h-4zM12,8h4v1h-4zM5,9h4v1h-4zM12,9h4v1h-4zM2,10h3v1h-3zM9,10h3v1h-3zM16,10h4v1h-4zM2,11h3v1h-3zM9,11h3v1h-3zM16,11h4v1h-4zM2,12h3v1h-3zM9,12h3v1h-3zM16,12h4v1h-4zM5,13h4v1h-4zM20,13h3v1h-3zM5,14h4v1h-4zM20,14h3v1h-3zM5,15h4v1h-4zM20,15h3v1h-3zM9,16h3v1h-3zM23,16h4v1h-4zM9,17h3v1h-3zM23,17h4v1h-4zM9,18h3v1h-3zM23,18h4v1h-4zM12,19h4v1h-4zM20,19h7v1h-7zM12,20h4v1h-4zM20,20h7v1h-7zM12,21h4v1h-4zM20,21h7v1h-7zM16,22h11v1h-11zM16,23h11v1h-11zM16,24h11v1h-11z" />
-                                    <path fill="var(--mc-icon-shadow)"
-                                        d="M12,13h4v1h-4zM12,14h4v1h-4zM12,15h4v1h-4zM27,19h3v1h-3zM27,20h3v1h-3zM27,21h3v1h-3zM27,22h3v1h-3zM27,23h3v1h-3zM27,24h3v1h-3zM20,25h10v1h-10zM20,26h10v1h-10zM20,27h10v1h-10z" />
-                                </svg> <span>{{ 'Edit' | t }}</span>
+                                <mat-icon svgIcon="mc:weapons/pen" matButtonIcon></mat-icon> <span>{{ 'Edit' | t }}</span>
                             </button>
                             <button mat-stroked-button color="primary" (click)="deleteFaq(f)">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
-                                    width="18" height="18" matButtonIcon class="mc-icon"
-                                    style="transform: translateY(1px)">
-                                    <path fill="currentColor"
-                                        d="M5,2h18v1h-18zM5,3h18v1h-18zM5,4h18v1h-18zM2,5h25v1h-25zM2,6h25v1h-25zM2,7h25v1h-25zM2,8h3v1h-3zM12,8h4v1h-4zM23,8h4v1h-4zM2,9h3v1h-3zM12,9h4v1h-4zM23,9h4v1h-4zM2,10h3v1h-3zM12,10h4v1h-4zM23,10h4v1h-4zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM2,14h10v1h-10zM16,14h11v1h-11zM2,15h10v1h-10zM16,15h11v1h-11zM2,16h10v1h-10zM16,16h11v1h-11zM2,17h10v1h-10zM16,17h11v1h-11zM5,18h7v1h-7zM16,18h7v1h-7zM5,19h7v1h-7zM16,19h7v1h-7zM5,20h7v1h-7zM16,20h7v1h-7zM5,21h4v1h-4zM12,21h4v1h-4zM20,21h3v1h-3zM5,22h4v1h-4zM12,22h4v1h-4zM20,22h3v1h-3zM5,23h4v1h-4zM12,23h4v1h-4zM20,23h3v1h-3z" />
-                                    <path fill="var(--mc-icon-shadow)"
-                                        d="M5,8h7v1h-7zM16,8h7v1h-7zM27,8h3v1h-3zM5,9h7v1h-7zM16,9h7v1h-7zM27,9h3v1h-3zM5,10h7v1h-7zM16,10h7v1h-7zM27,10h3v1h-3zM5,11h4v1h-4zM16,11h4v1h-4zM27,11h3v1h-3zM5,12h4v1h-4zM16,12h4v1h-4zM27,12h3v1h-3zM5,13h4v1h-4zM16,13h4v1h-4zM27,13h3v1h-3zM27,14h3v1h-3zM27,15h3v1h-3zM27,16h3v1h-3zM27,17h3v1h-3zM12,18h4v1h-4zM23,18h7v1h-7zM12,19h4v1h-4zM23,19h7v1h-7zM12,20h4v1h-4zM23,20h7v1h-7zM9,21h3v1h-3zM23,21h4v1h-4zM9,22h3v1h-3zM23,22h4v1h-4zM9,23h3v1h-3zM23,23h4v1h-4zM9,24h3v1h-3zM16,24h4v1h-4zM23,24h4v1h-4zM9,25h3v1h-3zM16,25h4v1h-4zM23,25h4v1h-4zM9,26h3v1h-3zM16,26h4v1h-4zM23,26h4v1h-4z" />
-                                </svg> <span>{{ 'Delete' | t }}</span>
+                                <mat-icon svgIcon="mc:ui/trash_can" matButtonIcon></mat-icon> <span>{{ 'Delete' | t }}</span>
                             </button>
                         </mat-action-row>
                     </mat-expansion-panel>
@@ -1273,7 +1207,7 @@
                                 <mat-label>{{ 'Version name' | t }}</mat-label>
                                 <input matInput formControlName="name" placeholder="1.21.4" />
                             </mat-form-field>
-                            <button mat-flat-button type="submit" [disabled]="versionForm.invalid">{{ 'Add' | t }}</button>
+                            <button mat-flat-button type="submit" [disabled]="versionForm.invalid"><mat-icon svgIcon="mc:math/plus" matButtonIcon></mat-icon> <span>{{ 'Add' | t }}</span></button>
                         </form>
                     </mat-card-content>
                 </mat-card>
@@ -1282,17 +1216,11 @@
                     <mat-form-field appearance="outline" class="search-field">
                         <mat-label>{{ 'Filter versions' | t }}</mat-label>
                         <input matInput [ngModel]="versionsPager.search()" (ngModelChange)="versionsPager.search.set($event)" (keyup.enter)="versionsPager.runSearch()" />
-                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                        <mat-icon svgIcon="mc:ui/magnifying_glass" matPrefix></mat-icon>
                     </mat-form-field>
                     <div class="search-actions">
                         <button mat-stroked-button (click)="versionsPager.search.set(''); versionsPager.reload()">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
-                                width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
-                                <path fill="currentColor"
-                                    d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
-                                <path fill="var(--mc-icon-shadow)"
-                                    d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
-                            </svg> <span>{{ 'Clear' | t }}</span>
+                            <mat-icon svgIcon="mc:letters/X" matButtonIcon></mat-icon> <span>{{ 'Clear' | t }}</span>
                         </button>
                     </div>
                 </div>
@@ -1311,7 +1239,7 @@
                         <th mat-header-cell *matHeaderCellDef></th>
                         <td mat-cell *matCellDef="let v">
                             <button mat-icon-button color="warn" (click)="deleteVersion(v)" [matTooltip]="'Delete' | t">
-                                <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>
                             </button>
                         </td>
                     </ng-container>
@@ -1369,20 +1297,19 @@
                                     @if (editingAcceptId() === +s.id) {
                                     <button mat-icon-button color="primary" [matTooltip]="'Confirm accept' | t"
                                         (click)="acceptSuggestion(s)">
-                                        <img src="/icons/ui/check.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                        <mat-icon svgIcon="mc:ui/check"></mat-icon>
                                     </button>
                                     <button mat-icon-button [matTooltip]="'Cancel' | t"
                                         (click)="cancelAccept()">
-                                        <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                        <mat-icon svgIcon="mc:letters/X"></mat-icon>
                                     </button>
                                     } @else {
                                     <button mat-icon-button color="primary" [matTooltip]="'Accept (rename before confirming)' | t" (click)="startAccept(s)">
-                                        <img src="/icons/ui/check.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                        <mat-icon svgIcon="mc:ui/check"></mat-icon>
                                     </button>
                                     <button mat-icon-button color="warn" [matTooltip]="'Refuse' | t"
                                         (click)="refuseSuggestion(s)">
-                                        <img src="/icons/ui/forbidden_circle.svg" alt="" aria-hidden="true"
-                                            class="mc-icon" />
+                                        <mat-icon svgIcon="mc:ui/forbidden_circle"></mat-icon>
                                     </button>
                                     }
                                 </td>
@@ -1401,7 +1328,7 @@
                                 <mat-label>{{ 'Tag name' | t }}</mat-label>
                                 <input matInput formControlName="name" />
                             </mat-form-field>
-                            <button mat-flat-button type="submit" [disabled]="tagForm.invalid">{{ 'Add' | t }}</button>
+                            <button mat-flat-button type="submit" [disabled]="tagForm.invalid"><mat-icon svgIcon="mc:math/plus" matButtonIcon></mat-icon> <span>{{ 'Add' | t }}</span></button>
                         </form>
                     </mat-card-content>
                 </mat-card>
@@ -1410,17 +1337,11 @@
                     <mat-form-field appearance="outline" class="search-field">
                         <mat-label>{{ 'Filter tags' | t }}</mat-label>
                         <input matInput [ngModel]="tagsPager.search()" (ngModelChange)="tagsPager.search.set($event)" (keyup.enter)="tagsPager.runSearch()" />
-                        <img src="/icons/weapons/fishing_rod.svg" alt="" aria-hidden="true" matPrefix class="mc-icon" />
+                        <mat-icon svgIcon="mc:ui/magnifying_glass" matPrefix></mat-icon>
                     </mat-form-field>
                     <div class="search-actions">
                         <button mat-stroked-button (click)="tagsPager.search.set(''); tagsPager.reload()">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
-                                width="18" height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
-                                <path fill="currentColor"
-                                    d="M2,4h4v1h-4zM22,4h4v1h-4zM2,5h4v1h-4zM22,5h4v1h-4zM2,6h4v1h-4zM22,6h4v1h-4zM2,7h8v1h-8zM18,7h8v1h-8zM2,8h8v1h-8zM18,8h8v1h-8zM2,9h8v1h-8zM18,9h8v1h-8zM6,10h16v1h-16zM6,11h16v1h-16zM6,12h16v1h-16zM10,13h8v1h-8zM10,14h8v1h-8zM10,15h8v1h-8zM6,16h16v1h-16zM6,17h16v1h-16zM6,18h16v1h-16zM2,19h8v1h-8zM18,19h8v1h-8zM2,20h8v1h-8zM18,20h8v1h-8zM2,21h8v1h-8zM18,21h8v1h-8zM2,22h4v1h-4zM22,22h4v1h-4zM2,23h4v1h-4zM22,23h4v1h-4zM2,24h4v1h-4zM22,24h4v1h-4z" />
-                                <path fill="var(--mc-icon-shadow)"
-                                    d="M26,7h4v1h-4zM26,8h4v1h-4zM26,9h4v1h-4zM22,10h8v1h-8zM22,11h8v1h-8zM22,12h8v1h-8zM18,13h8v1h-8zM18,14h8v1h-8zM18,15h8v1h-8zM10,19h8v1h-8zM10,20h8v1h-8zM10,21h8v1h-8zM6,22h8v1h-8zM26,22h4v1h-4zM6,23h8v1h-8zM26,23h4v1h-4zM6,24h8v1h-8zM26,24h4v1h-4zM6,25h4v1h-4zM26,25h4v1h-4zM6,26h4v1h-4zM26,26h4v1h-4zM6,27h4v1h-4zM26,27h4v1h-4z" />
-                            </svg> <span>{{ 'Clear' | t }}</span>
+                            <mat-icon svgIcon="mc:letters/X" matButtonIcon></mat-icon> <span>{{ 'Clear' | t }}</span>
                         </button>
                     </div>
                     <mat-paginator [length]="tagSuggestionsPager.total()" [pageSize]="tagSuggestionsPager.pageSize()" [pageIndex]="tagSuggestionsPager.pageIndex()"
@@ -1441,7 +1362,7 @@
                         <th mat-header-cell *matHeaderCellDef></th>
                         <td mat-cell *matCellDef="let t">
                             <button mat-icon-button color="warn" (click)="deleteTag(t)" [matTooltip]="'Delete' | t">
-                                <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>
                             </button>
                         </td>
                     </ng-container>
@@ -1477,7 +1398,7 @@
                         <p class="ticket-body">{{ t.description | emojify }}</p>
                         @if (t.contact) {
                         <div class="ticket-contact">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M2,7h25v1h-25zM2,8h25v1h-25zM2,9h25v1h-25zM2,10h7v1h-7zM20,10h7v1h-7zM2,11h7v1h-7zM20,11h7v1h-7zM2,12h7v1h-7zM20,12h7v1h-7zM2,13h3v1h-3zM9,13h3v1h-3zM16,13h4v1h-4zM23,13h4v1h-4zM2,14h3v1h-3zM9,14h3v1h-3zM16,14h4v1h-4zM23,14h4v1h-4zM2,15h3v1h-3zM9,15h3v1h-3zM16,15h4v1h-4zM23,15h4v1h-4zM2,16h3v1h-3zM12,16h4v1h-4zM23,16h4v1h-4zM2,17h3v1h-3zM12,17h4v1h-4zM23,17h4v1h-4zM2,18h3v1h-3zM12,18h4v1h-4zM23,18h4v1h-4zM2,19h3v1h-3zM23,19h4v1h-4zM2,20h3v1h-3zM23,20h4v1h-4zM2,21h3v1h-3zM23,21h4v1h-4zM2,22h25v1h-25zM2,23h25v1h-25zM2,24h25v1h-25z" /><path fill="var(--mc-icon-shadow)" d="M9,10h11v1h-11zM27,10h3v1h-3zM9,11h11v1h-11zM27,11h3v1h-3zM9,12h11v1h-11zM27,12h3v1h-3zM5,13h4v1h-4zM27,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM20,16h3v1h-3zM27,16h3v1h-3zM5,17h4v1h-4zM20,17h3v1h-3zM27,17h3v1h-3zM5,18h4v1h-4zM20,18h3v1h-3zM27,18h3v1h-3zM5,19h4v1h-4zM16,19h4v1h-4zM27,19h3v1h-3zM5,20h4v1h-4zM16,20h4v1h-4zM27,20h3v1h-3zM5,21h4v1h-4zM16,21h4v1h-4zM27,21h3v1h-3zM27,22h3v1h-3zM27,23h3v1h-3zM27,24h3v1h-3zM5,25h25v1h-25zM5,26h25v1h-25zM5,27h25v1h-25z" /></svg>
+                            <mat-icon svgIcon="mc:communication/mail"></mat-icon>
                             <span>{{ t.contact }}</span>
                         </div>
                         }
@@ -1493,11 +1414,10 @@
                     </mat-card-content>
                     <mat-card-actions>
                         <button mat-stroked-button (click)="closeTicket()">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" matButtonIcon class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M9,5h3v1h-3zM9,6h3v1h-3zM9,7h3v1h-3zM5,8h7v1h-7zM5,9h7v1h-7zM5,10h7v1h-7zM2,11h25v1h-25zM2,12h25v1h-25zM2,13h25v1h-25zM5,14h7v1h-7zM5,15h7v1h-7zM5,16h7v1h-7zM5,17h7v1h-7zM9,18h3v1h-3zM9,19h3v1h-3zM9,20h3v1h-3z" /><path fill="var(--mc-icon-shadow)" d="M12,8h4v1h-4zM12,9h4v1h-4zM12,10h4v1h-4zM12,14h18v1h-18zM12,15h18v1h-18zM12,16h18v1h-18zM12,17h18v1h-18zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM12,21h4v1h-4zM12,22h4v1h-4zM12,23h4v1h-4z" /></svg> <span>{{ 'Back to list' | t }}</span>
+                            <mat-icon svgIcon="mc:arrows/arrow_left" matButtonIcon></mat-icon> <span>{{ 'Back to list' | t }}</span>
                         </button>
                         <button mat-stroked-button color="warn" (click)="deleteTicket(t)">
-                            <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" matButtonIcon
-                                class="mc-icon" /> <span>{{ 'Delete' | t }}</span>
+                            <mat-icon svgIcon="mc:ui/trash_can" matButtonIcon></mat-icon> <span>{{ 'Delete' | t }}</span>
                         </button>
                     </mat-card-actions>
                 </mat-card>
@@ -1505,11 +1425,10 @@
 
                 <div class="search-row">
                     <button mat-stroked-button class="newest-toggle" style="margin-left: auto;" (click)="toggleTicketsUnreadOnly()">
-                        <img [src]="ticketsUnreadOnly() ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
-                            alt="" aria-hidden="true" class="mc-icon" />
+                        <mat-icon [svgIcon]="ticketsUnreadOnly() ? 'mc:shapes/box_checked' : 'mc:shapes/box'"></mat-icon>
                         @if (ticketsUnreadOnly()) { <span
-                            style="transform: translateY(1px); display: inline-block;">{{ 'Show all' | t }}</span> } @else { <span
-                            style="transform: translateY(1px); display: inline-block;">{{ 'Unread only' | t }}</span> }
+                           >{{ 'Show all' | t }}</span> } @else { <span
+                           >{{ 'Unread only' | t }}</span> }
                     </button>
                 </div>
 
@@ -1550,11 +1469,11 @@
                         <th mat-header-cell *matHeaderCellDef></th>
                         <td mat-cell *matCellDef="let t">
                             <button mat-icon-button [matTooltip]="'View' | t" (click)="viewTicket(t)">
-                                <img src="/icons/math/infinite.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                <mat-icon svgIcon="mc:ui/eye"></mat-icon>
                             </button>
                             <button mat-icon-button color="warn" [matTooltip]="'Delete' | t"
                                 (click)="deleteTicket(t)">
-                                <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>
                             </button>
                         </td>
                     </ng-container>
@@ -1624,7 +1543,7 @@
                         <td mat-cell *matCellDef="let e">
                             <button mat-icon-button color="warn" [matTooltip]="'Dismiss' | t"
                                 (click)="deleteServerLog(e)">
-                                <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>
                             </button>
                         </td>
                     </ng-container>
@@ -1643,9 +1562,8 @@
                 <div class="section-header">
                     <h3>{{ 'Live Stream' | t }}</h3>
                     <button mat-stroked-button class="newest-toggle" (click)="autoScrollLogs.set(!autoScrollLogs())">
-                        <img [src]="autoScrollLogs() ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
-                            alt="" aria-hidden="true" class="mc-icon" />
-                        <span style="transform: translateY(1px); display: inline-block;">{{ 'Auto-scroll' | t }}</span>
+                        <mat-icon [svgIcon]="autoScrollLogs() ? 'mc:shapes/box_checked' : 'mc:shapes/box'"></mat-icon>
+                        <span>{{ 'Auto-scroll' | t }}</span>
                     </button>
                 </div>
 

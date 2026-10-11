@@ -13,15 +13,16 @@ import { NumberFormatPipe } from '../../shared/pipes/number-format.pipe';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { VideoPlayerComponent } from '../../shared/components/video-player/video-player.component';
 import { VideosService, VideoResponse, videoStreamUrl, videoThumbnailUrl } from '../../core/services/videos.service';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'app-video-watch',
     standalone: true,
-    imports: [TPipe, DatePipe, RouterLink, MatButtonModule, MatTooltipModule, MarkdownPipe, NumberFormatPipe, EmptyStateComponent, VideoPlayerComponent],
+    imports: [MatIconModule, TPipe, DatePipe, RouterLink, MatButtonModule, MatTooltipModule, MarkdownPipe, NumberFormatPipe, EmptyStateComponent, VideoPlayerComponent],
     template: `
         <div class="page-container watch">
             <button mat-icon-button class="back-btn" routerLink="/videos" [matTooltip]="'Back to videos' | t">
-                <img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" class="mc-icon" />
+                <mat-icon svgIcon="mc:arrows/arrow_left"></mat-icon>
             </button>
 
             @if (loading()) {
@@ -36,12 +37,12 @@ import { VideosService, VideoResponse, videoStreamUrl, videoThumbnailUrl } from 
                     </div>
                     <div class="actions">
                     <button mat-stroked-button type="button" (click)="copyLink(v)">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18" height="18" matButtonIcon class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M4,2h16v1h-16zM4,3h16v1h-16zM4,4h16v1h-16zM4,5h16v1h-16zM4,6h16v1h-16zM4,7h16v1h-16zM4,8h16v1h-16zM4,9h16v1h-16zM4,10h16v1h-16zM4,11h16v1h-16zM4,12h16v1h-16zM4,13h16v1h-16zM4,14h16v1h-16zM4,15h16v1h-16zM4,16h16v1h-16zM4,17h16v1h-16zM4,18h16v1h-16zM4,19h16v1h-16zM4,20h16v1h-16zM4,21h16v1h-16zM4,22h16v1h-16zM4,23h16v1h-16zM4,24h16v1h-16zM4,25h16v1h-16zM4,26h16v1h-16z" /><path fill="var(--mc-icon-shadow)" d="M20,5h8v1h-8zM20,6h8v1h-8zM20,7h8v1h-8zM20,8h8v1h-8zM20,9h8v1h-8zM20,10h8v1h-8zM20,11h8v1h-8zM20,12h8v1h-8zM20,13h8v1h-8zM20,14h8v1h-8zM20,15h8v1h-8zM20,16h8v1h-8zM20,17h8v1h-8zM20,18h8v1h-8zM20,19h8v1h-8zM20,20h8v1h-8zM20,21h8v1h-8zM20,22h8v1h-8zM20,23h8v1h-8zM20,24h8v1h-8zM20,25h8v1h-8zM20,26h8v1h-8zM12,27h16v1h-16zM12,28h16v1h-16zM12,29h16v1h-16z" /></svg>
+                        <mat-icon svgIcon="mc:ui/overlapping_sheets" matButtonIcon></mat-icon>
                         <span>{{ 'Copy link' | t }}</span>
                     </button>
                     @if (isAdmin()) {
                     <button mat-icon-button type="button" (click)="editInAdmin(v)" [matTooltip]="'Edit video' | t">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="20" height="20" class="mc-icon" aria-hidden="true"><path fill="currentColor" d="M9,4h3v1h-3zM9,5h3v1h-3zM9,6h3v1h-3zM5,7h4v1h-4zM12,7h4v1h-4zM5,8h4v1h-4zM12,8h4v1h-4zM5,9h4v1h-4zM12,9h4v1h-4zM2,10h3v1h-3zM9,10h3v1h-3zM16,10h4v1h-4zM2,11h3v1h-3zM9,11h3v1h-3zM16,11h4v1h-4zM2,12h3v1h-3zM9,12h3v1h-3zM16,12h4v1h-4zM5,13h4v1h-4zM20,13h3v1h-3zM5,14h4v1h-4zM20,14h3v1h-3zM5,15h4v1h-4zM20,15h3v1h-3zM9,16h3v1h-3zM23,16h4v1h-4zM9,17h3v1h-3zM23,17h4v1h-4zM9,18h3v1h-3zM23,18h4v1h-4zM12,19h4v1h-4zM20,19h7v1h-7zM12,20h4v1h-4zM20,20h7v1h-7zM12,21h4v1h-4zM20,21h7v1h-7zM16,22h11v1h-11zM16,23h11v1h-11zM16,24h11v1h-11z" /><path fill="var(--mc-icon-shadow)" d="M12,13h4v1h-4zM12,14h4v1h-4zM12,15h4v1h-4zM27,19h3v1h-3zM27,20h3v1h-3zM27,21h3v1h-3zM27,22h3v1h-3zM27,23h3v1h-3zM27,24h3v1h-3zM20,25h10v1h-10zM20,26h10v1h-10zM20,27h10v1h-10z" /></svg>
+                        <mat-icon svgIcon="mc:weapons/pen"></mat-icon>
                     </button>
                     }
                     </div>
@@ -53,7 +54,7 @@ import { VideosService, VideoResponse, videoStreamUrl, videoThumbnailUrl } from 
                     @if (descFoldable()) {
                     <button type="button" class="desc-toggle" (click)="descOpen.set(!descOpen())"
                         [attr.aria-expanded]="descOpen()" [matTooltip]="(descOpen() ? 'Collapse' : 'Expand') | t">
-                        <img src="/icons/arrows/tild_full_down.svg" alt="" aria-hidden="true" class="mc-icon expand-arrow" />
+                        <mat-icon svgIcon="mc:arrows/tild_full_down" class="expand-arrow"></mat-icon>
                     </button>
                     }
                 </div>
@@ -123,13 +124,13 @@ import { VideosService, VideoResponse, videoStreamUrl, videoThumbnailUrl } from 
             &:hover { background: var(--mat-sys-surface-container-high); }
 
             .expand-arrow {
-                width: 20px;
-                height: 20px;
+                width: var(--icon-size);
+                height: var(--icon-size);
                 transition: transform 0.2s;
-                transform-origin: center 43.75%;
+                transform-origin: center;
             }
 
-            &[aria-expanded='true'] .expand-arrow { transform: rotate(180deg) translateY(1px); }
+            &[aria-expanded='true'] .expand-arrow { transform: rotate(180deg); --mc-shadow-dir: -1; }
         }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     `],

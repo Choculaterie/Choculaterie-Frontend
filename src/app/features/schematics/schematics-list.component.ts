@@ -1,4 +1,3 @@
-import { FilePickDirective } from '../../shared/directives/file-pick.directive';
 import { MediaSkeletonDirective } from '../../shared/directives/media-skeleton.directive';
 import { scrollIntoViewSoon, scrollBackTo } from '../../shared/utils/scroll';
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect, Injector, ElementRef, ViewChild, afterNextRender } from '@angular/core';
@@ -37,7 +36,7 @@ import { DropZoneDirective } from '../../shared/directives/drop-zone.directive';
 @Component({
     selector: 'app-schematics-list',
     standalone: true,
-    imports: [FilePickDirective, MediaSkeletonDirective, TPipe,
+    imports: [MediaSkeletonDirective, TPipe,
         FormsModule,
         ReactiveFormsModule,
         MatFormFieldModule,

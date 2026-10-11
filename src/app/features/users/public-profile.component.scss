@@ -116,8 +116,9 @@ $sk: linear-gradient(90deg,
 
 .split-icon {
     font-size: 3rem;
-    width: 3rem;
-    height: 3rem;
+    --icon-size: 60px;
+    width: var(--icon-size);
+    height: var(--icon-size);
     background: var(--mat-sys-surface);
     color: var(--mat-sys-primary);
     border-radius: 50%;
@@ -245,11 +246,8 @@ $sk: linear-gradient(90deg,
         background: var(--mat-sys-surface-variant);
     }
 
-    .mc-icon {
-        width: 75% !important;
-        height: 75% !important;
-        display: block;
-        object-fit: cover;
+    mat-icon {
+        --icon-size: 120px;
     }
 
     app-skeleton-img {
@@ -287,7 +285,7 @@ $sk: linear-gradient(90deg,
     transition: opacity 0.15s ease, background 0.15s ease;
     overflow: visible;
 
-    img.mc-icon {
+    mat-icon {
         visibility: hidden !important;
     }
 
@@ -345,8 +343,9 @@ $sk: linear-gradient(90deg,
 }
 
 .badge-icon {
-    width: 28px;
-    height: 28px;
+    --icon-size: 24px;
+    width: var(--icon-size);
+    height: var(--icon-size);
     cursor: default;
 }
 
@@ -428,8 +427,8 @@ $sk: linear-gradient(90deg,
     mat-icon,
     ng-icon {
         font-size: 18px;
-        width: 18px;
-        height: 18px;
+        width: var(--icon-size);
+        height: var(--icon-size);
         color: var(--mat-sys-primary);
     }
 }
@@ -451,8 +450,8 @@ $sk: linear-gradient(90deg,
         opacity: 0;
         transition: opacity 0.15s;
         font-size: 15px;
-        width: 15px;
-        height: 15px;
+        width: var(--icon-size);
+        height: var(--icon-size);
     }
 
     &:hover {
@@ -722,8 +721,8 @@ mat-divider {
     mat-icon,
     ng-icon {
         font-size: 20px;
-        width: 20px;
-        height: 20px;
+        width: var(--icon-size);
+        height: var(--icon-size);
         color: var(--mat-sys-primary);
     }
 
@@ -871,6 +870,7 @@ mat-divider {
     button[mat-icon-button] {
         --mdc-icon-button-state-layer-size: 28px;
         --mdc-icon-button-icon-size: 16px;
+        font-size: inherit;
         width: 28px !important;
         height: 28px !important;
         padding: 0 !important;
@@ -881,8 +881,9 @@ mat-divider {
         vertical-align: middle;
 
         .copy-icon {
-            width: 16px;
-            height: 16px;
+            --icon-size: calc(var(--mc-em) * 1.5);
+            width: var(--icon-size);
+            height: var(--icon-size);
             flex-shrink: 0;
         }
     }
@@ -994,8 +995,8 @@ mat-divider {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: var(--icon-size);
+    height: var(--icon-size);
     margin-right: 0.25rem;
 }
 
@@ -1133,7 +1134,7 @@ mat-divider {
     }
 }
 
-button img.mc-icon--fixed-white {
+button mat-icon.mc-icon--fixed-white {
     filter: none !important;
 }
 .badge-clickable {
@@ -1155,6 +1156,7 @@ button img.mc-icon--fixed-white {
     }
 
     .premium-icon {
+        --logo-size: 50px;
         width: 50px;
         height: 50px;
         flex: none;

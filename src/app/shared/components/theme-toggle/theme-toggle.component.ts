@@ -1,12 +1,14 @@
 import { Component, inject } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-theme-toggle',
   standalone: true,
+  imports: [MatIconModule],
   template: `
     <button class="theme-toggle" (click)="theme.toggle()" [attr.aria-label]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'">
-      <img [src]="theme.isDark() ? '/icons/weather/sun.png' : '/icons/weather/moon.png'" alt="" aria-hidden="true" />
+      <mat-icon [svgIcon]="theme.isDark() ? 'mc:weather/sun' : 'mc:weather/moon'"></mat-icon>
     </button>
   `,
   styles: [`

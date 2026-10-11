@@ -39,8 +39,9 @@
     padding: 0 0.6rem;
 
     img {
-        width: 16px;
-        height: 16px;
+        --icon-size: 24px;
+        width: var(--icon-size);
+        height: var(--icon-size);
     }
 }
 
@@ -122,8 +123,9 @@
 
 .error-overlay mat-icon {
     font-size: 48px;
-    width: 48px;
-    height: 48px;
+    --icon-size: 60px;
+    width: var(--icon-size);
+    height: var(--icon-size);
     color: #ef5350;
 }
 

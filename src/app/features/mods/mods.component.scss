@@ -21,9 +21,9 @@
     font: var(--mat-sys-headline-medium);
     margin: 0;
 
-    img.mc-icon {
-        width: 28px;
-        height: 28px;
+    mat-icon {
+        width: var(--icon-size);
+        height: var(--icon-size);
     }
 }
 
@@ -108,9 +108,10 @@
         transform: scale(0.75);
     }
 
-    button img.mc-icon {
-        width: 24px;
-        height: 24px;
+    button mat-icon {
+        --icon-size: 36px;
+        width: var(--icon-size);
+        height: var(--icon-size);
     }
 }
 
@@ -215,8 +216,9 @@
 }
 
 .mod-icon {
-    width: 48px;
-    height: 48px;
+    --icon-size: 60px;
+    width: var(--icon-size);
+    height: var(--icon-size);
     border-radius: 8px;
     object-fit: cover;
     flex-shrink: 0;
@@ -278,10 +280,9 @@
     color: var(--mat-sys-on-surface-variant);
 
     mat-icon,
-    ng-icon,
-    img.mc-icon {
+    ng-icon {
         font-size: 24px;
-        width: 24px;
-        height: 24px;
+        width: var(--icon-size);
+        height: var(--icon-size);
     }
 }

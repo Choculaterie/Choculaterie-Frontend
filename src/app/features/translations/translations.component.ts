@@ -204,7 +204,7 @@ function describeExpr(expr: string): string {
             @if (view() === 'focus') {
             <div class="fq">
                 <div class="fq-bar">
-                    <button mat-icon-button (click)="exitFocus()" [matTooltip]="'Back' | t"><img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" class="mc-icon" /></button>
+                    <button mat-icon-button (click)="exitFocus()" [matTooltip]="'Back' | t"><mat-icon svgIcon="mc:arrows/arrow_left"></mat-icon></button>
                     <strong class="tr-crumb">{{ crumb() }}</strong>
                     <span class="fq-progress">{{ index() + 1 }} / {{ queue().length }}</span>
                     <span class="tr-spacer"></span>
@@ -250,11 +250,7 @@ function describeExpr(expr: string): string {
                         <div class="fq-actions">
                             <button mat-icon-button (click)="prev()" [disabled]="index() === 0"
                                 [matTooltip]="'Previous' | t">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
-                                    class="mc-icon" aria-hidden="true">
-                                    <path fill="currentColor" d="M9,5h3v1h-3zM9,6h3v1h-3zM9,7h3v1h-3zM5,8h7v1h-7zM5,9h7v1h-7zM5,10h7v1h-7zM2,11h25v1h-25zM2,12h25v1h-25zM2,13h25v1h-25zM5,14h7v1h-7zM5,15h7v1h-7zM5,16h7v1h-7zM5,17h7v1h-7zM9,18h3v1h-3zM9,19h3v1h-3zM9,20h3v1h-3z" />
-                                    <path fill="var(--mc-icon-shadow)" d="M12,8h4v1h-4zM12,9h4v1h-4zM12,10h4v1h-4zM12,14h18v1h-18zM12,15h18v1h-18zM12,16h18v1h-18zM12,17h18v1h-18zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM12,21h4v1h-4zM12,22h4v1h-4zM12,23h4v1h-4z" />
-                                </svg>
+                                <mat-icon svgIcon="mc:arrows/arrow_left"></mat-icon>
                             </button>
                             @if (canEdit()) {
                             <button mat-stroked-button (click)="useSource(st)"
@@ -271,11 +267,7 @@ function describeExpr(expr: string): string {
                             </span>
                             <button mat-icon-button (click)="next()" [matTooltip]="'Skip' | t"
                                 [disabled]="index() >= queue().length - 1">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges"
-                                    class="mc-icon" aria-hidden="true">
-                                    <path fill="currentColor" d="M16,5h4v1h-4zM16,6h4v1h-4zM16,7h4v1h-4zM16,8h7v1h-7zM16,9h7v1h-7zM16,10h7v1h-7zM2,11h25v1h-25zM2,12h25v1h-25zM2,13h25v1h-25zM16,14h7v1h-7zM16,15h7v1h-7zM16,16h7v1h-7zM16,17h7v1h-7zM16,18h4v1h-4zM16,19h4v1h-4zM16,20h4v1h-4z" />
-                                    <path fill="var(--mc-icon-shadow)" d="M5,14h11v1h-11zM23,14h7v1h-7zM5,15h11v1h-11zM23,15h7v1h-7zM5,16h11v1h-11zM23,16h7v1h-7zM5,17h11v1h-11zM23,17h7v1h-7zM20,18h7v1h-7zM20,19h7v1h-7zM20,20h7v1h-7zM20,21h3v1h-3zM20,22h3v1h-3zM20,23h3v1h-3z" />
-                                </svg>
+                                <mat-icon svgIcon="mc:arrows/arrow_right"></mat-icon>
                             </button>
                         </div>
                     </div>
@@ -350,7 +342,7 @@ function describeExpr(expr: string): string {
             } @else if (view() === 'sections') {
             <div class="tr-list">
                 <div class="fq-bar">
-                    <button mat-icon-button (click)="setView('languages')" [matTooltip]="'Back' | t"><img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" class="mc-icon" /></button>
+                    <button mat-icon-button (click)="setView('languages')" [matTooltip]="'Back' | t"><mat-icon svgIcon="mc:arrows/arrow_left"></mat-icon></button>
                     <strong class="tr-crumb">{{ crumb() }}</strong>
                 </div>
                 <mat-card appearance="outlined" class="tr-nav" (click)="setView('pages')">
@@ -376,7 +368,7 @@ function describeExpr(expr: string): string {
             } @else if (view() === 'mods') {
             <div class="tr-list">
                 <div class="fq-bar">
-                    <button mat-icon-button (click)="setView('sections')" [matTooltip]="'Back' | t"><img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" class="mc-icon" /></button>
+                    <button mat-icon-button (click)="setView('sections')" [matTooltip]="'Back' | t"><mat-icon svgIcon="mc:arrows/arrow_left"></mat-icon></button>
                     <strong class="tr-crumb">{{ crumb() }}</strong>
                 </div>
                 @for (m of mods(); track m.id) {
@@ -396,7 +388,7 @@ function describeExpr(expr: string): string {
             } @else if (view() === 'mod') {
             <div class="tr-list">
                 <div class="fq-bar">
-                    <button mat-icon-button (click)="openMods()" [matTooltip]="'Back' | t"><img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" class="mc-icon" /></button>
+                    <button mat-icon-button (click)="openMods()" [matTooltip]="'Back' | t"><mat-icon svgIcon="mc:arrows/arrow_left"></mat-icon></button>
                     <strong class="tr-crumb">{{ crumb() }}</strong>
                 </div>
                 <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No translatable text for this mod yet' | t" [subtitle]="'Mod titles and descriptions are not in the catalog yet, so there is nothing to fill in here.' | t" />
@@ -405,7 +397,7 @@ function describeExpr(expr: string): string {
             } @else {
             <!-- ═══ TOOLBAR ═══ -->
             <div class="tr-toolbar">
-                <button mat-icon-button (click)="goBack()" [matTooltip]="'Back' | t"><img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" class="mc-icon" /></button>
+                <button mat-icon-button (click)="goBack()" [matTooltip]="'Back' | t"><mat-icon svgIcon="mc:arrows/arrow_left"></mat-icon></button>
                 <strong class="tr-crumb">{{ crumb() }}</strong>
                 <span class="tr-spacer"></span>
             </div>

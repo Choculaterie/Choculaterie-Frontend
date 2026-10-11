@@ -23,7 +23,7 @@ import { SkeletonImgComponent } from '../skeleton-img/skeleton-img.component';
                     @if (user().filePath) {
                         <app-skeleton-img [src]="user().filePath! | userImg" [alt]="user().username!" height="64px" />
                     } @else {
-                        <img src="/icons/ui/smile_circle.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        <mat-icon svgIcon="mc:people/guy"></mat-icon>
                     }
                 </div>
                 <div class="user-name-row">
@@ -71,7 +71,8 @@ import { SkeletonImgComponent } from '../skeleton-img/skeleton-img.component';
             background: var(--mat-sys-surface-variant);
             app-skeleton-img { width: 100%; height: 100%; }
             mat-icon { font-size: 48px; width: 48px; height: 48px; color: var(--mat-sys-on-surface-variant); }
-            img.mc-icon { width: 48px; height: 48px; transform: translate(1px,1px); }
+            mat-icon { --icon-size: 64px;
+    width: var(--icon-size); height: var(--icon-size); }
         }
         .user-name-row {
             display: flex; align-items: center; gap: 0.35rem;

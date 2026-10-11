@@ -15,11 +15,12 @@ import { CaptchaComponent } from '../../../../shared/components/captcha/captcha.
 import type { CaptchaPositionDto } from '../../../../api/generated.schemas';
 import { ToastService } from '../../../../core/services/toast.service';
 import { AUTH } from '../../../../i18n/labels';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [TPipe,
+  imports: [MatIconModule, TPipe,
     RouterLink,
     ReactiveFormsModule,
     MatCardModule,

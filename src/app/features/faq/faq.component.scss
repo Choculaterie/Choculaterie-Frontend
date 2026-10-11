@@ -40,14 +40,15 @@
     }
 
     .expand-arrow {
-        width: 20px;
-        height: 20px;
+        width: var(--icon-size);
+        height: var(--icon-size);
         margin-left: 12px;
         transition: transform 0.2s;
-        transform-origin: center 43.75%;
+        transform-origin: center;
 
         &.expanded {
-            transform: rotate(180deg) translateY(1px);
+            transform: rotate(180deg);
+            --mc-shadow-dir: -1;
         }
     }
 
@@ -143,9 +144,9 @@
         height: 16px;
     }
 
-    img.mc-icon {
-        width: 16px;
-        height: 16px;
+    mat-icon {
+        width: var(--icon-size);
+        height: var(--icon-size);
     }
 
     div {
@@ -253,9 +254,10 @@
         transform: scale(0.75);
     }
 
-    button img.mc-icon {
-        width: 24px;
-        height: 24px;
+    button mat-icon {
+        --icon-size: 36px;
+        width: var(--icon-size);
+        height: var(--icon-size);
     }
 }
 
@@ -267,7 +269,7 @@
 .form-actions {
     display: flex;
 
-    button:disabled img.mc-icon {
+    button:disabled mat-icon {
         opacity: 1;
         filter: contrast(0) !important;
     }
@@ -283,8 +285,9 @@
 
     .success-icon {
         font-size: 56px;
-        width: 56px;
-        height: 56px;
+        --icon-size: 72px;
+        width: var(--icon-size);
+        height: var(--icon-size);
         color: var(--mat-sys-primary);
     }
 

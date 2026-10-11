@@ -3,11 +3,12 @@ import { TPipe } from '../../../core/i18n/t.pipe';
 import { MatDividerModule } from '@angular/material/divider';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { simpleGithub, simpleDiscord } from '@ng-icons/simple-icons';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'app-footer',
     standalone: true,
-    imports: [TPipe, MatDividerModule, NgIconComponent],
+    imports: [MatIconModule, TPipe, MatDividerModule, NgIconComponent],
     viewProviders: [provideIcons({ simpleGithub, simpleDiscord })],
     template: `
         <mat-divider />
@@ -21,7 +22,7 @@ import { simpleGithub, simpleDiscord } from '@ng-icons/simple-icons';
                     <ng-icon name="simpleDiscord" size="18" /> Discord
                 </a>
                 <a href="https://status.choculaterie.com/" target="_blank" rel="noopener" [attr.aria-label]="'Status' | t">
-                    <img src="/icons/data/graph_up.svg" alt="" aria-hidden="true" class="mc-icon status-icon" /> {{ 'Status' | t }}
+                    <mat-icon svgIcon="mc:data/graph_up" class="status-icon"></mat-icon> {{ 'Status' | t }}
                 </a>
             </div>
         </footer>
@@ -55,12 +56,8 @@ import { simpleGithub, simpleDiscord } from '@ng-icons/simple-icons';
             &:hover { color: var(--mat-sys-primary); }
         }
         .footer-links .mc-icon {
-            width: 18px;
-            height: 18px;
-        }
-        .status-icon {
-            position: relative;
-            top: -1px;
+            width: var(--icon-size);
+            height: var(--icon-size);
         }
     `,
 })

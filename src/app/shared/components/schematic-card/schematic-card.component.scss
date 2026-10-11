@@ -71,11 +71,11 @@
     opacity: 0.9;
     cursor: pointer;
 
-    mat-icon,
-    img.mc-icon {
+    mat-icon {
         font-size: 16px;
-        width: 16px;
-        height: 16px;
+        --icon-size: 24px;
+        width: var(--icon-size);
+        height: var(--icon-size);
         color: var(--mat-sys-primary);
     }
 }
@@ -88,9 +88,10 @@
     justify-content: center;
     background: var(--mat-sys-surface-variant);
 
-    svg.mc-icon {
-        width: 48px;
-        height: 48px;
+    mat-icon {
+        --icon-size: 60px;
+        width: var(--icon-size);
+        height: var(--icon-size);
         color: var(--mat-sys-on-surface-variant);
     }
 }
@@ -146,11 +147,10 @@ mat-card-content {
         gap: 0.2rem;
     }
 
-    mat-icon,
-    img.mc-icon {
+    mat-icon {
         font-size: 16px;
-        width: 16px;
-        height: 16px;
+        width: var(--icon-size);
+        height: var(--icon-size);
     }
 }
 

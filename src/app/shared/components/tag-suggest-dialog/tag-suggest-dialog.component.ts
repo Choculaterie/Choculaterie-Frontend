@@ -29,9 +29,7 @@ import { ToastService } from '../../../core/services/toast.service';
                 <mat-label>{{ 'Tag name' | t }}</mat-label>
                 <input matInput [formControl]="nameCtrl" [placeholder]="'e.g. oak log' | t"
                     (keydown.enter)="submit()" autocomplete="off" maxlength="30" />
-                <img matSuffix src="/icons/ui/!!.svg" alt="" aria-hidden="true" class="mc-icon field-info"
-                    [matTooltip]="'Lowercase letters, numbers, spaces, hyphens and underscores only' | t" matTooltipTouchGestures="on" draggable="false"
-                    (contextmenu)="$event.preventDefault()" />
+                <mat-icon svgIcon="mc:ui/!!" matSuffix class="field-info" [matTooltip]="'Lowercase letters, numbers, spaces, hyphens and underscores only' | t" matTooltipTouchGestures="on" (contextmenu)="$event.preventDefault()"></mat-icon>
                 @if (nameCtrl.hasError('pattern')) {
                 <mat-error>{{ 'Only lowercase letters, numbers, spaces, hyphens and underscores are allowed' | t }}</mat-error>
                 }

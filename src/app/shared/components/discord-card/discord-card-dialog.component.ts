@@ -8,6 +8,7 @@ import { simpleDiscord } from '@ng-icons/simple-icons';
 import { TPipe } from '../../../core/i18n/t.pipe';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
 import { translateText } from '../../../core/i18n/translation.store';
+import { MatIconModule } from '@angular/material/icon';
 
 export interface DiscordCardDialogData {
     username: string;
@@ -35,7 +36,7 @@ interface DiscordCardResponse {
 @Component({
     selector: 'app-discord-card-dialog',
     standalone: true,
-    imports: [TPipe, LoadingSpinnerComponent, DatePipe, MatDialogModule, MatButtonModule, NgIconComponent],
+    imports: [MatIconModule, TPipe, LoadingSpinnerComponent, DatePipe, MatDialogModule, MatButtonModule, NgIconComponent],
     viewProviders: [provideIcons({ simpleDiscord })],
     template: `
         <div class="dc-card">
@@ -44,7 +45,7 @@ interface DiscordCardResponse {
                 <h2>{{ 'Discord' | t }}</h2>
                 <span class="dc-spacer"></span>
                 <button mat-icon-button mat-dialog-close [attr.aria-label]="'Close' | t">
-                    <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+                    <mat-icon svgIcon="mc:letters/X"></mat-icon>
                 </button>
             </div>
 

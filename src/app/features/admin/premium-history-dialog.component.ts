@@ -38,7 +38,7 @@ interface HistoryRow {
     template: `
 <div mat-dialog-title class="premium-dlg-title">
     <button mat-icon-button [mat-dialog-close]="'back'" class="back-btn" [matTooltip]="'Back' | t">
-        <img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" class="mc-icon" />
+        <mat-icon svgIcon="mc:arrows/arrow_left"></mat-icon>
     </button>
     <span>{{ data.username }}</span>
 </div>

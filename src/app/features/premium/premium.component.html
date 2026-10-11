@@ -1,6 +1,6 @@
 <div class="premium-page">
     <button mat-icon-button class="back-btn" (click)="goBack()" [matTooltip]="'Back' | t">
-        <img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" class="mc-icon" />
+        <mat-icon svgIcon="mc:arrows/arrow_left"></mat-icon>
     </button>
     <header class="premium-header">
         <h1>{{ 'Choculaterie Premium' | t }}</h1>
@@ -72,37 +72,31 @@
             </tr>
             <tr>
                 <td>{{ 'Manual upload and download' | t }}</td>
-                <td><img src="/icons/ui/check.svg" [alt]="'Yes' | t" class="mc-icon check-icon" /></td>
-                <td><img src="/icons/ui/check.svg" [alt]="'Yes' | t" class="mc-icon check-icon" /></td>
+                <td><mat-icon svgIcon="mc:ui/check" class="check-icon"></mat-icon></td>
+                <td><mat-icon svgIcon="mc:ui/check" class="check-icon"></mat-icon></td>
             </tr>
             <tr>
                 <td>
                     <span class="feature-with-info">{{ 'Automatic cloud sync' | t }}
-                        <img src="/icons/ui/!!.svg" alt="" aria-hidden="true" class="mc-icon info-point"
-                            [matTooltip]="'Pick which worlds sync by marking them as favourite with the star in the mod. Only favourited worlds upload automatically.' | t"
-                            matTooltipTouchGestures="on" draggable="false"
-                            (contextmenu)="$event.preventDefault()" />
+                        <mat-icon svgIcon="mc:ui/!!" class="info-point" [matTooltip]="'Pick which worlds sync by marking them as favourite with the star in the mod. Only favourited worlds upload automatically.' | t" matTooltipTouchGestures="on" (contextmenu)="$event.preventDefault()"></mat-icon>
                     </span>
                 </td>
-                <td><img src="/icons/letters/X.svg" [alt]="'No' | t" class="mc-icon cross-icon" /></td>
-                <td><img src="/icons/ui/check.svg" [alt]="'Yes' | t" class="mc-icon check-icon" /></td>
+                <td><mat-icon svgIcon="mc:letters/X" class="cross-icon"></mat-icon></td>
+                <td><mat-icon svgIcon="mc:ui/check" class="check-icon"></mat-icon></td>
             </tr>
             <tr>
                 <td>
                     <span class="feature-with-info">{{ 'Version history per world' | t }}
-                        <img src="/icons/ui/!!.svg" alt="" aria-hidden="true" class="mc-icon info-point"
-                            [matTooltip]="'Premium keeps earlier backups of each world, one per day over the last three days, so you can roll back to how it was on a previous day. Free keeps only the current one.' | t"
-                            matTooltipTouchGestures="on" draggable="false"
-                            (contextmenu)="$event.preventDefault()" />
+                        <mat-icon svgIcon="mc:ui/!!" class="info-point" [matTooltip]="'Premium keeps earlier backups of each world, one per day over the last three days, so you can roll back to how it was on a previous day. Free keeps only the current one.' | t" matTooltipTouchGestures="on" (contextmenu)="$event.preventDefault()"></mat-icon>
                     </span>
                 </td>
-                <td><img src="/icons/letters/X.svg" [alt]="'No' | t" class="mc-icon cross-icon" /></td>
-                <td><img src="/icons/ui/check.svg" [alt]="'Yes' | t" class="mc-icon check-icon" /></td>
+                <td><mat-icon svgIcon="mc:letters/X" class="cross-icon"></mat-icon></td>
+                <td><mat-icon svgIcon="mc:ui/check" class="check-icon"></mat-icon></td>
             </tr>
             <tr>
                 <td>{{ 'Premium badge on your profile' | t }}</td>
-                <td><img src="/icons/letters/X.svg" [alt]="'No' | t" class="mc-icon cross-icon" /></td>
-                <td><img src="/icons/ui/check.svg" [alt]="'Yes' | t" class="mc-icon check-icon" /></td>
+                <td><mat-icon svgIcon="mc:letters/X" class="cross-icon"></mat-icon></td>
+                <td><mat-icon svgIcon="mc:ui/check" class="check-icon"></mat-icon></td>
             </tr>
         </tbody>
     </table>
@@ -171,7 +165,7 @@
                         <div class="copy-row">
                             <code>{{ invoice()!.xmr }} XMR</code>
                             <button mat-icon-button [matTooltip]="'Copy' | t" (click)="copy(invoice()!.xmr, 'Amount')">
-                                <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                <mat-icon svgIcon="mc:ui/overlapping_sheets"></mat-icon>
                             </button>
                         </div>
                     </div>
@@ -180,7 +174,7 @@
                         <div class="copy-row">
                             <code class="address">{{ invoice()!.address }}</code>
                             <button mat-icon-button [matTooltip]="'Copy' | t" (click)="copy(invoice()!.address, 'Address')">
-                                <img src="/icons/shapes/form_1.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                <mat-icon svgIcon="mc:ui/overlapping_sheets"></mat-icon>
                             </button>
                         </div>
                     </div>

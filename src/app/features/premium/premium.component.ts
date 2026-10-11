@@ -12,13 +12,14 @@ import { SessionService } from '../../core/services/session.service';
 import { ToastService } from '../../core/services/toast.service';
 import { BillingService, MoneroInvoice, MoneroPlan, OwnSubscriptionResponse } from '../../api/billing';
 import { toDataURL } from 'qrcode';
+import { MatIconModule } from '@angular/material/icon';
 
 const CHECKOUT_HOP_KEY = 'premium-checkout-hop';
 
 @Component({
     selector: 'app-premium',
     standalone: true,
-    imports: [
+    imports: [MatIconModule, 
         TPipe, DatePipe, MatCardModule, MatButtonModule, MatTooltipModule,
         MatProgressBarModule,
     ],

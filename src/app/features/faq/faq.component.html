@@ -20,8 +20,7 @@
             <mat-expansion-panel hideToggle #panel>
                 <mat-expansion-panel-header>
                     <mat-panel-title>{{ faq.question }}</mat-panel-title>
-                    <img src="/icons/arrows/tild_full_down.svg" alt="" aria-hidden="true" class="mc-icon expand-arrow"
-                        [class.expanded]="panel.expanded" [matTooltip]="(panel.expanded ? 'Collapse' : 'Expand') | t" />
+                    <mat-icon svgIcon="mc:arrows/tild_full_down" class="expand-arrow" [class.expanded]="panel.expanded" [matTooltip]="(panel.expanded ? 'Collapse' : 'Expand') | t"></mat-icon>
                 </mat-expansion-panel-header>
                 <p class="faq-answer">{{ faq.answer }}</p>
             </mat-expansion-panel>
@@ -57,7 +56,7 @@
                 </div>
             </div>
             <div class="channel">
-                <img src="/icons/communication/mail.svg" alt="" aria-hidden="true" class="mc-icon" />
+                <mat-icon svgIcon="mc:communication/mail"></mat-icon>
                 <div>
                     <strong>{{ 'Email' | t }}</strong>
 
@@ -71,7 +70,7 @@
 
         @if (submitted()) {
         <div class="success-state">
-            <img src="/icons/ui/check.svg" alt="" aria-hidden="true" class="mc-icon success-icon" />
+            <mat-icon svgIcon="mc:ui/check" class="success-icon"></mat-icon>
             <h3>{{ 'Message sent!' | t }}</h3>
             <p>{{ 'We\'ll get back to you as soon as possible.' | t }}</p>
         </div>
@@ -91,23 +90,15 @@
                 <mat-label>{{ 'Your contact (optional)' | t }}</mat-label>
                 <input matInput formControlName="contact" [placeholder]="'email or Discord' | t"
                     maxlength="200" />
-                <img matSuffix src="/icons/ui/!!.svg" alt="" aria-hidden="true" class="mc-icon field-info"
-                    [matTooltip]="'So I can reply to you' | t" matTooltipTouchGestures="on" draggable="false"
-                    (contextmenu)="$event.preventDefault()" />
+                <mat-icon svgIcon="mc:ui/!!" matSuffix class="field-info" [matTooltip]="'So I can reply to you' | t" matTooltipTouchGestures="on" (contextmenu)="$event.preventDefault()"></mat-icon>
             </mat-form-field>
 
             <div class="attachments">
                 <button type="button" mat-stroked-button (click)="imgInput.click()" [disabled]="imageFiles.length >= 5">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="18"
-                        height="18" matButtonIcon class="mc-icon" style="transform: translateY(1px)">
-                        <path fill="currentColor"
-                            d="M2,2h3v1h-3zM12,2h4v1h-4zM23,2h4v1h-4zM2,3h3v1h-3zM12,3h4v1h-4zM23,3h4v1h-4zM2,4h3v1h-3zM12,4h4v1h-4zM23,4h4v1h-4zM5,5h4v1h-4zM20,5h3v1h-3zM5,6h4v1h-4zM20,6h3v1h-3zM5,7h4v1h-4zM20,7h3v1h-3zM9,8h3v1h-3zM16,8h4v1h-4zM9,9h3v1h-3zM16,9h4v1h-4zM9,10h3v1h-3zM16,10h4v1h-4zM2,11h3v1h-3zM12,11h4v1h-4zM23,11h4v1h-4zM2,12h3v1h-3zM12,12h4v1h-4zM23,12h4v1h-4zM2,13h3v1h-3zM12,13h4v1h-4zM23,13h4v1h-4zM9,14h3v1h-3zM16,14h4v1h-4zM9,15h3v1h-3zM16,15h4v1h-4zM9,16h3v1h-3zM16,16h4v1h-4zM9,17h3v1h-3zM16,17h4v1h-4zM5,18h4v1h-4zM20,18h3v1h-3zM5,19h4v1h-4zM20,19h3v1h-3zM5,20h4v1h-4zM20,20h3v1h-3zM2,21h3v1h-3zM12,21h4v1h-4zM23,21h4v1h-4zM2,22h3v1h-3zM12,22h4v1h-4zM23,22h4v1h-4zM2,23h3v1h-3zM12,23h4v1h-4zM23,23h4v1h-4z" />
-                        <path fill="var(--mc-icon-shadow)"
-                            d="M16,5h4v1h-4zM27,5h3v1h-3zM16,6h4v1h-4zM27,6h3v1h-3zM16,7h4v1h-4zM27,7h3v1h-3zM23,8h4v1h-4zM23,9h4v1h-4zM23,10h4v1h-4zM20,11h3v1h-3zM20,12h3v1h-3zM20,13h3v1h-3zM5,14h4v1h-4zM27,14h3v1h-3zM5,15h4v1h-4zM27,15h3v1h-3zM5,16h4v1h-4zM27,16h3v1h-3zM5,17h4v1h-4zM27,17h3v1h-3zM12,18h4v1h-4zM12,19h4v1h-4zM12,20h4v1h-4zM9,21h3v1h-3zM9,22h3v1h-3zM9,23h3v1h-3zM5,24h4v1h-4zM16,24h4v1h-4zM27,24h3v1h-3zM5,25h4v1h-4zM16,25h4v1h-4zM27,25h3v1h-3zM5,26h4v1h-4zM16,26h4v1h-4zM27,26h3v1h-3z" />
-                    </svg>
+                    <mat-icon svgIcon="mc:media/image" matButtonIcon></mat-icon>
                     <span>{{ 'Attach images' | t }} ({{ imageFiles.length }}/5)</span>
                 </button>
-                <input #imgInput type="file" appFilePick accept="image/*" multiple hidden (change)="onImageChange($event)" />
+                <input #imgInput type="file" accept="image/*" multiple hidden (change)="onImageChange($event)" />
                 @if (imagePreviews().length) {
                 <div class="preview-grid">
                     @for (preview of imagePreviews(); track preview; let i = $index) {
@@ -115,7 +106,7 @@
                         <img appMediaSkeleton [src]="preview" [alt]="imageFiles[i]?.name" style="cursor:pointer" />
                         <div class="preview-actions">
                             <button mat-icon-button type="button" (click)="removeImage(i)" [matTooltip]="'Remove' | t">
-                                <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+                                <mat-icon svgIcon="mc:letters/X"></mat-icon>
                             </button>
                         </div>
                     </div>
@@ -133,9 +124,7 @@
             <div class="form-actions">
                 <button mat-flat-button type="submit"
                     [disabled]="contactForm.invalid || submitting() || (!session.isAuthenticated() && !captchaData())">
-                    <img [src]="contactForm.invalid || submitting() || (!session.isAuthenticated() && !captchaData())
-                        ? '/icons/fantasy/potion_throw_disabled.svg'
-                        : '/icons/fantasy/potion_throw.svg'" alt="" aria-hidden="true" matButtonIcon class="mc-icon" />
+                    <mat-icon svgIcon="mc:communication/send" matButtonIcon></mat-icon>
                     <span>{{ 'Send message' | t }}</span>
                 </button>
             </div>

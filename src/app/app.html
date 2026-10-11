@@ -1,7 +1,7 @@
 @for (a of announcements(); track a.id) {
 @let t = a.type.toLowerCase();
 <div class="site-banner" [class]="'site-banner--' + t">
-  <img [src]="t === 'info' ? '/icons/ui/info.svg' : '/icons/ui/warning.svg'" alt="" aria-hidden="true" class="mc-icon" />
+  <mat-icon [svgIcon]="t === 'info' ? 'mc:ui/info' : 'mc:ui/warning'"></mat-icon>
   <span>{{ a.message }}</span>
 </div>
 }

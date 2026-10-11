@@ -11,11 +11,12 @@ import { NotificationsService } from '../../../api/notifications';
 import { ThemeService } from '../../../core/services/theme.service';
 import { TicketReplyViewDialogComponent } from '../ticket-reply-view-dialog/ticket-reply-view-dialog.component';
 import { ADMIN_TAB } from '../../../core/enums';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'app-inbox-dialog',
     standalone: true,
-    imports: [TPipe,
+    imports: [MatIconModule, TPipe,
         MatDialogModule,
         MatButtonModule,
         MatTooltipModule,
@@ -29,15 +30,15 @@ import { ADMIN_TAB } from '../../../core/enums';
     <div class="title-right">
         @if (hasAnyUnread()) {
         <button mat-icon-button (click)="markAllRead()" [matTooltip]="'Mark all read' | t" class="check-icon-btn check-gray" [style.filter]="theme.isDark() ? 'none' : 'invert(1)'">
-            <img src="/icons/ui/check.svg" [alt]="'Mark all read' | t">
+            <mat-icon svgIcon="mc:ui/check"></mat-icon>
         </button>
         } @else if (items().length > 0) {
         <button mat-icon-button (click)="markAllUnread()" [matTooltip]="'Mark all unread' | t" class="check-icon-btn" [style.filter]="theme.isDark() ? 'none' : 'invert(1)'">
-            <img src="/icons/ui/check.svg" [alt]="'Mark all unread' | t">
+            <mat-icon svgIcon="mc:ui/check"></mat-icon>
         </button>
         }
         <button mat-icon-button mat-dialog-close>
-            <img src="/icons/letters/X.svg" [alt]="'Close' | t">
+            <mat-icon svgIcon="mc:letters/X"></mat-icon>
         </button>
     </div>
 </div>
@@ -45,24 +46,24 @@ import { ADMIN_TAB } from '../../../core/enums';
 <mat-dialog-content class="inbox-dlg-content">
     @if (items().length === 0) {
     <div class="inbox-empty">
-        <img src="/icons/communication/mail.svg" [alt]="'No notifications' | t" class="empty-icon">
+        <mat-icon svgIcon="mc:communication/mail" class="empty-icon"></mat-icon>
         <p>{{ 'No notifications' | t }}</p>
     </div>
     } @else {
     @for (n of items(); track trackItem(n)) {
     <div class="inbox-item" [class.inbox-unread]="!n.isRead" (click)="openNotification(n)">
-        <img src="/icons/ui/info.svg" alt="" class="inbox-type-icon" style="width: 24px; height: 24px; left: -3px;">
+        <mat-icon svgIcon="mc:ui/info" class="inbox-type-icon" style="--icon-size: 36px;  left: -3px;"></mat-icon>
         <div class="inbox-text">
             <span class="inbox-msg">{{ n.message }}</span>
             <span class="inbox-time">{{ formatTime(n.createdAt) }}</span>
         </div>
         <button mat-icon-button class="inbox-action-btn check-icon-btn" [class.check-gray]="!n.isRead"
             (click)="toggleRead(n, $event)" [matTooltip]="n.isRead ? 'Mark unread' : 'Mark read'" [style.filter]="theme.isDark() ? 'none' : 'invert(1)'">
-            <img src="/icons/ui/check.svg" alt="">
+            <mat-icon svgIcon="mc:ui/check"></mat-icon>
         </button>
         <button mat-icon-button class="inbox-action-btn inbox-delete-btn" (click)="deleteNotification(n, $event)"
             [matTooltip]="'Delete' | t">
-            <img src="/icons/fantasy/skull.svg" [alt]="'Delete' | t" style="width: 18px; height: 18px;">
+            <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>
         </button>
     </div>
     }
@@ -94,7 +95,8 @@ import { ADMIN_TAB } from '../../../core/enums';
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
             padding: 1rem; opacity: 0.5;
             mat-icon { font-size: 40px; width: 40px; height: 40px; }
-            .empty-icon { width: 40px; height: 40px; }
+            .empty-icon { --icon-size: 48px;
+    width: var(--icon-size); height: var(--icon-size); }
         }
         .inbox-item {
             display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box;
@@ -103,7 +105,8 @@ import { ADMIN_TAB } from '../../../core/enums';
             &:hover { background: var(--mat-sys-surface-variant); }
         }
         .inbox-unread { background: color-mix(in srgb, var(--mat-sys-primary) 6%, transparent); font-weight: 600; }
-        .inbox-type-icon { flex-shrink: 0; opacity: 0.7; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; }
+        .inbox-type-icon { flex-shrink: 0; opacity: 0.7; display: flex; align-items: center; justify-content: center; --icon-size: 36px;
+    width: var(--icon-size); height: var(--icon-size); }
         .inbox-text { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 2px; min-width: 0; }
         .inbox-msg { font-size: 0.88rem; white-space: normal; word-break: break-word; }
         .inbox-time { font-size: 0.72rem; opacity: 0.5; }

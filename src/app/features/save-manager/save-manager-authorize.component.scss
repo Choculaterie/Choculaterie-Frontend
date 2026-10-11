@@ -77,8 +77,9 @@ p {
 
     .app-icon {
         font-size: 2.5rem;
-        width: 2.5rem;
-        height: 2.5rem;
+        --icon-size: 48px;
+        width: var(--icon-size);
+        height: var(--icon-size);
         color: var(--mat-sys-primary);
     }
 
@@ -163,12 +164,14 @@ p {
 }
 
 .key-toggle-arrow {
-    width: 10px;
-    height: 10px;
+    width: var(--icon-size);
+    height: var(--icon-size);
     transition: transform 0.2s;
-    transform-origin: center 43.75%;
-    image-rendering: pixelated;
-    &.open { transform: rotate(180deg) translateY(1px); }
+    transform-origin: center;
+    &.open {
+        transform: rotate(180deg);
+        --mc-shadow-dir: -1;
+    }
 }
 
 .mc-font {

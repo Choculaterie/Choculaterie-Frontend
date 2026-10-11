@@ -9,7 +9,7 @@
     @if (state() === 'expired') {
     <mat-card class="auth-card auth-card--warn">
         <mat-card-content>
-            <img src="/icons/misc/clock.svg" alt="" aria-hidden="true" class="mc-icon state-icon state-icon--warn" />
+            <mat-icon svgIcon="mc:misc/clock" class="state-icon state-icon--warn"></mat-icon>
             <h2>{{ 'Request expired' | t }}</h2>
             <p>{{ 'This Save Manager authorization request has expired or no longer exists. Please initiate a new request from the mod.' | t }}</p>
             <button mat-stroked-button routerLink="/">{{ 'Go home' | t }}</button>
@@ -20,7 +20,7 @@
     @if (state() === 'error') {
     <mat-card class="auth-card auth-card--warn">
         <mat-card-content>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" class="mc-icon state-icon state-icon--warn" aria-hidden="true"><path fill="currentColor" d="M13,1h3v1h-3zM13,2h3v1h-3zM13,3h3v1h-3zM10,4h3v1h-3zM16,4h3v1h-3zM10,5h3v1h-3zM16,5h3v1h-3zM10,6h3v1h-3zM16,6h3v1h-3zM10,7h3v1h-3zM16,7h3v1h-3zM10,8h3v1h-3zM16,8h3v1h-3zM10,9h3v1h-3zM16,9h3v1h-3zM7,10h3v1h-3zM13,10h3v1h-3zM19,10h3v1h-3zM7,11h3v1h-3zM13,11h3v1h-3zM19,11h3v1h-3zM7,12h3v1h-3zM13,12h3v1h-3zM19,12h3v1h-3zM7,13h3v1h-3zM13,13h3v1h-3zM19,13h3v1h-3zM7,14h3v1h-3zM13,14h3v1h-3zM19,14h3v1h-3zM7,15h3v1h-3zM13,15h3v1h-3zM19,15h3v1h-3zM4,16h3v1h-3zM13,16h3v1h-3zM22,16h3v1h-3zM4,17h3v1h-3zM13,17h3v1h-3zM22,17h3v1h-3zM4,18h3v1h-3zM13,18h3v1h-3zM22,18h3v1h-3zM4,19h3v1h-3zM22,19h3v1h-3zM4,20h3v1h-3zM22,20h3v1h-3zM4,21h3v1h-3zM22,21h3v1h-3zM1,22h3v1h-3zM13,22h3v1h-3zM25,22h3v1h-3zM1,23h3v1h-3zM13,23h3v1h-3zM25,23h3v1h-3zM1,24h3v1h-3zM13,24h3v1h-3zM25,24h3v1h-3zM1,25h27v1h-27zM1,26h27v1h-27zM1,27h27v1h-27z" /><path fill="var(--mc-icon-shadow)" d="M13,7h3v1h-3zM19,7h3v1h-3zM13,8h3v1h-3zM19,8h3v1h-3zM13,9h3v1h-3zM19,9h3v1h-3zM10,13h3v1h-3zM16,13h3v1h-3zM22,13h3v1h-3zM10,14h3v1h-3zM16,14h3v1h-3zM22,14h3v1h-3zM10,15h3v1h-3zM16,15h3v1h-3zM22,15h3v1h-3zM10,16h3v1h-3zM16,16h3v1h-3zM10,17h3v1h-3zM16,17h3v1h-3zM10,18h3v1h-3zM16,18h3v1h-3zM7,19h3v1h-3zM16,19h3v1h-3zM25,19h3v1h-3zM7,20h3v1h-3zM16,20h3v1h-3zM25,20h3v1h-3zM7,21h3v1h-3zM16,21h3v1h-3zM25,21h3v1h-3zM7,22h3v1h-3zM7,23h3v1h-3zM7,24h3v1h-3zM28,25h3v1h-3zM28,26h3v1h-3zM28,27h3v1h-3zM4,28h27v1h-27zM4,29h27v1h-27zM4,30h27v1h-27z" /></svg>
+            <mat-icon svgIcon="mc:ui/warning" class="state-icon state-icon--warn"></mat-icon>
             <h2>{{ 'Something went wrong' | t }}</h2>
             <p>{{ errorMsg() }}</p>
             <button mat-stroked-button routerLink="/">{{ 'Go home' | t }}</button>
@@ -32,7 +32,7 @@
     <mat-card class="auth-card">
         <mat-card-content>
             <div class="app-identity">
-                <img src="/icons/ui/warning.svg" alt="" aria-hidden="true" class="mc-icon app-icon" />
+                <mat-icon svgIcon="mc:ui/warning" class="app-icon"></mat-icon>
                 <div>
                     <span class="app-name">{{ flow()!.clientIdentifier }}</span>
                     <span class="app-label">{{ 'wants access to your saves' | t }}</span>
@@ -49,20 +49,20 @@
                 </p>
                 <div class="permission-list" role="list">
                     <div class="permission">
-                        <img src="/icons/arrows/arrow_up.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        <mat-icon svgIcon="mc:arrows/arrow_up"></mat-icon>
                         <span>{{ 'Upload world saves' | t }}</span>
                     </div>
                     <div class="permission">
-                        <img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        <mat-icon svgIcon="mc:arrows/arrow_down"></mat-icon>
                         <span>{{ 'Download world saves' | t }}</span>
                     </div>
                     <div class="permission">
-                        <img src="/icons/fantasy/skull.svg" alt="" aria-hidden="true" class="mc-icon" />
+                        <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>
                         <span>{{ 'Delete world saves' | t }}</span>
                     </div>
                 </div>
                 <p class="expires-note">
-                    <img src="/icons/misc/clock.svg" alt="" aria-hidden="true" class="mc-icon" />
+                    <mat-icon svgIcon="mc:misc/clock"></mat-icon>
                     <span>{{ 'Request expires' | t }} {{ flow()!.expiresAt | date:'shortTime' }} ({{ flow()!.expiresAt |
                         date:'mediumDate' }})</span>
                 </p>
@@ -81,20 +81,20 @@
     @if (state() === 'approved') {
     <mat-card class="auth-card auth-card--success">
         <mat-card-content>
-            <img src="/icons/ui/check.svg" alt="" aria-hidden="true" class="mc-icon state-icon state-icon--success" />
+            <mat-icon svgIcon="mc:ui/check" class="state-icon state-icon--success"></mat-icon>
             <h2>{{ 'Access approved' | t }}</h2>
             <p>{{ 'Switch back to the mod; it will receive the key automatically within a few seconds.' | t }}</p>
             @if (approveResult()?.saveKey) {
             <div class="key-block">
                 <button class="key-toggle" (click)="toggleManualKey()">
                     <span>{{ 'Save Key (manual fallback)' | t }}</span>
-                    <img src="/icons/arrows/tild_full_down_2.svg" alt="" aria-hidden="true" class="mc-icon key-toggle-arrow" [class.open]="showManualKey()" />
+                    <mat-icon svgIcon="mc:arrows/tild_full_down_2" class="key-toggle-arrow" [class.open]="showManualKey()"></mat-icon>
                 </button>
                 @if (showManualKey()) {
                 <div class="key-row">
                     <span class="key-value mc-font">{{ approveResult()!.saveKey }}</span>
                     <button mat-icon-button (click)="copyKey()" [matTooltip]="copiedKey() ? 'Copied!' : 'Copy'">
-                        <img [src]="copiedKey() ? '/icons/ui/check.svg' : '/icons/shapes/form_1.svg'" alt="" aria-hidden="true" class="mc-icon" />
+                        <mat-icon [svgIcon]="copiedKey() ? 'mc:ui/check' : 'mc:ui/overlapping_sheets'"></mat-icon>
                     </button>
                 </div>
                 <p class="key-note">{{ 'Only needed if the mod didn\'t receive the key automatically.' | t }}</p>
@@ -108,7 +108,7 @@
     @if (state() === 'cancelled') {
     <mat-card class="auth-card">
         <mat-card-content>
-            <img src="/icons/ui/forbidden_circle.svg" alt="" aria-hidden="true" class="mc-icon state-icon" />
+            <mat-icon svgIcon="mc:ui/forbidden_circle" class="state-icon"></mat-icon>
             <h2>{{ 'Request denied' | t }}</h2>
             <p>{{ 'The Save Manager authorization request was denied. You can close this page.' | t }}</p>
             <button mat-stroked-button routerLink="/">{{ 'Go home' | t }}</button>

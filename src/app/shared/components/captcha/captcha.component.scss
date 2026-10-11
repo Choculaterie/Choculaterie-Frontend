@@ -53,9 +53,10 @@
     width: 26px;
     height: 26px;
 
-    img.mc-icon {
-        width: 26px;
-        height: 26px;
+    mat-icon {
+        --icon-size: 36px;
+        width: var(--icon-size);
+        height: var(--icon-size);
     }
 }
 
@@ -70,8 +71,9 @@
 }
 
 .solved-icon {
-    width: 26px;
-    height: 26px;
+    --icon-size: 36px;
+    width: var(--icon-size);
+    height: var(--icon-size);
 }
 
 .captcha-error {

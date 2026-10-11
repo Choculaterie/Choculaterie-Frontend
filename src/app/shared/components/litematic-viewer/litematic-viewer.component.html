@@ -1,7 +1,7 @@
 <div class="viewer-dialog">
     <div class="viewer-header">
         <button mat-icon-button (click)="downloadFile()" [matTooltip]="('Download' | t) + ' ' + data.fileName">
-            <img src="/icons/arrows/arrow_down.svg" alt="" aria-hidden="true" class="mc-icon" />
+            <mat-icon svgIcon="mc:arrows/arrow_down"></mat-icon>
         </button>
         <h2>{{ data.fileName }}</h2>
         @if (isDiffMode() && diffSummary()) {
@@ -12,13 +12,12 @@
         }
         @if (!loading() && !error() && !isDiffMode()) {
         <button mat-stroked-button class="fly-toggle" (click)="toggleFlyMode()" [matTooltip]="'Move around with WASD instead of dragging to rotate' | t">
-            <img [src]="flyMode() ? '/icons/shapes/box_checked.svg' : '/icons/shapes/box.svg'"
-                alt="" aria-hidden="true" class="mc-icon" />
+            <mat-icon [svgIcon]="flyMode() ? 'mc:shapes/box_checked' : 'mc:shapes/box'"></mat-icon>
             <span>{{ 'Fly mode' | t }}</span>
         </button>
         }
         <button mat-icon-button mat-dialog-close>
-            <img src="/icons/letters/X.svg" alt="" aria-hidden="true" class="mc-icon" />
+            <mat-icon svgIcon="mc:letters/X"></mat-icon>
         </button>
     </div>
 
@@ -32,7 +31,7 @@
 
         @if (error()) {
         <div class="error-overlay">
-            <img src="/icons/ui/warning.svg" alt="" aria-hidden="true" class="mc-icon" />
+            <mat-icon svgIcon="mc:ui/warning"></mat-icon>
             <p>{{ error() }}</p>
         </div>
         }

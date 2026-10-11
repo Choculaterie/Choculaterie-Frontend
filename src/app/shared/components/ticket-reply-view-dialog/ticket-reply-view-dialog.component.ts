@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { TPipe } from '../../../core/i18n/t.pipe';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 export interface TicketReplyViewData {
     title: string;
@@ -11,12 +12,12 @@ export interface TicketReplyViewData {
 @Component({
     selector: 'app-ticket-reply-view-dialog',
     standalone: true,
-    imports: [TPipe, MatDialogModule, MatButtonModule],
+    imports: [MatIconModule, TPipe, MatDialogModule, MatButtonModule],
     template: `
 <div mat-dialog-title class="title-row">
     <span>{{ 'Ticket reply' | t }}</span>
     <button mat-icon-button mat-dialog-close>
-        <img src="/icons/letters/X.svg" [alt]="'Close' | t">
+        <mat-icon svgIcon="mc:letters/X"></mat-icon>
     </button>
 </div>
 <mat-dialog-content>

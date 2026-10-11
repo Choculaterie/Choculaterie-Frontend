@@ -3,7 +3,8 @@ import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { filter } from 'rxjs';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { TitleSpotlightComponent } from './shared/components/title-spotlight/title-spotlight.component';
@@ -38,6 +39,12 @@ export class App implements OnInit {
   private readonly titleLabel = signal<string | null>(null);
 
   constructor() {
+    const sanitizer = inject(DomSanitizer);
+    const build = typeof document === 'undefined' ? null
+      : /main-([A-Z0-9]+)\.js/i.exec(document.querySelector<HTMLScriptElement>('script[src*="main-"]')?.src ?? '')?.[1];
+    const iconBase = build ? `/icons/v${build}/` : '/icons/';
+    inject(MatIconRegistry).addSvgIconResolver((name, namespace) =>
+      namespace === 'mc' ? sanitizer.bypassSecurityTrustResourceUrl(`${iconBase}${name}.svg`) : null);
 
     effect(() => {
       const label = this.titleLabel();

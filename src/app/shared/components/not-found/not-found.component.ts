@@ -2,18 +2,19 @@ import { Component } from '@angular/core';
 import { TPipe } from '../../../core/i18n/t.pipe';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'app-not-found',
     standalone: true,
-    imports: [TPipe, RouterLink, MatButtonModule],
+    imports: [MatIconModule, TPipe, RouterLink, MatButtonModule],
     template: `
     <div class="not-found">
-        <img src="/icons/ui/forbidden_circle.svg" alt="" aria-hidden="true" class="mc-icon big-icon" />
+        <mat-icon svgIcon="mc:ui/forbidden_circle" class="big-icon"></mat-icon>
         <h1>404</h1>
         <p>{{ "The page you're looking for doesn't exist or has been moved." | t }}</p>
         <a mat-flat-button routerLink="/">
-            <img src="/icons/arrows/arrow_left.svg" alt="" aria-hidden="true" matButtonIcon class="mc-icon" /> {{ 'Back to Home' | t }}
+            <mat-icon svgIcon="mc:arrows/arrow_left" matButtonIcon></mat-icon> {{ 'Back to Home' | t }}
         </a>
     </div>
     `,
@@ -29,8 +30,9 @@ import { MatButtonModule } from '@angular/material/button';
         }
         .big-icon {
             font-size: 96px;
-            width: 96px;
-            height: 96px;
+            --icon-size: 132px;
+            width: var(--icon-size);
+            height: var(--icon-size);
             color: var(--mat-sys-on-surface-variant);
         }
         h1 {

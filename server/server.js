@@ -299,7 +299,7 @@ function injectMeta(html, title, metaBlock) {
 
 const server = http.createServer(async (req, res) => {
 
-    const urlPath = (req.url || '/').split('?')[0];
+    const urlPath = (req.url || '/').split('?')[0].replace(/^\/icons\/v[\w-]+\//, '/icons/');
 
     const staticRoot = path.resolve(STATIC_DIR);
     const filePath = path.resolve(staticRoot, '.' + decodeURIComponent(urlPath));

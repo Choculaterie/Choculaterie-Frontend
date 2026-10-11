@@ -1,13 +1,14 @@
 import { Component, ElementRef, HostListener, OnDestroy, computed, input, signal, viewChild } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TPipe } from '../../../core/i18n/t.pipe';
-import { PLAYER_ICONS, PixelIcon } from './player-icons';
+import { MatIconModule } from '@angular/material/icon';
+import { McIconPipe } from '../../pipes/mc-icon.pipe';
 import { formatDuration } from '../../../core/services/videos.service';
 
 @Component({
     selector: 'app-video-player',
     standalone: true,
-    imports: [MatTooltipModule, TPipe],
+    imports: [MatTooltipModule, TPipe, MatIconModule, McIconPipe],
     template: `
         <div #shell class="player" tabindex="0" [class.idle]="idle()" [class.paused]="!playing()"
             (mousemove)="poke()" (mouseleave)="hideSoon()" (keydown)="onKey($event)">
@@ -20,12 +21,12 @@ import { formatDuration } from '../../../core/services/videos.service';
 
             @if (!playing() && (!started() || ended())) {
             <button class="big-play badge" type="button" (click)="toggle()" [attr.aria-label]="(ended() ? 'Replay' : 'Play') | t">
-                <img src="/icons/arrows/tild_full_right.svg" alt="" aria-hidden="true" class="mc-icon" />
+                <mat-icon svgIcon="mc:arrows/tild_full_right"></mat-icon>
             </button>
             }
             @for (f of flash(); track f.key) {
             <div class="flash badge" aria-hidden="true">
-                <img [src]="f.src" alt="" class="mc-icon" />
+                <mat-icon [svgIcon]="f.src | mcIcon"></mat-icon>
             </div>
             }
             @if (buffering() && playing()) {
@@ -42,16 +43,10 @@ import { formatDuration } from '../../../core/services/videos.service';
                 </div>
                 <div class="bar">
                     <button type="button" class="ctl" (click)="toggle(false)" [matTooltip]="(playing() ? 'Pause' : 'Play') | t">
-                        <svg viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">
-                            <path fill="currentColor" [attr.d]="(playing() ? icons.pause : icons.play).main" />
-                            <path fill="var(--mc-icon-shadow)" [attr.d]="(playing() ? icons.pause : icons.play).shadow" />
-                        </svg>
+                        <mat-icon [svgIcon]="playing() ? 'mc:media/pause' : 'mc:arrows/tild_full_right'"></mat-icon>
                     </button>
                     <button type="button" class="ctl" (click)="toggleMute()" [matTooltip]="(muted() ? 'Unmute' : 'Mute') | t">
-                        <svg viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">
-                            <path fill="currentColor" [attr.d]="volumeIcon().main" />
-                            <path fill="var(--mc-icon-shadow)" [attr.d]="volumeIcon().shadow" />
-                        </svg>
+                        <mat-icon [svgIcon]="volumeIcon()"></mat-icon>
                     </button>
                     <input class="volume" type="range" min="0" max="1" step="0.05" [value]="muted() ? 0 : volume()"
                         (input)="setVolume($any($event.target).valueAsNumber)" [attr.aria-label]="'Volume' | t" />
@@ -61,10 +56,7 @@ import { formatDuration } from '../../../core/services/videos.service';
                     </button>
                     <span class="spacer"></span>
                     <button type="button" class="ctl" (click)="toggleFullscreen()" [matTooltip]="(fullscreen() ? 'Exit full screen' : 'Full screen') | t">
-                        <svg viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">
-                            <path fill="currentColor" [attr.d]="(fullscreen() ? icons.exitFullscreen : icons.fullscreen).main" />
-                            <path fill="var(--mc-icon-shadow)" [attr.d]="(fullscreen() ? icons.exitFullscreen : icons.fullscreen).shadow" />
-                        </svg>
+                        <mat-icon [svgIcon]="fullscreen() ? 'mc:letters/X' : 'mc:media/fullscreen'"></mat-icon>
                     </button>
                 </div>
             </div>
@@ -85,7 +77,6 @@ import { formatDuration } from '../../../core/services/videos.service';
         .player:focus-visible { box-shadow: 0 0 0 2px var(--mat-sys-primary); }
         .player.idle { cursor: none; }
         video { width: 100%; height: 100%; display: block; object-fit: contain; background: #000; }
-        svg { width: 100%; height: 100%; display: block; }
 
         .badge {
             position: absolute;
@@ -101,7 +92,7 @@ import { formatDuration } from '../../../core/services/videos.service';
             align-items: center;
             justify-content: center;
 
-            img { width: 40px; height: 40px; transform: translate(1px, 1px); }
+            mat-icon { --icon-size: 48px; color: var(--mat-sys-on-surface); }
         }
         .big-play { cursor: pointer; transition: transform 0.15s; }
         .big-play:hover { transform: scale(1.06); }
@@ -149,7 +140,10 @@ import { formatDuration } from '../../../core/services/videos.service';
         .ctl {
             width: 32px;
             height: 32px;
-            padding: 5px;
+            padding: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             border: none;
             border-radius: 6px;
             background: none;
@@ -157,7 +151,6 @@ import { formatDuration } from '../../../core/services/videos.service';
             cursor: pointer;
         }
         .ctl:hover { background: rgba(255, 255, 255, 0.15); }
-        .ctl svg { transform: translate(1px, 1px); }
         .volume { width: 80px; accent-color: var(--mat-sys-primary); cursor: pointer; }
         .time {
             margin-left: 4px;
@@ -192,7 +185,6 @@ export class VideoPlayerComponent implements OnDestroy {
     private readonly video = viewChild.required<ElementRef<HTMLVideoElement>>('video');
     private readonly shell = viewChild.required<ElementRef<HTMLElement>>('shell');
 
-    readonly icons = PLAYER_ICONS;
     readonly playing = signal(false);
     readonly started = signal(false);
     readonly buffering = signal(false);
@@ -210,7 +202,7 @@ export class VideoPlayerComponent implements OnDestroy {
 
     readonly playedPct = computed(() => this.duration() ? this.current() / this.duration() * 100 : 0);
     readonly bufferedPct = computed(() => this.duration() ? this.buffered() / this.duration() * 100 : 0);
-    readonly volumeIcon = computed<PixelIcon>(() => this.muted() || this.volume() === 0 ? this.icons.muted : this.icons.volume);
+    readonly volumeIcon = computed(() => this.muted() || this.volume() === 0 ? 'mc:media/speaker_x' : 'mc:media/speaker');
     readonly fmt = (s: number) => formatDuration(s) || '0:00';
 
     private idleTimer: ReturnType<typeof setTimeout> | null = null;

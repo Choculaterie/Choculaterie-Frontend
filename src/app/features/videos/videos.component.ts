@@ -6,16 +6,17 @@ import { NumberFormatPipe } from '../../shared/pipes/number-format.pipe';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { VideosService, VideoResponse, videoThumbnailUrl, videoStreamUrl, formatDuration } from '../../core/services/videos.service';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'app-videos',
     standalone: true,
-    imports: [TPipe, DatePipe, RouterLink, NumberFormatPipe, EmptyStateComponent, MatPaginatorModule],
+    imports: [MatIconModule, TPipe, DatePipe, RouterLink, NumberFormatPipe, EmptyStateComponent, MatPaginatorModule],
     template: `
         <div class="page-container">
             <div class="page-header">
                 <h1 class="page-title">
-                    <img src="/icons/arrows/tild_full_right.svg" alt="" aria-hidden="true" class="mc-icon" style="transform: translateY(-2px);" />
+                    <mat-icon svgIcon="mc:arrows/tild_full_right"></mat-icon>
                     <span>{{ 'Videos' | t }}</span>
                 </h1>
             </div>
@@ -77,7 +78,8 @@ import { VideosService, VideoResponse, videoThumbnailUrl, videoStreamUrl, format
             font: var(--mat-sys-headline-medium);
             margin: 0;
 
-            img.mc-icon { width: 28px; height: 28px; }
+            mat-icon {
+    width: var(--icon-size); height: var(--icon-size); }
         }
         .center-state { min-height: 60vh; display: flex; align-items: center; justify-content: center; }
         .video-grid {

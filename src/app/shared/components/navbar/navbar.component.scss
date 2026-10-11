@@ -20,10 +20,10 @@
 }
 
 .brand-logo {
-    height: 28px;
+    --logo-size: 28px;
+    height: var(--logo-size);
     width: auto;
     display: block;
-    transform: translateY(-1.5px);
 }
 
 .lang-code {
@@ -36,8 +36,6 @@
 .lang-code .lang-code-text {
     display: inline-block;
     line-height: 1;
-
-    transform: translate(1px, 2px);
 }
 
 .brand-text {
@@ -71,11 +69,12 @@
 
     .dropdown-arrow {
         transition: transform 0.2s;
-        transform-origin: center 43.75%;
+        transform-origin: center;
     }
 
     &[aria-expanded='true'] .dropdown-arrow {
-        transform: rotate(180deg) translateY(1px);
+        transform: rotate(180deg);
+        --mc-shadow-dir: -1;
     }
 }
 
@@ -99,11 +98,15 @@
         height: 100%;
         border-radius: 50%;
     }
+
+    mat-icon {
+        --icon-size: 24px;
+    }
 }
 
 .dropdown-arrow {
-    width: 20px;
-    height: 20px;
+    width: var(--icon-size);
+    height: var(--icon-size);
 }
 
 .username {
@@ -149,14 +152,15 @@
 
 .inbox-badge {
     position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 9px;
-    height: 9px;
+    top: 7px;
+    right: 7px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     background: var(--mat-sys-error);
     pointer-events: none;
     border: 2px solid var(--mat-sys-surface);
+    z-index: 2;
 }
 
 @media (max-width: 850px) {
@@ -189,18 +193,14 @@
 .premium-item {
     color: var(--mat-sys-primary);
 
-    svg {
-        transform: translate(1px, 1px);
-    }
-
     span {
         color: var(--mat-sys-primary);
         font-weight: 500;
     }
 
-    svg.mc-icon {
-        width: var(--mat-menu-item-icon-size, 24px);
-        height: var(--mat-menu-item-icon-size, 24px);
+    mat-icon {
+        width: var(--icon-size);
+        height: var(--icon-size);
         margin-right: var(--mat-menu-item-spacing, 12px);
     }
 }
