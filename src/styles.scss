@@ -482,10 +482,9 @@ img[src$='free.png'] {
   translate: calc(var(--logo-px) / -2) calc(var(--logo-px) / -2);
 }
 
-img[src$='server_logo.png'] {
+img[src$='site-logo.png'] {
   --logo-px: calc(var(--logo-size, 28px) * 0.035);
   filter: drop-shadow(var(--logo-px) var(--logo-px) 0 rgba(30, 30, 30, 0.4));
-  translate: calc(var(--logo-px) / -2) calc(var(--logo-px) / -2);
 }
 
 :root {
