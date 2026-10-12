@@ -41,9 +41,9 @@
 }
 
 .state-icon {
-    font-size: 3rem;
-    width: 3rem;
-    height: 3rem;
+    --icon-size: 48px;
+    width: var(--icon-size);
+    height: var(--icon-size);
     align-self: center;
     color: var(--mat-sys-on-surface-variant);
 

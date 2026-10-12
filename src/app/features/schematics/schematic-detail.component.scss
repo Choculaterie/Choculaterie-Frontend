@@ -201,8 +201,9 @@ $shimmer: linear-gradient(90deg,
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 28px;
-        height: 28px;
+        --icon-size: 24px;
+        width: var(--icon-size);
+        height: var(--icon-size);
         color: white;
         filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
     }
