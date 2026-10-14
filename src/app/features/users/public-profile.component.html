@@ -144,7 +144,7 @@
         @if (p.discordUsername || p.isDiscordLinked) {
         <div class="meta-item" [class.meta-item--dc]="p.discordUsername"
             (click)="p.discordUsername && openDiscordCard(p.username!)">
-            <ng-icon name="simpleDiscord" size="18" /> <strong>{{ 'Discord:' | t }}</strong>
+            <mat-icon svgIcon="mc:logos/discord"></mat-icon> <strong>{{ 'Discord:' | t }}</strong>
             @if (p.discordUsername) {
             <span class="mc-name">{{ p.discordUsername }}</span>
             }
@@ -159,7 +159,9 @@
         <div class="social-links-meta">
             @for (link of p.socialLinks; track link.id) {
             <a [href]="link.url" target="_blank" rel="noopener" [matTooltip]="link.platform" class="social-link">
-                @if (isBrandIcon(link.platform)) {
+                @if (pixelLogo(link.platform)) {
+                <mat-icon [svgIcon]="pixelLogo(link.platform)"></mat-icon>
+                } @else if (isBrandIcon(link.platform)) {
                 <ng-icon [name]="socialIcon(link.platform)" size="20" />
                 } @else {
                 <mat-icon svgIcon="mc:misc/globe"></mat-icon>
@@ -288,29 +290,29 @@
                                 (selectionChange)="updateSocialLink($index, 'platform', $event.value)">
                                 <mat-select-trigger>
                                     <span class="select-trigger">
-                                        <ng-icon [name]="socialIcon(link.platform)" size="18" />
+                                        <mat-icon [svgIcon]="pixelLogo(link.platform) || 'mc:misc/globe'"></mat-icon>
                                         {{ link.platform === 'youtube' ? 'YouTube' : link.platform === 'twitch' ?
                                         'Twitch' : link.platform === 'discord' ? 'Discord' : link.platform === 'matrix'
                                         ? 'Matrix' : link.platform === 'github' ? 'GitHub' : 'Website' }}
                                     </span>
                                 </mat-select-trigger>
                                 <mat-option value="youtube">
-                                    <span class="option-row"><ng-icon name="simpleYoutube" size="18" /> YouTube</span>
+                                    <span class="option-row"><mat-icon svgIcon="mc:logos/youtube"></mat-icon> YouTube</span>
                                 </mat-option>
                                 <mat-option value="twitch">
-                                    <span class="option-row"><ng-icon name="simpleTwitch" size="18" /> Twitch</span>
+                                    <span class="option-row"><mat-icon svgIcon="mc:logos/twitch"></mat-icon> Twitch</span>
                                 </mat-option>
                                 <mat-option value="discord">
-                                    <span class="option-row"><ng-icon name="simpleDiscord" size="18" /> Discord</span>
+                                    <span class="option-row"><mat-icon svgIcon="mc:logos/discord"></mat-icon> Discord</span>
                                 </mat-option>
                                 <mat-option value="matrix">
-                                    <span class="option-row"><ng-icon name="simpleMatrix" size="18" /> Matrix</span>
+                                    <span class="option-row"><mat-icon svgIcon="mc:logos/matrix"></mat-icon> Matrix</span>
                                 </mat-option>
                                 <mat-option value="github">
-                                    <span class="option-row"><ng-icon name="simpleGithub" size="18" /> GitHub</span>
+                                    <span class="option-row"><mat-icon svgIcon="mc:logos/github"></mat-icon> GitHub</span>
                                 </mat-option>
                                 <mat-option value="website">
-                                    <span class="option-row"><ng-icon name="simpleFirefoxbrowser" size="18" />
+                                    <span class="option-row"><mat-icon svgIcon="mc:logos/website"></mat-icon>
                                         {{ 'Website' | t }}</span>
                                 </mat-option>
                             </mat-select>
@@ -545,7 +547,7 @@
 
                     <mat-divider class="section-divider" />
 
-                    <h3 class="section-heading"><ng-icon name="simpleDiscord" size="20" /> <span>{{ 'Discord' | t }}</span>
+                    <h3 class="section-heading"><mat-icon svgIcon="mc:logos/discord"></mat-icon> <span>{{ 'Discord' | t }}</span>
                     </h3>
                     @if (op.isDiscordLinked) {
                     <div class="link-status linked">
@@ -759,7 +761,7 @@
                                 <button mat-icon-button (click)="downloadSave(s)" [disabled]="downloadingIds().has(s.id)"
                                     [matTooltip]="(s.versionCount > 1 ? 'Download a version' : 'Download') | t">
                                     @if (downloadingIds().has(s.id)) { <img src="loading.gif" alt="" class="btn-loading-gif" /> } @else {
-                                    <mat-icon svgIcon="mc:arrows/arrow_down"></mat-icon> }
+                                    <mat-icon svgIcon="mc:ui/download"></mat-icon> }
                                 </button>
                                 <button mat-icon-button color="warn" (click)="deleteSave(s)" [matTooltip]="'Delete' | t"><mat-icon svgIcon="mc:ui/trash_can"></mat-icon></button>
                             </td>

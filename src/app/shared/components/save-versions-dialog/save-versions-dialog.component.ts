@@ -43,7 +43,7 @@ export interface SaveVersionsDialogData {
                         @if (busyId() === v.id) {
                         <img src="loading.gif" alt="" class="version-loading" />
                         } @else {
-                        <mat-icon svgIcon="mc:arrows/arrow_down"></mat-icon>
+                        <mat-icon svgIcon="mc:ui/download"></mat-icon>
                         }
                     </button>
                 </li>

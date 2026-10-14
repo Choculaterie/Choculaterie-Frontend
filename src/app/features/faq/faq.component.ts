@@ -17,8 +17,6 @@ import { SessionService } from '../../core/services/session.service';
 import { ToastService } from '../../core/services/toast.service';
 import { CaptchaComponent } from '../../shared/components/captcha/captcha.component';
 import type { FaqResponse, CaptchaPositionDto } from '../../api/generated.schemas';
-import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { simpleDiscord, simpleMatrix } from '@ng-icons/simple-icons';
 import { PROFILE } from '../../i18n/labels';
 import { getLocale } from '../../core/i18n/locale';
 
@@ -34,10 +32,8 @@ import { getLocale } from '../../core/i18n/locale';
         MatIconModule,
         MatDividerModule,
         MatTooltipModule,
-        NgIconComponent,
         CaptchaComponent,
     ],
-    viewProviders: [provideIcons({ simpleDiscord, simpleMatrix })],
     templateUrl: './faq.component.html',
     styleUrl: './faq.component.scss',
 })

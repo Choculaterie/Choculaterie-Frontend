@@ -1,7 +1,7 @@
 <div class="viewer-dialog">
     <div class="viewer-header">
         <button mat-icon-button (click)="downloadFile()" [matTooltip]="('Download' | t) + ' ' + data.fileName">
-            <mat-icon svgIcon="mc:arrows/arrow_down"></mat-icon>
+            <mat-icon svgIcon="mc:ui/download"></mat-icon>
         </button>
         <h2>{{ data.fileName }}</h2>
         @if (isDiffMode() && diffSummary()) {

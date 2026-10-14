@@ -120,7 +120,7 @@ export class DropZoneDirective implements OnInit, OnDestroy {
         const items = Array.from(e?.dataTransfer?.items ?? []).filter(i => i.kind === 'file');
         const iconSrc = items.some(i => i.type.startsWith('video/')) ? '/icons/arrows/tild_full_right.svg'
             : this.unknownTypeIcon && items.some(i => !i.type) ? this.unknownTypeIcon
-            : '/icons/arrows/arrow_up.svg';
+            : '/icons/ui/upload.svg';
         this.fpOverlay = this.renderer.createElement('div');
         this.renderer.setStyle(this.fpOverlay, 'animation', 'overlay-fade-in 0.15s ease-out both');
         this.renderer.setStyle(this.fpOverlay, 'position', 'fixed');

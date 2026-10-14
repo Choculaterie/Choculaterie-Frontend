@@ -39,7 +39,7 @@
             <div class="channel channel--copy" role="button" tabindex="0" (click)="copyContactHandle('@Choculat')"
                 (keydown.enter)="copyContactHandle('@Choculat')"
                 (keydown.space)="$event.preventDefault(); copyContactHandle('@Choculat')">
-                <ng-icon name="simpleDiscord" size="16" />
+                <mat-icon svgIcon="mc:logos/discord"></mat-icon>
                 <div>
                     <strong>{{ 'Discord' | t }}</strong>
                     <span>&#64;Choculat</span>
@@ -49,7 +49,7 @@
                 (click)="copyContactHandle('@choculat:24628528.xyz')"
                 (keydown.enter)="copyContactHandle('@choculat:24628528.xyz')"
                 (keydown.space)="$event.preventDefault(); copyContactHandle('@choculat:24628528.xyz')">
-                <ng-icon name="simpleMatrix" size="16" />
+                <mat-icon svgIcon="mc:logos/matrix"></mat-icon>
                 <div>
                     <strong>{{ 'Matrix' | t }}</strong>
                     <span>&#64;choculat:24628528.xyz</span>

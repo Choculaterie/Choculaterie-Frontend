@@ -59,9 +59,8 @@ import { translateText } from '../../core/i18n/translation.store';
 import { PROFILE, USERS, DIALOGS, AUTH, COMMON } from '../../i18n/labels';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
-    simpleYoutube, simpleTwitch, simpleDiscord, simpleGithub,
-    simpleReddit, simpleInstagram, simpleTiktok, simpleMatrix,
-    simpleFacebook, simpleX, simpleFirefoxbrowser,
+    simpleReddit, simpleInstagram, simpleTiktok,
+    simpleFacebook, simpleX,
 } from '@ng-icons/simple-icons';
 import { matfMinecraftColored } from '@ng-icons/material-file-icons/colored';
 import { MatIconModule } from '@angular/material/icon';
@@ -104,9 +103,8 @@ const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
         SkeletonImgComponent,
     ],
     viewProviders: [provideIcons({
-        simpleYoutube, simpleTwitch, simpleDiscord, simpleGithub,
-        simpleReddit, simpleInstagram, simpleTiktok, simpleMatrix,
-        simpleFacebook, simpleX, simpleFirefoxbrowser,
+        simpleReddit, simpleInstagram, simpleTiktok,
+        simpleFacebook, simpleX,
         matfMinecraftColored,
     })],
     templateUrl: './public-profile.component.html',
@@ -182,13 +180,16 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         });
     }
 
+    private static readonly PIXEL_LOGOS = new Set(['youtube', 'discord', 'twitch', 'github', 'matrix', 'website']);
     private static readonly BRAND_ICONS: Record<string, string> = {
-        youtube: 'simpleYoutube', discord: 'simpleDiscord', twitter: 'simpleX', x: 'simpleX',
-        twitch: 'simpleTwitch', github: 'simpleGithub', matrix: 'simpleMatrix',
+        twitter: 'simpleX', x: 'simpleX',
         reddit: 'simpleReddit', instagram: 'simpleInstagram',
         tiktok: 'simpleTiktok', facebook: 'simpleFacebook',
-        website: 'simpleFirefoxbrowser',
     };
+    pixelLogo(platform: string): string {
+        const p = platform.toLowerCase();
+        return PublicProfileComponent.PIXEL_LOGOS.has(p) ? `mc:logos/${p}` : '';
+    }
     socialIcon(platform: string): string {
         return PublicProfileComponent.BRAND_ICONS[platform.toLowerCase()] ?? '';
     }

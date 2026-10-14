@@ -3,8 +3,6 @@ import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
-import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { simpleDiscord } from '@ng-icons/simple-icons';
 import { TPipe } from '../../../core/i18n/t.pipe';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
 import { translateText } from '../../../core/i18n/translation.store';
@@ -36,12 +34,11 @@ interface DiscordCardResponse {
 @Component({
     selector: 'app-discord-card-dialog',
     standalone: true,
-    imports: [MatIconModule, TPipe, LoadingSpinnerComponent, DatePipe, MatDialogModule, MatButtonModule, NgIconComponent],
-    viewProviders: [provideIcons({ simpleDiscord })],
+    imports: [MatIconModule, TPipe, LoadingSpinnerComponent, DatePipe, MatDialogModule, MatButtonModule],
     template: `
         <div class="dc-card">
             <div class="dc-header">
-                <ng-icon name="simpleDiscord" size="20" />
+                <mat-icon svgIcon="mc:logos/discord"></mat-icon>
                 <h2>{{ 'Discord' | t }}</h2>
                 <span class="dc-spacer"></span>
                 <button mat-icon-button mat-dialog-close [attr.aria-label]="'Close' | t">
@@ -58,7 +55,7 @@ interface DiscordCardResponse {
                 @if (c.avatarUrl) {
                 <img [src]="c.avatarUrl" alt="" class="dc-avatar" />
                 } @else {
-                <div class="dc-avatar dc-avatar--empty"><ng-icon name="simpleDiscord" size="32" /></div>
+                <div class="dc-avatar dc-avatar--empty"><mat-icon svgIcon="mc:logos/discord" style="--icon-size: 48px"></mat-icon></div>
                 }
                 <div class="dc-names">
                     @if (c.globalName) {

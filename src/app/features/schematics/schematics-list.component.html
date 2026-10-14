@@ -4,7 +4,7 @@
         <h1 class="page-title"><mat-icon svgIcon="mc:weapons/pickaxe"></mat-icon> <span>{{ 'Schematics' | t }}</span></h1>
         <button mat-flat-button (click)="onUploadClick()"
             [matTooltip]="(showCreate() ? 'Cancel' : 'Upload Schematic') | t" class="upload-btn">
-            <mat-icon [svgIcon]="showCreate() ? 'mc:letters/X' : 'mc:arrows/arrow_up'" matButtonIcon></mat-icon>
+            <mat-icon [svgIcon]="showCreate() ? 'mc:letters/X' : 'mc:ui/upload'" matButtonIcon></mat-icon>
             <span class="upload-btn-label">{{ (showCreate() ? 'Cancel' : 'Upload Schematic') | t }}</span>
         </button>
     </div>

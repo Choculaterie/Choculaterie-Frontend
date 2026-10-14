@@ -1,25 +1,22 @@
 import { Component } from '@angular/core';
 import { TPipe } from '../../../core/i18n/t.pipe';
 import { MatDividerModule } from '@angular/material/divider';
-import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { simpleGithub, simpleDiscord } from '@ng-icons/simple-icons';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'app-footer',
     standalone: true,
-    imports: [MatIconModule, TPipe, MatDividerModule, NgIconComponent],
-    viewProviders: [provideIcons({ simpleGithub, simpleDiscord })],
+    imports: [MatIconModule, TPipe, MatDividerModule],
     template: `
         <mat-divider />
         <footer class="footer">
             <span class="disclaimer">{{ 'Choculaterie is not affiliated with Mojang Studios or Microsoft.' | t }}</span>
             <div class="footer-links">
                 <a href="https://github.com/Choculaterie" target="_blank" rel="noopener" aria-label="GitHub">
-                    <ng-icon name="simpleGithub" size="18" /> GitHub
+                    <mat-icon svgIcon="mc:logos/github"></mat-icon> GitHub
                 </a>
                 <a href="https://discord.gg/choculaterie" target="_blank" rel="noopener" aria-label="Discord">
-                    <ng-icon name="simpleDiscord" size="18" /> Discord
+                    <mat-icon svgIcon="mc:logos/discord"></mat-icon> Discord
                 </a>
                 <a href="https://status.choculaterie.com/" target="_blank" rel="noopener" [attr.aria-label]="'Status' | t">
                     <mat-icon svgIcon="mc:data/graph_up" class="status-icon"></mat-icon> {{ 'Status' | t }}

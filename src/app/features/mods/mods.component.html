@@ -154,7 +154,7 @@
                     <div class="mod-card-meta">
                         <mat-chip [matTooltip]="'Versions' | t">{{ mod.versionCount }} {{ 'version' | t }}{{
                             mod.versionCount > 1 ? 's' : '' }}</mat-chip>
-                        <span class="meta-stat" [matTooltip]="'Downloads' | t"><mat-icon svgIcon="mc:arrows/arrow_down"></mat-icon> {{
+                        <span class="meta-stat" [matTooltip]="'Downloads' | t"><mat-icon svgIcon="mc:ui/download"></mat-icon> {{
                             mod.totalDownloads | numFmt }}</span>
                         <span class="meta-stat" [matTooltip]="'Minecraft Version' | t"><ng-icon
                                 name="matfMinecraftColored" size="16" /> {{ mod.versionRange }}</span>

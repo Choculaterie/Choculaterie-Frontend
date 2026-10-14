@@ -4,7 +4,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { simpleDiscord } from '@ng-icons/simple-icons';
 import { matfMinecraftColored } from '@ng-icons/material-file-icons/colored';
 import type { PublicUserListItemResponse, UserListItemResponse } from '../../../api/generated.schemas';
 import { UserImgPipe } from '../../pipes/image-url.pipe';
@@ -14,7 +13,7 @@ import { SkeletonImgComponent } from '../skeleton-img/skeleton-img.component';
     selector: 'app-user-card',
     standalone: true,
     imports: [RouterLink, MatCardModule, MatIconModule, MatTooltipModule, NgIconComponent, UserImgPipe, SkeletonImgComponent],
-    viewProviders: [provideIcons({ simpleDiscord, matfMinecraftColored })],
+    viewProviders: [provideIcons({ matfMinecraftColored })],
     template: `
         <a class="card-link" [routerLink]="['/users', user().username]">
         <mat-card class="user-card" appearance="outlined">
@@ -37,7 +36,7 @@ import { SkeletonImgComponent } from '../skeleton-img/skeleton-img.component';
                         <span class="link-badge" title="Minecraft"><ng-icon name="matfMinecraftColored" size="14" /> {{ $any(user()).minecraftUsername }}</span>
                     }
                     @if ($any(user()).isDiscordLinked) {
-                        <span class="link-badge" title="Discord"><ng-icon name="simpleDiscord" size="14" /> {{ $any(user()).discordUsername }}</span>
+                        <span class="link-badge" title="Discord"><mat-icon svgIcon="mc:logos/discord"></mat-icon> {{ $any(user()).discordUsername }}</span>
                     }
                 </div>
             </mat-card-content>
@@ -95,7 +94,6 @@ import { SkeletonImgComponent } from '../skeleton-img/skeleton-img.component';
         .link-badge {
             display: flex; align-items: center; gap: 0.2rem;
             font-size: 0.7rem; color: var(--mat-sys-on-surface-variant);
-            mat-icon { font-size: 14px; width: 14px; height: 14px; }
         }
     `],
 })

@@ -131,7 +131,7 @@ export interface IsometricScreenshotData {
                 <span class="spacer"></span>
                 <button mat-stroked-button type="button" (click)="cancel()">{{ 'Cancel' | t }}</button>
                 <button mat-flat-button type="button" (click)="confirm()">
-                    <mat-icon [svgIcon]="resolvedMode() === 'download' ? 'mc:arrows/arrow_down' : 'mc:ui/check'" matButtonIcon></mat-icon>
+                    <mat-icon [svgIcon]="resolvedMode() === 'download' ? 'mc:ui/download' : 'mc:ui/check'" matButtonIcon></mat-icon>
                     {{ (resolvedMode() === 'download' ? 'Download' : 'Use') | t }}
                 </button>
             </div>

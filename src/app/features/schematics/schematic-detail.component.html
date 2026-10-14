@@ -111,7 +111,7 @@
         </button>
         }
         <button mat-stroked-button (click)="download()">
-            <mat-icon svgIcon="mc:arrows/arrow_down" matButtonIcon></mat-icon> <span>{{ 'Download' | t }} ({{ s.downloadCount | numFmt }})</span>
+            <mat-icon svgIcon="mc:ui/download" matButtonIcon></mat-icon> <span>{{ 'Download' | t }} ({{ s.downloadCount | numFmt }})</span>
         </button>
         <button mat-icon-button [matMenuTriggerFor]="moreMenu">
             <mat-icon svgIcon="mc:ui/power_2"></mat-icon>
@@ -434,7 +434,7 @@
                     </button>
                     }
                     <button mat-icon-button [matTooltip]="'Download file' | t" (click)="downloadSingleFile(f)">
-                        <mat-icon svgIcon="mc:arrows/arrow_down"></mat-icon>
+                        <mat-icon svgIcon="mc:ui/download"></mat-icon>
                     </button>
                 </div>
                 @if (f.blockList) {

@@ -949,7 +949,7 @@ mat-divider {
     align-items: center;
     gap: 0.5rem;
     padding: 0 2px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
     border-radius: 8px;
     box-sizing: border-box;
     overflow: visible;
@@ -978,7 +978,7 @@ mat-divider {
 }
 
 .social-platform-field {
-    width: 160px;
+    width: 180px;
     flex-shrink: 0;
 
     @media (max-width: 600px) {
@@ -1000,16 +1000,16 @@ mat-divider {
     margin-right: 0.25rem;
 }
 
-.select-trigger {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-}
-
+.select-trigger,
 .option-row {
     display: inline-flex;
     align-items: center;
+    vertical-align: top;
     gap: 0.5rem;
+
+    .mat-icon {
+        margin: 0;
+    }
 }
 
 .key-actions {
