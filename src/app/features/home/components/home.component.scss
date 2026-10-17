@@ -278,6 +278,7 @@
 }
 
 .support-btn-icon {
+    --icon-size: calc(var(--mc-em) * 1.5);
     width: var(--icon-size);
     height: var(--icon-size);
     flex-shrink: 0;

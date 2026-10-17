@@ -479,7 +479,6 @@ img[src$='premium.png'],
 img[src$='free.png'] {
   --logo-px: calc(var(--logo-size, var(--icon-size)) * 0.096);
   filter: drop-shadow(var(--logo-px) var(--logo-px) 0 var(--mc-icon-shadow));
-  translate: calc(var(--logo-px) / -2) calc(var(--logo-px) / -2);
 }
 
 img[src$='site-logo.png'] {
