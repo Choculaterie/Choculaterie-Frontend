@@ -243,7 +243,7 @@
         </button>
     </div>
 
-    <div class="advanced-filters-wrapper" [style.height]="filtersHeight()">
+    <div class="advanced-filters-wrapper" [class.open]="showAdvancedFilters()" [style.height]="filtersHeight()">
         <div class="advanced-filters" #filtersInner>
             <mat-form-field appearance="outline" class="filter-sm">
                 <mat-label>{{ 'Tag' | t }}</mat-label>
@@ -275,7 +275,7 @@
             </mat-form-field>
 
             <button mat-stroked-button class="unverified-toggle" (click)="toggleIncludeUnverified()" [matTooltip]="'Show schematics from users without a linked Minecraft account' | t">
-                <mat-icon [svgIcon]="includeUnverified ? 'mc:shapes/box_checked' : 'mc:shapes/box'"></mat-icon>
+                <mat-icon [svgIcon]="includeUnverified ? 'mc:shapes/box_checked' : 'mc:shapes/box'" matButtonIcon></mat-icon>
                 <span>{{ 'Unverified' | t }}</span>
             </button>
         </div>

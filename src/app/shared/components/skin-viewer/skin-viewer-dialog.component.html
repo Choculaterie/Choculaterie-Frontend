@@ -27,9 +27,9 @@
 
             <button mat-stroked-button (click)="toggleAnimation()" class="anim-btn" [disabled]="loading() || !!error()">
                 @if (animating()) {
-                <mat-icon svgIcon="mc:media/pause"></mat-icon>
+                <mat-icon svgIcon="mc:media/pause" matButtonIcon></mat-icon>
                 } @else {
-                <mat-icon svgIcon="mc:arrows/tild_full_right_2"></mat-icon>
+                <mat-icon svgIcon="mc:arrows/tild_full_right_2" matButtonIcon></mat-icon>
                 }
                 @if (animating()) { <span>{{ 'Pause' | t }}</span> } @else { <span>{{ 'Animate' | t }}</span> }
             </button>
@@ -37,13 +37,13 @@
             <div class="screenshot-btns">
                 <button mat-stroked-button (click)="screenshotBody()" [matTooltip]="'Download 3D view' | t"
                     [disabled]="loading() || !!error()" class="screenshot-btn">
-                    <mat-icon svgIcon="mc:ui/target"></mat-icon>
+                    <mat-icon svgIcon="mc:ui/target" matButtonIcon></mat-icon>
                     <span>{{ 'Screenshot' | t }}</span>
                 </button>
                 <div class="screenshot-row">
                     <button mat-stroked-button (click)="screenshotFace()" [matTooltip]="'Download face' | t"
                         [disabled]="loading() || !!error()">
-                        <mat-icon svgIcon="mc:people/guy"></mat-icon>
+                        <mat-icon svgIcon="mc:people/guy" matButtonIcon></mat-icon>
                         <span>{{ 'Face' | t }}</span>
                     </button>
                     <button mat-stroked-button (click)="downloadSkin()" [matTooltip]="'Download skin file' | t"

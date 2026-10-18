@@ -195,7 +195,7 @@
                         <button mat-stroked-button class="newest-toggle"
                             (click)="premiumOnlyUsers.set(!premiumOnlyUsers()); searchUsers()"
                             >
-                            <mat-icon [svgIcon]="premiumOnlyUsers() ? 'mc:shapes/box_checked' : 'mc:shapes/box'"></mat-icon>
+                            <mat-icon [svgIcon]="premiumOnlyUsers() ? 'mc:shapes/box_checked' : 'mc:shapes/box'" matButtonIcon></mat-icon>
                             <span>{{ 'Premium only' | t }}</span>
                         </button>
                         <button mat-stroked-button (click)="usersSearch = ''; searchUsers()">
@@ -1425,7 +1425,7 @@
 
                 <div class="search-row">
                     <button mat-stroked-button class="newest-toggle" style="margin-left: auto;" (click)="toggleTicketsUnreadOnly()">
-                        <mat-icon [svgIcon]="ticketsUnreadOnly() ? 'mc:shapes/box_checked' : 'mc:shapes/box'"></mat-icon>
+                        <mat-icon [svgIcon]="ticketsUnreadOnly() ? 'mc:shapes/box_checked' : 'mc:shapes/box'" matButtonIcon></mat-icon>
                         @if (ticketsUnreadOnly()) { <span
                            >{{ 'Show all' | t }}</span> } @else { <span
                            >{{ 'Unread only' | t }}</span> }
@@ -1562,7 +1562,7 @@
                 <div class="section-header">
                     <h3>{{ 'Live Stream' | t }}</h3>
                     <button mat-stroked-button class="newest-toggle" (click)="autoScrollLogs.set(!autoScrollLogs())">
-                        <mat-icon [svgIcon]="autoScrollLogs() ? 'mc:shapes/box_checked' : 'mc:shapes/box'"></mat-icon>
+                        <mat-icon [svgIcon]="autoScrollLogs() ? 'mc:shapes/box_checked' : 'mc:shapes/box'" matButtonIcon></mat-icon>
                         <span>{{ 'Auto-scroll' | t }}</span>
                     </button>
                 </div>

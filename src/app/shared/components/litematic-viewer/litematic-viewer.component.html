@@ -12,7 +12,7 @@
         }
         @if (!loading() && !error() && !isDiffMode()) {
         <button mat-stroked-button class="fly-toggle" (click)="toggleFlyMode()" [matTooltip]="'Move around with WASD instead of dragging to rotate' | t">
-            <mat-icon [svgIcon]="flyMode() ? 'mc:shapes/box_checked' : 'mc:shapes/box'"></mat-icon>
+            <mat-icon [svgIcon]="flyMode() ? 'mc:shapes/box_checked' : 'mc:shapes/box'" matButtonIcon></mat-icon>
             <span>{{ 'Fly mode' | t }}</span>
         </button>
         }

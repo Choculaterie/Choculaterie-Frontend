@@ -488,7 +488,7 @@ $shimmer: linear-gradient(90deg,
 .edit-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
+    gap: 0 0.75rem;
 
     @media (max-width: 600px) {
         grid-template-columns: 1fr;

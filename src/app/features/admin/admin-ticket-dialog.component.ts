@@ -247,7 +247,7 @@ export interface AdminTicketDialogResult {
         .reply-form {
             display: flex;
             flex-direction: column;
-            gap: 0.35rem;
+            gap: 0;
             margin-top: 0.25rem;
         }
         .reply-heading {

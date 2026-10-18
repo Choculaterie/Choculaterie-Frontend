@@ -788,12 +788,11 @@ html:not([data-theme]) {
 }
 
 
-:is(.mat-mdc-form-field:has(+ .mat-mdc-button-base, + * > .mat-mdc-button-base), .mat-mdc-button-base + .mat-mdc-form-field, :has(> .mat-mdc-button-base) + .mat-mdc-form-field, :not(form) > .mat-mdc-form-field:has(~ .mat-mdc-button-base), :not(form) > .mat-mdc-button-base ~ .mat-mdc-form-field) .mat-mdc-form-field-subscript-wrapper:not(:has(.mat-mdc-form-field-error, .mat-mdc-form-field-hint)) {
+:not(form) > :is(.mat-mdc-form-field:has(~ .mat-mdc-button-base, + * > .mat-mdc-button-base), .mat-mdc-button-base ~ .mat-mdc-form-field, :has(> .mat-mdc-button-base) + .mat-mdc-form-field) .mat-mdc-form-field-subscript-wrapper:not(:has(.mat-mdc-form-field-error, .mat-mdc-form-field-hint)) {
   display: none;
 }
 
-:has(> .mat-mdc-form-field + .mat-mdc-button-base, > .mat-mdc-button-base + .mat-mdc-form-field, > .mat-mdc-form-field + * > .mat-mdc-button-base, > :has(> .mat-mdc-button-base) + .mat-mdc-form-field),
-:not(form):has(> .mat-mdc-form-field ~ .mat-mdc-button-base, > .mat-mdc-button-base ~ .mat-mdc-form-field) {
+:not(form):has(> .mat-mdc-form-field ~ .mat-mdc-button-base, > .mat-mdc-button-base ~ .mat-mdc-form-field, > .mat-mdc-form-field + * > .mat-mdc-button-base) {
   padding-bottom: var(--mat-form-field-subscript-text-line-height, 20px);
 }
 
