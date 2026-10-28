@@ -1527,10 +1527,13 @@
                     </ng-container>
                     <ng-container matColumnDef="message">
                         <th mat-header-cell *matHeaderCellDef>{{ 'Message' | t }}</th>
-                        <td mat-cell *matCellDef="let e">
-                            {{ e.message }}
+                        <td mat-cell *matCellDef="let e" class="log-message-cell">
+                            <div class="log-message-clamp" [title]="e.message">{{ e.message }}</div>
                             @if (e.exception) {
-                            <pre class="log-exception">{{ e.exception }}</pre>
+                            <details class="log-exception-details" (click)="$event.stopPropagation()">
+                                <summary>{{ e.exception.split('\n')[0] }}</summary>
+                                <pre class="log-exception">{{ e.exception }}</pre>
+                            </details>
                             }
                         </td>
                     </ng-container>
@@ -1540,7 +1543,11 @@
                     </ng-container>
                     <ng-container matColumnDef="actions">
                         <th mat-header-cell *matHeaderCellDef></th>
-                        <td mat-cell *matCellDef="let e">
+                        <td mat-cell *matCellDef="let e" class="log-actions-cell">
+                            <button mat-icon-button [matTooltip]="'Copy' | t"
+                                (click)="$event.stopPropagation(); copyServerLog(e)">
+                                <mat-icon svgIcon="mc:ui/overlapping_sheets"></mat-icon>
+                            </button>
                             <button mat-icon-button color="warn" [matTooltip]="'Dismiss' | t"
                                 (click)="deleteServerLog(e)">
                                 <mat-icon svgIcon="mc:ui/trash_can"></mat-icon>

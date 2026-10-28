@@ -1891,6 +1891,10 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.loadServerLogs();
     }
 
+    copyServerLog(entry: ServerLogEntryResponse): void {
+        this.copyToClipboard(entry.exception ? `${entry.message}\n\n${entry.exception}` : entry.message);
+    }
+
     deleteServerLog(entry: ServerLogEntryResponse): void {
         this.adminApi.deleteApiAdminServerLogsId(entry.id).subscribe({
             next: () => {
