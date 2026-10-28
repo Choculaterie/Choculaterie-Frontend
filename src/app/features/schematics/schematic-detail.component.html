@@ -62,7 +62,7 @@
                     height="500px" [objectFit]="imageFit()" borderRadius="12px" />
         </div>
         } @else if (hasVideo) {
-        <iframe class="video-embed" [src]="getYouTubeEmbedUrl(s.youtubeLink)" frameborder="0" allowfullscreen
+        <iframe class="video-embed" [src]="youtubeEmbedUrl()" frameborder="0" allowfullscreen
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
         </iframe>
         }

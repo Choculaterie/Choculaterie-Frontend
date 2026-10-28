@@ -120,10 +120,10 @@ export class SchematicDetailComponent implements OnInit {
         return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : null;
     }
 
-    getYouTubeEmbedUrl(url: string | null): SafeResourceUrl | null {
-        const id = this.getYouTubeId(url);
+    readonly youtubeEmbedUrl: Signal<SafeResourceUrl | null> = computed(() => {
+        const id = this.getYouTubeId(this.schematic()?.youtubeLink ?? null);
         return id ? this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube-nocookie.com/embed/${id}`) : null;
-    }
+    });
     readonly saving = signal(false);
     readonly allowedTags = signal<AllowedTagResponse[]>([]);
     readonly allowedVersions = signal<AllowedVersionResponse[]>([]);
