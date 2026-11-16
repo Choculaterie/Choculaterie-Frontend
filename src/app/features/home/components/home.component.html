@@ -101,7 +101,7 @@
         @if (foundersLeft() > 0) {
         <a routerLink="/premium" class="founder-pill settle-in">
             <mat-icon svgIcon="mc:ui/star_thick" class="founder-pill-icon"></mat-icon>
-            <span>{{ 'First 100 supporters get the Founder badge' | t }} &middot; {{ foundersLeft() }} {{ 'left' | t }}</span>
+            <span>{{ 'First 100 supporters get the Founder badge' | t }} &middot; <strong>{{ foundersLeft() }} {{ 'left' | t }}</strong></span>
         </a>
         }
         <div class="support-actions">
