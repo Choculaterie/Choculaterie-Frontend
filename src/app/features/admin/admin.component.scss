@@ -953,3 +953,22 @@ mat-accordion .faq-answer {
         overflow-wrap: break-word;
     }
 }
+
+.email-preview-field {
+    width: 260px;
+}
+
+@keyframes row-flash {
+    0%,
+    100% {
+        background-color: transparent;
+    }
+
+    50% {
+        background-color: color-mix(in srgb, var(--mat-sys-primary) 25%, transparent);
+    }
+}
+
+.flash-row td {
+    animation: row-flash 1.2s ease-in-out var(--flash-count, 1);
+}

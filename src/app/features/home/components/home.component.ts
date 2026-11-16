@@ -13,6 +13,7 @@ import { RealtimeService } from '../../../core/services/realtime.service';
 import type { SchematicListItemResponse } from '../../../api/generated.schemas';
 import { SchematicCardComponent } from '../../../shared/components/schematic-card/schematic-card.component';
 import { SessionService } from '../../../core/services/session.service';
+import { BillingService } from '../../../api/billing';
 
 @Component({
     selector: 'app-home',
@@ -34,6 +35,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private statsApi = inject(StatsService);
     private realtime = inject(RealtimeService);
     private session = inject(SessionService);
+    private billing = inject(BillingService);
+    readonly foundersLeft = signal(0);
     private router = inject(Router);
     private injector = inject(Injector);
     private gridResizeObserver?: ResizeObserver;
@@ -60,6 +63,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        this.billing.getOffers().subscribe({
+            next: (o) => this.foundersLeft.set(Math.max(0, o.founderSlots - o.foundersTaken)),
+            error: () => void 0,
+        });
         this.schematicsApi.getApiSchematics({ page: 1, pageSize: 8, sort: 'date', direction: 'desc' }).subscribe({
             next: (res) => { this.rawSchematics.set(res.items.slice(0, 8)); this.loadingSchematics.set(false); },
             error: () => this.loadingSchematics.set(false),

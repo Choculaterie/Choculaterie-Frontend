@@ -1,6 +1,6 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, input, output, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { MatDialog, MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -13,37 +13,58 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 import { BillingService } from '../../api/billing';
 import type { AdminPremiumGrant, AdminUserBilling } from '../../api/billing';
 
-export interface PremiumHistoryData {
-    userId: string;
-    username: string;
-    billing: AdminUserBilling | null;
-}
-
 interface HistoryRow {
     when: string;
     kind: string;
     source: string;
     amount: string;
     description: string | null;
+    full: string | null;
     grant: AdminPremiumGrant | null;
+    paid: boolean;
+    revoked: boolean;
+}
+
+const EVENT_LABELS: Record<string, string> = {
+    'checkout.session.completed': 'Subscribed',
+    'invoice.paid': 'Paid',
+    'customer.subscription.updated': 'Changed',
+    'customer.subscription.deleted': 'Ended',
+    'invoice.payment_failed': 'Payment failed',
+    'charge.refunded': 'Refunded',
+    'charge.dispute.created': 'Disputed',
+};
+
+const GRANT_LABELS: Record<string, string> = {
+    Admin: 'Granted by admin',
+    Trial: 'Free trial',
+    Referral: 'Referral reward',
+    Gift: 'Gift received',
+    Stripe: 'Paid time',
+    Monero: 'Paid time',
+};
+
+function shortDetails(details: string | null): string | null {
+    if (!details) return null;
+    const period = details.match(/^Paid .* \((.+)\)$/);
+    if (period) return period[1];
+    const cancel = details.match(/^Set to cancel at the end of the period \((.+)\)$/);
+    if (cancel) return `Won't renew, ends ${cancel[1]}`;
+    const monero = details.match(/^Paid \$[\d.]+ in Monero for (.+)$/);
+    if (monero) return monero[1];
+    if (details === 'Subscribed with card') return null;
+    return details;
 }
 
 @Component({
-    selector: 'app-premium-history-dialog',
+    selector: 'app-premium-manage-panel',
     standalone: true,
     imports: [
-        MatDialogModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule,
+        MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule,
         MatTooltipModule, DatePipe, TPipe,
     ],
     template: `
-<div mat-dialog-title class="premium-dlg-title">
-    <button mat-icon-button [mat-dialog-close]="'back'" class="back-btn" [matTooltip]="'Back' | t">
-        <mat-icon svgIcon="mc:arrows/arrow_left"></mat-icon>
-    </button>
-    <span>{{ data.username }}</span>
-</div>
-
-<mat-dialog-content class="premium-dlg-content">
+<div class="premium-panel">
     @if (billing(); as b) {
 
     <div class="status-row">
@@ -78,26 +99,24 @@ interface HistoryRow {
     <table class="history-table">
         <thead>
             <tr>
-                <th>{{ 'When' | t }}</th>
-                <th>{{ 'Action' | t }}</th>
-                <th>{{ 'Source' | t }}</th>
+                <th>{{ 'Date' | t }}</th>
+                <th>{{ 'Event' | t }}</th>
                 <th>{{ 'Amount' | t }}</th>
-                <th>{{ 'Description' | t }}</th>
+                <th>{{ 'Details' | t }}</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             @for (r of rows(); track $index) {
-            <tr [class.spent]="r.kind === 'Revoked'">
-                <td class="col-when">{{ r.when | date:'medium' }}</td>
-                <td>{{ r.kind }}</td>
-                <td><span class="src src-{{ r.source.toLowerCase() }}">{{ r.source }}</span></td>
+            <tr [class.spent]="r.revoked">
+                <td class="col-when" [matTooltip]="(r.when | date:'medium') ?? ''">{{ r.when | date:'mediumDate' }}</td>
+                <td class="col-event">{{ r.kind | t }} <span class="src src-{{ r.source.toLowerCase() }}">{{ r.source }}</span></td>
                 <td class="col-amount">{{ r.amount }}</td>
-                <td class="muted">{{ r.description }}</td>
+                <td class="muted" [matTooltip]="r.description && r.full && r.full !== r.description ? r.full : ''">{{ r.description }}</td>
                 <td class="col-action">
                     @if (r.grant; as g) {
                     <button mat-button [disabled]="revoking() === g.id" (click)="revoke(g)">{{ 'Revoke' | t }}</button>
-                    } @else if (r.kind === 'Granted' && r.source !== 'Admin') {
+                    } @else if (r.paid) {
                     <span class="muted paid" [matTooltip]="(r.source === 'Monero'
                         ? 'Paid time cannot be revoked. Monero payments can only be refunded manually from the Choculaterie wallet.'
                         : 'Paid time cannot be revoked. Refund in Stripe instead.') | t">{{ 'paid' | t }}</span>
@@ -108,16 +127,17 @@ interface HistoryRow {
         </tbody>
     </table>
     }
+    } @else {
+    <p class="muted">{{ 'Loading' | t }}</p>
     }
-</mat-dialog-content>
+</div>
 
 `,
     styles: [`
-        .premium-dlg-title { display: flex; align-items: center; gap: 0.25rem; font-size: 1rem; }
-        .back-btn { margin-left: -8px; flex-shrink: 0; }
-        .premium-dlg-content { max-height: 70vh; font-size: 0.85rem; padding-bottom: 1rem; }
+        :host { display: block; }
+        .premium-panel { font-size: 0.85rem; }
         .muted { color: var(--mat-sys-on-surface-variant); }
-        .status-row { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 1.75rem; }
+        .status-row { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 1.25rem; }
         .status-on { color: var(--mat-sys-primary); }
         .section-title { margin: 1.25rem 0 0.5rem; font-size: 0.85rem; font-weight: 500; }
         .grant-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
@@ -133,6 +153,8 @@ interface HistoryRow {
         .history-table tr.spent { opacity: 0.5; }
         .col-when { white-space: nowrap; color: var(--mat-sys-on-surface-variant); }
         .col-amount { white-space: nowrap; }
+        .col-event { white-space: nowrap; }
+        .col-event .src { margin-left: 4px; }
         .col-action { text-align: right; white-space: nowrap; }
         .src { padding: 1px 6px; border-radius: 999px; font-size: 0.72rem; background: var(--mat-sys-surface-container-high); }
         .src-stripe { background: color-mix(in srgb, var(--mat-sys-primary) 20%, transparent); }
@@ -140,21 +162,23 @@ interface HistoryRow {
         .paid { font-size: 0.75rem; }
     `],
 })
-export class PremiumHistoryDialogComponent {
-    readonly data = inject<PremiumHistoryData>(MAT_DIALOG_DATA);
-    readonly dialogRef = inject(MatDialogRef<PremiumHistoryDialogComponent>);
+export class PremiumManagePanelComponent implements OnInit {
+    readonly userId = input.required<string>();
+    readonly initialBilling = input<AdminUserBilling | null>(null);
+    readonly changed = output<AdminUserBilling>();
     private billingApi = inject(BillingService);
     private toast = inject(ToastService);
     private confirmDlg = inject(MatDialog);
 
-    readonly billing = signal<AdminUserBilling | null>(this.data.billing);
+    readonly billing = signal<AdminUserBilling | null>(null);
     readonly loading = signal(false);
     readonly grantMonths = signal<number>(1);
     readonly grantReason = signal<string>('');
     readonly granting = signal(false);
     readonly revoking = signal<string | null>(null);
 
-    constructor() {
+    ngOnInit(): void {
+        this.billing.set(this.initialBilling());
         this.load();
     }
 
@@ -168,49 +192,69 @@ export class PremiumHistoryDialogComponent {
         const b = this.billing();
         if (!b) return [];
         const out: HistoryRow[] = [];
+        const paidEvents = b.payments.filter((p) => p.eventType === 'invoice.paid' && p.grantedDays > 0);
+        const matchesPayment = (g: AdminPremiumGrant) => paidEvents.some((p) =>
+            p.provider === g.source && p.grantedDays === g.days
+            && Math.abs(new Date(p.processedAt).getTime() - new Date(g.createdAt).getTime()) < 120000);
 
         for (const g of b.grants) {
+            const paidGrant = g.source === 'Stripe' || g.source === 'Monero' || g.source === 'Gift';
+            if (!g.revokedAt && (g.source === 'Stripe' || g.source === 'Monero') && matchesPayment(g)) continue;
+            const reason = g.source === 'Referral' ? null : g.reason;
             out.push({
                 when: g.createdAt,
-                kind: 'Granted',
+                kind: GRANT_LABELS[g.source] ?? 'Granted',
                 source: g.source,
-                amount: `${g.days} days`,
-                description: g.reason,
-                grant: g.source === 'Admin' && !g.revokedAt ? g : null,
+                amount: `+${g.days} days`,
+                description: reason,
+                full: reason,
+                grant: !paidGrant && !g.revokedAt ? g : null,
+                paid: paidGrant && !g.revokedAt,
+                revoked: false,
             });
             if (g.revokedAt) {
                 out.push({
                     when: g.revokedAt,
                     kind: 'Revoked',
                     source: g.source,
-                    amount: `${g.days} days`,
-                    description: g.reason,
+                    amount: `-${g.days} days`,
+                    description: reason,
+                    full: reason,
                     grant: null,
+                    paid: false,
+                    revoked: true,
                 });
             }
         }
 
         for (const p of b.payments) {
-            const amount = p.amountCents != null
-                ? `$${(p.amountCents / 100).toFixed(2)} ${(p.currency ?? '').toUpperCase()}`
-                : '';
+            const money = p.amountCents != null && p.amountCents > 0 ? `$${(p.amountCents / 100).toFixed(2)}` : '';
+            const isPaid = p.eventType === 'invoice.paid' && p.grantedDays > 0;
             out.push({
                 when: p.processedAt,
-                kind: 'Payment',
+                kind: EVENT_LABELS[p.eventType] ?? p.eventType,
                 source: p.provider,
-                amount: [amount, p.grantedDays ? `${p.grantedDays} days` : ''].filter(Boolean).join(' · '),
-                description: p.eventType,
+                amount: [money, isPaid ? `+${p.grantedDays} days` : ''].filter(Boolean).join(' · '),
+                description: shortDetails(p.details ?? null),
+                full: p.details ?? p.eventType,
                 grant: null,
+                paid: isPaid,
+                revoked: false,
             });
         }
 
-        return out.sort((a, b2) => new Date(b2.when).getTime() - new Date(a.when).getTime());
+        const rank = (r: HistoryRow) => ['Subscribed', 'Paid', 'Paid time', 'Changed', 'Payment failed', 'Ended', 'Refunded', 'Disputed', 'Revoked'].indexOf(r.kind);
+        return out.sort((a, b2) => {
+            const diff = new Date(b2.when).getTime() - new Date(a.when).getTime();
+            if (Math.abs(diff) < 60000 && rank(a) !== rank(b2)) return rank(b2) - rank(a);
+            return diff;
+        });
     });
 
     private load(): void {
         if (!this.billing()) this.loading.set(true);
-        this.billingApi.adminGetUserBilling(this.data.userId).subscribe({
-            next: (b) => { this.billing.set(b); this.loading.set(false); },
+        this.billingApi.adminGetUserBilling(this.userId()).subscribe({
+            next: (b) => { this.billing.set(b); this.loading.set(false); this.changed.emit(b); },
             error: () => this.loading.set(false),
         });
     }
@@ -219,7 +263,7 @@ export class PremiumHistoryDialogComponent {
         const months = this.grantMonths();
         if (months < 1) return;
         this.granting.set(true);
-        this.billingApi.adminGrantPremium(this.data.userId, months, this.grantReason().trim() || null).subscribe({
+        this.billingApi.adminGrantPremium(this.userId(), months, this.grantReason().trim() || null).subscribe({
             next: () => {
                 this.granting.set(false);
                 this.grantReason.set('');

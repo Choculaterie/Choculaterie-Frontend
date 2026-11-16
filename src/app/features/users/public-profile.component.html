@@ -181,7 +181,7 @@
                 <mat-icon svgIcon="mc:ui/flag" matButtonIcon class="mc-icon--draw"></mat-icon> <span>{{ 'Report' | t }}</span>
             </button>
             @if (isAdmin()) {
-            <a mat-stroked-button routerLink="/admin" [queryParams]="{ tab: 0, userId: enrichedProfile()!.id }"
+            <a mat-stroked-button routerLink="/admin" [queryParams]="{ tab: 0, search: enrichedProfile()!.username, flash: enrichedProfile()!.id }"
                 class="admin-manage-btn">
                 <mat-icon svgIcon="mc:ui/shield_empty" matButtonIcon class="mc-icon--draw"></mat-icon> <span>{{ 'Manage User' | t }}</span>
             </a>

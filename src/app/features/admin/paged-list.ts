@@ -22,8 +22,8 @@ export class PagedList<T> {
         private onLoaded: () => void = () => { },
     ) { }
 
-    load(): void {
-        this.loading.set(true);
+    load(silent = false): void {
+        if (!silent) this.loading.set(true);
         let params = new HttpParams().set('page', this.pageIndex() + 1).set('pageSize', this.pageSize());
         const q = this.search().trim();
         if (q) params = params.set('search', q);

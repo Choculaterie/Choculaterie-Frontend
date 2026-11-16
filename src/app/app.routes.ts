@@ -1,4 +1,5 @@
-import { Routes, UrlMatchResult, UrlSegment } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, Routes, UrlMatchResult, UrlSegment } from '@angular/router';
 import { authGuard, roleGuard } from './core/guards';
 
 const TRANSLATIONS_PARAMS = ['loc', 'section', 'group', 'index'];
@@ -61,6 +62,14 @@ export const routes: Routes = [
         path: 'videos/:id',
         loadComponent: () =>
             import('./features/videos/video-watch.component').then((m) => m.VideoWatchComponent),
+    },
+    {
+        path: 'r/:code',
+        redirectTo: ({ params }) => inject(Router).createUrlTree(['/premium'], { queryParams: { ref: params['code'] } }),
+    },
+    {
+        path: 'gift/:code',
+        redirectTo: ({ params }) => inject(Router).createUrlTree(['/premium'], { queryParams: { claim: params['code'] } }),
     },
     {
         path: 'premium',

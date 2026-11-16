@@ -9,6 +9,7 @@ import { RealtimeService, type InboxItem } from '../../../core/services/realtime
 import { AdminService } from '../../../api/admin';
 import { NotificationsService } from '../../../api/notifications';
 import { ThemeService } from '../../../core/services/theme.service';
+import { SessionService } from '../../../core/services/session.service';
 import { TicketReplyViewDialogComponent } from '../ticket-reply-view-dialog/ticket-reply-view-dialog.component';
 import { ADMIN_TAB } from '../../../core/enums';
 import { MatIconModule } from '@angular/material/icon';
@@ -127,6 +128,7 @@ import { ADMIN, COMMON } from '../../../i18n/labels';
 export class InboxDialogComponent {
     readonly realtime = inject(RealtimeService);
     readonly theme = inject(ThemeService);
+    private session = inject(SessionService);
     private adminApi = inject(AdminService);
     private notificationsApi = inject(NotificationsService);
     private router = inject(Router);
@@ -188,6 +190,21 @@ export class InboxDialogComponent {
         }
 
         const data = this.parseData(n.data);
+
+        const premiumTargets: Record<string, string> = {
+            trial_ending: 'checkout', trial_ended: 'checkout', referral_reward: 'invite', premium_gift: 'status',
+        };
+        if (n.type in premiumTargets) {
+            this.dialogRef.close();
+            this.router.navigate(['/premium'], { queryParams: { highlight: premiumTargets[n.type] } });
+            return;
+        }
+        if (n.type === 'founder_badge') {
+            this.dialogRef.close();
+            const me = this.session.user()?.username;
+            this.router.navigate(me ? ['/users', me] : ['/profile']);
+            return;
+        }
 
         if (n.type === 'starred_user_schematic') {
             const schematicId = data['schematicId'] ?? data['SchematicId'];

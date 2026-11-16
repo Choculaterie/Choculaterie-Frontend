@@ -7,9 +7,9 @@ import { DropZoneDirective } from '../../shared/directives/drop-zone.directive';
 import { firstValueFrom } from 'rxjs';
 import { VideosService, AdminVideoResponse, videoThumbnailUrl, formatDuration } from '../../core/services/videos.service';
 import { EmojifyPipe } from '../../shared/pipes/emojify.pipe';
-import { Component, OnInit, OnDestroy, inject, signal, computed, effect, viewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, effect, viewChild, ElementRef, PLATFORM_ID } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
-import { DatePipe, Location } from '@angular/common';
+import { DatePipe, Location, isPlatformBrowser } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -231,6 +231,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly usersTotalCount = signal(0);
     readonly loadingUsers = signal(true);
     readonly premiumOnlyUsers = signal(false);
+    private premiumParamRead = false;
     readonly usersPage = signal(0);
     readonly usersPageSize = signal(25);
     readonly usersSort = signal('date');
@@ -408,6 +409,27 @@ export class AdminComponent implements OnInit, OnDestroy {
 
         this.autoSubs.push(
             this.route.queryParams.subscribe(params => {
+                if (params['flash'] && isPlatformBrowser(this.platformId)) {
+                    const flashTab = parseInt(params['tab'], 10) === ADMIN_TAB.schematics ? ADMIN_TAB.schematics : ADMIN_TAB.users;
+                    const count = parseInt(params['flashes'], 10);
+                    this.pendingFlash = { tab: flashTab, id: String(params['flash']), count: count > 0 && count <= 10 ? count : 1 };
+                    if (flashTab === ADMIN_TAB.schematics) {
+                        this.schematicsSearch = params['search'] ?? '';
+                        this.schematicsPage.set(0);
+                    } else {
+                        this.usersSearch = params['search'] ?? '';
+                        this.usersPage.set(0);
+                    }
+                    this.loadedTabs.delete(flashTab);
+                    this.router.navigate([], { queryParams: { flash: null, flashes: null, search: null }, queryParamsHandling: 'merge', replaceUrl: true });
+                }
+                const premiumOnly = params['premium'] === '1';
+                if (!this.premiumParamRead && premiumOnly !== this.premiumOnlyUsers()) {
+                    this.premiumOnlyUsers.set(premiumOnly);
+                    this.usersPage.set(0);
+                    this.loadedTabs.delete(ADMIN_TAB.users);
+                }
+                this.premiumParamRead = true;
                 const tabParam = parseInt(params['tab'], 10);
                 const tab = !isNaN(tabParam) && tabParam >= 0 ? tabParam : 0;
                 const prevTab = this.selectedTab();
@@ -519,6 +541,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         params.delete('page');
 
         if (idx !== ADMIN_TAB.tickets) params.delete('ticketId');
+        if (idx === ADMIN_TAB.users && this.premiumOnlyUsers()) params.set('premium', '1'); else params.delete('premium');
         const qs = params.toString();
         this.location.replaceState(window.location.pathname + (qs ? '?' + qs : ''));
 
@@ -629,6 +652,7 @@ export class AdminComponent implements OnInit, OnDestroy {
                 this.users.set(r.items);
                 this.usersTotalCount.set(Number(r.totalCount));
                 this.loadingUsers.set(false);
+                this.flashPendingRow(ADMIN_TAB.users, r.items.map((x) => String(x.id)));
             },
             error: () => this.loadingUsers.set(false),
         });
@@ -659,6 +683,18 @@ export class AdminComponent implements OnInit, OnDestroy {
         }
         this.usersPage.set(0);
         this.syncPageParam(0);
+        this.loadUsers();
+    }
+
+    togglePremiumOnly(): void {
+        const on = !this.premiumOnlyUsers();
+        this.premiumOnlyUsers.set(on);
+        this.usersPage.set(0);
+        const params = new URLSearchParams(window.location.search);
+        if (on) params.set('premium', '1'); else params.delete('premium');
+        params.delete('page');
+        const qs = params.toString();
+        this.location.replaceState(window.location.pathname + (qs ? '?' + qs : ''));
         this.loadUsers();
     }
 
@@ -880,9 +916,29 @@ export class AdminComponent implements OnInit, OnDestroy {
                 this.schematics.set(r.items);
                 this.schematicsTotalCount.set(Number(r.totalCount));
                 this.loadingSchematics.set(false);
+                this.flashPendingRow(ADMIN_TAB.schematics, r.items.map((x) => String(x.id)));
             },
             error: () => this.loadingSchematics.set(false),
         });
+    }
+
+    private platformId = inject(PLATFORM_ID);
+    readonly flashRowId = signal<string | null>(null);
+    readonly flashCount = signal(1);
+    private pendingFlash: { tab: number; id: string; count: number } | null = null;
+
+    private flashPendingRow(tab: number, ids: string[]): void {
+        const pending = this.pendingFlash;
+        if (!pending || pending.tab !== tab) return;
+        this.pendingFlash = null;
+        if (!ids.includes(pending.id)) {
+            this.toast.info('Not found in this list.');
+            return;
+        }
+        this.flashCount.set(pending.count);
+        this.flashRowId.set(pending.id);
+        setTimeout(() => document.querySelector(`[data-row-id="${CSS.escape(pending.id)}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+        setTimeout(() => this.flashRowId.set(null), pending.count * 1200 + 300);
     }
 
     onSchematicsPageChange(event: PageEvent): void {
@@ -1128,6 +1184,17 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     private readonly promoBanner = inject(PromoBannerService);
+    emailPreviewTo = 'margot@choculaterie.com';
+    readonly sendingPreviews = signal(false);
+
+    sendEmailPreviews(): void {
+        this.sendingPreviews.set(true);
+        this.http.post<{ sent: number }>('/api/Admin/email-previews', { to: this.emailPreviewTo.trim() }).subscribe({
+            next: (r) => { this.sendingPreviews.set(false); this.toast.success(`${r.sent} preview emails sent`); },
+            error: (err) => { this.sendingPreviews.set(false); this.toast.error(err?.error?.message ?? ADMIN.failed); },
+        });
+    }
+
     readonly trackPromotion = (_: number, p: AdminPromotionResponse) => p.id;
 
     setPromotionPlacements(p: AdminPromotionResponse, placements: string[]): void {
@@ -1289,9 +1356,11 @@ export class AdminComponent implements OnInit, OnDestroy {
         }, 250);
     }
 
+    readonly trackVideo = (_: number, v: AdminVideoResponse) => v.id;
+
     private syncVideoPolling(): void {
         const busy = this.adminVideos().some(v => v.status === 'Processing');
-        if (busy && !this.videoPoll) this.videoPoll = setInterval(() => this.loadVideos(), 3000);
+        if (busy && !this.videoPoll) this.videoPoll = setInterval(() => this.videosPager.load(true), 3000);
         if (!busy && this.videoPoll) { clearInterval(this.videoPoll); this.videoPoll = null; }
     }
 

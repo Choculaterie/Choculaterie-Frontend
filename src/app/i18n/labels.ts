@@ -386,4 +386,5 @@ export const BADGES_ROLES = {
     artist: 'Artist',
     user: 'User',
     premium: 'Premium',
+    founder: 'Founder',
 };

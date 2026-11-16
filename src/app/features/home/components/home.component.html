@@ -98,6 +98,12 @@
             <span>{{ 'Support the Services' | t }}</span>
         </h2>
         <p>{{ 'Help me to continue providing free, ad-free, and tracking-free cloud services!' | t }}</p>
+        @if (foundersLeft() > 0) {
+        <a routerLink="/premium" class="founder-pill settle-in">
+            <mat-icon svgIcon="mc:ui/star_thick" class="founder-pill-icon"></mat-icon>
+            <span>{{ 'First 100 supporters get the Founder badge' | t }} &middot; {{ foundersLeft() }} {{ 'left' | t }}</span>
+        </a>
+        }
         <div class="support-actions">
             <a href="https://ko-fi.com/choculat" target="_blank" rel="noopener noreferrer" class="support-btn kofi-btn">
                 <mat-icon svgIcon="mc:misc/coffee" class="support-btn-icon"></mat-icon>

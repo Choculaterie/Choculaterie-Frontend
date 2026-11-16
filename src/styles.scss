@@ -851,3 +851,14 @@ html:not([data-theme]) {
         }
     }
 }
+
+.cdk-overlay-dark-backdrop {
+  background: rgba(0, 0, 0, .72);
+  backdrop-filter: blur(6px);
+}
+
+.mat-mdc-button-base .mdc-button__label:has(> .btn-loader) {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+}

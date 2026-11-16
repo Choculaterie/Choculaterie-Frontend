@@ -5,6 +5,7 @@ export enum Badge {
     Dev = 3,
     Premium = 4,
     Artist = 5,
+    Founder = 6,
 }
 
 import { BADGES_ROLES } from '../../i18n/labels';
@@ -16,6 +17,7 @@ export const BADGE_LABELS: Record<number, string> = {
     [Badge.Dev]: BADGES_ROLES.developer,
     [Badge.Premium]: BADGES_ROLES.premium,
     [Badge.Artist]: BADGES_ROLES.artist,
+    [Badge.Founder]: BADGES_ROLES.founder,
 };
 
 export const BADGE_ICONS: Record<number, string> = {
@@ -25,6 +27,7 @@ export const BADGE_ICONS: Record<number, string> = {
     [Badge.Dev]: '/icons/weapons/pickaxe.svg',
     [Badge.Premium]: '/premium.png',
     [Badge.Artist]: '/icons/weapons/pen.svg',
+    [Badge.Founder]: '/icons/ui/star_thick.svg',
 };
 
 const BADGE_NAME_TO_NUM: Record<string, number> = Object.fromEntries(

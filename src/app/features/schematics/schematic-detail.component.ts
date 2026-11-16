@@ -30,6 +30,7 @@ import { ReportDialogComponent, ReportDialogData, ReportDialogResult } from '../
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { DownloadPickerComponent, DownloadPickerData } from '../../shared/components/download-picker/download-picker.component';
 import { SessionService } from '../../core/services/session.service';
+import { ADMIN_TAB } from '../../core/enums/admin-tab';
 import { ToastService } from '../../core/services/toast.service';
 import { SCHEMATICS, DIALOGS, COMMON } from '../../i18n/labels';
 import { SchematicImgPipe } from '../../shared/pipes/image-url.pipe';
@@ -173,6 +174,16 @@ export class SchematicDetailComponent implements OnInit {
 
     isEditFileValid(): boolean {
         return this.editPictureItems().length >= 1 && this.editFileItems().length >= 1;
+    }
+
+    canManage(): boolean {
+        return this.session.isAdminOrMod();
+    }
+
+    manageInAdmin(): void {
+        const s = this.schematic();
+        if (!s) return;
+        this.router.navigate(['/admin'], { queryParams: { tab: ADMIN_TAB.schematics, search: s.name, flash: s.id } });
     }
 
     isOwner(): boolean {

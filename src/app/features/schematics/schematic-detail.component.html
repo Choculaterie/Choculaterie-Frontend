@@ -133,6 +133,12 @@
                    >{{ 'Report' | t }}</span>
             </button>
             }
+            @if (canManage()) {
+            <button mat-menu-item (click)="manageInAdmin()">
+                <mat-icon svgIcon="mc:ui/shield_empty" matMenuItemIcon></mat-icon> <span
+                   >{{ 'Manage Schematic' | t }}</span>
+            </button>
+            }
             @if (isOwner()) {
             <button mat-menu-item (click)="startEdit()">
                 <mat-icon svgIcon="mc:weapons/pen" matMenuItemIcon></mat-icon> <span

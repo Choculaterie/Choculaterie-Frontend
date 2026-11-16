@@ -7,6 +7,46 @@
         <p>{{ 'Support the project and unlock extra perks.' | t }}</p>
     </header>
 
+    @if (foundersLeft() > 0) {
+    <div class="founder-banner settle-in">
+        <mat-icon svgIcon="mc:ui/star_thick" class="founder-icon"></mat-icon>
+        <span>{{ 'The first 100 supporters get the Founder badge.' | t }} <strong>{{ foundersLeft() }} {{ 'left' | t }}</strong></span>
+    </div>
+    }
+
+    @if (claimInfo(); as c) {
+    <mat-card appearance="outlined" class="status-card claim-card settle-in">
+        <mat-card-content>
+            <img src="/premium.png" alt="" aria-hidden="true" class="mc-icon premium-icon" draggable="false" />
+            <div>
+                @if (c.voided) {
+                <strong>{{ 'This gift link is no longer valid.' | t }}</strong>
+                } @else if (c.claimed) {
+                <strong>{{ 'This gift link was already claimed.' | t }}</strong>
+                } @else {
+                <strong>{{ c.from ?? ('Someone' | t) }} {{ 'gifted you' | t }} {{ c.months }} {{ (c.months === 1 ? 'month' : 'months') | t }} {{ 'of Premium' | t }}</strong>
+                <p>{{ 'Claim it to add it to your account. If you already have Premium, it is added on top.' | t }}</p>
+                }
+            </div>
+            @if (!c.claimed && !c.voided) {
+            <button mat-flat-button color="primary" class="status-action" [disabled]="claiming()" (click)="claim()">
+                @if (claiming()) {<img src="loading.gif" alt="" aria-hidden="true" class="btn-loader" />}
+                {{ (isAuthenticated() ? 'Claim' : 'Sign in to claim') | t }}
+            </button>
+            }
+        </mat-card-content>
+    </mat-card>
+    }
+
+    @if (waitingGiftLink()) {
+    <mat-card appearance="outlined" class="status-card confirming-card settle-in">
+        <mat-card-content>
+            <img src="loading.gif" alt="" aria-hidden="true" class="status-loader" />
+            <span>{{ 'Creating your gift link' | t }}</span>
+        </mat-card-content>
+    </mat-card>
+    }
+
     @if (confirmingCheckout()) {
     <mat-card appearance="outlined" class="status-card confirming-card settle-in">
         <mat-card-content>
@@ -51,6 +91,33 @@
     </mat-card>
     }
 
+    @if (showTrial() && offers(); as o) {
+    <mat-card appearance="outlined" class="trial-card settle-in">
+        <mat-card-content>
+            <div class="trial-text">
+                <strong>{{ 'Try Premium free for 14 days' | t }}</strong>
+                @if (!isAuthenticated()) {
+                <p>{{ 'Sign in and link your Minecraft account to start your free trial. No card needed.' | t }}</p>
+                } @else if (o.trialState === 'NeedsMinecraftLink') {
+                <p>{{ 'Link your Minecraft account to start your free trial. No card needed.' | t }}</p>
+                } @else {
+                <p>{{ 'No card needed. One free trial per Minecraft account.' | t }}</p>
+                }
+            </div>
+            @if (!isAuthenticated()) {
+            <button mat-flat-button color="primary" class="trial-action" (click)="startTrial()">{{ 'Sign in' | t }}</button>
+            } @else if (o.trialState === 'NeedsMinecraftLink') {
+            <a mat-flat-button color="primary" class="trial-action" [routerLink]="ownProfilePath()" [queryParams]="{ tab: 3, section: 'minecraft' }">{{ 'Link Minecraft account' | t }}</a>
+            } @else {
+            <button mat-flat-button color="primary" class="trial-action" [disabled]="startingTrial()" (click)="startTrial()">
+                @if (startingTrial()) {<img src="loading.gif" alt="" aria-hidden="true" class="btn-loader" />}
+                {{ 'Start free trial' | t }}
+            </button>
+            }
+        </mat-card-content>
+    </mat-card>
+    }
+
     <table class="compare-table">
         <thead>
             <tr>
@@ -63,7 +130,7 @@
             <tr>
                 <td>{{ 'Price' | t }}</td>
                 <td>$0</td>
-                <td>$5 {{ '/month' | t }}</td>
+                <td><span class="price-main">{{ price(offers()?.monthlyCents ?? 500) }} {{ '/month' | t }}</span><br><span class="price-alt">{{ 'or' | t }} {{ price(offers()?.yearlyCents ?? 4800) }} {{ '/year' | t }}</span></td>
             </tr>
             <tr>
                 <td>{{ 'Cloud storage' | t }}</td>
@@ -87,7 +154,7 @@
             <tr>
                 <td>
                     <span class="feature-with-info">{{ 'Version history per world' | t }}
-                        <mat-icon svgIcon="mc:ui/!!" class="info-point" [matTooltip]="'Premium keeps earlier backups of each world, one per day over the last three days, so you can roll back to how it was on a previous day. Free keeps only the current one.' | t" matTooltipTouchGestures="on" (contextmenu)="$event.preventDefault()"></mat-icon>
+                        <mat-icon svgIcon="mc:ui/!!" class="info-point" [matTooltip]="'Earlier backups of each world are kept, one per day over the last three days.' | t" matTooltipTouchGestures="on" (contextmenu)="$event.preventDefault()"></mat-icon>
                     </span>
                 </td>
                 <td><mat-icon svgIcon="mc:letters/X" class="cross-icon"></mat-icon></td>
@@ -102,52 +169,101 @@
     </table>
 
     @if (!loadingSubscription() && !subscription()?.isPremium) {
-    <div class="pay-options settle-in">
-        <button mat-flat-button color="primary" class="subscribe-btn" [disabled]="checkingOut()" (click)="subscribe()">
-            {{ (checkingOut() ? 'Redirecting…' : 'Subscribe with card') | t }}
+    <div class="subscribe-cta checkout-card settle-in">
+        <button mat-flat-button color="primary" class="subscribe-btn" (click)="openCheckout()">{{ 'Subscribe' | t }}</button>
+        @if (offers()) {
+        <span class="cta-note">{{ 'From' | t }} {{ price(cheapestMonthly()) }} {{ '/month' | t }}</span>
+        } @else {
+        <span class="cta-note">&nbsp;</span>
+        }
+    </div>
+    }
+
+    @if (isAuthenticated()) {
+    <div class="extra-tiles settle-in">
+        <button type="button" class="tile" (click)="openGift()">
+            <mat-icon svgIcon="mc:ui/heart" class="tile-icon"></mat-icon>
+            <span class="tile-title">{{ 'Gift Premium' | t }}</span>
+            <span class="tile-text">{{ 'Send it to a friend or buy a link anyone can claim.' | t }}</span>
         </button>
-        <button mat-stroked-button class="crypto-btn" (click)="toggleCrypto()">
-            {{ (showCrypto() ? 'Hide Monero payment' : 'Pay with Monero (XMR)') | t }}
+        <button type="button" class="tile" (click)="openInvite()">
+            <mat-icon svgIcon="mc:people/guy_plus" class="tile-icon"></mat-icon>
+            <span class="tile-title">{{ 'Invite friends' | t }}</span>
+            <span class="tile-text">{{ 'Get 1 free month for every friend who buys Premium with your code.' | t }}</span>
         </button>
     </div>
+    }
+</div>
 
-    @if (showCrypto()) {
-    <mat-card appearance="outlined" class="crypto-card" #cryptoSection>
-        <mat-card-content>
-            @if (!invoice()) {
-            <header class="crypto-head">
-                <h2>{{ 'Pay with Monero' | t }}</h2>
-                <span class="crypto-tag">{{ discountLabel() }}</span>
-            </header>
-            <p class="crypto-intro">{{ 'Prepaid, you cannot be refunded.' | t }}</p>
+@if (celebrating(); as source) {
+<div class="celebration" [attr.data-source]="source" aria-hidden="true">
+    @for (fw of fireworks; track fw.cls) {
+    <video #firework [class]="'firework ' + fw.cls" [src]="fw.src" [attr.data-delay]="fw.delay"
+        muted playsinline preload="auto" (playing)="firework.classList.add('live')"></video>
+    }
+</div>
+}
 
-            <div class="plan-grid">
-                @for (plan of plans(); track plan.months) {
-                <button type="button" class="plan" [class.selected]="selectedMonths() === plan.months"
-                    [attr.aria-pressed]="selectedMonths() === plan.months" (click)="selectMonths(plan.months)">
-                    <span class="plan-months">{{ plan.months }} {{ (plan.months === 1 ? 'month' : 'months') | t }}</span>
-                    <span class="plan-price">{{ price(plan.usdCents) }}</span>
-                    <span class="plan-was">{{ price(plan.listUsdCents) }}</span>
-                </button>
-                }
-            </div>
-
-            <button mat-flat-button color="primary" class="crypto-continue"
-                [disabled]="creatingInvoice() || !plans().length" (click)="createInvoice()">
-                @if (creatingInvoice()) {
-                <img src="loading.gif" alt="" aria-hidden="true" class="btn-loader" />
-                {{ 'Getting the current rate' | t }}
-                } @else if (selectedPlan(); as p) {
-                {{ 'Continue' | t }} &middot; {{ price(p.usdCents) }}
-                } @else {
-                {{ 'Continue' | t }}
+<ng-template #checkoutTpl>
+    <div mat-dialog-title class="dlg-title">
+        @if (invoice(); as inv) {
+        <span>{{ 'Send' | t }} {{ inv.xmr }} XMR</span>
+        } @else {
+        <span>{{ 'Get Premium' | t }}</span>
+        }
+        <button mat-icon-button mat-dialog-close class="close-btn"><mat-icon svgIcon="mc:letters/X"></mat-icon></button>
+    </div>
+    <mat-dialog-content class="checkout-dialog">
+        @if (!invoice()) {
+        <p class="step">{{ 'How long?' | t }}</p>
+        <div class="plan-grid four-grid">
+            @for (plan of offers()?.plans ?? []; track plan.months) {
+            <button type="button" class="plan" [class.selected]="selectedMonths() === plan.months"
+                [attr.aria-pressed]="selectedMonths() === plan.months" (click)="selectMonths(plan.months)">
+                <span class="plan-months">{{ plan.months }} {{ (plan.months === 1 ? 'month' : 'months') | t }}</span>
+                <span class="plan-price">{{ price(plan.amountCents) }}</span>
+                <span class="plan-note">{{ price(plan.amountCents / plan.months) }} {{ '/month' | t }}</span>
+                @if (plan.listAmountCents > plan.amountCents) {
+                <span class="plan-badge">{{ discount(plan) }}% {{ 'off' | t }}</span>
                 }
             </button>
+            }
+        </div>
+
+        <button mat-flat-button color="primary" class="pay-btn" [disabled]="checkingOut() || creatingInvoice()" (click)="subscribe()">
+            @if (checkingOut()) {<img src="loading.gif" alt="" aria-hidden="true" class="btn-loader" />}
+            <span>{{ (checkingOut() ? 'Redirecting' : 'Subscribe with card') | t }} &middot; {{ price(selectedCents()) }}</span>
+        </button>
+        <p class="pay-note">
+            @if (selectedMonths() === 1) { {{ 'Renews every month. Cancel anytime.' | t }} }
+            @else if (selectedMonths() === 12) { {{ 'Renews every year. Cancel anytime.' | t }} }
+            @else { {{ 'Renews every' | t }} {{ selectedMonths() }} {{ 'months. Cancel anytime.' | t }} }
+        </p>
+
+        <div class="alt-pay">
+            @if (creatingInvoice()) {
+            <img src="loading.gif" alt="" aria-hidden="true" class="btn-loader" />
+            <span>{{ 'Getting the current rate' | t }}</span>
             } @else {
-            <header class="crypto-head">
-                <h2>{{ 'Send' | t }} {{ invoice()!.xmr }} XMR</h2>
-                <span class="crypto-tag">{{ invoice()!.months }} {{ (invoice()!.months === 1 ? 'month' : 'months') | t }} &middot; {{ price(invoice()!.usdCents) }}</span>
-            </header>
+            <span>{{ 'Prefer crypto?' | t }}</span>
+            <button type="button" class="text-link" [disabled]="checkingOut()" (click)="createInvoice()">{{ 'Pay once with Monero' | t }}</button>
+            <mat-icon svgIcon="mc:ui/!!" class="field-info" [matTooltip]="'Pays for the selected length once. Does not renew. Crypto payments cannot be refunded.' | t" matTooltipTouchGestures="on" (contextmenu)="$event.preventDefault()"></mat-icon>
+            }
+        </div>
+
+        @if (showReferral()) {
+        <mat-form-field appearance="outline" class="referral-field">
+            <mat-label>{{ 'Referral code' | t }}</mat-label>
+            <input matInput [(ngModel)]="referralCode" (ngModelChange)="syncReferral($event)" maxlength="16" autocomplete="off" />
+            <mat-icon svgIcon="mc:ui/!!" matSuffix class="field-info" [matTooltip]="'Got a code from a friend? Enter it here and they get 1 free month of Premium when you buy.' | t" matTooltipTouchGestures="on" (contextmenu)="$event.preventDefault()"></mat-icon>
+        </mat-form-field>
+        } @else {
+        <div class="checkout-links">
+            <button type="button" class="text-link" (click)="showReferral.set(true)">{{ 'Have a referral code?' | t }}</button>
+        </div>
+        }
+        } @else {
+            <span class="crypto-tag">{{ invoice()!.months }} {{ (invoice()!.months === 1 ? 'month' : 'months') | t }} &middot; {{ price(invoice()!.usdCents) }}</span>
             <p class="crypto-intro">{{ 'This price is held for' | t }} {{ minutesLeft() }} {{ 'minutes.' | t }} {{ 'Send the exact amount to the address below.' | t }}</p>
 
             <div class="invoice-body">
@@ -201,19 +317,6 @@
             </div>
 
             <button mat-stroked-button class="invoice-cancel" (click)="cancelInvoice()">{{ 'Back' | t }}</button>
-            }
-        </mat-card-content>
-    </mat-card>
-    }
-    }
-</div>
-
-@if (celebrating(); as source) {
-<div class="celebration" [attr.data-source]="source" aria-hidden="true">
-    @for (fw of fireworks; track fw.cls) {
-    <video #firework [class]="'firework ' + fw.cls" [src]="fw.src" [attr.data-delay]="fw.delay"
-        muted playsinline preload="auto" (playing)="firework.classList.add('live')"></video>
-    }
-</div>
-}
-
+        }
+    </mat-dialog-content>
+</ng-template>

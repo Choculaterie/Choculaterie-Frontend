@@ -193,7 +193,7 @@
                     </mat-form-field>
                     <div class="search-actions">
                         <button mat-stroked-button class="newest-toggle"
-                            (click)="premiumOnlyUsers.set(!premiumOnlyUsers()); searchUsers()"
+                            (click)="togglePremiumOnly()"
                             >
                             <mat-icon [svgIcon]="premiumOnlyUsers() ? 'mc:shapes/box_checked' : 'mc:shapes/box'" matButtonIcon></mat-icon>
                             <span>{{ 'Premium only' | t }}</span>
@@ -267,7 +267,8 @@
                             </td>
                         </ng-container>
                         <tr mat-header-row *matHeaderRowDef="userColumns"></tr>
-                        <tr mat-row *matRowDef="let row; columns: userColumns;"></tr>
+                        <tr mat-row *matRowDef="let row; columns: userColumns;" [attr.data-row-id]="row.id"
+                            [class.flash-row]="flashRowId() === row.id" [style.--flash-count]="flashCount()"></tr>
                     </table>
                 </div>
                 <mat-paginator [length]="usersTotalCount()" [pageSize]="usersPageSize()" [pageIndex]="usersPage()"
@@ -370,6 +371,9 @@
                         </ng-container>
                         <tr mat-header-row *matHeaderRowDef="schematicColumns"></tr>
                         <tr mat-row *matRowDef="let row; columns: schematicColumns;"
+                            [attr.data-row-id]="row.id"
+                            [class.flash-row]="flashRowId() === row.id"
+                            [style.--flash-count]="flashCount()"
                             [class.highlight-row]="highlightedSchematicIds().has(row.id)"
                             (click)="onSchematicRowClick(row)">
                         </tr>
@@ -640,7 +644,7 @@
                 <app-empty-state icon="/icons/ui/question_mark!.svg" [title]="'No videos' | t" />
                 } @else {
                 <div class="table-scroll settle-in">
-                    <table mat-table [dataSource]="adminVideos()" class="full-width video-table">
+                    <table mat-table [dataSource]="adminVideos()" [trackBy]="trackVideo" class="full-width video-table">
                         <ng-container matColumnDef="thumb">
                             <th mat-header-cell *matHeaderCellDef></th>
                             <td mat-cell *matCellDef="let v">
@@ -711,6 +715,14 @@
             <div class="tab-content" appDropZone [fullPage]="true" [dropDisabled]="selectedTab() !== adminTab.promotions"
                 accept="image/*" (filesDrop)="onPromotionFilesDropped($event)">
                 <div class="video-toolbar promotion-toolbar">
+                    <mat-form-field appearance="outline" class="email-preview-field">
+                        <mat-label>{{ 'Email previews to' | t }}</mat-label>
+                        <input matInput [(ngModel)]="emailPreviewTo" type="email" />
+                    </mat-form-field>
+                    <button mat-stroked-button type="button" [disabled]="sendingPreviews()" (click)="sendEmailPreviews()">
+                        <mat-icon svgIcon="mc:communication/mail" matButtonIcon></mat-icon>
+                        <span>{{ 'Send email previews' | t }}</span>
+                    </button>
                     <button mat-flat-button type="button" (click)="togglePromotionForm()">
                         <mat-icon [svgIcon]="showPromotionForm() ? 'mc:letters/X' : 'mc:math/plus'" matButtonIcon></mat-icon>
                         <span>{{ (showPromotionForm() ? 'Cancel' : 'New Promotion') | t }}</span>

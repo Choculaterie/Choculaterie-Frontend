@@ -150,9 +150,105 @@
     max-width: 320px;
 }
 
-.crypto-card {
+.crypto-card,
+.gift-card,
+.referral-card {
     max-width: 620px;
     margin: 1.5rem auto 0;
+}
+
+.founder-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0 auto 1.5rem;
+    padding: 0.6rem 1rem;
+    max-width: 620px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
+    text-align: center;
+
+    .founder-icon {
+        flex: none;
+        color: var(--mat-sys-primary);
+    }
+}
+
+.trial-card {
+    margin-bottom: 2rem;
+
+    mat-card-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        @media (max-width: 600px) {
+            flex-wrap: wrap;
+
+            .trial-action {
+                flex: 1 1 100%;
+            }
+        }
+    }
+
+    .trial-text p {
+        margin: 0.25rem 0 0;
+        color: var(--mat-sys-on-surface-variant);
+    }
+
+    .trial-action {
+        flex: none;
+        margin-left: auto;
+    }
+}
+
+.price-main,
+.price-alt {
+    white-space: nowrap;
+}
+
+.price-alt {
+    font-size: 0.82rem;
+    opacity: 0.75;
+}
+
+.period-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    max-width: 320px;
+    margin: 0 auto 1rem;
+}
+
+.plan .plan-note {
+    font-size: 0.78rem;
+    opacity: 0.65;
+}
+
+.referral-field,
+.gift-field {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+.referral-field {
+    margin-bottom: 20px;
+}
+
+.gift-field {
+    max-width: none;
+    margin-bottom: 20px;
+}
+
+.plan-grid.gift-grid {
+    grid-template-columns: repeat(4, 1fr);
+
+    @media (max-width: 480px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .crypto-head {
@@ -253,8 +349,6 @@
 .btn-loader {
     width: 16px;
     height: 16px;
-    vertical-align: -2px;
-    margin-right: 0.45rem;
 }
 
 .invoice-body {
@@ -395,4 +489,214 @@
     &.ball-right { right: 6vw; height: 64vh; }
     &.star-left { left: 24vw; height: 85vh; }
     &.creeper-right { right: 24vw; height: 92vh; }
+}
+
+.subscribe-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1.5rem auto 0;
+    max-width: 320px;
+    border-radius: 16px;
+
+    .subscribe-btn {
+        max-width: none;
+    }
+
+    .cta-note {
+        font-size: 0.85rem;
+        opacity: 0.7;
+    }
+}
+
+.dlg-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.close-btn {
+    margin-right: -8px;
+}
+
+.checkout-dialog {
+    display: flex;
+    flex-direction: column;
+
+    .step {
+        margin: 0 0 0.5rem;
+        font-size: 0.85rem;
+        opacity: 0.8;
+    }
+
+    .plan-grid.four-grid {
+        grid-template-columns: repeat(4, 1fr);
+        padding-top: 10px;
+
+        .plan {
+            position: relative;
+            gap: 0.2rem;
+            padding-top: 1.2rem;
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0.1rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            white-space: nowrap;
+            background: var(--mat-sys-primary);
+            color: var(--mat-sys-on-primary);
+        }
+
+
+        @media (max-width: 520px) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .pay-btn {
+        width: 100%;
+    }
+
+    .pay-note {
+        margin: 0.4rem 0 1rem;
+        font-size: 0.8rem;
+        opacity: 0.65;
+        text-align: center;
+    }
+
+    .referral-field {
+        max-width: none;
+        margin: 0.25rem 0 0;
+    }
+
+    .alt-pay {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+
+        > span {
+            opacity: 0.7;
+        }
+
+        .field-info {
+            --icon-size: 14px;
+            width: 14px;
+            height: 14px;
+            opacity: 0.6;
+            cursor: help;
+        }
+    }
+
+    .checkout-links {
+        margin-top: 0.25rem;
+    }
+
+    .crypto-tag {
+        align-self: flex-start;
+        margin-bottom: 0.75rem;
+    }
+}
+
+.checkout-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+
+    .dot {
+        opacity: 0.5;
+    }
+}
+
+.text-link {
+    font: inherit;
+    color: var(--mat-sys-primary);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.plan .plan-save {
+    font-size: 0.75rem;
+    color: var(--mat-sys-primary);
+}
+
+.extra-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    max-width: 620px;
+    margin: 2rem auto 0;
+
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tile {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--mat-sys-outline-variant);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+        border-color: color-mix(in srgb, var(--mat-sys-primary) 60%, transparent);
+        background: color-mix(in srgb, var(--mat-sys-primary) 6%, transparent);
+    }
+
+    .tile-icon {
+        color: var(--mat-sys-primary);
+    }
+
+    .tile-title {
+        font-weight: 600;
+    }
+
+    .tile-text {
+        font-size: 0.82rem;
+        opacity: 0.7;
+        line-height: 1.4;
+    }
+}
+
+.gift-ready {
+    display: block !important;
+
+    p {
+        margin: 0.25rem 0 0.75rem;
+    }
+}
+
+.copy-row .value {
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+}
+
+code {
+    font-family: inherit;
 }

@@ -344,3 +344,23 @@
     }
 
 }
+.founder-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 auto 0.9rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    color: var(--mat-sys-on-surface);
+    text-decoration: none;
+    background: color-mix(in srgb, var(--mat-sys-primary) 16%, transparent);
+
+    .founder-pill-icon {
+        color: var(--mat-sys-primary);
+    }
+
+    &:hover {
+        background: color-mix(in srgb, var(--mat-sys-primary) 26%, transparent);
+    }
+}
