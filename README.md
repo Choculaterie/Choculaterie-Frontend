@@ -1,12 +1,20 @@
-# Choculaterie-Frontend
+# Choculaterie Frontend
 
-Will make a pretty readme at some point!
+The web app behind [choculaterie.com](https://choculaterie.com): discover, share and download Minecraft schematics, back up your worlds with Save Manager, and get the Choculaterie mods.
 
-In construction, hopefully coming soon to replace the current MVC mess that is the [Choculaterie](https://choculaterie.com)
+[Website](https://choculaterie.com) · [Discord](https://discord.gg/choculaterie) · [Status](https://status.choculaterie.com) · [GitHub](https://github.com/Choculaterie)
 
-Angular frontend, Dotnet Backend, using OpenAPI to link the two, Material 3 for the UI/UX
+Built with Angular and Material 3. The 3D viewer uses [schematic-renderer](https://github.com/Schem-at/schematic-renderer).
 
-Viewer based on : https://github.com/endingcredits/litematic-viewer/
+## Run it
 
-$sudo npm run api:generate
-$sudo npx orval
+```bash
+npm install
+npm start
+```
+
+Needs the backend on `http://localhost:5289`. Regenerate the API client with `npm run api:generate`.
+
+## License
+
+Copyright (C) 2026 The Choculaterie. Licensed under the [GNU AGPL-3.0](LICENSE). Not affiliated with Mojang Studios or Microsoft.
