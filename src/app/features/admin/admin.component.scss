@@ -139,6 +139,10 @@ h1 {
     vertical-align: middle;
 }
 
+.inline-select.placement-select {
+    width: 180px;
+}
+
 .compact-input {
     width: 100px;
 }
@@ -766,9 +770,10 @@ mat-accordion .faq-answer {
 }
 
 .promo-thumb {
-    width: 32px;
+    width: auto;
     height: 48px;
-    object-fit: cover;
+    max-width: 86px;
+    object-fit: contain;
     border-radius: 4px;
     display: block;
 }

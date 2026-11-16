@@ -873,6 +873,9 @@ if(postApiAdminPromotionsBody.CtaText !== undefined) {
 if(postApiAdminPromotionsBody.IsActive !== undefined) {
  formData.append(`IsActive`, postApiAdminPromotionsBody.IsActive.toString());
  }
+if(postApiAdminPromotionsBody.Placements !== undefined) {
+ postApiAdminPromotionsBody.Placements.forEach(value => formData.append(`Placements`, value));
+ }
 if(postApiAdminPromotionsBody.Image !== undefined) {
  formData.append(`Image`, postApiAdminPromotionsBody.Image);
  }
@@ -940,6 +943,9 @@ if(putApiAdminPromotionsIdBody.CtaText !== undefined) {
  }
 if(putApiAdminPromotionsIdBody.IsActive !== undefined) {
  formData.append(`IsActive`, putApiAdminPromotionsIdBody.IsActive.toString());
+ }
+if(putApiAdminPromotionsIdBody.Placements !== undefined) {
+ putApiAdminPromotionsIdBody.Placements.forEach(value => formData.append(`Placements`, value));
  }
 if(putApiAdminPromotionsIdBody.Image !== undefined) {
  formData.append(`Image`, putApiAdminPromotionsIdBody.Image);

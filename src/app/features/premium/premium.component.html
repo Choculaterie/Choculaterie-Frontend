@@ -209,5 +209,11 @@
 </div>
 
 @if (celebrating(); as source) {
-<div class="celebration" [attr.data-source]="source" aria-hidden="true"></div>
+<div class="celebration" [attr.data-source]="source" aria-hidden="true">
+    @for (fw of fireworks; track fw.cls) {
+    <video #firework [class]="'firework ' + fw.cls" [src]="fw.src" [attr.data-delay]="fw.delay"
+        muted playsinline preload="auto" (playing)="firework.classList.add('live')"></video>
+    }
+</div>
 }
+

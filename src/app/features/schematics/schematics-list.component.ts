@@ -7,12 +7,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
@@ -46,7 +45,6 @@ import { DropZoneDirective } from '../../shared/directives/drop-zone.directive';
         MatIconModule,
         MatPaginatorModule,
         MatCardModule,
-        MatChipsModule,
         MatAutocompleteModule,
         MatTooltipModule,
         RouterLink,
@@ -98,9 +96,9 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     readonly loading = signal(true);
 
     search = '';
-    tag = '';
+    tags: string[] = [];
     type = '';
-    version = '';
+    versions: string[] = [];
     sort = 'date';
     direction = 'desc';
     includeUnverified = false;
@@ -130,7 +128,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         }
     }
 
-    readonly hasActiveFilters = computed(() => !!this.tag || !!this.type || !!this.version || this.includeUnverified);
+    readonly hasActiveFilters = computed(() => this.tags.length > 0 || !!this.type || this.versions.length > 0 || this.includeUnverified);
 
     readonly showUnverifiedBanner = computed(() => {
         if (!this.session.isAuthenticated()) return false;
@@ -170,29 +168,18 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
     readonly createVersionList = signal<string[]>([]);
     readonly allowedTags = signal<AllowedTagResponse[]>([]);
     readonly allowedVersions = signal<AllowedVersionResponse[]>([]);
-    readonly tagInputValue = signal('');
-    readonly versionInputValue = signal('');
 
     tagLabel(sourceName: string): string {
         return this.allowedTags().find(t => (t.sourceName ?? t.name) === sourceName)?.name ?? sourceName;
     }
 
-    readonly filteredTags = computed(() => {
-        const q = this.tagInputValue().toLowerCase();
-        const selected = this.createTagList();
-        return this.allowedTags()
-            .map(t => t.sourceName ?? t.name)
-            .filter(name => !selected.includes(name))
-            .filter(name => !q || name.toLowerCase().includes(q)
-                || this.tagLabel(name).toLowerCase().includes(q));
+    readonly tagOptions = computed(() => {
+        const allowed = this.allowedTags().map(t => t.sourceName ?? t.name);
+        return [...allowed, ...this.createTagList().filter(t => !allowed.includes(t))];
     });
-    readonly filteredVersions = computed(() => {
-        const q = this.versionInputValue().toLowerCase();
-        const selected = this.createVersionList();
-        return this.allowedVersions()
-            .map(v => v.name)
-            .filter(name => !selected.includes(name))
-            .filter(name => !q || name.toLowerCase().includes(q));
+    readonly versionOptions = computed(() => {
+        const allowed = this.allowedVersions().map(v => v.name);
+        return [...allowed, ...this.createVersionList().filter(v => !allowed.includes(v))];
     });
     private searchInput$ = new Subject<string>();
     private authorInput$ = new Subject<string>();
@@ -211,9 +198,9 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
 
         this.route.queryParams.subscribe(params => {
             this.search = params['search'] ?? '';
-            this.tag = params['tag'] ?? '';
+            this.tags = this.splitParam(params['tag']);
             this.type = params['type'] ?? '';
-            this.version = params['version'] ?? '';
+            this.versions = this.splitParam(params['version']);
             this.sort = params['sort'] ?? 'date';
             this.direction = params['direction'] ?? 'desc';
             this.includeUnverified = params['includeUnverified'] === 'true';
@@ -256,51 +243,12 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         this.selectedAuthorId.set(null);
         this.authorInput$.next(q);
     }
-    onTagInput(q: string): void { this.tagInputValue.set(q); }
-    onVersionInput(q: string): void { this.versionInputValue.set(q); }
-
-    onCreateTagSelected(event: MatAutocompleteSelectedEvent, input: HTMLInputElement): void {
-        const val = event.option.value as string;
-        if (val === '__suggest__') {
-            this.openTagSuggest();
-        } else if (this.createTagList().length >= this.MAX_SELECTIONS) {
-            this.toast.error('You can select up to 10 tags.');
-        } else if (!this.createTagList().includes(val)) {
-            this.createTagList.update(tags => [...tags, val]);
-        }
-        input.value = '';
-        this.tagInputValue.set('');
-    }
-
-    removeCreateTag(tag: string): void {
-        this.createTagList.update(tags => tags.filter(t => t !== tag));
-    }
-
-    onCreateVersionSelected(event: MatAutocompleteSelectedEvent, input: HTMLInputElement): void {
-        const val = event.option.value as string;
-        if (this.createVersionList().length >= this.MAX_SELECTIONS) {
-            this.toast.error('You can select up to 10 versions.');
-        } else if (!this.createVersionList().includes(val)) {
-            this.createVersionList.update(versions => [...versions, val]);
-        }
-        input.value = '';
-        this.versionInputValue.set('');
-    }
-
-    onCreateAuthorSelected(event: MatAutocompleteSelectedEvent): void {
-        const author = event.option.value as AuthorSearchResultResponse;
-        this.createForm.controls.authorName.setValue(author.username);
-        this.selectedAuthorId.set(author.userId);
-    }
 
     displayAuthor(author: AuthorSearchResultResponse | string | null): string {
         if (!author) return '';
         return typeof author === 'string' ? author : author.username;
     }
 
-    removeCreateVersion(version: string): void {
-        this.createVersionList.update(versions => versions.filter(v => v !== version));
-    }
 
     onSuggestionSelected(event: any): void {
         const suggestion = event.option.value as { label: string; type: 'schematic' | 'user' };
@@ -312,14 +260,23 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         return val?.label ?? val ?? '';
     }
 
+    private splitParam(value: string | undefined): string[] {
+        return (value ?? '').split(',').map(v => v.trim()).filter(Boolean);
+    }
+
+    filterSummary(selected: readonly string[], kind: 'tag' | 'version'): string {
+        if (selected.length === 0) return 'All';
+        return (kind === 'tag' ? selected.map(t => this.tagLabel(t)) : selected).join(', ');
+    }
+
     loadPage(page: number): void {
 
         this.router.navigate([], {
             queryParams: {
                 search: this.search || null,
-                tag: this.tag || null,
+                tag: this.tags.join(',') || null,
                 type: this.type || null,
-                version: this.version || null,
+                version: this.versions.join(',') || null,
                 sort: this.sort !== 'date' ? this.sort : null,
                 direction: this.direction !== 'desc' ? this.direction : null,
                 includeUnverified: this.includeUnverified ? 'true' : null,
@@ -339,9 +296,9 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
             page,
             pageSize: this.pageSize(),
             search: this.search || undefined,
-            tag: this.tag || undefined,
+            tag: this.tags.join(',') || undefined,
             type: this.type || undefined,
-            version: this.version || undefined,
+            version: this.versions.join(',') || undefined,
             sort: this.sort || undefined,
             direction: this.direction || undefined,
             includeUnverified: this.includeUnverified || undefined,
@@ -413,9 +370,9 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
 
     clearFilters(): void {
         this.search = '';
-        this.tag = '';
+        this.tags = [];
         this.type = '';
-        this.version = '';
+        this.versions = [];
         this.sort = 'date';
         this.direction = 'desc';
         this.includeUnverified = false;
@@ -680,6 +637,30 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
         this.pictureFiles = [...this.pictureFiles, file];
         this.regeneratePreviews();
         this.toast.success('Screenshot added to pictures.');
+    }
+
+    setCreateTags(values: string[], select: MatSelect): void {
+        if (values.length > this.MAX_SELECTIONS) {
+            this.toast.error('You can select up to 10 tags.');
+            select.value = this.createTagList();
+            return;
+        }
+        this.createTagList.set(values);
+    }
+
+    setCreateVersions(values: string[], select: MatSelect): void {
+        if (values.length > this.MAX_SELECTIONS) {
+            this.toast.error('You can select up to 10 versions.');
+            select.value = this.createVersionList();
+            return;
+        }
+        this.createVersionList.set(values);
+    }
+
+    onCreateAuthorSelected(event: MatAutocompleteSelectedEvent): void {
+        const author = event.option.value as AuthorSearchResultResponse;
+        this.createForm.controls.authorName.setValue(author.username);
+        this.selectedAuthorId.set(author.userId);
     }
 
     openTagSuggest(): void {

@@ -381,8 +381,18 @@
     position: fixed;
     inset: 0;
     z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     pointer-events: none;
+    overflow: hidden;
+}
+
+.firework {
+    position: absolute;
+    bottom: 0;
+    aspect-ratio: 400 / 868;
+    opacity: 0;
+    &.live { opacity: 1; }
+    &.ball-left { left: 6vw; height: 78vh; }
+    &.ball-right { right: 6vw; height: 64vh; }
+    &.star-left { left: 24vw; height: 85vh; }
+    &.creeper-right { right: 24vw; height: 92vh; }
 }

@@ -242,51 +242,26 @@
                 </mat-form-field>
                 <mat-form-field appearance="outline">
                     <mat-label>{{ 'Tags' | t }}</mat-label>
-                    <mat-chip-grid #editTagChipGrid>
-                        @for (tag of editTagList(); track tag) {
-                        <mat-chip-row (removed)="removeEditTag(tag)">
-                            {{ tag }}
-                            <button matChipRemove [attr.aria-label]="'Remove tag' | t"><mat-icon svgIcon="mc:letters/X"></mat-icon></button>
-                        </mat-chip-row>
-                        }
-                        <input [matChipInputFor]="editTagChipGrid" [matChipInputSeparatorKeyCodes]="[]"
-                            [matAutocomplete]="editTagAuto" (input)="onTagInput($any($event.target).value)"
-                            #editTagInput />
-                    </mat-chip-grid>
-                    <mat-autocomplete #editTagAuto="matAutocomplete"
-                        (optionSelected)="onEditTagSelected($event, editTagInput)">
-                        @for (tag of filteredTags(); track tag) {
+                    <mat-select #editTagSelect [value]="editTagList()" multiple panelClass="game-versions-panel"
+                        (selectionChange)="setEditTags($event.value, editTagSelect)">
+                        <mat-select-trigger>{{ editTagList().join(', ') }}</mat-select-trigger>
+                        @for (tag of tagOptions(); track tag) {
                         <mat-option [value]="tag">{{ tag }}</mat-option>
                         }
-                        @if (filteredTags().length === 0 && tagInputValue().length > 0) {
-                        <mat-option value="__suggest__">
-                            <span style="display:flex;align-items:center;gap:8px;">
-                                <mat-icon svgIcon="mc:weapons/pen"></mat-icon>
-                                <span>{{ 'Propose a new tag' | t }}</span>
-                            </span>
-                        </mat-option>
-                        }
-                    </mat-autocomplete>
+                        <button mat-button type="button" class="select-panel-action" (click)="editTagSelect.close(); openTagSuggest()">
+                            <mat-icon svgIcon="mc:weapons/pen" matButtonIcon></mat-icon> <span>{{ 'Propose a new tag' | t }}</span>
+                        </button>
+                    </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
                     <mat-label>{{ 'Versions' | t }}</mat-label>
-                    <mat-chip-grid #editVersionChipGrid>
-                        @for (ver of editVersionList(); track ver) {
-                        <mat-chip-row (removed)="removeEditVersion(ver)">
-                            {{ ver }}
-                            <button matChipRemove [attr.aria-label]="'Remove version' | t"><mat-icon svgIcon="mc:letters/X"></mat-icon></button>
-                        </mat-chip-row>
-                        }
-                        <input [matChipInputFor]="editVersionChipGrid" [matChipInputSeparatorKeyCodes]="[]"
-                            [matAutocomplete]="editVersionAuto" (input)="onVersionInput($any($event.target).value)"
-                            #editVersionInput />
-                    </mat-chip-grid>
-                    <mat-autocomplete #editVersionAuto="matAutocomplete"
-                        (optionSelected)="onEditVersionSelected($event, editVersionInput)">
-                        @for (ver of filteredVersions(); track ver) {
+                    <mat-select #editVersionSelect [value]="editVersionList()" multiple panelClass="game-versions-panel"
+                        (selectionChange)="setEditVersions($event.value, editVersionSelect)">
+                        <mat-select-trigger>{{ editVersionList().join(', ') }}</mat-select-trigger>
+                        @for (ver of versionOptions(); track ver) {
                         <mat-option [value]="ver">{{ ver }}</mat-option>
                         }
-                    </mat-autocomplete>
+                    </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
                     <mat-label>{{ 'Author Name' | t }}</mat-label>

@@ -18,7 +18,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle, moveItemInArray } from '@angular/cdk/drag-drop';
 import { SchematicsService } from '../../api/schematics';
@@ -131,23 +131,13 @@ export class SchematicDetailComponent implements OnInit {
     readonly selectedAuthorId = signal<string | null>(null);
     readonly editTagList = signal<string[]>([]);
     readonly editVersionList = signal<string[]>([]);
-    readonly tagInputValue = signal('');
-    readonly versionInputValue = signal('');
-    readonly filteredTags = computed(() => {
-        const q = this.tagInputValue().toLowerCase();
-        const selected = this.editTagList();
-        return this.allowedTags()
-            .map(t => t.name)
-            .filter(name => !selected.includes(name))
-            .filter(name => !q || name.toLowerCase().includes(q));
+    readonly tagOptions = computed(() => {
+        const allowed = this.allowedTags().map(t => t.name);
+        return [...allowed, ...this.editTagList().filter(t => !allowed.includes(t))];
     });
-    readonly filteredVersions = computed(() => {
-        const q = this.versionInputValue().toLowerCase();
-        const selected = this.editVersionList();
-        return this.allowedVersions()
-            .map(v => v.name)
-            .filter(name => !selected.includes(name))
-            .filter(name => !q || name.toLowerCase().includes(q));
+    readonly versionOptions = computed(() => {
+        const allowed = this.allowedVersions().map(v => v.name);
+        return [...allowed, ...this.editVersionList().filter(v => !allowed.includes(v))];
     });
     private authorInput$ = new Subject<string>();
 
@@ -565,41 +555,10 @@ export class SchematicDetailComponent implements OnInit {
         this.authorInput$.next(q);
     }
 
-    onTagInput(q: string): void {
-        this.tagInputValue.set(q);
-    }
 
-    onVersionInput(q: string): void {
-        this.versionInputValue.set(q);
-    }
 
-    onEditTagSelected(event: MatAutocompleteSelectedEvent, input: HTMLInputElement): void {
-        const val = event.option.value as string;
-        if (val === '__suggest__') {
-            this.openTagSuggest();
-        } else if (this.editTagList().length >= this.MAX_SELECTIONS) {
-            this.toast.error('You can select up to 10 tags.');
-        } else if (!this.editTagList().includes(val)) {
-            this.editTagList.update(tags => [...tags, val]);
-        }
-        input.value = '';
-        this.tagInputValue.set('');
-    }
 
-    removeEditTag(tag: string): void {
-        this.editTagList.update(tags => tags.filter(t => t !== tag));
-    }
 
-    onEditVersionSelected(event: MatAutocompleteSelectedEvent, input: HTMLInputElement): void {
-        const val = event.option.value as string;
-        if (this.editVersionList().length >= this.MAX_SELECTIONS) {
-            this.toast.error('You can select up to 10 versions.');
-        } else if (!this.editVersionList().includes(val)) {
-            this.editVersionList.update(versions => [...versions, val]);
-        }
-        input.value = '';
-        this.versionInputValue.set('');
-    }
 
     onEditAuthorSelected(event: MatAutocompleteSelectedEvent): void {
         const author = event.option.value as AuthorSearchResultResponse;
@@ -612,9 +571,6 @@ export class SchematicDetailComponent implements OnInit {
         return typeof author === 'string' ? author : author.username;
     }
 
-    removeEditVersion(version: string): void {
-        this.editVersionList.update(versions => versions.filter(v => v !== version));
-    }
 
     submitEdit(): void {
         if (this.editForm.invalid || !this.isEditFileValid()) return;
@@ -973,6 +929,24 @@ export class SchematicDetailComponent implements OnInit {
             a.click();
             URL.revokeObjectURL(url);
         }
+    }
+
+    setEditTags(values: string[], select: MatSelect): void {
+        if (values.length > this.MAX_SELECTIONS) {
+            this.toast.error('You can select up to 10 tags.');
+            select.value = this.editTagList();
+            return;
+        }
+        this.editTagList.set(values);
+    }
+
+    setEditVersions(values: string[], select: MatSelect): void {
+        if (values.length > this.MAX_SELECTIONS) {
+            this.toast.error('You can select up to 10 versions.');
+            select.value = this.editVersionList();
+            return;
+        }
+        this.editVersionList.set(values);
     }
 
     openTagSuggest(): void {

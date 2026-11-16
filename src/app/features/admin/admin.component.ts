@@ -43,6 +43,7 @@ import type { AdminUserResponse, AdminSchematicResponse, AdminUserDetailResponse
 import type { GetApiAdminTicketsParams, GetApiAdminServerLogsParams } from '../../api/generated.schemas';
 import { AdminLogsService } from './services/admin-logs.service';
 import { AdminPlugin, AdminPluginsService } from './services/admin-plugins.service';
+import { PromoBannerService } from '../../core/services/promo-banner.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
@@ -265,9 +266,13 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly promotions = signal<AdminPromotionResponse[]>([]);
     readonly loadingPromotions = signal(true);
     readonly editingPromotionId = signal<number | null>(null);
-    promotionColumns = ['image', 'title', 'key', 'clicks', 'active', 'actions'];
+    promotionColumns = ['image', 'title', 'key', 'clicks', 'placements', 'actions'];
+    readonly promotionPlacements = [
+        { value: 'site-banner', label: 'Website banner' },
+        { value: 'litematic-downloader', label: 'LitematicDownloader' },
+    ] as const;
     private readonly emptyPromotion = {
-        key: '', kicker: '', title: '', description: '', linkUrl: '', imageAlt: '', ctaText: '', isActive: false,
+        key: '', kicker: '', title: '', description: '', linkUrl: '', imageAlt: '', ctaText: '', placements: [] as string[],
     };
     readonly adminTab = ADMIN_TAB;
     readonly showPromotionForm = signal(false);
@@ -282,7 +287,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         linkUrl: ['', [Validators.required, Validators.maxLength(500), Validators.pattern(/^https?:\/\/\S+$/)]],
         imageAlt: ['', Validators.maxLength(200)],
         ctaText: ['', Validators.maxLength(50)],
-        isActive: [false],
+        placements: [[] as string[]],
     });
 
     readonly modMessages = signal<ModMessageResponse[]>([]);
@@ -1005,12 +1010,14 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     deleteLiveMessage(m: LiveMessageResponse): void {
-        this.adminApi.deleteApiAdminLiveMessagesId(m.id as any).subscribe({
-            next: () => {
-                this.liveMessages.update(list => list.filter(x => x.id !== m.id));
-                this.toast.success(ADMIN.deleted);
-            },
-            error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+        this.confirmDelete(ADMIN.deleteLiveMessageTitle, m.message, () => {
+            this.adminApi.deleteApiAdminLiveMessagesId(m.id as any).subscribe({
+                next: () => {
+                    this.liveMessages.update(list => list.filter(x => x.id !== m.id));
+                    this.toast.success(ADMIN.deleted);
+                },
+                error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+            });
         });
     }
 
@@ -1021,7 +1028,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     private promotionBody(v: typeof this.emptyPromotion): PutApiAdminPromotionsIdBody {
         return {
             Key: v.key, Kicker: v.kicker, Title: v.title, Description: v.description, LinkUrl: v.linkUrl,
-            ImageAlt: v.imageAlt, CtaText: v.ctaText, IsActive: v.isActive,
+            ImageAlt: v.imageAlt, CtaText: v.ctaText, IsActive: v.placements.length > 0, Placements: v.placements,
         };
     }
 
@@ -1059,6 +1066,7 @@ export class AdminComponent implements OnInit, OnDestroy {
                     : [saved, ...list]);
                 this.closePromotionForm();
                 this.toast.success(id ? ADMIN.promotionUpdated : ADMIN.promotionCreated);
+                this.promoBanner.refresh();
             },
             error: (err) => this.toast.error(err.error?.message ?? err.error?.detail ?? ADMIN.failed),
         });
@@ -1097,7 +1105,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.editingPromotionId.set(p.id as any);
         this.promotionForm.setValue({
             key: p.key, kicker: p.kicker, title: p.title, description: p.description, linkUrl: p.linkUrl,
-            imageAlt: p.imageAlt ?? '', ctaText: p.ctaText, isActive: p.isActive,
+            imageAlt: p.imageAlt ?? '', ctaText: p.ctaText, placements: p.placements ?? [],
         });
         this.promotionImageFile.set(null);
         this.promotionImagePreview.set(p.imagePath ? promotionImageUrl(p.imagePath) : null);
@@ -1112,17 +1120,33 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.promotionRemoveImage.set(false);
     }
 
-    togglePromotion(p: AdminPromotionResponse): void {
+    promotionPlacementSummary(placements: readonly string[] | null | undefined): string {
+        const list = placements ?? [];
+        if (list.length === 0) return 'Off';
+        if (list.length === this.promotionPlacements.length) return 'All';
+        return this.promotionPlacements.filter(o => list.includes(o.value)).map(o => o.label).join(', ');
+    }
+
+    private readonly promoBanner = inject(PromoBannerService);
+    readonly trackPromotion = (_: number, p: AdminPromotionResponse) => p.id;
+
+    setPromotionPlacements(p: AdminPromotionResponse, placements: string[]): void {
+        const current = p.placements ?? [];
+        if (placements.length === current.length && placements.every(x => current.includes(x))) return;
         const body = this.promotionBody({
             key: p.key, kicker: p.kicker, title: p.title, description: p.description, linkUrl: p.linkUrl,
-            imageAlt: p.imageAlt ?? '', ctaText: p.ctaText, isActive: !p.isActive,
+            imageAlt: p.imageAlt ?? '', ctaText: p.ctaText, placements,
         });
         this.adminApi.putApiAdminPromotionsId(p.id as any, body).subscribe({
             next: (saved) => {
                 this.promotions.update(list => list.map(x => x.id === p.id ? saved : x));
-                this.toast.success(saved.isActive ? ADMIN.promotionEnabled : ADMIN.promotionDisabled);
+                this.toast.success(saved.isActive ? ADMIN.promotionUpdated : ADMIN.promotionDisabled);
+                this.promoBanner.refresh();
             },
-            error: (err) => this.toast.error(err.error?.message ?? err.error?.detail ?? ADMIN.failed),
+            error: (err) => {
+                this.promotions.update(list => list.map(x => x.id === p.id ? { ...x } : x));
+                this.toast.error(err.error?.message ?? err.error?.detail ?? ADMIN.failed);
+            },
         });
     }
 
@@ -1377,6 +1401,12 @@ export class AdminComponent implements OnInit, OnDestroy {
         );
     }
 
+    private confirmDelete(title: string, message: string | null | undefined, action: () => void): void {
+        this.dialog.open(ConfirmDialogComponent, {
+            data: { title, message: message ?? '', confirmText: COMMON.delete, warn: true } as ConfirmDialogData,
+        }).afterClosed().subscribe((ok) => { if (ok) action(); });
+    }
+
     deleteVideo(v: AdminVideoResponse): void {
         this.dialog.open(ConfirmDialogComponent, {
             data: { title: ADMIN.deleteVideoTitle, message: v.title, confirmText: COMMON.delete, warn: true } as ConfirmDialogData,
@@ -1394,13 +1424,16 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     deletePromotion(p: AdminPromotionResponse): void {
-        this.adminApi.deleteApiAdminPromotionsId(p.id as any).subscribe({
-            next: () => {
-                this.promotions.update(list => list.filter(x => x.id !== p.id));
-                if (this.editingPromotionId() === (p.id as any)) this.cancelPromotionEdit();
-                this.toast.success(ADMIN.deleted);
-            },
-            error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+        this.confirmDelete(ADMIN.deletePromotionTitle, p.title, () => {
+            this.adminApi.deleteApiAdminPromotionsId(p.id as any).subscribe({
+                next: () => {
+                    this.promotions.update(list => list.filter(x => x.id !== p.id));
+                    if (this.editingPromotionId() === (p.id as any)) this.cancelPromotionEdit();
+                    this.toast.success(ADMIN.deleted);
+                    this.promoBanner.refresh();
+                },
+                error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+            });
         });
     }
 
@@ -1433,12 +1466,14 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     deleteModMessage(m: ModMessageResponse): void {
-        this.adminApi.deleteApiAdminModMessagesId(m.id as any).subscribe({
-            next: () => {
-                this.modMessages.update(list => list.filter(x => x.id !== m.id));
-                this.toast.success(ADMIN.deleted);
-            },
-            error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+        this.confirmDelete(ADMIN.deleteModMessageTitle, m.message, () => {
+            this.adminApi.deleteApiAdminModMessagesId(m.id as any).subscribe({
+                next: () => {
+                    this.modMessages.update(list => list.filter(x => x.id !== m.id));
+                    this.toast.success(ADMIN.deleted);
+                },
+                error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+            });
         });
     }
 
@@ -1656,12 +1691,14 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     deleteNotification(n: AdminNotificationResponse): void {
-        this.adminApi.deleteApiAdminNotificationsId(n.id as number).subscribe({
-            next: () => {
-                this.notifications.update(list => list.filter(x => x.id !== n.id));
-                this.realtime.removeAdminNotification(n.id);
-            },
-            error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+        this.confirmDelete(ADMIN.deleteNotificationTitle, n.message, () => {
+            this.adminApi.deleteApiAdminNotificationsId(n.id as number).subscribe({
+                next: () => {
+                    this.notifications.update(list => list.filter(x => x.id !== n.id));
+                    this.realtime.removeAdminNotification(n.id);
+                },
+                error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+            });
         });
     }
 
@@ -1896,12 +1933,14 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     deleteServerLog(entry: ServerLogEntryResponse): void {
-        this.adminApi.deleteApiAdminServerLogsId(entry.id).subscribe({
-            next: () => {
-                this.serverLogs.update(list => list.filter(x => x.id !== entry.id));
-                this.serverLogsTotalCount.update(c => Math.max(0, c - 1));
-            },
-            error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+        this.confirmDelete(ADMIN.deleteServerLogTitle, entry.message, () => {
+            this.adminApi.deleteApiAdminServerLogsId(entry.id).subscribe({
+                next: () => {
+                    this.serverLogs.update(list => list.filter(x => x.id !== entry.id));
+                    this.serverLogsTotalCount.update(c => Math.max(0, c - 1));
+                },
+                error: (err) => this.toast.error(err.error?.detail ?? ADMIN.failed),
+            });
         });
     }
     private readonly http = inject(HttpClient);

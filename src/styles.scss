@@ -530,6 +530,18 @@ html:not([data-theme]) {
   }
 }
 
+.game-versions-panel {
+  min-width: 180px;
+
+  .select-panel-action {
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: 0;
+    border-top: 1px solid var(--mat-sys-outline-variant);
+    padding-inline: 16px;
+  }
+}
+
 .game-versions-panel .mat-pseudo-checkbox-full {
   border: none !important;
   border-radius: 0 !important;
@@ -805,4 +817,37 @@ html:not([data-theme]) {
 .mat-mdc-unelevated-button,
 .mat-mdc-raised-button {
   --mc-icon-shadow: color-mix(in srgb, var(--mat-button-filled-container-color, var(--mat-sys-primary)) 70%, black);
+}
+
+@keyframes attention-flash {
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+.attention-flash {
+    position: relative;
+
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: color-mix(in srgb, var(--mat-sys-primary) 25%, transparent);
+        pointer-events: none;
+        opacity: 0;
+        animation: attention-flash 1.2s ease-in-out 3;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &::after {
+            animation: none;
+            opacity: 1;
+        }
+    }
 }

@@ -1,10 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { TPipe } from '../../../core/i18n/t.pipe';
 import type { PromotionResponse } from '../../../api/generated.schemas';
 import { PromoImgPipe } from '../../pipes/image-url.pipe';
 import { MatIconModule } from '@angular/material/icon';
+import { PromoBannerService } from '../../../core/services/promo-banner.service';
 
 
 const DISMISSED_PREFIX = 'chocu-title-spotlight-dismissed-';
@@ -27,17 +28,13 @@ const DISMISSED_PREFIX = 'chocu-title-spotlight-dismissed-';
                     <img
                         class="title-spotlight__art"
                         [src]="p.imagePath | promoImg"
-                        width="600"
-                        height="900"
                         [alt]="p.imageAlt ?? p.title"
                         loading="lazy"
                         decoding="async"
                     />
                     }
                     <span class="title-spotlight__copy">
-                        @if (p.kicker) {
-                        <span class="title-spotlight__kicker">{{ p.kicker }}</span>
-                        }
+                        <span class="title-spotlight__kicker">{{ 'Featured' | t }}@if (p.kicker) { · {{ p.kicker }}}</span>
                         <span class="title-spotlight__name">{{ p.title }}</span>
                         @if (p.description) {
                         <span class="title-spotlight__meta">{{ p.description }}</span>
@@ -93,9 +90,10 @@ const DISMISSED_PREFIX = 'chocu-title-spotlight-dismissed-';
 
         .title-spotlight__art {
             flex: 0 0 auto;
-            width: 2.75rem;
+            width: auto;
             height: 4.125rem;
-            object-fit: cover;
+            max-width: 8rem;
+            object-fit: contain;
             border-radius: 6px;
             background: #111;
             box-shadow: var(--mat-sys-level1);
@@ -180,7 +178,16 @@ const DISMISSED_PREFIX = 'chocu-title-spotlight-dismissed-';
 export class TitleSpotlightComponent {
     readonly promo = signal<PromotionResponse | null>(null);
 
+    private readonly banner = inject(PromoBannerService);
+
     constructor(private http: HttpClient) {
+        effect(() => {
+            this.banner.version();
+            this.load();
+        });
+    }
+
+    private load(): void {
         this.http.get<PromotionResponse | null>('/api/Promo/active').subscribe({
             next: (p) => this.promo.set(p && !this.isDismissed(p.key) ? p : null),
             error: () => { },

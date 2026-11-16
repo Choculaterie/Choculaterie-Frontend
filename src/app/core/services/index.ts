@@ -4,3 +4,4 @@ export { RealtimeService } from './realtime.service';
 export type { SiteStats } from './realtime.service';
 export { OgMetaService } from './og-meta.service';
 export { SubscriptionActionsService } from './subscription-actions.service';
+export { PromoBannerService } from './promo-banner.service';

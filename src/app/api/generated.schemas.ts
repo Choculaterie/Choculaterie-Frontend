@@ -1395,6 +1395,7 @@ export interface AdminPromotionResponse {
   updatedAt: string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   clicks: number | string;
+  placements: string[];
 }
 
 export type PostApiAdminPromotionsBody = {
@@ -1406,6 +1407,7 @@ export type PostApiAdminPromotionsBody = {
   ImageAlt?: string;
   CtaText?: string;
   IsActive?: boolean;
+  Placements?: string[];
   Image?: Blob;
   RemoveImage?: boolean;
 };
@@ -1419,6 +1421,7 @@ export type PutApiAdminPromotionsIdBody = {
   ImageAlt?: string;
   CtaText?: string;
   IsActive?: boolean;
+  Placements?: string[];
   Image?: Blob;
   RemoveImage?: boolean;
 };

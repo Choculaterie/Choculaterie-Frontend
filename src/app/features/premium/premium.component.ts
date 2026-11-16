@@ -1,5 +1,5 @@
 import { SubscriptionActionsService } from '../../core/services/subscription-actions.service';
-import { Component, ElementRef, Injector, OnDestroy, OnInit, afterNextRender, inject, signal, computed, viewChild } from '@angular/core';
+import { Component, ElementRef, Injector, OnDestroy, OnInit, afterNextRender, inject, signal, computed, viewChild, viewChildren } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { TPipe } from '../../core/i18n/t.pipe';
@@ -49,6 +49,16 @@ export class PremiumComponent implements OnInit, OnDestroy {
     readonly creatingInvoice = signal(false);
     readonly confirmingCheckout = signal(false);
     readonly celebrating = signal<'stripe' | 'monero' | null>(null);
+    readonly fireworks = [
+        { cls: 'ball-left', src: 'assets/fireworks/firework_ball.webm', delay: 0 },
+        { cls: 'ball-right', src: 'assets/fireworks/firework_ball.webm', delay: 700 },
+        { cls: 'star-left', src: 'assets/fireworks/firework_star.webm', delay: 1050 },
+        { cls: 'creeper-right', src: 'assets/fireworks/firework_creeper.webm', delay: 1400 },
+    ];
+    private readonly fireworkEls = viewChildren<ElementRef<HTMLVideoElement>>('firework');
+    readonly devTools = ['localhost', '127.0.0.1'].includes(location.hostname);
+    private fireworkTimers: ReturnType<typeof setTimeout>[] = [];
+    private beforeSimulation: OwnSubscriptionResponse | null = null;
     readonly now = signal(Date.now());
 
     private pollTimer?: ReturnType<typeof setInterval>;
@@ -110,7 +120,6 @@ export class PremiumComponent implements OnInit, OnDestroy {
     private awaitCheckoutGrant(s: OwnSubscriptionResponse | null, attemptsLeft: number): void {
         if (s?.isPremium) {
             this.confirmingCheckout.set(false);
-            this.toast.success('Payment confirmed. Premium is active.');
             this.celebrate('stripe');
             return;
         }
@@ -128,12 +137,53 @@ export class PremiumComponent implements OnInit, OnDestroy {
         }, 2000);
     }
 
+    simulateReturn(source: 'stripe' | 'monero'): void {
+        const until = new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString();
+        const fake: OwnSubscriptionResponse = {
+            isPremium: true,
+            premiumUntil: until,
+            subscription: {
+                id: 'local-test', provider: source === 'stripe' ? 'Stripe' : 'Monero', status: 'Active',
+                externalId: null, currentPeriodEnd: until, cancelAtPeriodEnd: false,
+            },
+        };
+        clearTimeout(this.checkoutTimer);
+        if (this.subscription()?.subscription?.id !== 'local-test') this.beforeSimulation = this.subscription();
+        const before = this.beforeSimulation;
+        const land = () => {
+            this.confirmingCheckout.set(false);
+            this.showCrypto.set(false);
+            this.subscription.set(fake);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            this.celebrate(source);
+            this.checkoutTimer = setTimeout(() => {
+                this.celebrating.set(null);
+                this.subscription.set(before);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 5000);
+        };
+        if (source === 'stripe') {
+            this.confirmingCheckout.set(true);
+            this.checkoutTimer = setTimeout(land, 1500);
+        } else {
+            land();
+        }
+    }
+
     celebrate(source: 'stripe' | 'monero'): void {
         clearTimeout(this.celebrateTimer);
+        this.fireworkTimers.forEach(clearTimeout);
         this.celebrating.set(null);
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         requestAnimationFrame(() => {
             this.celebrating.set(source);
-            this.celebrateTimer = setTimeout(() => this.celebrating.set(null), 4000);
+            this.celebrateTimer = setTimeout(() => this.celebrating.set(null), 4700);
+            afterNextRender(() => {
+                this.fireworkTimers = this.fireworkEls().map(({ nativeElement: v }) => setTimeout(() => {
+                    v.muted = true;
+                    v.play().catch(() => { /* autoplay refused: just skip it */ });
+                }, Number(v.dataset['delay'] ?? 0)));
+            }, { injector: this.injector });
         });
     }
 
@@ -156,6 +206,7 @@ export class PremiumComponent implements OnInit, OnDestroy {
     }
 
     subscribe(): void {
+        if (this.devTools) return this.simulateReturn('stripe');
         if (!this.requireLogin()) return;
         this.checkingOut.set(true);
         this.billing.createStripeCheckout().subscribe({
@@ -171,6 +222,7 @@ export class PremiumComponent implements OnInit, OnDestroy {
     }
 
     toggleCrypto(): void {
+        if (this.devTools) return this.simulateReturn('monero');
         if (!this.requireLogin()) return;
         const opening = !this.showCrypto();
         this.showCrypto.set(opening);
@@ -250,7 +302,6 @@ export class PremiumComponent implements OnInit, OnDestroy {
             this.invoice.set(null);
             this.qr.set(null);
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            this.toast.success('Payment confirmed. Premium is active.');
             this.celebrate('monero');
             this.billing.getSubscription().subscribe({
                 next: (s) => this.subscription.set(s),

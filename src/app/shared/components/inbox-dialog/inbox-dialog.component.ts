@@ -12,6 +12,8 @@ import { ThemeService } from '../../../core/services/theme.service';
 import { TicketReplyViewDialogComponent } from '../ticket-reply-view-dialog/ticket-reply-view-dialog.component';
 import { ADMIN_TAB } from '../../../core/enums';
 import { MatIconModule } from '@angular/material/icon';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
+import { ADMIN, COMMON } from '../../../i18n/labels';
 
 @Component({
     selector: 'app-inbox-dialog',
@@ -268,15 +270,20 @@ export class InboxDialogComponent {
 
     deleteNotification(n: InboxItem, event: Event): void {
         event.stopPropagation();
-        if (n.source === 'admin') {
-            this.adminApi.deleteApiAdminNotificationsId(n.id as number).subscribe({
-                next: () => this.realtime.removeAdminNotification(n.id),
-            });
-        } else {
-            this.notificationsApi.deleteApiNotificationsId(n.id as number).subscribe({
-                next: () => this.realtime.removeUserNotification(n.id),
-            });
-        }
+        this.dialog.open(ConfirmDialogComponent, {
+            data: { title: ADMIN.deleteNotificationTitle, message: n.message, confirmText: COMMON.delete, warn: true } as ConfirmDialogData,
+        }).afterClosed().subscribe((ok) => {
+            if (!ok) return;
+            if (n.source === 'admin') {
+                this.adminApi.deleteApiAdminNotificationsId(n.id as number).subscribe({
+                    next: () => this.realtime.removeAdminNotification(n.id),
+                });
+            } else {
+                this.notificationsApi.deleteApiNotificationsId(n.id as number).subscribe({
+                    next: () => this.realtime.removeUserNotification(n.id),
+                });
+            }
+        });
     }
 
     formatTime(iso: string): string {

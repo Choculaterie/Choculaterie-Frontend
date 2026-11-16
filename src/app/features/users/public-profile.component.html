@@ -62,7 +62,8 @@
     }
 
     <div class="profile-content">
-        <div class="profile-avatar" [class.editable]="isOwnProfile()">
+        <div id="avatar-section" class="profile-avatar" [class.editable]="isOwnProfile()"
+            [class.section-highlight]="highlightSection() === 'avatar'">
             @if (isOwnProfile() && picUploading()) {
             <div class="avatar-loading"><img src="loading.gif" alt=""
                     style="width:48px;height:48px;object-fit:contain" /></div>
@@ -74,7 +75,7 @@
             @if (isOwnProfile()) {
             <button class="avatar-edit-btn" [matTooltip]="'Change picture' | t" (click)="picInput.click()"
                 [disabled]="picUploading()">
-                <mat-icon svgIcon="mc:media/image"></mat-icon>
+                <mat-icon svgIcon="mc:weapons/pen_white"></mat-icon>
             </button>
             <input #picInput type="file" accept="image/jpeg,image/png,image/webp" hidden
                 (change)="onPictureSelected($event)" />
@@ -484,7 +485,7 @@
                     <mat-divider class="section-divider" />
 
                     <h3 id="minecraft-section" class="section-heading"
-                        [class.section-highlight]="highlightSection() === 'minecraft'">
+                        [class.attention-flash]="highlightSection() === 'minecraft'">
                         <ng-icon name="matfMinecraftColored" size="20" /> <span>{{ 'Minecraft' | t }}</span>
                     </h3>
                     @if (op.isMinecraftLinked) {
@@ -686,7 +687,7 @@
                         </div>
                     </mat-card-content>
                     <div id="premium-section" class="premium-banner"
-                        [class.section-highlight]="highlightSection() === 'premium'">
+                        [class.attention-flash]="highlightSection() === 'premium'">
                         @if (!loadingSubscription()) {
                         @let sub = subscription();
                         @if (sub?.isPremium) {
