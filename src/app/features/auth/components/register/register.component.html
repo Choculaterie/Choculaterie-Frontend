@@ -89,6 +89,8 @@
 
         <app-captcha (solved)="onCaptchaSolved($event)" (reset)="captchaData.set(null)" />
 
+        <p class="legal-consent"><app-legal-consent action="register" /></p>
+
         <div class="form-actions">
           <a mat-button [routerLink]="['/auth/login']" [queryParams]="returnUrl ? {returnUrl: returnUrl} : {}"
            >{{ 'Already have an account?' | t }}</a>

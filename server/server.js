@@ -172,6 +172,8 @@ const ROUTE_TITLES = {
     'mods': 'Mods',
     'users': 'Users',
     'faq': 'Faq',
+    'terms': 'Terms of Service',
+    'privacy': 'Privacy Policy',
     'translations': 'Translations',
     'admin': 'Admin',
     'viewer': 'Viewer',

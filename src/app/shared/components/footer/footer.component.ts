@@ -2,16 +2,20 @@ import { Component } from '@angular/core';
 import { TPipe } from '../../../core/i18n/t.pipe';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
+import { RouterLink } from '@angular/router';
+import { LEGAL_LINK_LABELS } from '../../../features/legal/legal-consent.component';
 
 @Component({
     selector: 'app-footer',
     standalone: true,
-    imports: [MatIconModule, TPipe, MatDividerModule],
+    imports: [MatIconModule, TPipe, MatDividerModule, RouterLink],
     template: `
         <mat-divider />
         <footer class="footer">
             <span class="disclaimer">{{ 'Choculaterie is not affiliated with Mojang Studios or Microsoft.' | t }}</span>
             <div class="footer-links">
+                <a routerLink="/terms">{{ legal.terms }}</a>
+                <a routerLink="/privacy">{{ legal.privacy }}</a>
                 <a href="https://github.com/Choculaterie" target="_blank" rel="noopener" aria-label="GitHub">
                     <mat-icon svgIcon="mc:logos/github"></mat-icon> GitHub
                 </a>
@@ -58,4 +62,6 @@ import { MatIconModule } from '@angular/material/icon';
         }
     `,
 })
-export class FooterComponent { }
+export class FooterComponent {
+    readonly legal = LEGAL_LINK_LABELS;
+}

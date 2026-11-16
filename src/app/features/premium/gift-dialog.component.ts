@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { LegalConsentComponent } from '../legal/legal-consent.component';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { ToastService } from '../../core/services/toast.service';
 import { BillingService, GiftLink, PremiumOffers } from '../../api/billing';
@@ -21,7 +22,7 @@ export interface GiftDialogData {
     selector: 'app-gift-dialog',
     standalone: true,
     imports: [MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatAutocompleteModule,
-        MatIconModule, MatTooltipModule, FormsModule, DatePipe, TPipe],
+        MatIconModule, MatTooltipModule, FormsModule, DatePipe, TPipe, LegalConsentComponent],
     template: `
 <div mat-dialog-title class="dlg-title">
     <span>{{ 'Gift Premium' | t }}</span>
@@ -83,6 +84,8 @@ export interface GiftDialogData {
         <span>{{ (mode() === 'link' ? 'Buy gift link' : 'Gift Premium') | t }} &middot; {{ price(selectedPrice()) }}</span>
     </button>
 
+    <p class="legal-consent"><app-legal-consent action="pay" /></p>
+
     @if (links().length) {
     <h4 class="links-title">{{ 'Your gift links' | t }}</h4>
     @for (l of links(); track l.code) {
@@ -141,6 +144,7 @@ export interface GiftDialogData {
             border-radius: 999px; font-size: 0.7rem; white-space: nowrap;
             background: var(--mat-sys-primary); color: var(--mat-sys-on-primary); }
         .pay { margin-bottom: 0.5rem; }
+        .legal-consent { margin: 0.25rem 0 0.5rem; font-size: 0.75rem; text-align: center; color: color-mix(in srgb, var(--mat-sys-on-surface) 65%, transparent); }
         .btn-loader { width: 16px; height: 16px; }
         .links-title { margin: 1rem 0 0.5rem; font-size: 0.85rem; font-weight: 500; }
         .link-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.4rem 0;

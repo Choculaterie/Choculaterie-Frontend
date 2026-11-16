@@ -238,18 +238,8 @@
             @if (selectedMonths() === 1) { {{ 'Renews every month. Cancel anytime.' | t }} }
             @else if (selectedMonths() === 12) { {{ 'Renews every year. Cancel anytime.' | t }} }
             @else { {{ 'Renews every' | t }} {{ selectedMonths() }} {{ 'months. Cancel anytime.' | t }} }
+            <app-legal-consent action="pay" />
         </p>
-
-        <div class="alt-pay">
-            @if (creatingInvoice()) {
-            <img src="loading.gif" alt="" aria-hidden="true" class="btn-loader" />
-            <span>{{ 'Getting the current rate' | t }}</span>
-            } @else {
-            <span>{{ 'Prefer crypto?' | t }}</span>
-            <button type="button" class="text-link" [disabled]="checkingOut()" (click)="createInvoice()">{{ 'Pay once with Monero' | t }}</button>
-            <mat-icon svgIcon="mc:ui/!!" class="field-info" [matTooltip]="'Pays for the selected length once. Does not renew. Crypto payments cannot be refunded.' | t" matTooltipTouchGestures="on" (contextmenu)="$event.preventDefault()"></mat-icon>
-            }
-        </div>
 
         @if (showReferral()) {
         <mat-form-field appearance="outline" class="referral-field">
@@ -257,14 +247,22 @@
             <input matInput [(ngModel)]="referralCode" (ngModelChange)="syncReferral($event)" maxlength="16" autocomplete="off" />
             <mat-icon svgIcon="mc:ui/!!" matSuffix class="field-info" [matTooltip]="'Got a code from a friend? Enter it here and they get 1 free month of Premium when you buy.' | t" matTooltipTouchGestures="on" (contextmenu)="$event.preventDefault()"></mat-icon>
         </mat-form-field>
-        } @else {
-        <div class="checkout-links">
-            <button type="button" class="text-link" (click)="showReferral.set(true)">{{ 'Have a referral code?' | t }}</button>
-        </div>
         }
+        <div class="checkout-links">
+            @if (!showReferral()) {
+            <button type="button" class="text-link" (click)="showReferral.set(true)">{{ 'Have a referral code?' | t }}</button>
+            <span class="dot">&middot;</span>
+            }
+            @if (creatingInvoice()) {
+            <img src="loading.gif" alt="" aria-hidden="true" class="btn-loader" />
+            <span>{{ 'Getting the current rate' | t }}</span>
+            } @else {
+            <button type="button" class="text-link" [disabled]="checkingOut()" (click)="createInvoice()">{{ 'Pay once with Monero' | t }}</button>
+            }
+        </div>
         } @else {
             <span class="crypto-tag">{{ invoice()!.months }} {{ (invoice()!.months === 1 ? 'month' : 'months') | t }} &middot; {{ price(invoice()!.usdCents) }}</span>
-            <p class="crypto-intro">{{ 'This price is held for' | t }} {{ minutesLeft() }} {{ 'minutes.' | t }} {{ 'Send the exact amount to the address below.' | t }}</p>
+            <p class="crypto-intro">{{ 'This price is held for' | t }} {{ minutesLeft() }} {{ 'minutes.' | t }} {{ 'Send the exact amount to the address below.' | t }} {{ 'It does not renew, and crypto payments cannot be refunded.' | t }}</p>
 
             <div class="invoice-body">
                 <div class="qr-panel">

@@ -77,6 +77,18 @@ export const routes: Routes = [
             import('./features/premium/premium.component').then((m) => m.PremiumComponent),
     },
     {
+        path: 'terms',
+        data: { doc: 'terms' },
+        loadComponent: () =>
+            import('./features/legal/legal-page.component').then((m) => m.LegalPageComponent),
+    },
+    {
+        path: 'privacy',
+        data: { doc: 'privacy' },
+        loadComponent: () =>
+            import('./features/legal/legal-page.component').then((m) => m.LegalPageComponent),
+    },
+    {
         path: 'faq',
         loadComponent: () =>
             import('./features/faq/faq.component').then((m) => m.FaqComponent),

@@ -2,6 +2,7 @@ import { SubscriptionActionsService } from '../../core/services/subscription-act
 import { Component, ElementRef, Injector, OnDestroy, OnInit, TemplateRef, afterNextRender, inject, signal, computed, viewChild, viewChildren } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { LegalConsentComponent } from '../legal/legal-consent.component';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,7 +28,7 @@ const REFERRAL_KEY = 'chocu-referral-code';
 @Component({
     selector: 'app-premium',
     standalone: true,
-    imports: [MatIconModule, MatDialogModule, 
+    imports: [LegalConsentComponent, MatIconModule, MatDialogModule, 
         TPipe, DatePipe, MatCardModule, MatButtonModule, MatTooltipModule,
         MatProgressBarModule, FormsModule, MatFormFieldModule, MatInputModule, RouterLink,
     ],

@@ -19,3 +19,9 @@ mat-card-content { display: flex; flex-direction: column; }
 .password-rules li mat-icon { font-size: 18px;
     width: var(--icon-size); height: var(--icon-size); }
 .password-rules li.met { color: var(--mat-sys-primary); }
+
+.legal-consent {
+  margin: 0 0 1rem;
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--mat-sys-on-surface) 70%, transparent);
+}
