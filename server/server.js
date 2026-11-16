@@ -15,6 +15,8 @@ const SITE_URL = 'https://choculaterie.com';
 const DEFAULT_TITLE = `${SITE_NAME} - Minecraft Schematics`;
 const DEFAULT_DESC = 'Browse, download and share Minecraft schematics on Choculaterie.';
 const FALLBACK_IMAGE = `${SITE_URL}/server_logo.png`;
+const PREMIUM_IMAGE = `${SITE_URL}/premium.png`;
+const PREMIUM_DESC = 'Auto sync, full version history and more cloud storage for your Minecraft worlds.';
 
 const CRAWLER_UA_RE = /bot|facebookexternalhit|whatsapp|telegram|slack|discord|embedly|quora link preview|showyoubot|outbrain|pinterest|vkshare|redditbot|w3c_validator/i;
 function isCrawlerUA(ua) {
@@ -114,6 +116,24 @@ function buildMeta(title, description, image, type = 'website') {
         `<meta property="og:type" content="${type}" />`,
         `<meta property="og:site_name" content="${esc(SITE_NAME)}" />`,
         `<meta property="og:image" content="${esc(img)}" />`,
+    ].join('\n  ');
+}
+
+function buildCardMeta(title, description, image, url) {
+    const esc = (s) => (s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    return [
+        `<meta property="og:title" content="${esc(title)}" />`,
+        `<meta property="og:description" content="${esc(description)}" />`,
+        `<meta property="og:type" content="website" />`,
+        `<meta property="og:site_name" content="${esc(SITE_NAME)}" />`,
+        `<meta property="og:url" content="${esc(url)}" />`,
+        `<meta property="og:image" content="${esc(image)}" />`,
+        `<meta property="og:image:alt" content="${esc(SITE_NAME)} Premium" />`,
+        `<meta name="twitter:card" content="summary" />`,
+        `<meta name="twitter:title" content="${esc(title)}" />`,
+        `<meta name="twitter:description" content="${esc(description)}" />`,
+        `<meta name="twitter:image" content="${esc(image)}" />`,
+        `<meta name="theme-color" content="#ffabf3" />`,
     ].join('\n  ');
 }
 
@@ -226,6 +246,21 @@ async function resolveMeta(urlPath, isCrawler) {
                 : null;
             return { title, metaBlock: buildMeta(title, description, image, 'website') };
         }
+    }
+
+    const referralMatch = urlPath.match(/^\/r\/([A-Za-z0-9]{1,16})\/?$/);
+    if (referralMatch) {
+        const code = referralMatch[1].toUpperCase();
+        const data = await apiGet(`/api/Billing/referral/${code}/preview`);
+        const title = data?.username
+            ? `${data.username} invited you to ${SITE_NAME} Premium`
+            : `${SITE_NAME} Premium`;
+        return { title, metaBlock: buildCardMeta(title, PREMIUM_DESC, PREMIUM_IMAGE, `${SITE_URL}/r/${code}`) };
+    }
+
+    if (/^\/premium\/?$/.test(urlPath)) {
+        const title = `${SITE_NAME} Premium`;
+        return { title, metaBlock: buildCardMeta(title, PREMIUM_DESC, PREMIUM_IMAGE, `${SITE_URL}/premium`) };
     }
 
     const firstSegment = urlPath.split('/').filter(Boolean)[0] ?? '';
