@@ -219,7 +219,7 @@
 </div>
 
 @if (editing()) {
-<mat-card appearance="outlined" class="edit-card settle-in" appDropZone [fullPage]="true" accept="image/*,.litematic"
+<mat-card appearance="outlined" class="edit-card settle-in" appDropZone [fullPage]="true" accept="image/*,.litematic,.schem"
     (filesDrop)="onEditFilesDropped($event)">
     <mat-card-header><mat-card-title>{{ 'Edit Schematic' | t }}</mat-card-title></mat-card-header>
     <mat-card-content>
@@ -367,7 +367,7 @@
                     <button mat-stroked-button type="button" (click)="editLitematicInput.click()">
                         <mat-icon svgIcon="mc:weapons/pickaxe" matButtonIcon></mat-icon> <span>{{ 'Add Litematic Files' | t }}</span>
                     </button>
-                    <input #editLitematicInput type="file" accept=".litematic" multiple hidden
+                    <input #editLitematicInput type="file" accept=".litematic,.schem" multiple hidden
                         (change)="onEditLitematicsSelected($event)" />
             </div>
             }

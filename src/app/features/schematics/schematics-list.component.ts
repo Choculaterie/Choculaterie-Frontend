@@ -425,7 +425,7 @@ export class SchematicsListComponent implements OnInit, OnDestroy {
 
     onFilesDropped(files: File[]): void {
         const images = files.filter(f => f.type.startsWith('image/'));
-        const litematics = files.filter(f => f.name.toLowerCase().endsWith('.litematic'));
+        const litematics = files.filter(f => /\.(litematic|schem)$/i.test(f.name));
         if (images.length) this.addPictureFiles(images);
         if (litematics.length) this.addLitematicFiles(litematics);
     }

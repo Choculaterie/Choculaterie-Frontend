@@ -486,7 +486,7 @@ export class SchematicDetailComponent implements OnInit {
 
     onEditFilesDropped(files: File[]): void {
         const images = files.filter(f => f.type.startsWith('image/'));
-        const litematics = files.filter(f => f.name.toLowerCase().endsWith('.litematic'));
+        const litematics = files.filter(f => /\.(litematic|schem)$/i.test(f.name));
         if (images.length) this.addEditPictureFiles(images);
         if (litematics.length) this.addEditLitematicFiles(litematics);
     }

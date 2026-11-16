@@ -1,4 +1,4 @@
-<div class="page-container" appDropZone [fullPage]="true" accept="image/*,.litematic"
+<div class="page-container" appDropZone [fullPage]="true" accept="image/*,.litematic,.schem"
     unknownTypeIcon="/icons/weapons/pickaxe.svg" (filesDrop)="onPageFilesDropped($event)">
     <div class="page-header">
         <h1 class="page-title"><mat-icon svgIcon="mc:weapons/pickaxe"></mat-icon> <span>{{ 'Schematics' | t }}</span></h1>
@@ -100,7 +100,7 @@
                     <button mat-stroked-button type="button" (click)="litematicInput.click()">
                         <mat-icon svgIcon="mc:weapons/pickaxe" matButtonIcon></mat-icon> <span>{{ 'Add Litematic Files' | t }}</span>
                     </button>
-                    <input #litematicInput type="file" accept=".litematic" multiple hidden
+                    <input #litematicInput type="file" accept=".litematic,.schem" multiple hidden
                         (change)="onLitematicsSelected($event)" />
                 </div>
 
