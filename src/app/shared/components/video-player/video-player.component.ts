@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnDestroy, computed, input, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, afterNextRender, computed, input, signal, viewChild } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TPipe } from '../../../core/i18n/t.pipe';
 import { MatIconModule } from '@angular/material/icon';
@@ -205,6 +205,20 @@ export class VideoPlayerComponent implements OnDestroy {
     readonly volumeIcon = computed(() => this.muted() || this.volume() === 0 ? 'mc:media/speaker_x' : 'mc:media/speaker');
     readonly fmt = (s: number) => formatDuration(s) || '0:00';
 
+    private static readonly SOUND_KEY = 'chocu-video-sound';
+
+    constructor() {
+        afterNextRender(() => {
+            try {
+                const saved = JSON.parse(localStorage.getItem(VideoPlayerComponent.SOUND_KEY) ?? 'null');
+                if (!saved) return;
+                const v = this.video().nativeElement;
+                if (typeof saved.volume === 'number') v.volume = Math.min(1, Math.max(0, saved.volume));
+                v.muted = !!saved.muted;
+            } catch { void 0; }
+        });
+    }
+
     private idleTimer: ReturnType<typeof setTimeout> | null = null;
     private clickTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -315,6 +329,7 @@ export class VideoPlayerComponent implements OnDestroy {
         const v = this.video().nativeElement;
         this.volume.set(v.volume);
         this.muted.set(v.muted);
+        try { localStorage.setItem(VideoPlayerComponent.SOUND_KEY, JSON.stringify({ volume: v.volume, muted: v.muted })); } catch { void 0; }
     }
 
     startSeek(event: PointerEvent): void {
