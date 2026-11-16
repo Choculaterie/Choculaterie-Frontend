@@ -279,6 +279,23 @@
                     </div>
                 </form>
 
+                @if (ownedBadges().length) {
+                <mat-divider class="section-divider" />
+
+                <h3 class="section-heading"><mat-icon svgIcon="mc:ui/start" matButtonIcon style="color: var(--mat-sys-primary);"></mat-icon> <span>{{ 'Badges' | t }}</span></h3>
+                <mat-form-field class="full-width" appearance="outline">
+                    <mat-label>{{ 'Shown on your profile' | t }}</mat-label>
+                    <mat-select #badgeSelect [value]="shownBadges()" multiple panelClass="game-versions-panel"
+                        (selectionChange)="setShownBadges($event.value)">
+                        <mat-select-trigger>{{ shownBadgeLabels() }}</mat-select-trigger>
+                        @for (b of ownedBadges(); track b) {
+                        <mat-option [value]="b">{{ badgeLabel(b) }}</mat-option>
+                        }
+                    </mat-select>
+                    <mat-icon svgIcon="mc:ui/start" matPrefix></mat-icon>
+                </mat-form-field>
+                }
+
                 <mat-divider class="section-divider" />
 
                 <h3 class="section-heading"><mat-icon svgIcon="mc:communication/share" matButtonIcon style="color: var(--mat-sys-primary);"></mat-icon> <span>{{ 'Social Links' | t }}</span></h3>

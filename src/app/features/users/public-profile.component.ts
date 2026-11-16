@@ -137,6 +137,50 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         const label = this.badgeLabel(b.badge);
         return b.locale ? `${label} (${b.locale.toUpperCase()})` : label;
     }
+    readonly ownedBadges = computed(() => {
+        const list = ((this.ownProfile() as any)?.badges ?? []) as { badge: unknown }[];
+        return [...new Set(list.map((b) => resolveBadge(b.badge)).filter((n): n is number => n != null))];
+    });
+
+    readonly shownBadges = computed(() => {
+        const hidden = ((this.ownProfile() as any)?.hiddenBadges ?? []) as number[];
+        return this.ownedBadges().filter((b) => !hidden.includes(b));
+    });
+
+    readonly shownBadgeLabels = computed(() => {
+        const shown = this.shownBadges();
+        return shown.length ? shown.map((b) => this.badgeLabel(b)).join(', ') : translateText('None');
+    });
+
+    setShownBadges(values: number[]): void {
+        const hidden = this.ownedBadges().filter((b) => !values.includes(b));
+        const before = { own: this.ownProfile(), quick: this.quickProfile(), enriched: this.enrichedProfile() };
+        this.applyHiddenBadges(hidden);
+        this.http.put<OwnProfileResponse>('/api/Users/me/hidden-badges', { badges: hidden }).subscribe({
+            next: (updated) => {
+                this.ownProfile.set(updated);
+                this.session.setProfile(updated);
+            },
+            error: () => {
+                this.ownProfile.set(before.own);
+                this.quickProfile.set(before.quick);
+                this.enrichedProfile.set(before.enriched);
+                this.toast.error('Could not update your badges.');
+            },
+        });
+    }
+
+    private applyHiddenBadges(hidden: number[]): void {
+        const own = this.ownProfile();
+        if (!own) return;
+        this.ownProfile.set({ ...own, hiddenBadges: hidden } as OwnProfileResponse);
+        const all = ((own as any).badges ?? []) as { badge: unknown }[];
+        const visible = all.filter((b) => !hidden.includes(resolveBadge(b.badge) ?? -1));
+        const withBadges = <T>(p: T | null): T | null => p ? ({ ...p, badges: visible } as T) : p;
+        this.quickProfile.set(withBadges(this.quickProfile()));
+        this.enrichedProfile.set(withBadges(this.enrichedProfile()));
+    }
+
     badgeIcon(badge: unknown): string { const n = resolveBadge(badge); return n != null ? BADGE_ICONS[n] : '/icons/ui/start.svg'; }
 
     readonly isAdminRoleOnly = computed(() => this.session.user()?.role?.toLowerCase() === 'admin');
@@ -209,7 +253,14 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     readonly ownProfile = signal<OwnProfileResponse | null>(null);
 
     readonly displayProfile = computed<any>(() => {
-        if (this.isOwnProfile()) return this.ownProfile();
+        if (this.isOwnProfile()) {
+            const own = this.ownProfile() as any;
+            if (!own) return own;
+            const hidden: number[] = own.hiddenBadges ?? [];
+            const badges = (own.badges ?? []).filter((b: { badge: unknown }) => !hidden.includes(resolveBadge(b.badge) ?? -1));
+            const single = resolveBadge(own.badge);
+            return { ...own, badges, badge: single != null && hidden.includes(single) ? null : own.badge };
+        }
         return this.enrichedProfile() ?? this.quickProfile();
     });
 
