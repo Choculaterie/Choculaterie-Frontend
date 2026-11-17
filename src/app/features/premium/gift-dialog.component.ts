@@ -56,7 +56,7 @@ export interface GiftDialogData {
     @if (mode() === 'user') {
     <mat-form-field appearance="outline" class="full">
         <mat-label>{{ 'Their username' | t }}</mat-label>
-        <input matInput [(ngModel)]="username" (ngModelChange)="onUsername($event)" [matAutocomplete]="auto" maxlength="50" autocomplete="off" />
+        <input matInput required [(ngModel)]="username" (ngModelChange)="onUsername($event)" [matAutocomplete]="auto" maxlength="50" autocomplete="off" />
         <mat-autocomplete #auto="matAutocomplete" (optionSelected)="pickUser($event.option.value)">
             @for (u of suggestions(); track u) {
             <mat-option [value]="u">{{ u }}</mat-option>

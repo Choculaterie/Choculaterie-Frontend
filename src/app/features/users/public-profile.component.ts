@@ -133,8 +133,9 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
 
     badgeLabel(badge: unknown): string { const n = resolveBadge(badge); return n != null ? translateText(BADGE_LABELS[n]) : ''; }
 
-    badgeTooltip(b: { badge: number; locale?: string | null }): string {
+    badgeTooltip(b: { badge: number; locale?: string | null; number?: number | null }): string {
         const label = this.badgeLabel(b.badge);
+        if (b.number) return `${label} #${b.number}`;
         return b.locale ? `${label} (${b.locale.toUpperCase()})` : label;
     }
     readonly ownedBadges = computed(() => {

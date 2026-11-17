@@ -357,7 +357,12 @@
     background: color-mix(in srgb, var(--mat-sys-primary) 16%, transparent);
 
     .founder-pill-icon {
-        color: var(--mat-sys-primary);
+        --icon-size: 1.5em;
+        flex: none;
+        width: var(--icon-size);
+        height: var(--icon-size);
+        transform: translateY(0.05em);
+        image-rendering: pixelated;
     }
 
     &:hover {

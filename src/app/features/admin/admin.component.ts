@@ -511,7 +511,7 @@ export class AdminComponent implements OnInit, OnDestroy {
 
     private autoOpenUserDetail(userId: string): void {
         this.loadingUserDetail.set(true);
-        loadAdminUserDialogData(this.adminApi, this.billingApi, userId).subscribe({
+        loadAdminUserDialogData(this.adminApi, this.billingApi, this.http, userId).subscribe({
             next: (u) => {
                 this.loadingUserDetail.set(false);
                 const ref = this.dialog.open(AdminUserDialogComponent, {
@@ -765,7 +765,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     openUserDetail(user: AdminUserResponse): void {
         this.loadingUserDetail.set(true);
         this.setQueryParam('userId', String(user.id));
-        loadAdminUserDialogData(this.adminApi, this.billingApi, user.id).subscribe({
+        loadAdminUserDialogData(this.adminApi, this.billingApi, this.http, user.id).subscribe({
             next: (u) => {
                 this.loadingUserDetail.set(false);
                 const ref = this.dialog.open(AdminUserDialogComponent, {

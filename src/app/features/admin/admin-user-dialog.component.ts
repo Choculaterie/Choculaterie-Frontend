@@ -30,13 +30,16 @@ import { translateText } from '../../core/i18n/translation.store';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { ADMIN, COMMON } from '../../i18n/labels';
 
-export type AdminUserDialogData = AdminUserDetailResponse & { billing?: AdminUserBilling | null };
+type AdminUserBadgeRow = { badge: number; locale: string | null };
 
-export function loadAdminUserDialogData(adminApi: AdminService, billingApi: BillingService, userId: string): Observable<AdminUserDialogData> {
+export type AdminUserDialogData = AdminUserDetailResponse & { billing?: AdminUserBilling | null; badges?: AdminUserBadgeRow[] | null };
+
+export function loadAdminUserDialogData(adminApi: AdminService, billingApi: BillingService, http: HttpClient, userId: string): Observable<AdminUserDialogData> {
     return forkJoin({
         user: adminApi.getApiAdminUsersId(userId),
         billing: billingApi.adminGetUserBilling(userId).pipe(catchError(() => of(null))),
-    }).pipe(map(({ user, billing }) => ({ ...user, billing })));
+        badges: http.get<AdminUserBadgeRow[]>(`/api/Translations/admin/user-badges/${userId}`).pipe(catchError(() => of(null))),
+    }).pipe(map(({ user, billing, badges }) => ({ ...user, billing, badges })));
 }
 
 export type AdminUserDialogResult = 'deleted' | null;
@@ -75,6 +78,8 @@ export type AdminUserDialogResult = 'deleted' | null;
         @for (b of savedBadges(); track b) {
         @if (badgeSvg(b); as icon) {
         <mat-icon [svgIcon]="icon" class="badge-icon" [matTooltip]="badgeLabel(b)"></mat-icon>
+        } @else if (badgeIcons[b]?.endsWith('.png')) {
+        <img [src]="badgeIcons[b]" alt="" class="badge-png" [matTooltip]="badgeLabel(b)" draggable="false" />
         }
         }
         @if (billing(); as b) {
@@ -335,6 +340,7 @@ export type AdminUserDialogResult = 'deleted' | null;
         .dlg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
         .dlg-avatar-icon { font-size: 32px; --icon-size: 48px;
     width: var(--icon-size); height: var(--icon-size); }
+        .badge-png { --icon-size: 24px; width: 24px; height: 24px; flex-shrink: 0; image-rendering: pixelated; }
         .badge-icon { --icon-size: 24px;
     width: var(--icon-size); height: var(--icon-size); flex-shrink: 0; }
         .username-link { color: inherit; text-decoration: none; &:hover { color: var(--mat-sys-primary); text-decoration: underline; } }
@@ -375,7 +381,7 @@ export type AdminUserDialogResult = 'deleted' | null;
         .schem-table a { color: var(--mat-sys-primary); text-decoration: none; }
         .schem-table a:hover { text-decoration: underline; }
         .schem-actions { white-space: nowrap; text-align: right; }
-        .plan-icon { --logo-size: 22px; width: 22px; height: 22px; flex-shrink: 0; }
+        .plan-icon { --logo-size: 24px; width: 24px; height: 24px; flex-shrink: 0; }
         .plan-skeleton { display: inline-block; border-radius: 4px; }
     `],
 })
@@ -440,6 +446,8 @@ export class AdminUserDialogComponent {
     readonly locales = signal<{ code: string; label: string }[]>([]);
     readonly translatorBadge = Badge.Translator;
     readonly savedBadges = signal<number[]>([]);
+    readonly badgeIcons = BADGE_ICONS;
+
     badgeSvg(b: number): string | null {
         const path = BADGE_ICONS[b];
         return path?.startsWith('/icons/') && path.endsWith('.svg') ? 'mc:' + path.slice(7, -4) : null;
@@ -473,16 +481,21 @@ export class AdminUserDialogComponent {
 
     badgeLabel(b: unknown): string { const n = resolveBadge(b); return n != null ? translateText(BADGE_LABELS[n]) : ''; }
 
+    private applyBadges(rows: AdminUserBadgeRow[]): void {
+        this.editBadges.set([...new Set(rows.map((r) => r.badge))]);
+        this.savedBadges.set(this.editBadges());
+        this.editLocales.set(rows.filter((r) => r.locale).map((r) => r.locale!));
+    }
+
     private loadBadges(): void {
-        this.http.get<{ badge: number; locale: string | null }[]>(
-            `/api/Translations/admin/user-badges/${this.u.id}`).subscribe({
-            next: (rows) => {
-                this.editBadges.set([...new Set((rows ?? []).map((r) => r.badge))]);
-                this.savedBadges.set(this.editBadges());
-                this.editLocales.set((rows ?? []).filter((r) => r.locale).map((r) => r.locale!));
-            },
-            error: () => { this.editBadges.set([]); this.editLocales.set([]); },
-        });
+        if (this.u.badges) {
+            this.applyBadges(this.u.badges);
+        } else {
+            this.http.get<AdminUserBadgeRow[]>(`/api/Translations/admin/user-badges/${this.u.id}`).subscribe({
+                next: (rows) => this.applyBadges(rows ?? []),
+                error: () => { this.editBadges.set([]); this.editLocales.set([]); },
+            });
+        }
         this.http.get<{ code: string; label: string }[]>('/api/Translations/locales').subscribe({
             next: (r) => this.locales.set(r ?? []),
             error: () => this.locales.set([]),

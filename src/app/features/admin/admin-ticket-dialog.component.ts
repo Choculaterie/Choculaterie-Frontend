@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { DatePipe } from '@angular/common';
@@ -273,6 +274,7 @@ export interface AdminTicketDialogResult {
 export class AdminTicketDialogComponent {
     private adminApi = inject(AdminService);
     private billingApi = inject(BillingService);
+    private http = inject(HttpClient);
     private toast = inject(ToastService);
     private confirmDialog = inject(MatDialog);
     private dialogRef = inject(MatDialogRef<AdminTicketDialogComponent>);
@@ -329,7 +331,7 @@ export class AdminTicketDialogComponent {
     openUserDetail(): void {
         const t = this.ticket();
         if (!t.userId) return;
-        loadAdminUserDialogData(this.adminApi, this.billingApi, t.userId as string).subscribe({
+        loadAdminUserDialogData(this.adminApi, this.billingApi, this.http, t.userId as string).subscribe({
             next: (u) => {
                 this.confirmDialog.open(AdminUserDialogComponent, {
                     data: u,

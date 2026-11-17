@@ -100,7 +100,7 @@
         <p>{{ 'Help me to continue providing free, ad-free, and tracking-free cloud services!' | t }}</p>
         @if (foundersLeft() > 0) {
         <a routerLink="/premium" class="founder-pill settle-in">
-            <mat-icon svgIcon="mc:ui/star_thick" class="founder-pill-icon"></mat-icon>
+            <img src="/founder.png" alt="" aria-hidden="true" class="founder-pill-icon" draggable="false" />
             <span>{{ 'First 100 supporters get the Founder badge' | t }} &middot; <strong>{{ foundersLeft() }} {{ 'left' | t }}</strong></span>
         </a>
         }
