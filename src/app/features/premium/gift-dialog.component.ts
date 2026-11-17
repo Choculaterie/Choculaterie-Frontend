@@ -110,6 +110,7 @@ export interface GiftDialogData {
         .dlg-title { display: flex; align-items: center; justify-content: space-between; }
         .close-btn { margin-right: -8px; }
         .dlg-content { display: flex; flex-direction: column; gap: 0; min-width: min(460px, 80vw); }
+        .dlg-content > * { flex-shrink: 0; }
         .step { margin: 0 0 0.5rem; font-size: 0.85rem; opacity: 0.8; }
         .targets { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 20px; }
         .target { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; padding: 0.8rem 0.5rem;
@@ -143,7 +144,7 @@ export interface GiftDialogData {
         .plan-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); padding: 0.1rem 0.5rem;
             border-radius: 999px; font-size: 0.7rem; white-space: nowrap;
             background: var(--mat-sys-primary); color: var(--mat-sys-on-primary); }
-        .pay { margin-bottom: 0.5rem; }
+        .pay { margin-bottom: 0.5rem; --mat-button-filled-container-height: 48px; }
         .legal-consent { margin: 0.25rem 0 0.5rem; font-size: 0.75rem; text-align: center; color: color-mix(in srgb, var(--mat-sys-on-surface) 65%, transparent); }
         .btn-loader { width: 16px; height: 16px; }
         .links-title { margin: 1rem 0 0.5rem; font-size: 0.85rem; font-weight: 500; }

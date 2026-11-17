@@ -2,6 +2,11 @@
     <button mat-icon-button class="back-btn" (click)="goBack()" [matTooltip]="'Back' | t">
         <mat-icon svgIcon="mc:arrows/arrow_left"></mat-icon>
     </button>
+    @if (isAdmin()) {
+    <button mat-icon-button class="test-fireworks-btn" (click)="celebrate('stripe')" [matTooltip]="'Test fireworks' | t">
+        <mat-icon svgIcon="mc:ui/star_thick"></mat-icon>
+    </button>
+    }
     <header class="premium-header">
         <h1>{{ 'Choculaterie Premium' | t }}</h1>
         <p>{{ 'Support the project and unlock extra perks.' | t }}</p>
@@ -130,7 +135,7 @@
             <tr>
                 <td>{{ 'Price' | t }}</td>
                 <td>$0</td>
-                <td><span class="price-main">{{ price(offers()?.monthlyCents ?? 500) }} {{ '/month' | t }}</span><br><span class="price-alt">{{ 'or' | t }} {{ price(offers()?.yearlyCents ?? 4800) }} {{ '/year' | t }}</span></td>
+                <td><span class="price-main">{{ price(offers()?.monthlyCents ?? 500) }} {{ '/month' | t }}</span><br><span class="price-alt">{{ 'or' | t }} <span class="price-amount">{{ price(offers()?.yearlyCents ?? 4800) }} {{ '/year' | t }}</span></span></td>
             </tr>
             <tr>
                 <td>{{ 'Cloud storage' | t }}</td>

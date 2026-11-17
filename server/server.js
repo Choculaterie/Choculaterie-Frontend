@@ -41,6 +41,9 @@ const MIME = {
     '.webp': 'image/webp',
     '.wasm': 'application/wasm',
     '.zip': 'application/zip',
+    '.webm': 'video/webm',
+    '.mp4': 'video/mp4',
+    '.ogg': 'audio/ogg',
 };
 
 function apiGet(path) {

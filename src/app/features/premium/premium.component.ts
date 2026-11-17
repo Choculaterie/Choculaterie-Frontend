@@ -85,13 +85,15 @@ export class PremiumComponent implements OnInit, OnDestroy {
     readonly confirmingCheckout = signal(false);
     readonly celebrating = signal<'stripe' | 'monero' | null>(null);
     readonly fireworks = [
-        { cls: 'ball-left', src: 'assets/fireworks/firework_ball.webm', delay: 0 },
-        { cls: 'ball-right', src: 'assets/fireworks/firework_ball.webm', delay: 700 },
-        { cls: 'star-left', src: 'assets/fireworks/firework_star.webm', delay: 1050 },
-        { cls: 'creeper-right', src: 'assets/fireworks/firework_creeper.webm', delay: 1400 },
+        { cls: 'ball-left', src: 'assets/fireworks/firework_ball.webm', delay: 0, burst: 1600, sounds: ['blast'] },
+        { cls: 'ball-right', src: 'assets/fireworks/firework_ball.webm', delay: 700, burst: 1600, sounds: ['blast_far'] },
+        { cls: 'star-left', src: 'assets/fireworks/firework_star.webm', delay: 1050, burst: 1770, sounds: ['blast', 'twinkle'] },
+        { cls: 'creeper-right', src: 'assets/fireworks/firework_creeper.webm', delay: 1400, burst: 1850, sounds: ['large_blast'] },
     ];
+    private fireworkSounds?: Record<string, HTMLAudioElement>;
     private readonly fireworkEls = viewChildren<ElementRef<HTMLVideoElement>>('firework');
     readonly devTools = ['localhost', '127.0.0.1'].includes(location.hostname);
+    readonly isAdmin = computed(() => this.session.user()?.role?.toLowerCase() === 'admin');
     private fireworkTimers: ReturnType<typeof setTimeout>[] = [];
     private beforeSimulation: OwnSubscriptionResponse | null = null;
     readonly now = signal(Date.now());
@@ -276,16 +278,34 @@ export class PremiumComponent implements OnInit, OnDestroy {
         this.fireworkTimers.forEach(clearTimeout);
         this.celebrating.set(null);
         if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        this.loadFireworkSounds();
         requestAnimationFrame(() => {
             this.celebrating.set(source);
             this.celebrateTimer = setTimeout(() => this.celebrating.set(null), 4700);
             afterNextRender(() => {
-                this.fireworkTimers = this.fireworkEls().map(({ nativeElement: v }) => setTimeout(() => {
+                this.fireworkTimers = this.fireworkEls().map(({ nativeElement: v }, i) => setTimeout(() => {
                     v.muted = true;
-                    v.play().catch(() => { /* autoplay refused: just skip it */ });
+                    v.play().then(() => {
+                        const fw = this.fireworks[i];
+                        this.playFireworkSound('launch');
+                        fw.sounds.forEach((name, n) => this.fireworkTimers.push(
+                            setTimeout(() => this.playFireworkSound(name), fw.burst + n * 350)));
+                    }).catch(() => { /* autoplay refused: just skip it */ });
                 }, Number(v.dataset['delay'] ?? 0)));
             }, { injector: this.injector });
         });
+    }
+
+    private loadFireworkSounds(): Record<string, HTMLAudioElement> {
+        return this.fireworkSounds ??= Object.fromEntries(['launch', 'blast', 'blast_far', 'large_blast', 'twinkle']
+            .map(n => [n, Object.assign(new Audio(`assets/fireworks/sounds/${n}.ogg`), { preload: 'auto' })]));
+    }
+
+    private playFireworkSound(name: string): void {
+        const sound = this.loadFireworkSounds()[name]?.cloneNode() as HTMLAudioElement | undefined;
+        if (!sound) return;
+        sound.volume = 0.5;
+        sound.play().catch(() => {});
     }
 
     goBack(): void {
