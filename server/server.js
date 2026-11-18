@@ -218,7 +218,7 @@ async function resolveMeta(urlPath, isCrawler) {
         }
     }
 
-    const videoMatch = urlPath.match(/^\/videos\/([A-Za-z0-9]{1,16})\/?$/);
+    const videoMatch = urlPath.match(/^\/videos\/([A-Za-z0-9_-]{1,16})\/?$/);
     if (videoMatch) {
         const data = await apiGet(`/api/Videos/${videoMatch[1]}`);
         if (data) {
