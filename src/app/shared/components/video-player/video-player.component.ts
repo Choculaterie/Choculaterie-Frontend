@@ -30,7 +30,7 @@ import { formatDuration } from '../../../core/services/videos.service';
             </div>
             }
             @if (buffering() && playing()) {
-            <img class="buffering" src="loading.gif" alt="" aria-hidden="true" />
+            <div class="buffering badge" aria-hidden="true"><img src="loading.gif" alt="" /></div>
             }
 
             <div class="controls" (click)="$event.stopPropagation()">
@@ -104,7 +104,8 @@ import { formatDuration } from '../../../core/services/videos.service';
             from { opacity: 1; transform: scale(0.85); }
             to { opacity: 0; transform: scale(1.35); }
         }
-        .buffering { position: absolute; inset: 0; margin: auto; width: 48px; height: 48px; pointer-events: none; }
+        .buffering { pointer-events: none; background: transparent; }
+        .buffering img { width: 56px; height: 56px; }
 
         .controls {
             position: absolute;

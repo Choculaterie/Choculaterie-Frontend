@@ -145,7 +145,7 @@ function buildVideoMeta(title, description, video) {
     const base = `${PUBLIC_API_URL}${video.mediaBase ?? `/media/videos/${video.id}`}`;
     const stream = `${base}/video.mp4`;
     const thumb = video.hasThumbnail
-        ? `${base}/thumbnail/${new Date(video.updatedAt ?? 0).getTime()}`
+        ? `${base}/thumbnail/${new Date(video.updatedAt ?? 0).getTime()}.jpg`
         : FALLBACK_IMAGE;
     const tags = [
         `<meta property="og:title" content="${esc(title)}" />`,
@@ -380,7 +380,7 @@ const server = http.createServer(async (req, res) => {
 
         res.writeHead(200, {
             'Content-Type': 'text/html; charset=utf-8',
-            'Cache-Control': 'no-cache',
+            'Cache-Control': 'no-cache, no-transform',
             'X-Frame-Options': 'DENY',
             'X-Content-Type-Options': 'nosniff',
             'Referrer-Policy': 'strict-origin-when-cross-origin',

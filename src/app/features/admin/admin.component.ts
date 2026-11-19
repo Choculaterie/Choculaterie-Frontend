@@ -1,4 +1,5 @@
 import { MediaSkeletonDirective } from '../../shared/directives/media-skeleton.directive';
+import { queryInt, queryParam, updateQuery } from '../../shared/utils/url-state';
 import { HttpClient } from '@angular/common/http';
 import { PagedList } from './paged-list';
 import { scrollIntoViewSoon, scrollBackTo } from '../../shared/utils/scroll';
@@ -433,24 +434,20 @@ export class AdminComponent implements OnInit, OnDestroy {
                 const tabParam = parseInt(params['tab'], 10);
                 const tab = !isNaN(tabParam) && tabParam >= 0 ? tabParam : 0;
                 const prevTab = this.selectedTab();
+                const firstLoad = !this.listUrlReady;
 
-                if (tab !== prevTab) {
+                if (firstLoad && !params['flash']) {
+                    this.selectedTab.set(tab);
+                    this.readListUrl(tab);
+                    this.listUrlReady = true;
+                    this.loadTabData(tab);
+                    if (tab !== prevTab) { this.syncLiveLogs(tab, prevTab); this.scrollActiveTabIntoView(); }
+                } else if (tab !== prevTab) {
+                    this.listUrlReady = true;
                     this.applyTabFromRoute(tab, prevTab);
                 } else {
-
+                    this.listUrlReady = true;
                     this.loadTabData(tab);
-                }
-
-                const pageParam = parseInt(params['page'], 10);
-                if (!isNaN(pageParam) && pageParam > 1) {
-                    const zeroIdx = pageParam - 1;
-                    switch (tab) {
-                        case ADMIN_TAB.users: this.usersPage.set(zeroIdx); break;
-                        case ADMIN_TAB.schematics: this.schematicsPage.set(zeroIdx); break;
-                        case ADMIN_TAB.storage: this.storagePage.set(zeroIdx); break;
-                        case ADMIN_TAB.tickets: this.ticketsPage.set(zeroIdx); break;
-                        case ADMIN_TAB.serverLogs: this.serverLogsPage.set(zeroIdx); break;
-                    }
                 }
 
                 const editVideoId = params['editVideo'];
@@ -547,6 +544,7 @@ export class AdminComponent implements OnInit, OnDestroy {
 
         this.resetTabPaging(idx);
         this.loadTabData(idx);
+        this.writeListUrl();
         this.syncLiveLogs(idx, prevIdx);
         this.scrollActiveTabIntoView();
     }
@@ -639,6 +637,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     loadUsers(): void {
+        this.writeListUrl();
         this.loadingUsers.set(true);
         this.adminApi.getApiAdminUsers({
             page: this.usersPage() + 1,
@@ -904,6 +903,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     loadSchematics(): void {
+        this.writeListUrl();
         this.loadingSchematics.set(true);
         this.adminApi.getApiAdminSchematics({
             page: this.schematicsPage() + 1,
@@ -1547,6 +1547,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     loadStorage(): void {
+        this.writeListUrl();
         this.loadingStorage.set(true);
         this.adminApi.getApiAdminStorage({
             page: this.storagePage() + 1,
@@ -1883,6 +1884,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     });
 
     loadTickets(): void {
+        this.writeListUrl();
         this.loadingTickets.set(true);
         this.adminApi.getApiAdminTickets({
             page: this.ticketsPage() + 1,
@@ -1963,6 +1965,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     loadServerLogs(): void {
+        this.writeListUrl();
         this.loadingServerLogs.set(true);
         const filter = this.serverLogsSourceFilter();
         this.adminApi.getApiAdminServerLogs({
@@ -2029,5 +2032,94 @@ export class AdminComponent implements OnInit, OnDestroy {
             direction: this.videoSortAsc() ? 'asc' : 'desc',
         }),
         () => { this.syncVideoPolling(); this.applyPendingVideoEdit(); });
+
+    private readonly registerPagerUrlSync = [this.liveMessagesPager, this.modMessagesPager, this.promotionsPager, this.pluginsPager,
+        this.tagsPager, this.tagSuggestionsPager, this.versionsPager, this.faqsPager, this.videosPager]
+        .forEach((p) => (p as PagedList<unknown>).onQuery = () => this.writeListUrl());
+
+    private readonly listUrlKeys = ['page', 'pageSize', 'search', 'sort', 'direction', 'visibility', 'status', 'source'];
+    private listUrlReady = false;
+
+    private pagerForTab(tab: number): PagedList<unknown> | null {
+        switch (tab) {
+            case ADMIN_TAB.videos: return this.videosPager as PagedList<unknown>;
+            case ADMIN_TAB.promotions: return this.promotionsPager as PagedList<unknown>;
+            case ADMIN_TAB.plugins: return this.pluginsPager as PagedList<unknown>;
+            case ADMIN_TAB.liveMessages: return this.liveMessagesPager as PagedList<unknown>;
+            case ADMIN_TAB.modMessages: return this.modMessagesPager as PagedList<unknown>;
+            case ADMIN_TAB.faq: return this.faqsPager as PagedList<unknown>;
+            case ADMIN_TAB.versions: return this.versionsPager as PagedList<unknown>;
+            case ADMIN_TAB.tags: return this.tagsPager as PagedList<unknown>;
+            default: return null;
+        }
+    }
+
+    private listUrlState(tab: number): Record<string, string | number | null> {
+        const page = (i: number) => i > 0 ? i + 1 : null;
+        const size = (n: number) => n !== 25 ? n : null;
+        const not = <T>(value: T, def: T) => value !== def ? String(value) : null;
+        switch (tab) {
+            case ADMIN_TAB.users: return { page: page(this.usersPage()), pageSize: size(this.usersPageSize()), search: this.usersSearch || null, sort: not(this.usersSort(), 'date'), direction: not(this.usersDirection(), 'desc') };
+            case ADMIN_TAB.schematics: return { page: page(this.schematicsPage()), pageSize: size(this.schematicsPageSize()), search: this.schematicsSearch || null, sort: not(this.schematicsSort(), 'date'), direction: not(this.schematicsDirection(), 'desc') };
+            case ADMIN_TAB.storage: return { page: page(this.storagePage()), pageSize: size(this.storagePageSize()), search: this.storageSearch || null, sort: not(this.storageSort(), 'total'), direction: not(this.storageDirection(), 'desc') };
+            case ADMIN_TAB.tickets: return { page: page(this.ticketsPage()), pageSize: size(this.ticketsPageSize()) };
+            case ADMIN_TAB.serverLogs: return { page: page(this.serverLogsPage()), pageSize: size(this.serverLogsPageSize()), source: not(this.serverLogsSourceFilter(), 'all') };
+        }
+        const pager = this.pagerForTab(tab);
+        if (!pager) return {};
+        const state: Record<string, string | number | null> = { page: page(pager.pageIndex()), pageSize: size(pager.pageSize()), search: pager.search().trim() || null };
+        if (tab === ADMIN_TAB.videos) {
+            Object.assign(state, {
+                visibility: this.videoVisibilityFilter() || null,
+                status: this.videoStatusFilter() || null,
+                sort: not(this.videoSort(), 'date'),
+                direction: this.videoSortAsc() ? 'asc' : null,
+            });
+        }
+        return state;
+    }
+
+    private writeListUrl(): void {
+        if (!this.listUrlReady || !isPlatformBrowser(this.platformId)) return;
+        const patch: Record<string, string | number | null> = Object.fromEntries(this.listUrlKeys.map((k) => [k, null]));
+        updateQuery(this.location, Object.assign(patch, this.listUrlState(this.selectedTab())));
+    }
+
+    private readListUrl(tab: number): void {
+        const page = Math.max(0, queryInt('page', 1) - 1);
+        const size = queryInt('pageSize', 25, [25, 50, 100]);
+        const search = queryParam('search') ?? '';
+        const sort = queryParam('sort');
+        const asc = queryParam('direction') === 'asc';
+        const dir = (fallback: 'asc' | 'desc') => queryParam('direction') === 'asc' ? 'asc' : queryParam('direction') === 'desc' ? 'desc' : fallback;
+        switch (tab) {
+            case ADMIN_TAB.users:
+                this.usersPage.set(page); this.usersPageSize.set(size); this.usersSearch = search;
+                if (sort) this.usersSort.set(sort); this.usersDirection.set(dir('desc')); return;
+            case ADMIN_TAB.schematics:
+                this.schematicsPage.set(page); this.schematicsPageSize.set(size); this.schematicsSearch = search;
+                if (sort) this.schematicsSort.set(sort); this.schematicsDirection.set(dir('desc')); return;
+            case ADMIN_TAB.storage:
+                this.storagePage.set(page); this.storagePageSize.set(size); this.storageSearch = search;
+                if (sort) this.storageSort.set(sort); this.storageDirection.set(dir('desc')); return;
+            case ADMIN_TAB.tickets:
+                this.ticketsPage.set(page); this.ticketsPageSize.set(size); return;
+            case ADMIN_TAB.serverLogs: {
+                const source = queryParam('source');
+                this.serverLogsPage.set(page); this.serverLogsPageSize.set(size);
+                if (source === 'Backend' || source === 'API') this.serverLogsSourceFilter.set(source);
+                return;
+            }
+        }
+        const pager = this.pagerForTab(tab);
+        if (!pager) return;
+        pager.applyQuery(page, size, search);
+        if (tab === ADMIN_TAB.videos) {
+            this.videoVisibilityFilter.set(queryParam('visibility') ?? '');
+            this.videoStatusFilter.set(queryParam('status') ?? '');
+            if (sort === 'views' || sort === 'duration' || sort === 'title') this.videoSort.set(sort);
+            this.videoSortAsc.set(asc);
+        }
+    }
 
 }

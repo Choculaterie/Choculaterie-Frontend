@@ -45,6 +45,17 @@
 
 <body>
   <app-root></app-root>
+  <script>
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        var s = document.createElement('script');
+        s.defer = true;
+        s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+        s.setAttribute('data-cf-beacon', '{"token":"2d7da176633b4fc0926feff450c66b8a","spa":true}');
+        document.body.appendChild(s);
+      }, 0);
+    });
+  </script>
 </body>
 
 </html>

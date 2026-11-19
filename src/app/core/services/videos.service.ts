@@ -34,7 +34,7 @@ export function videoStreamUrl(v: Pick<VideoResponse, 'mediaBase'>): string {
 
 export function videoThumbnailUrl(v: Pick<VideoResponse, 'mediaBase' | 'updatedAt' | 'hasThumbnail'>): string | null {
     return v.hasThumbnail
-        ? `${environment.apiBasePath}${v.mediaBase}/thumbnail/${new Date(v.updatedAt).getTime()}`
+        ? `${environment.apiBasePath}${v.mediaBase}/thumbnail/${new Date(v.updatedAt).getTime()}.jpg`
         : null;
 }
 

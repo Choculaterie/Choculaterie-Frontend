@@ -1,4 +1,5 @@
 import { TabLinksDirective } from '../../shared/directives/tab-links.directive';
+import { queryInt, updateQuery } from '../../shared/utils/url-state';
 import { SubscriptionActionsService } from '../../core/services/subscription-actions.service';
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect, Injector, ElementRef, ViewChild, afterNextRender } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
@@ -297,6 +298,10 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     onSchematicsPageChange(event: PageEvent): void {
         if (event.pageSize !== this.schematicsPageSize()) this.schematicsPageSize.set(event.pageSize);
         this.schematicsPage.set(event.pageIndex);
+        updateQuery(this.location, {
+            page: event.pageIndex > 0 ? event.pageIndex + 1 : null,
+            pageSize: event.pageSize !== 24 ? event.pageSize : null,
+        });
         const username = this.route.snapshot.paramMap.get('username');
         if (username) this.loadSchematics(username);
     }
@@ -506,7 +511,8 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
         this.likedSchematics.set([]);
         this.likedUsers.set([]);
         this.selectedTab.set(0);
-        this.schematicsPage.set(0);
+        this.schematicsPage.set(Math.max(0, queryInt('page', 1) - 1));
+        this.schematicsPageSize.set(queryInt('pageSize', 24, [12, 24, 48]));
         this.schematicsTotalCount.set(0);
     }
 

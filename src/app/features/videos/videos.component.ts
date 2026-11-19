@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, Location } from '@angular/common';
+import { queryInt, updateQuery } from '../../shared/utils/url-state';
 import { RouterLink } from '@angular/router';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { NumberFormatPipe } from '../../shared/pipes/number-format.pipe';
@@ -95,7 +96,7 @@ import { MatIconModule } from '@angular/material/icon';
             overflow: hidden;
             background: var(--mat-sys-surface-container-high);
 
-            img { width: 100%; height: 100%; object-fit: cover; display: block; }
+            img { width: 100%; height: 100%; object-fit: contain; display: block; background: #000; }
         }
         .preview {
             position: absolute;
@@ -149,6 +150,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class VideosComponent implements OnInit {
     private api = inject(VideosService);
+    private location = inject(Location);
     readonly videos = signal<VideoResponse[]>([]);
     readonly loading = signal(true);
     readonly thumb = videoThumbnailUrl;
@@ -186,8 +188,8 @@ export class VideosComponent implements OnInit {
     }
 
     readonly total = signal(0);
-    readonly pageIndex = signal(0);
-    readonly pageSize = signal(24);
+    readonly pageIndex = signal(Math.max(0, queryInt('page', 1) - 1));
+    readonly pageSize = signal(queryInt('pageSize', 24, [24, 48, 96]));
 
     ngOnInit(): void {
         this.load();
@@ -196,6 +198,10 @@ export class VideosComponent implements OnInit {
     onPage(e: PageEvent): void {
         if (e.pageSize !== this.pageSize()) { this.pageSize.set(e.pageSize); this.pageIndex.set(0); }
         else this.pageIndex.set(e.pageIndex);
+        updateQuery(this.location, {
+            page: this.pageIndex() > 0 ? this.pageIndex() + 1 : null,
+            pageSize: this.pageSize() !== 24 ? this.pageSize() : null,
+        });
         this.load();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }

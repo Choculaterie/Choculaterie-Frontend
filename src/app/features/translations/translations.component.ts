@@ -1,7 +1,8 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { queryInt, queryParam, updateQuery } from '../../shared/utils/url-state';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
-import { DatePipe } from '@angular/common';
+import { DatePipe, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -606,6 +607,7 @@ export class TranslationsComponent implements OnInit {
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private session = inject(SessionService);
+    private location = inject(Location);
 
     readonly targetLocales = SUPPORTED_LOCALES.filter((l) => l.code !== SOURCE_LOCALE);
     locale: string = this.targetLocales[0]?.code ?? 'fr';
@@ -960,8 +962,9 @@ export class TranslationsComponent implements OnInit {
 
         this.contentGroup.set(null);
         this.activeGroup.set(g);
-        this.search = '';
-        this.listPage.set(0);
+        this.search = this.restoring ? queryParam('search') ?? '' : '';
+        this.listPage.set(this.restoring ? Math.max(0, queryInt('page', 1) - 1) : 0);
+        if (this.restoring) this.listPageSize = queryInt('pageSize', 25, [25, 50, 100]);
         this.view.set('list');
         this.syncUrl();
         this.fetchList();
@@ -989,6 +992,11 @@ export class TranslationsComponent implements OnInit {
 
     private fetchList(): void {
         this.loading.set(true);
+        setTimeout(() => updateQuery(this.location, {
+            search: this.search.trim() || null,
+            page: this.listPage() > 0 ? this.listPage() + 1 : null,
+            pageSize: this.listPageSize !== 25 ? this.listPageSize : null,
+        }));
         const content = this.contentGroup();
         if (content) {
             this.http.get<{ total: number; items: CatalogString[] }>(
@@ -1143,8 +1151,9 @@ export class TranslationsComponent implements OnInit {
     openContentGroup(g: PageGroup): void {
         this.contentGroup.set(g.group);
         this.activeGroup.set(g);
-        this.search = '';
-        this.listPage.set(0);
+        this.search = this.restoring ? queryParam('search') ?? '' : '';
+        this.listPage.set(this.restoring ? Math.max(0, queryInt('page', 1) - 1) : 0);
+        if (this.restoring) this.listPageSize = queryInt('pageSize', 25, [25, 50, 100]);
         this.view.set('list');
         this.syncUrl();
         this.fetchList();
