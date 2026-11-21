@@ -36,7 +36,7 @@
     @if (p.coverImagePath || isOwnProfile()) {
     <div class="profile-header" [class.has-cover]="p.coverImagePath">
         @if (p.coverImagePath) {
-        <div class="cover-pic">
+        <div class="cover-pic zoomable" (click)="openZoom(p.coverImagePath, false)">
             <app-skeleton-img [src]="p.coverImagePath | userImg" [alt]="p.username + ' cover'" height="100%"
                 objectFit="cover" />
         </div>
@@ -68,7 +68,9 @@
             <div class="avatar-loading"><img src="loading.gif" alt=""
                     style="width:48px;height:48px;object-fit:contain" /></div>
             } @else if (p.filePath) {
-            <app-skeleton-img [src]="p.filePath | userImg" [alt]="p.username" height="100%" />
+            <div class="avatar-zoom zoomable" (click)="openZoom(p.filePath, true)">
+                <app-skeleton-img [src]="p.filePath | userImg" [alt]="p.username" height="100%" />
+            </div>
             } @else {
             <mat-icon svgIcon="mc:people/guy"></mat-icon>
             }
@@ -810,3 +812,9 @@
     }
 </div>
 
+@if (zoomedImage(); as zoomed) {
+<div class="image-zoom-overlay" (click)="zoomedImage.set(null)">
+    <img [src]="zoomed | userImg" alt="" draggable="false" [class.avatar]="zoomedIsAvatar()"
+        [class.pixelated]="zoomedPixelated()" (load)="onZoomLoad($event)" />
+</div>
+}

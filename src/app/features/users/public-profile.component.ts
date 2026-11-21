@@ -1,7 +1,7 @@
 import { TabLinksDirective } from '../../shared/directives/tab-links.directive';
 import { queryInt, updateQuery } from '../../shared/utils/url-state';
 import { SubscriptionActionsService } from '../../core/services/subscription-actions.service';
-import { Component, OnInit, OnDestroy, inject, signal, computed, effect, Injector, ElementRef, ViewChild, afterNextRender } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, effect, Injector, ElementRef, ViewChild, afterNextRender, HostListener } from '@angular/core';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -244,6 +244,26 @@ export class PublicProfileComponent implements OnInit, OnDestroy {
     }
 
     readonly isOwnProfile = signal(false);
+    readonly zoomedImage = signal<string | null>(null);
+    readonly zoomedIsAvatar = signal(false);
+    readonly zoomedPixelated = signal(false);
+
+    openZoom(path: string | null | undefined, avatar: boolean): void {
+        if (!path) return;
+        this.zoomedIsAvatar.set(avatar);
+        this.zoomedPixelated.set(false);
+        this.zoomedImage.set(path);
+    }
+
+    onZoomLoad(event: Event): void {
+        const img = event.target as HTMLImageElement;
+        this.zoomedPixelated.set(img.naturalWidth > 0 && img.naturalWidth <= 256);
+    }
+
+    @HostListener('document:keydown.escape')
+    closeZoom(): void {
+        this.zoomedImage.set(null);
+    }
     readonly loading = signal(true);
     readonly error = signal('');
     readonly selectedTab = signal(0);
